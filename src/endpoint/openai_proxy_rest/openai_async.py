@@ -14,7 +14,7 @@ from tenacity import (
 
 
 class OpenAIChat(BaseModel):
-    """vector query"""
+    """OpenAI ChatCompletion Parameters"""
 
     prompt: str
     user: list[str]
@@ -29,7 +29,7 @@ class OpenAIChat(BaseModel):
 
 
 class OpenAIChatCompletion(BaseModel):
-    """list of video results"""
+    """Chat Completion Results"""
 
     assistant: dict[str, str]
     finish_reason: str
