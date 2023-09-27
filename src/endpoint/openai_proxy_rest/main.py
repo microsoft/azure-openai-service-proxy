@@ -11,8 +11,8 @@ from fastapi.exceptions import ResponseValidationError
 from openai_async import (
     OpenAIConfig,
     OpenAIManager as oai,
-    OpenAIChat,
-    OpenAIChatCompletion,
+    OpenAIChatRequest,
+    OpenAIChatResponse,
 )
 
 
@@ -37,7 +37,7 @@ async def validation_exception_handler(request, exc):
 
 
 @app.post("/api/oai_prompt", status_code=200)
-async def get_videos(chat: OpenAIChat, request: Request) -> OpenAIChatCompletion:
+async def openai_chat(chat: OpenAIChatRequest, request: Request) -> OpenAIChatResponse:
     """query vector datastore and return n results"""
 
     def get_user_token(headers) -> str | None:

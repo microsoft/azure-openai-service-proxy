@@ -13,8 +13,8 @@ from tenacity import (
 )
 
 
-class OpenAIChat(BaseModel):
-    """OpenAI ChatCompletion Parameters"""
+class OpenAIChatRequest(BaseModel):
+    """OpenAI Chat Request"""
 
     prompt: str
     user: list[str]
@@ -28,8 +28,8 @@ class OpenAIChat(BaseModel):
     presence_penalty: float
 
 
-class OpenAIChatCompletion(BaseModel):
-    """Chat Completion Results"""
+class OpenAIChatResponse(BaseModel):
+    """Chat Completion Response"""
 
     assistant: dict[str, str]
     finish_reason: str
@@ -77,7 +77,7 @@ class OpenAIAsyncManager:
         """init in memory session manager"""
         self.openai_config = openai_config
 
-    async def async_get_chat_completion(self, chat: OpenAIChat) -> Any:
+    async def async_get_chat_completion(self, chat: OpenAIChatRequest) -> Any:
         """Gets the OpenAI functions from the text."""
 
         msgs = list(map(lambda x: {"role": "system", "content": x}, chat.system))
@@ -114,10 +114,10 @@ class OpenAIManager:
         logging.basicConfig(level=logging.WARNING)
         self.logger = logging.getLogger(__name__)
 
-    def _report_exception(self, message: str) -> OpenAIChatCompletion:
+    def _report_exception(self, message: str) -> OpenAIChatResponse:
         """report exception"""
 
-        completion = OpenAIChatCompletion.empty()
+        completion = OpenAIChatResponse.empty()
         completion.assistant = {"role": "assistant", "content": message}
 
         self.logger.warning(msg=f"{message}")
@@ -129,10 +129,10 @@ class OpenAIManager:
         stop=stop_after_attempt(2),
         retry=retry_if_not_exception_type(openai.InvalidRequestError),
     )
-    async def call_openai_chat(self, chat: OpenAIChat) -> OpenAIChatCompletion:
+    async def call_openai_chat(self, chat: OpenAIChatRequest) -> OpenAIChatResponse:
         """call openai with retry"""
 
-        completion = OpenAIChatCompletion.empty()
+        completion = OpenAIChatResponse.empty()
 
         try:
             async_mgr = OpenAIAsyncManager(self.openai_config)
