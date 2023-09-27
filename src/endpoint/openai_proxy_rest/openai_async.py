@@ -80,21 +80,12 @@ class OpenAIAsyncManager:
     async def async_get_chat_completion(self, chat: OpenAIChat) -> Any:
         """Gets the OpenAI functions from the text."""
 
-        messages = []
-        for system in chat.system:
-            message = {"role": "system", "content": system}
-            messages.append(message)
-
-        for user in chat.user:
-            message = {"role": "user", "content": user}
-            messages.append(message)
-
-        for assistant in chat.assistant:
-            message = {"role": "assistant", "content": assistant}
-            messages.append(message)
+        msgs = list(map(lambda x: {"role": "system", "content": x}, chat.system))
+        msgs += list(map(lambda x: {"role": "user", "content": x}, chat.user))
+        msgs += list(map(lambda x: {"role": "assistant", "content": x}, chat.assistant))
 
         response = await openai.ChatCompletion.acreate(
-            messages=messages,
+            messages=msgs,
             temperature=chat.temperature,
             max_tokens=chat.max_tokens,
             top_p=chat.top_p,
