@@ -28,7 +28,9 @@ app = FastAPI()
 @app.exception_handler(ResponseValidationError)
 async def validation_exception_handler(request, exc):
     """validation exception handler"""
-    print(f"Caught Validation Error: {exc}")
+
+    logging.info("Caught Validation Error:%s ", str(exc))
+
     return JSONResponse(
         content={"message": "Response validation error"}, status_code=400
     )
@@ -57,7 +59,7 @@ async def get_videos(chat: OpenAIChat, request: Request) -> OpenAIChatCompletion
 
     # user_token = get_user_token(request.headers)
 
-    # if not user_token:
+    # if not user_token or user_token != app.state.api_key:
     #     raise HTTPException(status_code=401, detail="Not authorized")
 
     try:
@@ -76,14 +78,14 @@ async def startup_event():
 
     try:
         openai_endpoint = os.environ["AZURE_OPENAI_ENDPOINT"]
-        azure_openai_model_deployment_name = os.getenv(
-            "AZURE_OPENAI_MODEL_DEPLOYMENT_NAME", "gpt-35-turbo"
-        )
+        model_deployment_name = os.environ["AZURE_OPENAI_MODEL_DEPLOYMENT_NAME"]
+        app.state.api_key = os.environ["OPENAI_PROXY_API_KEY"]
     except KeyError:
         print(
             "Please set the environment variables AZURE_OPENAI_API_KEY and"
             " AZURE_OPENAI_ENDPOINT and AZURE_OPENAI_MODEL_DEPLOYMENT_NAME"
-            " and AZURE_OPENAI_EMBEDDING_MODEL_DEPLOYMENT_NAME"
+            " and AZURE_OPENAI_EMBEDDING_MODEL_DEPLOYMENT_NAME "
+            "and OPENAI_PROXY_API_KEY"
         )
         exit(1)
 
@@ -91,7 +93,7 @@ async def startup_event():
         openai_key=openai_key,
         openai_endpoint=openai_endpoint,
         openai_version=OPENAI_API_VERSION,
-        model_deployment_name=azure_openai_model_deployment_name,
+        model_deployment_name=model_deployment_name,
         gpt_model_name=GPT_MODEL_NAME,
     )
 
