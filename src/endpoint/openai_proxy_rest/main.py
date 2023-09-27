@@ -1,3 +1,5 @@
+""" FastAPI server for Azure OpenAI Service proxy """
+
 import os
 import json
 import base64
@@ -6,7 +8,12 @@ import logging
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import ResponseValidationError
-from openai_async import OpenAIConfig, OpenAIManager as oai, OpenAIChat
+from openai_async import (
+    OpenAIConfig,
+    OpenAIManager as oai,
+    OpenAIChat,
+    OpenAIChatCompletion,
+)
 
 
 logging.basicConfig(level=logging.WARNING)
@@ -28,7 +35,7 @@ async def validation_exception_handler(request, exc):
 
 
 @app.post("/api/oai_prompt", status_code=200)
-async def get_videos(chat: OpenAIChat, request: Request) -> oai.OpenAIChatCompletion:
+async def get_videos(chat: OpenAIChat, request: Request) -> OpenAIChatCompletion:
     """query vector datastore and return n results"""
 
     def get_user_token(headers) -> str | None:

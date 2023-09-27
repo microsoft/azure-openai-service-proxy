@@ -1,3 +1,5 @@
+""" OpenAI Async Manager"""
+
 import logging
 from typing import Any
 from pydantic import BaseModel
@@ -24,6 +26,16 @@ class OpenAIChat(BaseModel):
     stop_sequence: str
     frequency_penalty: float
     presence_penalty: float
+
+
+class OpenAIChatCompletion(BaseModel):
+    """list of video results"""
+
+    completion: dict[str, str]
+    finish_reason: str
+    response_ms: int
+    content_filtered: dict[str, dict[str, str | bool]]
+    usage: dict[str, dict[str, int]]
 
 
 class OpenAIConfig:
@@ -86,15 +98,6 @@ class OpenAIAsyncManager:
 
 class OpenAIManager:
     """OpenAI Manager"""
-
-    class OpenAIChatCompletion(BaseModel):
-        """list of video results"""
-
-        completion: dict[str, str]
-        finish_reason: str
-        response_ms: int
-        content_filtered: dict[str, dict[str, str | bool]]
-        usage: dict[str, dict[str, int]]
 
     def __init__(self, openai_config: OpenAIConfig):
         """init in memory session manager"""
@@ -163,7 +166,7 @@ class OpenAIManager:
                     },
                 }
 
-        return OpenAIManager.OpenAIChatCompletion(
+        return OpenAIChatCompletion(
             completion=completion,
             finish_reason=finish_reason,
             response_ms=response_ms,
