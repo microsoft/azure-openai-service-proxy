@@ -60,7 +60,12 @@ async def get_videos(chat: OpenAIChat, request: Request) -> OpenAIChatCompletion
     # if not user_token:
     #     raise HTTPException(status_code=401, detail="Not authorized")
 
-    return await app.state.openai_mgr.call_openai_chat(chat)
+    try:
+        return await app.state.openai_mgr.call_openai_chat(chat)
+    except Exception as exc:
+        raise HTTPException(
+            status_code=500, detail=f"Failed to generate response: {exc}"
+        ) from exc
 
 
 @app.on_event("startup")

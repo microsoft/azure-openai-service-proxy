@@ -31,11 +31,23 @@ class OpenAIChat(BaseModel):
 class OpenAIChatCompletion(BaseModel):
     """list of video results"""
 
-    completion: dict[str, str]
+    assistant: dict[str, str]
     finish_reason: str
     response_ms: int
     content_filtered: dict[str, dict[str, str | bool]]
     usage: dict[str, dict[str, int]]
+
+    # create an empty response
+    @classmethod
+    def empty(cls):
+        """empty response"""
+        return cls(
+            assistant={},
+            finish_reason="",
+            response_ms=0,
+            content_filtered={},
+            usage={},
+        )
 
 
 class OpenAIConfig:
@@ -111,6 +123,16 @@ class OpenAIManager:
         logging.basicConfig(level=logging.WARNING)
         self.logger = logging.getLogger(__name__)
 
+    def _report_exception(self, message: str) -> OpenAIChatCompletion:
+        """report exception"""
+
+        completion = OpenAIChatCompletion.empty()
+        completion.assistant = {"role": "assistant", "content": message}
+
+        self.logger.warning(msg=f"{message}")
+
+        return completion
+
     @retry(
         wait=wait_random_exponential(min=4, max=12),
         stop=stop_after_attempt(2),
@@ -119,57 +141,70 @@ class OpenAIManager:
     async def call_openai_chat(self, chat: OpenAIChat) -> OpenAIChatCompletion:
         """call openai with retry"""
 
-        completion = {}
-        finish_reason = ""
-        response_ms = 0
-        content_filtered = {}
-        usage = {}
+        completion = OpenAIChatCompletion.empty()
 
-        async_mgr = OpenAIAsyncManager(self.openai_config)
-        response = await async_mgr.async_get_chat_completion(chat)
+        try:
+            async_mgr = OpenAIAsyncManager(self.openai_config)
+            response = await async_mgr.async_get_chat_completion(chat)
 
-        if response and isinstance(response, openai.openai_object.OpenAIObject):
-            response_ms = response.response_ms
+            if response and isinstance(response, openai.openai_object.OpenAIObject):
+                completion.response_ms = response.response_ms
 
-            usage = {
-                "usage": {
-                    "completion_tokens": response.usage.completion_tokens,
-                    "prompt_tokens": response.usage.prompt_tokens,
-                    "total_tokens": response.usage.total_tokens,
-                }
-            }
-
-            choices = response.choices
-            if len(response.choices) > 0:
-                choice = choices[0]
-                filters = choice.content_filter_results
-
-                completion = {
-                    "role": "assistant",
-                    "content": choice.message.content,
+                completion.usage = {
+                    "usage": {
+                        "completion_tokens": response.usage.completion_tokens,
+                        "prompt_tokens": response.usage.prompt_tokens,
+                        "total_tokens": response.usage.total_tokens,
+                    }
                 }
 
-                finish_reason = choice.finish_reason
+                choices = response.choices
+                if len(response.choices) > 0:
+                    choice = choices[0]
+                    filters = choice.content_filter_results
 
-                content_filtered = {
-                    "hate": {
-                        "filtered": filters.hate.filtered,
-                        "severity": filters.hate.severity,
-                    },
-                    "self_harm": {
-                        "filtered": filters.self_harm.filtered,
-                        "severity": filters.self_harm.severity,
-                    },
-                    "sexual": {
-                        "filtered": filters.sexual.filtered,
-                        "severity": filters.sexual.severity,
-                    },
-                }
+                    completion.assistant = {
+                        "role": "assistant",
+                        "content": choice.message.content,
+                    }
 
-        return OpenAIChatCompletion(
-            completion=completion,
-            finish_reason=finish_reason,
-            response_ms=response_ms,
-            content_filtered=content_filtered,
-            usage=usage,
-        )
+                    completion.finish_reason = choice.finish_reason
+
+                    completion.content_filtered = {
+                        "hate": {
+                            "filtered": filters.hate.filtered,
+                            "severity": filters.hate.severity,
+                        },
+                        "self_harm": {
+                            "filtered": filters.self_harm.filtered,
+                            "severity": filters.self_harm.severity,
+                        },
+                        "sexual": {
+                            "filtered": filters.sexual.filtered,
+                            "severity": filters.sexual.severity,
+                        },
+                    }
+
+            return completion
+
+        except openai.error.InvalidRequestError as invalid_request_exception:
+            # this exception captures content policy violation policy
+            return self._report_exception(str(invalid_request_exception.user_message))
+
+        except openai.error.RateLimitError:
+            return self._report_exception(
+                "Oops, OpenAI rate limited. Please try again."
+            )
+
+        except openai.error.ServiceUnavailableError:
+            return self._report_exception("Oops, OpenAI unavailable. Please try again.")
+
+        except openai.error.Timeout:
+            return self._report_exception("Oops, OpenAI timeout. Please try again.")
+
+        except openai.error.OpenAIError as openai_error_exception:
+            return self._report_exception(str(openai_error_exception.user_message))
+
+        except Exception as exception:
+            self.logger.warning(msg=f"Global exception caught: {exception}")
+            raise exception
