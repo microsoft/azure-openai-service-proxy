@@ -71,4 +71,4 @@ output SERVICE_API_IDENTITY_PRINCIPAL_ID string = api.outputs.SERVICE_API_IDENTI
 output SERVICE_API_NAME string = api.outputs.SERVICE_API_NAME
 output SERVICE_API_URI string = api.outputs.SERVICE_API_URI
 output SERVICE_API_IMAGE_NAME string = api.outputs.SERVICE_API_IMAGE_NAME
-output SERVICE_API_ENDPOINTS array = ['${api.outputs.SERVICE_API_URI}']
+output SERVICE_API_ENDPOINTS array = ['${api.outputs.SERVICE_API_URI}/docs']
