@@ -5,7 +5,7 @@ import json
 import base64
 import binascii
 import logging
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import ResponseValidationError
 from openai_async import (
@@ -29,7 +29,7 @@ app = FastAPI()
 async def validation_exception_handler(request, exc):
     """validation exception handler"""
 
-    logging.info("Caught Validation Error:%s ", str(exc))
+    print("Caught Validation Error:%s ", str(exc))
 
     return JSONResponse(
         content={"message": "Response validation error"}, status_code=400
@@ -37,7 +37,9 @@ async def validation_exception_handler(request, exc):
 
 
 @app.post("/api/oai_prompt", status_code=200)
-async def openai_chat(chat: OpenAIChatRequest, request: Request) -> OpenAIChatResponse:
+async def openai_chat(
+    chat: OpenAIChatRequest, request: Request, response: Response
+) -> OpenAIChatResponse:
     """query vector datastore and return n results"""
 
     def get_user_token(headers) -> str | None:
@@ -57,13 +59,15 @@ async def openai_chat(chat: OpenAIChatRequest, request: Request) -> OpenAIChatRe
 
         return None
 
-    # user_token = get_user_token(request.headers)
+    user_token = get_user_token(request.headers)
 
-    # if not user_token or user_token != app.state.api_key:
-    #     raise HTTPException(status_code=401, detail="Not authorized")
+    if not user_token or user_token != app.state.api_key:
+        raise HTTPException(status_code=401, detail="Not authorized")
 
     try:
-        return await app.state.openai_mgr.call_openai_chat(chat)
+        completion, status_code = await app.state.openai_mgr.call_openai_chat(chat)
+        response.status_code = status_code
+        return completion
     except Exception as exc:
         raise HTTPException(
             status_code=500, detail=f"Failed to generate response: {exc}"
@@ -74,11 +78,9 @@ async def openai_chat(chat: OpenAIChatRequest, request: Request) -> OpenAIChatRe
 async def startup_event():
     """startup event"""
 
-    openai_key = os.environ["AZURE_OPENAI_API_KEY"]
-
     try:
-        openai_endpoint = os.environ["AZURE_OPENAI_ENDPOINT"]
-        model_deployment_name = os.environ["AZURE_OPENAI_MODEL_DEPLOYMENT_NAME"]
+        deployment_string = os.environ["AZURE_OPENAI_DEPLOYMENTS"]
+        deployments = json.loads(deployment_string)
         app.state.api_key = os.environ["OPENAI_PROXY_API_KEY"]
     except KeyError:
         print(
@@ -90,14 +92,14 @@ async def startup_event():
         exit(1)
 
     openai_config = OpenAIConfig(
-        openai_key=openai_key,
-        openai_endpoint=openai_endpoint,
         openai_version=OPENAI_API_VERSION,
-        model_deployment_name=model_deployment_name,
         gpt_model_name=GPT_MODEL_NAME,
+        deployments=deployments,
+        request_timeout=30,
     )
 
-    app.state.openai_mgr = oai(openai_config=openai_config)
+    app.state.openai_mgr = oai(app, openai_config=openai_config)
+    app.state.round_robin = 0
 
 
 if __name__ == "__main__":
