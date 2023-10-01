@@ -82,7 +82,7 @@ class OpenAIAsyncManager:
         self.openai_config = openai_config
         self.app = app
 
-    async def get_openai_completion(
+    async def get_openai_chat_completion(
         self, chat: OpenAIChatRequest
     ) -> openai.openai_object.OpenAIObject:
         """async get openai completion"""
@@ -239,7 +239,7 @@ class OpenAIManager:
 
         try:
             async_mgr = OpenAIAsyncManager(self.app, self.openai_config)
-            response = await async_mgr.get_openai_completion(chat)
+            response = await async_mgr.get_openai_chat_completion(chat)
 
             if response and isinstance(response, openai.openai_object.OpenAIObject):
                 completion.response_ms = response.response_ms
