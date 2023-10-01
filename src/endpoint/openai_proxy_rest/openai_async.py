@@ -106,7 +106,7 @@ class OpenAIAsyncManager:
         api_key = self.openai_config.deployments[index]["key"]
         resource_name = self.openai_config.deployments[index]["endpoint"]
 
-        chat_object = {
+        openai_request = {
             "messages": msgs,
             "max_tokens": chat.max_tokens,
             "temperature": chat.temperature,
@@ -128,7 +128,7 @@ class OpenAIAsyncManager:
         try:
             async with httpx.AsyncClient() as client:
                 response = await client.post(
-                    url, headers=headers, json=chat_object, timeout=30
+                    url, headers=headers, json=openai_request, timeout=30
                 )
 
             if not 200 <= response.status_code < 300:
@@ -192,7 +192,7 @@ class OpenAIAsyncManager:
         response_ms = int((end - start) * 1000)
 
         try:
-            chat_object = openai.openai_object.OpenAIObject.construct_from(
+            openai_response = openai.openai_object.OpenAIObject.construct_from(
                 json.loads(response.text), response_ms=response_ms
             )
 
@@ -201,7 +201,7 @@ class OpenAIAsyncManager:
                 f"Invalid response body from API: {response.text}"
             ) from exc
 
-        return chat_object
+        return openai_response
 
 
 class OpenAIManager:
