@@ -23,9 +23,10 @@ class OpenAIChatRequest(BaseModel):
     """OpenAI Chat Request"""
 
     prompt: str
-    user: list[str]
-    system: list[str]
-    assistant: list[str]
+    user: list[str] = []
+    system: list[str] = []
+    assistant: list[str] = []
+    messages: list[dict[str, str]] = []
     max_tokens: int = 1024
     temperature: float
     top_p: float
@@ -94,9 +95,21 @@ class OpenAIAsyncManager:
             except json.JSONDecodeError:
                 return None
 
-        msgs = list(map(lambda x: {"role": "system", "content": x}, chat.system))
-        msgs += list(map(lambda x: {"role": "user", "content": x}, chat.user))
-        msgs += list(map(lambda x: {"role": "assistant", "content": x}, chat.assistant))
+        msgs = []
+
+        if len(chat.system) > 0:
+            msgs += list(map(lambda x: {"role": "system", "content": x}, chat.system))
+
+        if len(chat.user) > 0:
+            msgs += list(map(lambda x: {"role": "user", "content": x}, chat.user))
+
+        if len(chat.assistant) > 0:
+            msgs += list(
+                map(lambda x: {"role": "assistant", "content": x}, chat.assistant)
+            )
+
+        if len(chat.messages) > 0:
+            msgs += chat.messages
 
         index = int(self.app.state.round_robin % len(self.openai_config.deployments))
         self.app.state.round_robin += 1
