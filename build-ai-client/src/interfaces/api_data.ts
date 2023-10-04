@@ -1,8 +1,5 @@
 export interface ApiData {
-    prompt: string;
-    user: string[];
-    system: string[];
-    assistant: string[];
+    messages: [{role: string, content: string}];
     max_tokens: number;
     temperature: number;
     top_p: number;
