@@ -22,10 +22,6 @@ from tenacity import (
 class OpenAIChatRequest(BaseModel):
     """OpenAI Chat Request"""
 
-    prompt: str
-    user: list[str] = []
-    system: list[str] = []
-    assistant: list[str] = []
     messages: list[dict[str, str]] = []
     max_tokens: int = 1024
     temperature: float
@@ -95,22 +91,6 @@ class OpenAIAsyncManager:
             except json.JSONDecodeError:
                 return None
 
-        msgs = []
-
-        if len(chat.system) > 0:
-            msgs += list(map(lambda x: {"role": "system", "content": x}, chat.system))
-
-        if len(chat.user) > 0:
-            msgs += list(map(lambda x: {"role": "user", "content": x}, chat.user))
-
-        if len(chat.assistant) > 0:
-            msgs += list(
-                map(lambda x: {"role": "assistant", "content": x}, chat.assistant)
-            )
-
-        if len(chat.messages) > 0:
-            msgs += chat.messages
-
         index = int(self.app.state.round_robin % len(self.openai_config.deployments))
         self.app.state.round_robin += 1
 
@@ -120,7 +100,7 @@ class OpenAIAsyncManager:
         resource_name = self.openai_config.deployments[index]["endpoint"]
 
         openai_request = {
-            "messages": msgs,
+            "messages": chat.messages,
             "max_tokens": chat.max_tokens,
             "temperature": chat.temperature,
             "top_p": chat.top_p,
