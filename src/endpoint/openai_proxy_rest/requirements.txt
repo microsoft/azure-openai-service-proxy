@@ -1,7 +1,7 @@
-tenacity>=8.2.3<=8.3.0
-openai>=0.28.1<=0.29.0
-fastapi>=0.103.1<=0.104.0
-uvicorn>=0.23.2<=0.24.0
-gunicorn>=21.2.0<=21.3.0
-httpx
-pydantic
+tenacity>=8.2.3,<8.3.0
+openai>=0.28.1,<0.29.0
+fastapi>=0.103.1,<0.104.0
+uvicorn>=0.23.2,<0.24.0
+gunicorn>=21.2.0,<21.3.0
+httpx>=0.25.0,<0.26.0
+pydantic>=2.4.2,<2.5.0
