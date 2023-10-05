@@ -1,21 +1,21 @@
 """ OpenAI Async Manager"""
 
 import json
-import time
 import logging
+import time
 from typing import Any
+
+import httpx
 import openai
 import openai.error
 import openai.openai_object
-from pydantic import BaseModel
-import httpx
 from fastapi import FastAPI
-
+from pydantic import BaseModel
 from tenacity import (
     retry,
+    retry_if_not_exception_type,
     stop_after_attempt,
     wait_random_exponential,
-    retry_if_not_exception_type,
 )
 
 
@@ -39,6 +39,7 @@ class OpenAIChatResponse(BaseModel):
     response_ms: int
     content_filtered: dict[str, dict[str, str | bool]]
     usage: dict[str, dict[str, int]]
+    name: str
 
     # create an empty response
     @classmethod
@@ -50,6 +51,7 @@ class OpenAIChatResponse(BaseModel):
             response_ms=0,
             content_filtered={},
             usage={},
+            name="",
         )
 
 
@@ -79,9 +81,7 @@ class OpenAIAsyncManager:
         self.openai_config = openai_config
         self.app = app
 
-    async def get_openai_chat_completion(
-        self, chat: OpenAIChatRequest
-    ) -> openai.openai_object.OpenAIObject:
+    async def get_openai_chat_completion(self, chat: OpenAIChatRequest) -> openai.openai_object.OpenAIObject:
         """async get openai completion"""
 
         def get_error(response: httpx.Response) -> dict[str, dict[str, Any]] | None:
@@ -120,9 +120,7 @@ class OpenAIAsyncManager:
 
         try:
             async with httpx.AsyncClient() as client:
-                response = await client.post(
-                    url, headers=headers, json=openai_request, timeout=30
-                )
+                response = await client.post(url, headers=headers, json=openai_request, timeout=30)
 
             if not 200 <= response.status_code < 300:
                 error = get_error(response)
@@ -142,23 +140,17 @@ class OpenAIAsyncManager:
                 elif response.status_code == 401:
                     message = error.get("message", "Unauthorized")
 
-                    raise openai.error.AuthenticationError(
-                        message=message, http_status=response.status_code
-                    )
+                    raise openai.error.AuthenticationError(message=message, http_status=response.status_code)
 
                 elif response.status_code == 403:
                     message = error.get("message", "Permission Error")
 
-                    raise openai.error.PermissionError(
-                        message=message, http_status=response.status_code
-                    )
+                    raise openai.error.PermissionError(message=message, http_status=response.status_code)
 
                 elif response.status_code == 409:
                     message = error.get("message", "Try Again")
 
-                    raise openai.error.TryAgain(
-                        message=message, http_status=response.status_code
-                    )
+                    raise openai.error.TryAgain(message=message, http_status=response.status_code)
 
                 elif response.status_code == 429:
                     message = error.get("message", "Rate limited.")
@@ -173,9 +165,7 @@ class OpenAIAsyncManager:
                     raise openai.error.APIError(message=message)
 
         except httpx.ConnectError as connect_error:
-            raise openai.error.ServiceUnavailableError(
-                "Service unavailable"
-            ) from connect_error
+            raise openai.error.ServiceUnavailableError("Service unavailable") from connect_error
 
         except httpx.ConnectTimeout as connect_timeout:
             raise openai.error.Timeout("Timeout error") from connect_timeout
@@ -190,11 +180,9 @@ class OpenAIAsyncManager:
             )
 
         except Exception as exc:
-            raise openai.APIError(
-                f"Invalid response body from API: {response.text}"
-            ) from exc
+            raise openai.APIError(f"Invalid response body from API: {response.text}") from exc
 
-        return openai_response
+        return openai_response, deployment_name
 
 
 class OpenAIManager:
@@ -208,9 +196,7 @@ class OpenAIManager:
         logging.basicConfig(level=logging.WARNING)
         self.logger = logging.getLogger(__name__)
 
-    def _report_exception(
-        self, message: str, http_status_code: int
-    ) -> OpenAIChatResponse:
+    def _report_exception(self, message: str, http_status_code: int) -> OpenAIChatResponse:
         """report exception"""
 
         completion = OpenAIChatResponse.empty()
@@ -232,10 +218,11 @@ class OpenAIManager:
 
         try:
             async_mgr = OpenAIAsyncManager(self.app, self.openai_config)
-            response = await async_mgr.get_openai_chat_completion(chat)
+            response, deployment_name = await async_mgr.get_openai_chat_completion(chat)
 
             if response and isinstance(response, openai.openai_object.OpenAIObject):
                 completion.response_ms = response.response_ms
+                completion.name = deployment_name
 
                 completion.usage = {
                     "usage": {

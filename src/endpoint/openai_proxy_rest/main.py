@@ -1,20 +1,23 @@
 """ FastAPI server for Azure OpenAI Service proxy """
 
-import os
-import json
 import base64
 import binascii
+import json
 import logging
+import os
+
 from fastapi import FastAPI, HTTPException, Request, Response
-from fastapi.responses import JSONResponse
 from fastapi.exceptions import ResponseValidationError
+from fastapi.responses import JSONResponse
+
 from openai_async import (
-    OpenAIConfig,
-    OpenAIManager as oai,
     OpenAIChatRequest,
     OpenAIChatResponse,
+    OpenAIConfig,
 )
-
+from .openai_async import (
+    OpenAIManager as oai,
+)
 
 logging.basicConfig(level=logging.WARNING)
 logger = logging.getLogger(__name__)
@@ -31,16 +34,12 @@ async def validation_exception_handler(request, exc):
 
     print("Caught Validation Error:%s ", str(exc))
 
-    return JSONResponse(
-        content={"message": "Response validation error"}, status_code=400
-    )
+    return JSONResponse(content={"message": "Response validation error"}, status_code=400)
 
 
 @app.post("/api/oai_prompt", status_code=200)
-async def openai_chat(
-    chat: OpenAIChatRequest, request: Request, response: Response
-) -> OpenAIChatResponse:
-    """query vector datastore and return n results"""
+async def openai_chat(chat: OpenAIChatRequest, request: Request, response: Response) -> OpenAIChatResponse:
+    """openai chat returns chat response"""
 
     def get_user_token(headers) -> str | None:
         """get the userId from the auth token"""
@@ -69,9 +68,7 @@ async def openai_chat(
         response.status_code = status_code
         return completion
     except Exception as exc:
-        raise HTTPException(
-            status_code=500, detail=f"Failed to generate response: {exc}"
-        ) from exc
+        raise HTTPException(status_code=500, detail=f"Failed to generate response: {exc}") from exc
 
 
 @app.on_event("startup")
