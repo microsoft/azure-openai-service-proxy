@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './App.css';
 import {
   makeStyles,
@@ -16,68 +16,54 @@ import {
   Text,
 } from "@fluentui/react-components";
 import { SendRegular } from "@fluentui/react-icons"
-import { useState, useEffect } from 'react';
-import { callApi } from './api';
 
+import { callApi } from './api/api';
+import { Message } from './interfaces/Message';
+import { ApiData } from './interfaces/ApiData';
+import { ChatCard } from './components/ChatCard';
+import { SystemCard } from './components/SystemCard';
+import { SlidersCard } from './components/SlidersCard';
 
-const useStyles = makeStyles({
-  card: {
-    ...shorthands.margin("auto"),
-    width: "720px",
-    maxWidth: "60%",
-  }
-})
+const defaultSysPrompt: Message = {role: "system", content: "You are an AI assistant that helps people find information."}
+const defaultSliders: Omit<ApiData, "messages"> = {
+  max_tokens: 1024,
+  temperature: 0,
+  top_p: 0,
+  stop_sequence: "string",
+  frequency_penalty: 0,
+  presence_penalty: 0
+}
+
 
 function App() {
+  const [systemPrompt, setSystemPrompt] = useState(defaultSysPrompt)
+  const [messageList, setMessageList] = useState([defaultSysPrompt]);
+  const [sliders, setSliders] = useState(defaultSliders);
 
-  const [userPrompt, setPrompt] = useState("");
-  const data = {
-    prompt: "string",
-    user: [userPrompt],
-    system: ["You are an AI bot that responds in at most two sentences."],
-    assistant: ["string"],
-    max_tokens: 1024,
-    temperature: 0,
-    top_p: 0,
-    stop_sequence: "",
-    frequency_penalty: 0,
-    presence_penalty: 0,
+  const onPromptEntered = (messages: Message[]) => {
+    const data: ApiData = {messages, ...sliders}
+    callApi(data).then((response) => {
+      console.log(response.assistant.content)
+      setMessageList([...messages, response.assistant])
+    });
+  }
+
+  const tokenUpdate = (label: keyof Omit<ApiData, "messages">, newValue: number | string) => {
+    setSliders(() => {
+      return {
+        ...sliders,
+        [label]: newValue
+      }
+    })
   }
 
 
-  const chat = useStyles();
   return (
-    <Card className={chat.card}>
-      <CardHeader
-        header={
-          <Body1>
-            <b>Chat Session</b>
-          </Body1>
-        }
-      />
-      <div className="chatContainer">
-        <Text>Here is where the response will be shown.</Text>
-      </div>
-      <CardFooter>
-        <Field className="user-query" style={{width: "100%"}}>
-          <Input 
-          value={userPrompt}
-          placeholder="Type user query here"
-          onChange={(event) => {
-            setPrompt(event.target.value);
-          }}
-          />
-        </Field>
-        <Button className="send-button" 
-        icon={<SendRegular />}
-        onClick={() => {
-          callApi(data).then((response) => {
-            console.log(response);
-          })
-        }}       
-        />
-      </CardFooter>
-    </Card>
+    <section className="App">
+      <SystemCard />
+      <ChatCard onPromptEntered={onPromptEntered} messageList={messageList}/>
+      <SlidersCard startSliders={sliders} tokenUpdate={tokenUpdate} />
+    </section>
 );
 }
 
