@@ -16,7 +16,6 @@ import {
   Text,
 } from "@fluentui/react-components";
 import { SendRegular } from "@fluentui/react-icons"
-
 import { callApi } from './api/api';
 import { Message } from './interfaces/Message';
 import { ApiData } from './interfaces/ApiData';
@@ -48,6 +47,11 @@ function App() {
     });
   }
 
+  const onPromptChange = (newPrompt: Message) => {
+    setSystemPrompt(newPrompt);
+    messageList[0] = newPrompt;
+  }
+
   const tokenUpdate = (label: keyof Omit<ApiData, "messages">, newValue: number | string) => {
     setSliders(() => {
       return {
@@ -60,7 +64,7 @@ function App() {
 
   return (
     <section className="App">
-      <SystemCard />
+      <SystemCard defaultPrompt={systemPrompt} onPromptChange={onPromptChange}/>
       <ChatCard onPromptEntered={onPromptEntered} messageList={messageList}/>
       <SlidersCard startSliders={sliders} tokenUpdate={tokenUpdate} />
     </section>

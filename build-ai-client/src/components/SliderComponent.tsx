@@ -24,38 +24,43 @@ export const SliderComponent = ({
 
   const mediumId = useId("medium");
 
-  const [value, setValue] = useState(defaultValue);
+  // const [value, setValue] = useState(defaultValue);
+
+  const id = useId();
   const [sliderValue, setSliderValue] = useState(defaultValue);
 
-  const onSliderChange = (data: string) => {
-
-      setSliderValue(parseFloat(data));
-      onUpdate(parseFloat(data))
-
+  const onSliderChange: SliderProps["onChange"] = (_, data) =>{
+    setSliderValue(data.value);
   }
+
+  React.useEffect(() => {
+    onUpdate(sliderValue)
+  }, [sliderValue])
 
   return (
     <>
-      <Label htmlFor={mediumId}>{label}</Label>
+      <Label htmlFor={mediumId}><b>{label}</b></Label>
       <Input
-      type = "number"
-      onBlur={(event) => {
-        let numData = parseFloat(event.target.value);
-        if (numData > max || numData < min) {
-          console.error("Value out of range");
-          return;
-        }
-        else{
-          setValue(parseFloat(event.target.value));
-          onUpdate(parseFloat(event.target.value))
-        }
-      }}></Input>
-      <Slider
-        size="medium"
-        value={sliderValue}
-        onChange={() => {setSliderValue(value); onUpdate(value)}}
+        id={mediumId}
+        type="number"
+        placeholder={sliderValue.toString()}
+        onChange={(event)=> {
+          setSliderValue(parseFloat(event.target.value))
+        }}
+        onBlur={() => onSliderChange}
       />
-      <Label htmlFor={mediumId}>Current Value: {value}</Label>
+      <Label htmlFor={mediumId}>
+        Control Slider [ Current Value: {sliderValue} ]
+      </Label>
+      <Slider
+        aria-valuetext={`Value is ${sliderValue}`}
+        value={sliderValue}
+        min={min}
+        max={max}
+        step={step}
+        onChange={onSliderChange}
+        id={id}
+      />
     </>
   );
 };
