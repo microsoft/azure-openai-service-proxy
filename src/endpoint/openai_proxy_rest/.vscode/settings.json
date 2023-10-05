@@ -25,6 +25,8 @@
     },
     "cSpell.words": [
         "fastapi",
+        "httpx",
+        "openai",
         "pydantic",
         "uvicorn"
     ],
