@@ -22,7 +22,7 @@ from tenacity import (
 class OpenAIChatRequest(BaseModel):
     """OpenAI Chat Request"""
 
-    messages: list[dict[str, str]] = []
+    messages: list[dict[str, str]]
     max_tokens: int = 1024
     temperature: float
     top_p: float
