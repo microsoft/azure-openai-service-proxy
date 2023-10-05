@@ -9,6 +9,15 @@ param name string
 @description('Primary location for all resources')
 param location string
 
+@minLength(10)
+@description('List of OpenAI Deployments [{"endpoint": "","deployment_name": "","key": ""}, {"endpoint": "","deployment_name": "","key": ""}]')
+param azure_openai_deployments string
+
+@minLength(10)
+@maxLength(64)
+@description('OpenAI API Proxy Key')
+param openai_proxy_api_key string
+
 param apiAppExists bool = false
 
 var resourceToken = toLower(uniqueString(subscription().id, name, location))
@@ -49,6 +58,8 @@ module api 'api.bicep' = {
     containerAppsEnvironmentName: containerApps.outputs.environmentName
     containerRegistryName: containerApps.outputs.registryName
     exists: apiAppExists
+    azure_openai_deployments: azure_openai_deployments
+    openai_proxy_api_key: openai_proxy_api_key
   }
 }
 
