@@ -9,7 +9,8 @@ export async function callApi(data: any): Promise<any> {
                 headers: {
                     'accept': 'application/json',
                     'Content-Type': 'application/json',
-                    'x-ms-client-principal': 'ewogICJpZGVudGl0eVByb3ZpZGVyIjogImdpdGh1YiIsCiAgInVzZXJJZCI6ICJSbXRgNTdbYktEJHtRbiNqVXhNNiV1Lk5DZjtyRlBTQUdfOH4iLAogICJ1c2VyRGV0YWlscyI6ICJ1c2VybmFtZSIsCiAgInVzZXJSb2xlcyI6IFsiYW5vbnltb3VzIiwgImF1dGhlbnRpY2F0ZWQiXSwKICAiY2xhaW1zIjogW3sKICAgICJ0eXAiOiAibmFtZSIsCiAgICAidmFsIjogIkF6dXJlIFN0YXRpYyBXZWIgQXBwcyIKICB9XQp9'
+                    'x-ms-client-principal': 'ewogICJpZGVudGl0eVByb3ZpZGVyIjogImdpdGh1YiIsCiAgInVzZXJJZCI6ICJSbXRgNTdbYktEJHtRbiNqVXhNNiV1Lk5DZjtyRlBTQUdfOH4iLAogICJ1c2VyRGV0YWlscyI6ICJ1c2VybmFtZSIsCiAgInVzZXJSb2xlcyI6IFsiYW5vbnltb3VzIiwgImF1dGhlbnRpY2F0ZWQiXSwKICAiY2xhaW1zIjogW3sKICAgICJ0eXAiOiAibmFtZSIsCiAgICAidmFsIjogIkF6dXJlIFN0YXRpYyBXZWIgQXBwcyIKICB9XQp9',
+                    'openai-event-code': 'advocacy202310'
                 },
                 body: JSON.stringify(data)
             }
