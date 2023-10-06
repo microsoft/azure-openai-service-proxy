@@ -15,8 +15,8 @@ param azure_openai_deployments string
 
 @minLength(10)
 @maxLength(64)
-@description('OpenAI API Proxy Key')
-param openai_proxy_api_key string
+@description('Azure storage account connection string')
+param azure_storage_connection_string string
 
 param apiAppExists bool = false
 
@@ -59,7 +59,7 @@ module api 'api.bicep' = {
     containerRegistryName: containerApps.outputs.registryName
     exists: apiAppExists
     azure_openai_deployments: azure_openai_deployments
-    openai_proxy_api_key: openai_proxy_api_key
+    azure_storage_connection_string: azure_storage_connection_string
   }
 }
 

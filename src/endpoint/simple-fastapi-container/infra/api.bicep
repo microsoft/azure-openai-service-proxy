@@ -8,7 +8,7 @@ param containerRegistryName string
 param serviceName string = 'api'
 param exists bool
 param azure_openai_deployments string
-param openai_proxy_api_key string
+param azure_storage_connection_string string
 
 resource apiIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
   name: identityName
@@ -32,8 +32,8 @@ module app 'core/host/container-app-upsert.bicep' = {
         value: azure_openai_deployments
       }
       {
-        name: 'OPENAI_PROXY_API_KEY'
-        value: openai_proxy_api_key
+        name: 'AZURE_STORAGE_CONNECTION_STRING'
+        value: azure_storage_connection_string
       }
     ]
   }

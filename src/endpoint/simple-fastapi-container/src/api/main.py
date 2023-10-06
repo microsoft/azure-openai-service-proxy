@@ -1,7 +1,5 @@
 """ FastAPI server for Azure OpenAI Service proxy """
 
-import base64
-import binascii
 import json
 import logging
 import os
@@ -10,6 +8,7 @@ from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.exceptions import ResponseValidationError
 from fastapi.responses import JSONResponse
 
+from .authorize import Authorize
 from .openai_async import (
     OpenAIChatRequest,
     OpenAIChatResponse,
@@ -41,26 +40,13 @@ async def validation_exception_handler(request, exc):
 async def openai_chat(chat: OpenAIChatRequest, request: Request, response: Response) -> OpenAIChatResponse:
     """openai chat returns chat response"""
 
-    def get_user_token(headers) -> str | None:
-        """get the userId from the auth token"""
-        if "x-ms-client-principal" in headers:
-            try:
-                auth_base64 = headers.get("x-ms-client-principal")
-                auth = json.loads(base64.b64decode(auth_base64))
-                if "userId" in auth:
-                    return auth["userId"]
-            except json.decoder.JSONDecodeError:
-                return None
-            except binascii.Error:
-                return None
-            except TypeError:
-                return None
+    def authorize(headers) -> str | None:
+        """get the event code from the header"""
+        if "openai-event-code" in headers:
+            return app.state.authorize.authorize(headers.get("openai-event-code"))
+        return False
 
-        return None
-
-    user_token = get_user_token(request.headers)
-
-    if not user_token or user_token != app.state.api_key:
+    if not authorize(request.headers):
         raise HTTPException(status_code=401, detail="Not authorized")
 
     try:
@@ -78,13 +64,13 @@ async def startup_event():
     try:
         deployment_string = os.environ["AZURE_OPENAI_DEPLOYMENTS"]
         deployments = json.loads(deployment_string)
-        app.state.api_key = os.environ["OPENAI_PROXY_API_KEY"]
+        storage_connection_string = os.environ["AZURE_STORAGE_CONNECTION_STRING"]
+        app.state.authorize = Authorize(storage_connection_string)
     except KeyError:
         print(
-            "Please set the environment variables AZURE_OPENAI_API_KEY and"
-            " AZURE_OPENAI_ENDPOINT and AZURE_OPENAI_MODEL_DEPLOYMENT_NAME"
-            " and AZURE_OPENAI_EMBEDDING_MODEL_DEPLOYMENT_NAME "
-            "and OPENAI_PROXY_API_KEY"
+            "Please set the environment variables "
+            "and AZURE_OPENAI_DEPLOYMENTS "
+            "and AZURE_STORAGE_CONNECTION_STRING"
         )
         exit(1)
 
