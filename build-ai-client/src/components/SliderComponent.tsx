@@ -1,8 +1,7 @@
 import * as React from "react";
 import { useId, Label, Slider, Input } from "@fluentui/react-components";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type {SliderProps} from "@fluentui/react-components"
-import { ApiData } from "../interfaces/ApiData";
 
 interface SliderComponentProps {
   label: string;
@@ -33,13 +32,13 @@ export const SliderComponent = ({
     setSliderValue(data.value);
   }
 
-  React.useEffect(() => {
+  useEffect(() => {
     onUpdate(sliderValue)
   }, [sliderValue])
 
   return (
     <>
-      <Label htmlFor={mediumId}><b>{label}</b></Label>
+      <Label htmlFor={mediumId} style={{textAlign: "left", fontSize: "large"}}><b>{label}</b></Label>
       <Input
         id={mediumId}
         type="number"

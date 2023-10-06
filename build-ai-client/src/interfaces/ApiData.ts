@@ -1,7 +1,7 @@
-import { Message } from "./Message";
+import { MessageData } from "./MessageData";
 
 export interface ApiData {
-    messages: Message[];
+    messages: MessageData[];
     max_tokens: number;
     temperature: number;
     top_p: number;

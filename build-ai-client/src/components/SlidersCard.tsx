@@ -1,13 +1,11 @@
-import { Card, makeStyles, shorthands } from "@fluentui/react-components"
+import { Card, makeStyles } from "@fluentui/react-components"
 import { SliderComponent } from "./SliderComponent";
 import { ApiData } from "../interfaces/ApiData";
 import {SliderInput} from "./SliderInput";
 
 const useStyles = makeStyles({
         card: {
-            ...shorthands.margin("auto"),
             height: "100vh",
-            width: "20vh",
         }
     })
 
@@ -38,6 +36,9 @@ export const SlidersCard =({ startSliders, tokenUpdate }: SliderCardProps) => {
                 max={2} step={0.1} onUpdate={updateParams("frequency_penalty")} />
             <SliderComponent label={"Presence Penalty"} defaultValue={startSliders.presence_penalty} min={0}
                 max={2} step={0.1} onUpdate={updateParams("presence_penalty")} />
+
+
+            {/* add small text with answer deployment*/}
         </Card>
     )
 }

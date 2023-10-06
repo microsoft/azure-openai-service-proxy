@@ -1,29 +1,13 @@
 import React, { useState } from 'react';
 import './App.css';
-import {
-  makeStyles,
-  Body1,
-  Caption1,
-  Button,
-  shorthands,
-  Card,
-  CardFooter,
-  CardHeader,
-  CardPreview,
-  Field,
-  Input,
-  Textarea,
-  Text,
-} from "@fluentui/react-components";
-import { SendRegular } from "@fluentui/react-icons"
 import { callApi } from './api/api';
-import { Message } from './interfaces/Message';
+import { MessageData } from './interfaces/MessageData';
 import { ApiData } from './interfaces/ApiData';
 import { ChatCard } from './components/ChatCard';
 import { SystemCard } from './components/SystemCard';
 import { SlidersCard } from './components/SlidersCard';
 
-const defaultSysPrompt: Message = {role: "system", content: "You are an AI assistant that helps people find information."}
+const defaultSysPrompt: MessageData = {role: "system", content: "You are an AI assistant that helps people find information."}
 const defaultSliders: Omit<ApiData, "messages"> = {
   max_tokens: 1024,
   temperature: 0,
@@ -39,7 +23,7 @@ function App() {
   const [messageList, setMessageList] = useState([defaultSysPrompt]);
   const [sliders, setSliders] = useState(defaultSliders);
 
-  const onPromptEntered = (messages: Message[]) => {
+  const onPromptEntered = (messages: MessageData[]) => {
     const data: ApiData = {messages, ...sliders}
     callApi(data).then((response) => {
       console.log(response.assistant.content)
@@ -47,7 +31,7 @@ function App() {
     });
   }
 
-  const onPromptChange = (newPrompt: Message) => {
+  const onPromptChange = (newPrompt: MessageData) => {
     setSystemPrompt(newPrompt);
     messageList[0] = newPrompt;
   }

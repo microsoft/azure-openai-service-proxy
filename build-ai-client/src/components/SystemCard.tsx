@@ -1,10 +1,10 @@
-import { Card, Input, Label } from "@fluentui/react-components"
-import { Message } from "../interfaces/Message";
+import { Body1, Card, CardHeader, Input, Label } from "@fluentui/react-components"
+import { MessageData } from "../interfaces/MessageData";
 import { useState } from "react";
 
 interface SystemProps {
-    defaultPrompt: Message;
-    onPromptChange: (newPrompt: Message) => void;
+    defaultPrompt: MessageData;
+    onPromptChange: (newPrompt: MessageData) => void;
 }
 
 export const SystemCard =({ defaultPrompt, onPromptChange}: SystemProps) => {
@@ -13,18 +13,24 @@ export const SystemCard =({ defaultPrompt, onPromptChange}: SystemProps) => {
 
     return (
         <Card>
-            <Label><b>System Message</b></Label>
-            <Input
-            value={sysPrompt}
-            onChange={(event) => {
-              setPrompt(event.target.value);
-            }}
-            onKeyDown={(event) => {
-              if (event.key === "Enter") {
-                onPromptChange({role: "system", content: sysPrompt});
-              }
-            }}
-            ></Input>
+            <CardHeader
+                style={{height: "10vh"}}
+                header={
+                <Body1 style={{fontSize: "large"}}>
+                <b>System Message</b>
+                </Body1>
+                }/>
+            <div>
+                <Input
+                style={{width: "100%", height: "10vh", fontSize: "large"}}
+                value={sysPrompt}
+                onChange={(event) => {
+                setPrompt(event.target.value);}}
+                onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                    onPromptChange({role: "system", content: sysPrompt});
+                }}}></Input>
+            </div>     
         </Card>
     )
 }

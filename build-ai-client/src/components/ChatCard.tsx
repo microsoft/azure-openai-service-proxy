@@ -1,37 +1,33 @@
 import { makeStyles,
     Body1,
-    Caption1,
     Button,
-    shorthands,
     Card,
     CardFooter,
     CardHeader,
-    CardPreview,
     Field,
     Input,
-    Textarea,
     Text } from '@fluentui/react-components';
 import React from 'react';
 import { SendRegular } from "@fluentui/react-icons"
-
-import { useState, useEffect } from 'react';
-import { Message } from '../interfaces/Message';
+import { useState } from 'react';
+import { MessageData } from '../interfaces/MessageData';
+import { Message } from './Message';
+import { Response } from './Response';
 
 interface CardProps {
-    onPromptEntered: (messages: Message[]) => void;
-    messageList: Message[];
+    onPromptEntered: (messages: MessageData[]) => void;
+    messageList: MessageData[];
 }
 
 const useStyles = makeStyles({
     card: {
-      ...shorthands.margin("auto"),
+    //   ...shorthands.margin("auto"),
       height: "100vh",
-      width: "720px",
-      maxWidth: "60%",
+      width: "100%",
     },
     dialog: {
         display: "block"
-    }
+    },
   })
 
 
@@ -40,22 +36,25 @@ export const ChatCard = ({ onPromptEntered, messageList}: CardProps) => {
     const chat = useStyles();
     return (
     <Card className={chat.card}>
-      <CardHeader
+    <CardHeader
+        style={{height: "10vh"}}
         header={
-          <Body1>
-            <b>Chat Session</b>
-          </Body1>
+            <Body1 style={{fontSize: "large"}}>
+                <b>Chat Session</b>
+            </Body1>
         }
-      />
+    />
       <div className="chatContainer">
         {messageList.length > 1 ? messageList.map((message, index) => {
             if (message.role === "system") {
                 return null;
             }
             return (
-                <Text key={index} className={chat.dialog}>
-                    <b>{message.role === "user" ? "You" : "AI"}</b>: {message.content}
-                </Text>
+                message.role === "user" ? <Message message={message} />:  <Response message={message} />
+                
+                // <Text key={index} className={chat.dialog}>
+                //     <b>{message.role === "user" ? "You" : "AI"}</b>: {message.content}
+                // </Text>
             )
         })
         :
@@ -64,9 +63,10 @@ export const ChatCard = ({ onPromptEntered, messageList}: CardProps) => {
         
         }
       </div>
-      <CardFooter>
+      <CardFooter style={{height: "10vh"}}>
         <Field className="user-query" style={{width: "100%"}}>
-          <Input 
+          <Input
+          style={{fontSize: "large"}}
           value={userPrompt}
           placeholder="Type user query here"
           onChange={(event) => {
