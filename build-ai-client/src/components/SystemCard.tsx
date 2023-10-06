@@ -1,4 +1,4 @@
-import { Body1, Card, CardHeader, Input, Label } from "@fluentui/react-components"
+import { Body1, Card, CardHeader, Input } from "@fluentui/react-components"
 import { MessageData } from "../interfaces/MessageData";
 import { useState } from "react";
 

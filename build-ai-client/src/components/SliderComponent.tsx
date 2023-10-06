@@ -34,7 +34,7 @@ export const SliderComponent = ({
 
   useEffect(() => {
     onUpdate(sliderValue)
-  }, [sliderValue])
+  }, [sliderValue, onUpdate])
 
   return (
     <>
