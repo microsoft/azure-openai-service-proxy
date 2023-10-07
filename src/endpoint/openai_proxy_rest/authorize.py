@@ -1,8 +1,9 @@
 """ Authorize a user to access playground based specific time bound event."""
 
 import string
-import pytz
 import logging
+from datetime import datetime, timedelta
+import pytz
 
 from azure.data.tables.aio import TableClient
 
@@ -11,7 +12,8 @@ from azure.core.exceptions import (
     ServiceRequestError,
     ClientAuthenticationError,
 )
-from datetime import datetime
+
+CACHE_EXPIRY_MINUTES = 10
 
 
 class Authorize:
@@ -20,6 +22,8 @@ class Authorize:
     def __init__(self, connection_string, table_name) -> None:
         self.connection_string = connection_string
         self.table_name = table_name
+        self.event_cache = []
+        self.cache_expiry = None
 
         logging.basicConfig(level=logging.WARNING)
         self.logger = logging.getLogger(__name__)
@@ -33,21 +37,48 @@ class Authorize:
         async with TableClient.from_connection_string(
             self.connection_string, self.table_name
         ) as table_client:
+            # calcultate current, if current plus 10 great than self.event_cache then delete event_cache
+            if self.cache_expiry:
+                if datetime.now() > self.cache_expiry:
+                    self.event_cache = []
+                    self.cache_expiry = None
+                else:
+                    # look for event_code in the self.event_cache list of dictionaries
+                    for event in self.event_cache:
+                        if event_code in event:
+                            start_utc = event.get(event_code).get("start_utc")
+                            end_utc = event.get(event_code).get("end_utc")
+                            current_time_utc = datetime.now(pytz.utc)
+                            return start_utc <= current_time_utc <= end_utc
+
             try:
-                name_filter = f"RowKey eq '{event_code}' and PartitionKey eq 'events'"
+                name_filter = f"PartitionKey eq 'events' and RowKey eq '{event_code}'"
                 queried_entities = table_client.query_entities(
                     query_filter=name_filter,
                     select=[
                         "start_utc",
                         "end_utc",
                     ],
-                    # parameters=parameters,
                 )
                 async for entity in queried_entities:
-                    start_time = entity["start_utc"]
-                    end_time = entity["end_utc"]
-                    current_time = datetime.now(pytz.utc)
-                    return start_time <= current_time <= end_time
+                    start_utc = entity["start_utc"]
+                    end_utc = entity["end_utc"]
+                    current_time_utc = datetime.now(pytz.utc)
+                    result = start_utc <= current_time_utc <= end_utc
+
+                    if result:
+                        # set cache_expiry to current time plus 10 minutes
+                        self.cache_expiry = datetime.now() + timedelta(
+                            minutes=CACHE_EXPIRY_MINUTES
+                        )
+
+                        cache_item = {
+                            event_code: {"start_utc": start_utc, "end_utc": end_utc}
+                        }
+
+                        self.event_cache.append(cache_item)
+
+                    return result
 
             except ClientAuthenticationError as auth_error:
                 logging.error("ClientAuthenticationError: %s", auth_error.message)
