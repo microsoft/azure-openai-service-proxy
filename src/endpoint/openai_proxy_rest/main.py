@@ -44,13 +44,13 @@ async def openai_chat(
 ) -> OpenAIChatResponse:
     """openai chat returns chat response"""
 
-    def authorize(headers) -> str | None:
+    async def authorize(headers) -> bool:
         """get the event code from the header"""
         if "openai-event-code" in headers:
-            return app.state.authorize.authorize(headers.get("openai-event-code"))
+            return await app.state.authorize.authorize(headers.get("openai-event-code"))
         return False
 
-    if not authorize(request.headers):
+    if not await authorize(request.headers):
         raise HTTPException(status_code=401, detail="Not authorized")
 
     try:
@@ -71,7 +71,8 @@ async def startup_event():
         deployment_string = os.environ["AZURE_OPENAI_DEPLOYMENTS"]
         deployments = json.loads(deployment_string)
         storage_connection_string = os.environ["AZURE_STORAGE_CONNECTION_STRING"]
-        app.state.authorize = Authorize(storage_connection_string)
+        storage_table_name = os.environ["AZURE_STORAGE_TABLE_NAME"]
+        app.state.authorize = Authorize(storage_connection_string, storage_table_name)
     except KeyError:
         print(
             "Please set the environment variables "
