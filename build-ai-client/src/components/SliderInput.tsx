@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Input } from '@fluentui/react-components';
+import { Input, Label } from '@fluentui/react-components';
 
 interface InputProps {
     label: string;
@@ -13,7 +13,7 @@ export const SliderInput = ({ label, defaultValue, onUpdate }: InputProps) => {
 
     return (
         <div>
-            <label><b>{label}</b></label>
+            <Label style={{fontSize: "large"}}><b>{label}</b></Label>
             <Input type="text" placeholder={value} onChange={() => setValue(value)} onBlur={() => onUpdate} />
         </div>
     );

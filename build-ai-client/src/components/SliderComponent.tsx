@@ -1,6 +1,6 @@
 import * as React from "react";
-import { useId, Label, Slider, Input } from "@fluentui/react-components";
-import { useState, useEffect } from "react";
+import { useId, Label, Slider, Input, makeStyles } from "@fluentui/react-components";
+import { useState } from "react";
 import type {SliderProps} from "@fluentui/react-components"
 
 interface SliderComponentProps {
@@ -12,6 +12,15 @@ interface SliderComponentProps {
   onUpdate: ( newValue: number | string) => void;
 }
 
+const useStyles = makeStyles({
+  sliderInput: {
+    maxWidth: "65px",
+    marginLeft: "10px",
+    alignSelf: "end",
+    maxHeight: "10px",
+  }
+});
+
 export const SliderComponent = ({
   label,
   defaultValue,
@@ -22,25 +31,29 @@ export const SliderComponent = ({
 }: SliderComponentProps) => {
 
   const mediumId = useId("medium");
-
-  // const [value, setValue] = useState(defaultValue);
-
   const id = useId();
   const [sliderValue, setSliderValue] = useState(defaultValue);
 
+
   const onSliderChange: SliderProps["onChange"] = (_, data) =>{
     setSliderValue(data.value);
+    onUpdate(data.value);
   }
 
-  useEffect(() => {
-    onUpdate(sliderValue)
-  }, [sliderValue, onUpdate])
 
+  // useEffect(() => {
+  //   console.log("test2");
+  //   onUpdate(sliderValue)
+  // }, [sliderValue, onUpdate])
+
+  const styles = useStyles();
   return (
+
     <>
+      <div>
       <Label htmlFor={mediumId} style={{textAlign: "left", fontSize: "large"}}><b>{label}</b></Label>
       <Input
-        id={mediumId}
+        className={styles.sliderInput}
         type="number"
         placeholder={sliderValue.toString()}
         onChange={(event)=> {
@@ -48,9 +61,10 @@ export const SliderComponent = ({
         }}
         onBlur={() => onSliderChange}
       />
-      <Label htmlFor={mediumId}>
+      </div>
+      {/* <Label htmlFor={mediumId}>
         Control Slider [ Current Value: {sliderValue} ]
-      </Label>
+      </Label> */}
       <Slider
         aria-valuetext={`Value is ${sliderValue}`}
         value={sliderValue}

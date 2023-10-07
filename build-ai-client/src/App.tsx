@@ -17,23 +17,28 @@ const defaultSliders: Omit<ApiData, "messages"> = {
   presence_penalty: 0
 }
 
-
 function App() {
   const [systemPrompt, setSystemPrompt] = useState(defaultSysPrompt)
   const [messageList, setMessageList] = useState([defaultSysPrompt]);
   const [sliders, setSliders] = useState(defaultSliders);
+  const [name, setName] = useState("");
 
-  const onPromptEntered = (messages: MessageData[]) => {
-    const data: ApiData = {messages, ...sliders}
-    callApi(data).then((response) => {
-      console.log(response.assistant.content)
-      setMessageList([...messages, response.assistant])
-    });
-  }
+  const onPromptEntered = async (messages: MessageData[]) => {
+    const userMessage = messages[messages.length - 1];
+    const updatedMessageList = [...messageList, { role: "user", content: userMessage.content }];
+    setMessageList(updatedMessageList);
+
+    const data: ApiData = { messages: updatedMessageList, ...sliders };
+    const response = await callApi(data);
+    setMessageList([...updatedMessageList, response.assistant]);
+    setName(response.name);
+  };
 
   const onPromptChange = (newPrompt: MessageData) => {
-    setSystemPrompt(newPrompt);
-    messageList[0] = newPrompt;
+    if(newPrompt !== systemPrompt){
+      setSystemPrompt(newPrompt);
+      messageList[0] = newPrompt;
+    }
   }
 
   const tokenUpdate = (label: keyof Omit<ApiData, "messages">, newValue: number | string) => {
@@ -43,14 +48,19 @@ function App() {
         [label]: newValue
       }
     })
+    console.log("test");
   }
+
+const clearMessageList = () => {
+  setMessageList((prevMessageList) => [prevMessageList[0]]);
+};
 
 
   return (
     <section className="App">
       <SystemCard defaultPrompt={systemPrompt} onPromptChange={onPromptChange}/>
-      <ChatCard onPromptEntered={onPromptEntered} messageList={messageList}/>
-      <SlidersCard startSliders={sliders} tokenUpdate={tokenUpdate} />
+      <ChatCard onPromptEntered={onPromptEntered} messageList={messageList} onClear={clearMessageList}/>
+      <SlidersCard startSliders={sliders} tokenUpdate={tokenUpdate} name={name} />
     </section>
 );
 }
