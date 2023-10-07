@@ -1,8 +1,8 @@
-import { Body1, Card, CardHeader, Label, makeStyles } from "@fluentui/react-components"
+import { Body1, Card, CardHeader, Input, Label, makeStyles } from "@fluentui/react-components"
 import { SliderComponent } from "./SliderComponent";
 import { ApiData } from "../interfaces/ApiData";
 import {SliderInput} from "./SliderInput";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 
 const useStyles = makeStyles({
         card: {
@@ -14,16 +14,17 @@ interface SliderCardProps {
     startSliders: Omit<ApiData, "messages">;
     tokenUpdate: (label: keyof Omit<ApiData, "messages">, newValue: number | string) => void;
     name: string;
+    eventUpdate: (eventCode: string) => void;
 }
 
-
-export const SlidersCard =({ startSliders, tokenUpdate, name }: SliderCardProps) => {
+export const SlidersCard =({ startSliders, tokenUpdate, name, eventUpdate }: SliderCardProps) => {
     const sliderCard = useStyles();
     const updateParams = useCallback((label: keyof Omit<ApiData, "messages">) => {
         return (newValue: number | string) => {
             tokenUpdate(label, newValue);
         };
     }, [tokenUpdate]);
+    const [eventCode, setEventCode] = useState("");
 
     return (
         <Card className={sliderCard.card}>
@@ -35,6 +36,20 @@ export const SlidersCard =({ startSliders, tokenUpdate, name }: SliderCardProps)
                     </Body1>
                 }
             />
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", height: "1px" }}>
+                <Label style={{ fontSize: "medium", marginBottom: "0.5rem" }}>
+                    <b>Event Code</b>
+                </Label>
+                <Input
+                    type="password"
+                    placeholder={"Enter your Event Code"}
+                    onChange={(e) => {
+                        setEventCode(e.target.value);
+                    }}
+                    onBlur={() => eventUpdate(eventCode)}
+                    style={{ textAlign: "center" }}
+                />
+            </div>
             <SliderComponent
                 label={"Tokens"}
                 defaultValue={startSliders.max_tokens}
@@ -60,6 +75,7 @@ export const SlidersCard =({ startSliders, tokenUpdate, name }: SliderCardProps)
                 onUpdate={updateParams("top_p")}
             />
             <SliderInput
+                type="text"
                 label={"Stop Sequence"}
                 defaultValue={startSliders.stop_sequence}
                 onUpdate={updateParams("stop_sequence")}

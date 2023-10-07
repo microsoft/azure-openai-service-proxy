@@ -40,32 +40,27 @@ export const SliderComponent = ({
     onUpdate(data.value);
   }
 
-
-  // useEffect(() => {
-  //   console.log("test2");
-  //   onUpdate(sliderValue)
-  // }, [sliderValue, onUpdate])
-
   const styles = useStyles();
   return (
 
     <>
-      <div>
-      <Label htmlFor={mediumId} style={{textAlign: "left", fontSize: "large"}}><b>{label}</b></Label>
-      <Input
-        className={styles.sliderInput}
-        type="number"
-        placeholder={sliderValue.toString()}
-        onChange={(event)=> {
-          setSliderValue(parseFloat(event.target.value))
-        }}
-        onBlur={() => onSliderChange}
-      />
+      <div style={{ display: "flex", flexDirection:"row", alignItems: "center", justifyContent: "flex-end", height: "0px" }}>
+        <Label htmlFor={mediumId} style={{ textAlign: "left", fontSize: "medium", marginRight: "1rem", flex: 1 }}>
+          <b>{label}</b>
+        </Label>
+        <Input
+          className={styles.sliderInput}
+          type="number"
+          placeholder={sliderValue.toString()}
+          onChange={(event) => {
+            setSliderValue(parseFloat(event.target.value));
+          }}
+          onBlur={() => onSliderChange}
+          style={{ textAlign: "right", flex: 1,}}
+        />
       </div>
-      {/* <Label htmlFor={mediumId}>
-        Control Slider [ Current Value: {sliderValue} ]
-      </Label> */}
       <Slider
+        style={{height: "0px"}}
         aria-valuetext={`Value is ${sliderValue}`}
         value={sliderValue}
         min={min}

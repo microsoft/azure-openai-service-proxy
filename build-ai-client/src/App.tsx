@@ -12,7 +12,7 @@ const defaultSliders: Omit<ApiData, "messages"> = {
   max_tokens: 1024,
   temperature: 0,
   top_p: 0,
-  stop_sequence: "string",
+  stop_sequence: "Stop sequences",
   frequency_penalty: 0,
   presence_penalty: 0
 }
@@ -22,6 +22,7 @@ function App() {
   const [messageList, setMessageList] = useState([defaultSysPrompt]);
   const [sliders, setSliders] = useState(defaultSliders);
   const [name, setName] = useState("");
+  const [eventCode, setEventCode] = useState("");
 
   const onPromptEntered = async (messages: MessageData[]) => {
     const userMessage = messages[messages.length - 1];
@@ -29,7 +30,7 @@ function App() {
     setMessageList(updatedMessageList);
 
     const data: ApiData = { messages: updatedMessageList, ...sliders };
-    const response = await callApi(data);
+    const response = await callApi(data, eventCode);
     setMessageList([...updatedMessageList, response.assistant]);
     setName(response.name);
   };
@@ -55,12 +56,15 @@ const clearMessageList = () => {
   setMessageList((prevMessageList) => [prevMessageList[0]]);
 };
 
+const eventCodeChange = (newEventCode: string) => {
+  setEventCode(newEventCode);
+}
 
   return (
     <section className="App">
-      <SystemCard defaultPrompt={systemPrompt} onPromptChange={onPromptChange}/>
-      <ChatCard onPromptEntered={onPromptEntered} messageList={messageList} onClear={clearMessageList}/>
-      <SlidersCard startSliders={sliders} tokenUpdate={tokenUpdate} name={name} />
+        <SystemCard defaultPrompt={systemPrompt} onPromptChange={onPromptChange}/>
+        <ChatCard onPromptEntered={onPromptEntered} messageList={messageList} onClear={clearMessageList}/>
+        <SlidersCard startSliders={sliders} tokenUpdate={tokenUpdate} name={name} eventUpdate={eventCodeChange} />
     </section>
 );
 }

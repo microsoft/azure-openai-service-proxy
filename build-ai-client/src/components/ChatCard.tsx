@@ -59,7 +59,7 @@ export const ChatCard = ({ onPromptEntered, messageList, onClear }: CardProps) =
             message.role === "user" ? <Message key={index} message={message} /> : <Response key={index} message={message} />
           )
         }):
-          <Text>Here is where the response will be shown.</Text>
+          <Text style={{fontSize: "large"}}>Start Chatting</Text>
         }
       </div>
       <CardFooter style={{ height: "10vh" }}>
