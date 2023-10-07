@@ -71,8 +71,7 @@ async def startup_event():
         deployment_string = os.environ["AZURE_OPENAI_DEPLOYMENTS"]
         deployments = json.loads(deployment_string)
         storage_connection_string = os.environ["AZURE_STORAGE_CONNECTION_STRING"]
-        storage_table_name = os.environ["AZURE_STORAGE_TABLE_NAME"]
-        app.state.authorize = Authorize(storage_connection_string, storage_table_name)
+        app.state.authorize = Authorize(storage_connection_string)
     except KeyError:
         print(
             "Please set the environment variables "
