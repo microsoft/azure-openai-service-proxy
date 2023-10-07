@@ -37,7 +37,7 @@ class Authorize:
         async with TableClient.from_connection_string(
             self.connection_string, self.table_name
         ) as table_client:
-            # calcultate current, if current plus 10 great than self.event_cache then delete event_cache
+            # Is there a cache and is the event_code in the cache and not expired
             if self.cache_expiry:
                 if datetime.now() > self.cache_expiry:
                     self.event_cache = []
@@ -60,25 +60,23 @@ class Authorize:
                         "end_utc",
                     ],
                 )
+
                 async for entity in queried_entities:
                     start_utc = entity["start_utc"]
                     end_utc = entity["end_utc"]
                     current_time_utc = datetime.now(pytz.utc)
-                    result = start_utc <= current_time_utc <= end_utc
 
-                    if result:
-                        # set cache_expiry to current time plus 10 minutes
+                    # set cache_expiry to current time plus 10 minutes
+                    if not self.cache_expiry:
                         self.cache_expiry = datetime.now() + timedelta(
                             minutes=CACHE_EXPIRY_MINUTES
                         )
 
-                        cache_item = {
-                            event_code: {"start_utc": start_utc, "end_utc": end_utc}
-                        }
+                    self.event_cache.append(
+                        {event_code: {"start_utc": start_utc, "end_utc": end_utc}}
+                    )
 
-                        self.event_cache.append(cache_item)
-
-                    return result
+                    return start_utc <= current_time_utc <= end_utc
 
             except ClientAuthenticationError as auth_error:
                 logging.error("ClientAuthenticationError: %s", auth_error.message)
