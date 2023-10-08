@@ -16,7 +16,13 @@ from tenacity import (
     retry_if_not_exception_type,
     stop_after_attempt,
     wait_random_exponential,
+    wait_random,
+    before_log,
+    RetryError,
 )
+
+logging.basicConfig(level=logging.WARNING)
+logger = logging.getLogger(__name__)
 
 
 class OpenAIChatRequest(BaseModel):
@@ -81,6 +87,12 @@ class OpenAIAsyncManager:
         self.openai_config = openai_config
         self.app = app
 
+    @retry(
+        wait=wait_random_exponential(multiplier=1, max=60),
+        # stop=stop_after_attempt(4),
+        before=before_log(logger, logging.DEBUG),
+        retry=retry_if_not_exception_type(openai.InvalidRequestError),
+    )
     async def get_openai_chat_completion(
         self, chat: OpenAIChatRequest
     ) -> openai.openai_object.OpenAIObject:
@@ -207,9 +219,6 @@ class OpenAIManager:
         self.openai_config = openai_config
         self.app = app
 
-        logging.basicConfig(level=logging.WARNING)
-        self.logger = logging.getLogger(__name__)
-
     def __report_exception(
         self, message: str, http_status_code: int
     ) -> OpenAIChatResponse:
@@ -218,7 +227,7 @@ class OpenAIManager:
         completion = OpenAIChatResponse.empty()
         completion.assistant = {"role": "assistant", "content": message}
 
-        self.logger.warning(msg=f"{message}")
+        logger.warning(msg=f"{message}")
 
         return completion, http_status_code
 
@@ -274,11 +283,6 @@ class OpenAIManager:
 
         return None, None
 
-    @retry(
-        wait=wait_random_exponential(min=4, max=10),
-        stop=stop_after_attempt(2),
-        retry=retry_if_not_exception_type(openai.InvalidRequestError),
-    )
     async def call_openai_chat(self, chat: OpenAIChatRequest) -> OpenAIChatResponse:
         """call openai with retry"""
 
@@ -364,6 +368,12 @@ class OpenAIManager:
                 openai_error_exception.http_status,
             )
 
+        except RetryError as retry_error_exception:
+            return self.__report_exception(
+                str(retry_error_exception),
+                429,
+            )
+
         except Exception as exception:
-            self.logger.warning(msg=f"Global exception caught: {exception}")
+            logger.warning(msg=f"Global exception caught: {exception}")
             raise exception
