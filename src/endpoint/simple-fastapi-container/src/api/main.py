@@ -33,20 +33,24 @@ async def validation_exception_handler(request, exc):
 
     print("Caught Validation Error:%s ", str(exc))
 
-    return JSONResponse(content={"message": "Response validation error"}, status_code=400)
+    return JSONResponse(
+        content={"message": "Response validation error"}, status_code=400
+    )
 
 
 @app.post("/api/oai_prompt", status_code=200)
-async def openai_chat(chat: OpenAIChatRequest, request: Request, response: Response) -> OpenAIChatResponse:
+async def openai_chat(
+    chat: OpenAIChatRequest, request: Request, response: Response
+) -> OpenAIChatResponse:
     """openai chat returns chat response"""
 
-    def authorize(headers) -> str | None:
+    async def authorize(headers) -> bool:
         """get the event code from the header"""
         if "openai-event-code" in headers:
-            return app.state.authorize.authorize(headers.get("openai-event-code"))
+            return await app.state.authorize.authorize(headers.get("openai-event-code"))
         return False
 
-    if not authorize(request.headers):
+    if not await authorize(request.headers):
         raise HTTPException(status_code=401, detail="Not authorized")
 
     try:
@@ -54,7 +58,9 @@ async def openai_chat(chat: OpenAIChatRequest, request: Request, response: Respo
         response.status_code = status_code
         return completion
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=f"Failed to generate response: {exc}") from exc
+        raise HTTPException(
+            status_code=500, detail=f"Failed to generate response: {exc}"
+        ) from exc
 
 
 @app.on_event("startup")

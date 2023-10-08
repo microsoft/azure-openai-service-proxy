@@ -81,7 +81,9 @@ class OpenAIAsyncManager:
         self.openai_config = openai_config
         self.app = app
 
-    async def get_openai_chat_completion(self, chat: OpenAIChatRequest) -> openai.openai_object.OpenAIObject:
+    async def get_openai_chat_completion(
+        self, chat: OpenAIChatRequest
+    ) -> openai.openai_object.OpenAIObject:
         """async get openai completion"""
 
         def get_error(response: httpx.Response) -> dict[str, dict[str, Any]] | None:
@@ -120,7 +122,9 @@ class OpenAIAsyncManager:
 
         try:
             async with httpx.AsyncClient() as client:
-                response = await client.post(url, headers=headers, json=openai_request, timeout=30)
+                response = await client.post(
+                    url, headers=headers, json=openai_request, timeout=30
+                )
 
             if not 200 <= response.status_code < 300:
                 error = get_error(response)
@@ -140,17 +144,23 @@ class OpenAIAsyncManager:
                 elif response.status_code == 401:
                     message = error.get("message", "Unauthorized")
 
-                    raise openai.error.AuthenticationError(message=message, http_status=response.status_code)
+                    raise openai.error.AuthenticationError(
+                        message=message, http_status=response.status_code
+                    )
 
                 elif response.status_code == 403:
                     message = error.get("message", "Permission Error")
 
-                    raise openai.error.PermissionError(message=message, http_status=response.status_code)
+                    raise openai.error.PermissionError(
+                        message=message, http_status=response.status_code
+                    )
 
                 elif response.status_code == 409:
                     message = error.get("message", "Try Again")
 
-                    raise openai.error.TryAgain(message=message, http_status=response.status_code)
+                    raise openai.error.TryAgain(
+                        message=message, http_status=response.status_code
+                    )
 
                 elif response.status_code == 429:
                     message = error.get("message", "Rate limited.")
@@ -165,7 +175,9 @@ class OpenAIAsyncManager:
                     raise openai.error.APIError(message=message)
 
         except httpx.ConnectError as connect_error:
-            raise openai.error.ServiceUnavailableError("Service unavailable") from connect_error
+            raise openai.error.ServiceUnavailableError(
+                "Service unavailable"
+            ) from connect_error
 
         except httpx.ConnectTimeout as connect_timeout:
             raise openai.error.Timeout("Timeout error") from connect_timeout
@@ -180,7 +192,9 @@ class OpenAIAsyncManager:
             )
 
         except Exception as exc:
-            raise openai.APIError(f"Invalid response body from API: {response.text}") from exc
+            raise openai.APIError(
+                f"Invalid response body from API: {response.text}"
+            ) from exc
 
         return openai_response, deployment_name
 
@@ -196,7 +210,9 @@ class OpenAIManager:
         logging.basicConfig(level=logging.WARNING)
         self.logger = logging.getLogger(__name__)
 
-    def _report_exception(self, message: str, http_status_code: int) -> OpenAIChatResponse:
+    def __report_exception(
+        self, message: str, http_status_code: int
+    ) -> OpenAIChatResponse:
         """report exception"""
 
         completion = OpenAIChatResponse.empty()
@@ -206,6 +222,58 @@ class OpenAIManager:
 
         return completion, http_status_code
 
+    def __validate_input(self, chat: OpenAIChatRequest):
+        """validate input"""
+        # do some basic input validation
+        if not chat.messages:
+            return self.__report_exception("Oops, no chat messages.", 400)
+
+        # search through the list of messages for a msg with a role of user
+        user_message = next(
+            (msg for msg in chat.messages if msg["role"] == "user"), None
+        )
+
+        if not user_message or user_message.get("content", "") == "":
+            return self.__report_exception(
+                "Oops, messages missing a user role message.", 400
+            )
+
+        # check the max_tokens is between 1 and 4096
+        if not 1 <= chat.max_tokens <= 4096:
+            return self.__report_exception(
+                "Oops, max_tokens must be between 1 and 4096.", 400
+            )
+
+        # check the temperature is between 0 and 1
+        if not 0 <= chat.temperature <= 1:
+            return self.__report_exception(
+                "Oops, temperature must be between 0 and 1.", 400
+            )
+
+        # check the top_p is between 0 and 1
+        if not 0 <= chat.top_p <= 1:
+            return self.__report_exception("Oops, top_p must be between 0 and 1.", 400)
+
+        # check the frequency_penalty is between 0 and 1
+        if not 0 <= chat.frequency_penalty <= 1:
+            return self.__report_exception(
+                "Oops, frequency_penalty must be between 0 and 1.", 400
+            )
+
+        # check the presence_penalty is between 0 and 1
+        if not 0 <= chat.presence_penalty <= 1:
+            return self.__report_exception(
+                "Oops, presence_penalty must be between 0 and 1.", 400
+            )
+
+        # check stop sequence are printable characters
+        if not chat.stop_sequence.isprintable():
+            return self.__report_exception(
+                "Oops, stop_sequence must be printable characters.", 400
+            )
+
+        return None, None
+
     @retry(
         wait=wait_random_exponential(min=4, max=10),
         stop=stop_after_attempt(2),
@@ -213,6 +281,10 @@ class OpenAIManager:
     )
     async def call_openai_chat(self, chat: OpenAIChatRequest) -> OpenAIChatResponse:
         """call openai with retry"""
+
+        completion, http_status_code = self.__validate_input(chat)
+        if completion or http_status_code:
+            return completion, http_status_code
 
         completion = OpenAIChatResponse.empty()
 
@@ -263,31 +335,31 @@ class OpenAIManager:
 
         except openai.error.InvalidRequestError as invalid_request_exception:
             # this exception captures content policy violation policy
-            return self._report_exception(
+            return self.__report_exception(
                 str(invalid_request_exception.user_message),
                 invalid_request_exception.http_status,
             )
 
         except openai.error.RateLimitError as rate_limit_exception:
-            return self._report_exception(
+            return self.__report_exception(
                 "Oops, OpenAI rate limited. Please try again.",
                 rate_limit_exception.http_status,
             )
 
         except openai.error.ServiceUnavailableError as service_unavailable_exception:
-            return self._report_exception(
+            return self.__report_exception(
                 "Oops, OpenAI unavailable. Please try again.",
                 service_unavailable_exception.http_status,
             )
 
         except openai.error.Timeout as timeout_exception:
-            return self._report_exception(
+            return self.__report_exception(
                 "Oops, OpenAI timeout. Please try again.",
                 timeout_exception.http_status,
             )
 
         except openai.error.OpenAIError as openai_error_exception:
-            return self._report_exception(
+            return self.__report_exception(
                 str(openai_error_exception.user_message),
                 openai_error_exception.http_status,
             )

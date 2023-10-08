@@ -14,7 +14,6 @@ param location string
 param azure_openai_deployments string
 
 @minLength(10)
-@maxLength(64)
 @description('Azure storage account connection string')
 param azure_storage_connection_string string
 
