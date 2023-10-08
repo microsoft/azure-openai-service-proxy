@@ -238,16 +238,6 @@ class OpenAIManager:
                 "Oops, messages missing a user role message.", 400
             )
 
-        # search through the list of messages for a msg with a role of system
-        system_message = next(
-            (msg for msg in chat.messages if msg["role"] == "system"), None
-        )
-
-        if not system_message or system_message.get("content", "") == "":
-            return self.__report_exception(
-                "Oops, messages missing a system role message.", 400
-            )
-
         # check the max_tokens is between 1 and 4096
         if not 1 <= chat.max_tokens <= 4096:
             return self.__report_exception(
