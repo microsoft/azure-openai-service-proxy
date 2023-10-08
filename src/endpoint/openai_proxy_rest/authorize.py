@@ -41,6 +41,7 @@ class Authorize:
             logging.error("General exception creating table: %s", str(exception))
 
     def __is_event_authorised_cached(self, event_code: str) -> bool | None:
+        """checks if event code is in the cache"""
         if self.cache_expiry:
             if datetime.now() > self.cache_expiry:
                 self.event_cache = []
