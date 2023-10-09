@@ -14,11 +14,9 @@ from pydantic import BaseModel
 from tenacity import (
     retry,
     retry_if_not_exception_type,
+    RetryError,
     stop_after_attempt,
     wait_random_exponential,
-    wait_random,
-    before_log,
-    RetryError,
 )
 
 logging.basicConfig(level=logging.WARNING)
@@ -88,9 +86,10 @@ class OpenAIAsyncManager:
         self.app = app
 
     @retry(
-        wait=wait_random_exponential(multiplier=1, max=60),
-        # stop=stop_after_attempt(4),
-        before=before_log(logger, logging.DEBUG),
+        wait=wait_random_exponential(min=1, max=60),
+        # wait=wait_random(min=2, max=6),
+        stop=stop_after_attempt(6),
+        # before=before_log(logger, logging.DEBUG),
         retry=retry_if_not_exception_type(openai.InvalidRequestError),
     )
     async def get_openai_chat_completion(
@@ -109,9 +108,9 @@ class OpenAIAsyncManager:
         self.app.state.round_robin += 1
 
         api_version = self.openai_config.openai_version
+        resource_name = self.openai_config.deployments[index]["resource_name"]
+        endpoint_key = self.openai_config.deployments[index]["endpoint_key"]
         deployment_name = self.openai_config.deployments[index]["deployment_name"]
-        api_key = self.openai_config.deployments[index]["key"]
-        resource_name = self.openai_config.deployments[index]["endpoint"]
 
         openai_request = {
             "messages": chat.messages,
@@ -128,7 +127,7 @@ class OpenAIAsyncManager:
             f"{deployment_name}/chat/completions?api-version={api_version}"
         )
 
-        headers = {"Content-Type": "application/json", "api-key": api_key}
+        headers = {"Content-Type": "application/json", "api-key": endpoint_key}
 
         start = time.time()
 
@@ -368,9 +367,9 @@ class OpenAIManager:
                 openai_error_exception.http_status,
             )
 
-        except RetryError as retry_error_exception:
+        except RetryError:
             return self.__report_exception(
-                str(retry_error_exception),
+                str("OpenAI API retry limit reached..."),
                 429,
             )
 

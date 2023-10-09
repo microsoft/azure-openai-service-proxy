@@ -77,13 +77,13 @@ class Authorize:
                 )
                 queried_entities = table_client.query_entities(
                     query_filter=name_filter,
-                    select=["start_utc", "end_utc", "active"],
+                    select=["StartUTC", "EndUTC", "Active"],
                 )
 
                 async for entity in queried_entities:
-                    start_utc = entity["start_utc"]
-                    end_utc = entity["end_utc"]
-                    active = entity.get("active", False)
+                    start_utc = entity["StartUTC"]
+                    end_utc = entity["EndUTC"]
+                    active = entity.get("Active", False)
 
                     if not active:
                         logging.warning("Event is not active: %s", event_code)
