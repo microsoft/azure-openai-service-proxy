@@ -180,7 +180,7 @@ curl -X 'POST' \
 }' | jq "."
 ```
 
-### Load testing
+## Load testing
 
 There are a number of load testing tools available. The recommended tool is JMeter as the test plan can be deployed to Azure. The JMeter test plan is located in the `loadtest` folder. The test plan is configured to run 100 concurrent users, generating 4 requests per minute.
 
@@ -191,3 +191,7 @@ There are a number of load testing tools available. The recommended tool is JMet
 2. You'll need to update the `HTTP Header Manager` element to include your event code.
    
     ![update event code](./docs/media/jmeter-request-header.png)
+
+### Example load test
+
+![](./docs/media/example_perf_jmeter.png)
