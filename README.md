@@ -72,7 +72,7 @@ The recommeded way to deploy this app is with Dev Containers. Install the [VS Co
 
 ## Time bound event authorisation
 
-Access to the RESt endpoint is controller by an event code. The REST endpont is accessed when the current UTC time is between the StartUTC and the EndUTC times and the event is active. The event code is passed in the `openai-event-code` header. If the event code is not passed, or the event is not active, or the current UTC time is not between the StartUTC and the EndUTC times, the REST endpoint will return a `401` error.
+Access to the REST endpoint is controller by an event code. The REST endpont is accessed when the current UTC time is between the StartUTC and the EndUTC times and the event is active. The event code is passed in the `openai-event-code` header. If the event code is not passed, or the event is not active, or the current UTC time is not between the StartUTC and the EndUTC times, the REST endpoint will return a `401` error.
 
 Event details are stored in an Azure Storage account table named `playgroundauthorization`. This table is created when the app is deployed and starts. The table has the following schema:
 
