@@ -16,7 +16,7 @@ from tenacity import (
     retry_if_not_exception_type,
     RetryError,
     stop_after_attempt,
-    wait_random_exponential,
+    wait_random
 )
 
 logging.basicConfig(level=logging.WARNING)
@@ -86,10 +86,8 @@ class OpenAIAsyncManager:
         self.app = app
 
     @retry(
-        wait=wait_random_exponential(min=1, max=60),
-        # wait=wait_random(min=2, max=6),
-        stop=stop_after_attempt(6),
-        # before=before_log(logger, logging.DEBUG),
+        wait=wait_random(min=0, max=2),
+        stop=stop_after_attempt(1),
         retry=retry_if_not_exception_type(openai.InvalidRequestError),
     )
     async def get_openai_chat_completion(
@@ -108,7 +106,7 @@ class OpenAIAsyncManager:
         self.app.state.round_robin += 1
 
         api_version = self.openai_config.openai_version
-        resource_name = self.openai_config.deployments[index]["resource_name"]
+        endpoint_location = self.openai_config.deployments[index]["endpoint_location"]
         endpoint_key = self.openai_config.deployments[index]["endpoint_key"]
         deployment_name = self.openai_config.deployments[index]["deployment_name"]
 
@@ -123,7 +121,7 @@ class OpenAIAsyncManager:
         }
 
         url = (
-            f"https://{resource_name}.openai.azure.com/openai/deployments/"
+            f"https://{endpoint_location}.api.cognitive.microsoft.com/openai/deployments/"
             f"{deployment_name}/chat/completions?api-version={api_version}"
         )
 
