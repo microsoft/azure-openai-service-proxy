@@ -16,7 +16,7 @@ from tenacity import (
     retry_if_not_exception_type,
     RetryError,
     stop_after_attempt,
-    wait_random,
+    wait_random
 )
 
 logging.basicConfig(level=logging.WARNING)
@@ -302,6 +302,7 @@ class OpenAIManager:
                         "completion_tokens": response.usage.completion_tokens,
                         "prompt_tokens": response.usage.prompt_tokens,
                         "total_tokens": response.usage.total_tokens,
+                        "max_tokens": chat.max_tokens
                     }
                 }
 

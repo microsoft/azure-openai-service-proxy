@@ -98,6 +98,9 @@ class Authorize:
                     active = entity.get("Active", False)
                     max_token_cap = entity.get("MaxTokenCap", 1024)
 
+                    if max_token_cap < 1:
+                        max_token_cap = 1024
+
                     if not active:
                         logging.warning("Event is not active: %s", event_code)
                         return None

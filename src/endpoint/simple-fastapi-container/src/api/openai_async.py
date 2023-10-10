@@ -302,6 +302,7 @@ class OpenAIManager:
                         "completion_tokens": response.usage.completion_tokens,
                         "prompt_tokens": response.usage.prompt_tokens,
                         "total_tokens": response.usage.total_tokens,
+                        "max_tokens": chat.max_tokens
                     }
                 }
 
