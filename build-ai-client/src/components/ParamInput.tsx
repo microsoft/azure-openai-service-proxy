@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Body1, Input, Label } from '@fluentui/react-components';
+import { Input, Label } from '@fluentui/react-components';
 
 interface InputProps {
     label: string;

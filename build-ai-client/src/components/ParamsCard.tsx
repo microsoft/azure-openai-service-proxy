@@ -37,7 +37,7 @@ export const ParamsCard =({ startValues, tokenUpdate, name, eventUpdate }: Param
     return (
         <Card className={styles.card}>
             <CardHeader
-                style={{ height: "10vh" }}
+                style={{ height: "10vh", alignItems: "start"}}
                 header={
                     <Body1 style={{ fontSize: "large" }}>
                         <h2>Parameters</h2>

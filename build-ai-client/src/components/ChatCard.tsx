@@ -45,7 +45,7 @@ export const ChatCard = ({ onPromptEntered, messageList, onClear }: CardProps) =
   return (
     <Card className={chat.card}>
       <CardHeader
-        style={{ height: "10vh" }}
+        style={{ height: "10vh", alignItems: "start" }}
         header={
           <Body1 style={{ fontSize: "large" }}>
             <h2>Chat Session</h2>

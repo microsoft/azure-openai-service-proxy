@@ -42,7 +42,7 @@ export const SystemCard =({ defaultPrompt, onPromptChange}: SystemProps) => {
     return (
         <Card className={styles.card}>
             <CardHeader
-                style={{height: "10vh"}}
+                style={{height: "10vh", alignItems: "start"}}
                 header={
                 <Body1 style={{fontSize: "large"}}>
                 <h2>System Message</h2>
