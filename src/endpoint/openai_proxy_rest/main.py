@@ -8,7 +8,7 @@ from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.exceptions import ResponseValidationError
 from fastapi.responses import JSONResponse
 
-from authorize import Authorize
+from authorize import Authorize, AuthorizeResponse
 from openai_async import (
     OpenAIChatRequest,
     OpenAIChatResponse,
@@ -44,16 +44,24 @@ async def openai_chat(
 ) -> OpenAIChatResponse:
     """openai chat returns chat response"""
 
-    async def authorize(headers) -> bool:
+    async def authorize(headers) -> AuthorizeResponse | None:
         """get the event code from the header"""
         if "openai-event-code" in headers:
             return await app.state.authorize.authorize(headers.get("openai-event-code"))
-        return False
+        return None
 
-    if not await authorize(request.headers):
-        raise HTTPException(status_code=401, detail="Not authorized")
+    authorize_response = await authorize(request.headers)
+
+    if authorize_response is None or not authorize_response.is_authorized:
+        raise HTTPException(
+            status_code=401,
+            detail="Event code is not authorized",
+        )
 
     try:
+        if chat.max_tokens > authorize_response.max_token_cap:
+            chat.max_tokens = authorize_response.max_token_cap
+
         completion, status_code = await app.state.openai_mgr.call_openai_chat(chat)
         response.status_code = status_code
         return completion
