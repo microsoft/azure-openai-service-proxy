@@ -109,7 +109,17 @@ ContactEmail: jsmith@example.com
 
 ### Event Code Cache
 
-Event data, namely the `EventCode`, `StartUTC`, and `EndUTC` are cached in the REST API. The cache is refreshed every 10 minutes. This is to reduce the number of calls to the Azure Storage Account table. The implication of this is that if you update the event details in the Azure Storage Account table, it may take up to 10 minutes for the changes to be reflected in the REST API.
+Event data, namely the `EventCode`, `StartUTC`, `EndUTC`, and `MaxTokenCap` are cached in the REST API. The cache is refreshed every 10 minutes. This is to reduce the number of calls to the Azure Storage Account table. The implication of this is that if you update the event details in the Azure Storage Account table, it may take up to 10 minutes for the changes to be reflected in the REST API.
+
+The solution auto scales using Azure Container Apps replicas. This means that containers will come online to support the load, and then scale down when the load decreases over time. The cache is not shared between the containers, so if you have multiple containers, the cache will be refreshed for each container. This means that if you update the event details in the Azure Storage Account table, it may take up to 10 minutes for the changes to be reflected in each container and in the interim, some containers may be serving requests for the old event details.
+
+## Scaling the REST API
+
+The REST API is stateless, so it can be scaled horizontally. The REST API is designed to auto scale up and down using Azure Container Apps replicas. The REST API is configured to scale up to 20 replicas. The number of replicas can be changed from the Azure Portal or from the az cli. For example, to scale to 30 replicas using the az cli, change the:
+
+```shell
+az containerapp update -n $APP_NAME -g $RESOURCE_GROUP --subscription $SUBSCRIPTION_ID --replica 30
+```
 
 ### Testing the REST API endpoint
 
