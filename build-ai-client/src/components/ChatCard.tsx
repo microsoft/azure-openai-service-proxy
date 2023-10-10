@@ -15,8 +15,11 @@ interface CardProps {
 const useStyles = makeStyles({
   card: {
     height: "100vh",
-    width: "100%",
-    display: "flex"
+    display: "flex",
+    marginTop: "10px",
+    marginRight: "10px",
+    marginBottom: "10px",
+    marginLeft: "10px",
   },
   dialog: {
     display: "block"
@@ -42,10 +45,10 @@ export const ChatCard = ({ onPromptEntered, messageList, onClear }: CardProps) =
   return (
     <Card className={chat.card}>
       <CardHeader
-        style={{ height: "5vh" }}
+        style={{ height: "10vh" }}
         header={
           <Body1 style={{ fontSize: "large" }}>
-            <b>Chat Session</b>
+            <h2>Chat Session</h2>
           </Body1>
         }
       />
@@ -72,7 +75,7 @@ export const ChatCard = ({ onPromptEntered, messageList, onClear }: CardProps) =
               setPrompt(event.target.value);
             }}
             onKeyDown={(event) => {
-              if (event.key === "Enter") {
+              if (event.key === "Enter" && !event.shiftKey) {
                 onPromptEntered([...messageList, { role: "user", content: userPrompt }]);
                 setPrompt("");
               }
@@ -81,20 +84,20 @@ export const ChatCard = ({ onPromptEntered, messageList, onClear }: CardProps) =
         </Field>
         <div>
         <Button className={chat.smallButton} id={"send-button"}
-          icon={<SendRegular />}
+          icon={<SendRegular />} iconPosition='after'
           onClick={() => {
             onPromptEntered([...messageList, { role: "user", content: userPrompt }]);
             setPrompt("");
           }}
-        />
+        >Send</Button>
         <Button 
         className={chat.smallButton}
         id="clear-button"
-        icon={<Delete24Regular />}
+        icon={<Delete24Regular />} iconPosition='after'
         onClick={() => {
           onClear();
-        }}
-        /></div>
+        }}>Clear Chat</Button>
+        </div>
       </CardFooter>
     </Card>
   );

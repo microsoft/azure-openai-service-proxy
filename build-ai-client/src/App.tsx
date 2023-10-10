@@ -5,13 +5,13 @@ import { MessageData } from './interfaces/MessageData';
 import { ApiData } from './interfaces/ApiData';
 import { ChatCard } from './components/ChatCard';
 import { SystemCard } from './components/SystemCard';
-import { SlidersCard } from './components/SlidersCard';
+import { ParamsCard } from './components/ParamsCard';
 
 const defaultSysPrompt: MessageData = {role: "system", content: "You are an AI assistant that helps people find information."}
-const defaultSliders: Omit<ApiData, "messages"> = {
-  max_tokens: 1024,
-  temperature: 0,
-  top_p: 0,
+const defaultParamValues: Omit<ApiData, "messages"> = {
+  max_tokens: 800,
+  temperature: 0.7,
+  top_p: 0.95,
   stop_sequence: "Stop sequences",
   frequency_penalty: 0,
   presence_penalty: 0
@@ -20,19 +20,23 @@ const defaultSliders: Omit<ApiData, "messages"> = {
 function App() {
   const [systemPrompt, setSystemPrompt] = useState(defaultSysPrompt)
   const [messageList, setMessageList] = useState([defaultSysPrompt]);
-  const [sliders, setSliders] = useState(defaultSliders);
+  const [params, setParams] = useState(defaultParamValues);
   const [name, setName] = useState("");
   const [eventCode, setEventCode] = useState("");
 
   const onPromptEntered = async (messages: MessageData[]) => {
+    if (eventCode !== "") {
     const userMessage = messages[messages.length - 1];
     const updatedMessageList = [...messageList, { role: "user", content: userMessage.content }];
     setMessageList(updatedMessageList);
 
-    const data: ApiData = { messages: updatedMessageList, ...sliders };
+    const data: ApiData = { messages: updatedMessageList, ...params };
     const response = await callApi(data, eventCode);
     setMessageList([...updatedMessageList, response.assistant]);
     setName(response.name);
+    } else {
+      alert("Please enter an event code");
+    }
   };
 
   const onPromptChange = (newPrompt: MessageData) => {
@@ -43,9 +47,9 @@ function App() {
   }
 
   const tokenUpdate = (label: keyof Omit<ApiData, "messages">, newValue: number | string) => {
-    setSliders(() => {
+    setParams(() => {
       return {
-        ...sliders,
+        ...params,
         [label]: newValue
       }
     })
@@ -64,7 +68,7 @@ const eventCodeChange = (newEventCode: string) => {
     <section className="App">
         <SystemCard defaultPrompt={systemPrompt} onPromptChange={onPromptChange}/>
         <ChatCard onPromptEntered={onPromptEntered} messageList={messageList} onClear={clearMessageList}/>
-        <SlidersCard startSliders={sliders} tokenUpdate={tokenUpdate} name={name} eventUpdate={eventCodeChange} />
+        <ParamsCard startValues={params} tokenUpdate={tokenUpdate} name={name} eventUpdate={eventCodeChange} />
     </section>
 );
 }
