@@ -18,9 +18,8 @@ This repo is set up for deployment on Azure Container Apps using the configurati
 Before you can deploy the REST API you need to have deployed the OpenAI models you want to use. Once deployed, you need to create a deployment configuration string. You can declare multiple OpenAI deployments and they are used to load balance OpenAI Chat requests using a simple [round robin](https://en.wikipedia.org/wiki/Round-robin_scheduling) schedule. It's important to ensure there are no spaces in the configuration string as it will cause the deployment to fail. The deployment configuration string format is a JSON array of objects formated as follows:
 
 
-
 ```text
-[{"resource_name":"<Your Azure OpenAI resource name>","endpoint_key":"<Your resource name endpoint key>","deployment_name","<Your OpenAI model deploymentname>"}]
+[{"endpoint_location":"<Your Azure OpenAI resource location/region>","endpoint_key":"<Your Azure OpenAI resource location/region>","deployment_name","<Your OpenAI model deploymentname>"}]
 ```
 
 #### Tips
@@ -79,8 +78,9 @@ Event details are stored in an Azure Storage account table named `playgroundauth
 | Property     | Type     | Description                                 |
 | ------------ | -------- | ------------------------------------------- |
 | PartitionKey | string   | Must be 'playground'                        |
-| RowKey       | string   | The event code. For example: myevent2022    |
+| RowKey       | string   | The event code between 6 and 20 characters long. For example: myevent2022    |
 | Active       | boolean  | Is the event active, true or false          |
+| MaxTokenCap  | int      | The maximum number of tokens per request. This overides user Max Token request for load balancing    |
 | StartUTC     | datetime | The start date and time of the event in UTC |
 | EndUTC       | datetime | The end date and time of the event in UTC   |
 | EventName    | string   | The name of the event                       |
@@ -99,6 +99,7 @@ Here is an example
 PartitionKey: playground
 RowKey: myevent2022
 Active: true
+MaxTokenCap: 1024
 StartUTC: 2023-10-01T00:00:00Z
 EndUTC: 2023-10-02T00:00:00Z
 EventName: My Event 2023
