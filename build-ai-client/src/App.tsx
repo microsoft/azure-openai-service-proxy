@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import './App.css';
 import { callApi } from './api/api';
 import { MessageData } from './interfaces/MessageData';
@@ -9,6 +9,7 @@ import { SystemCard } from './components/SystemCard';
 import { ParamsCard } from './components/ParamsCard';
 import { eventInfo } from './api/eventInfo';
 import { EventData } from './interfaces/EventData';
+
 
 const defaultSysPrompt: MessageData = {role: "system", content: "You are an AI assistant that helps people find information."}
 const defaultParamValues: Omit<ApiData, "messages"> = {
@@ -97,15 +98,15 @@ const eventCodeChange = (newEventCode: string) => {
   setEventCode(newEventCode);
 }
 
-useEffect(()=> {
-  getEventData();
-},[eventCode]);
-
-const getEventData = async () => {
+const getEventData = useCallback(async () => {
   const data = await eventInfo(eventCode);
   setMaxTokens(data.max_token_cap);
   setEventData(data);
-}
+}, [eventCode]);
+
+useEffect(() => {
+  getEventData();
+}, [eventCode, getEventData]);
 
   return (
     <section className="App">

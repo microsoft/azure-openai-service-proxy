@@ -1,4 +1,4 @@
-import { makeStyles, Body1, Button, Card, CardFooter, CardHeader, Field, Textarea, Divider, Spinner } from '@fluentui/react-components';
+import { makeStyles, Body1, Button, Card, CardFooter, CardHeader, Field, Textarea, Spinner } from '@fluentui/react-components';
 import React, { useEffect, useRef, useState } from 'react';
 import { Delete24Regular, SendRegular } from "@fluentui/react-icons"
 import { MessageData } from '../interfaces/MessageData';
@@ -45,18 +45,12 @@ export const ChatCard = ({ onPromptEntered, messageList, onClear, isLoading, eve
   const [userPrompt, setPrompt] = useState("");
   const chat = useStyles();
   const chatContainerRef = useRef<HTMLDivElement>(null);
-  const [title, setTitle] = useState("");
 
   useEffect(() => {
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
   }, [messageList]);
-
-  useEffect(() => {
-    setTitle(eventName);
-  },[eventName]);
-
 
   return (
     <Card className={chat.card}>
