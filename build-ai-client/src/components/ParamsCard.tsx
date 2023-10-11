@@ -25,8 +25,6 @@ const useStyles = makeStyles({
             maxWidth: "none",
             maxHeight: "25%",
             backgroundColor: "#f2f2f2"
-            maxHeight: "25%",
-            backgroundColor: "#f2f2f2"
         },
         dividerline: {
             maxHeight: "1%"
