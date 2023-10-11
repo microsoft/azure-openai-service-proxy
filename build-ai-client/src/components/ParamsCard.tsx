@@ -23,7 +23,8 @@ const useStyles = makeStyles({
             width: "100%",
             height: "50%",
             maxWidth: "none",
-            maxHeight: "25%"
+            maxHeight: "25%",
+            backgroundColor: "#f2f2f2"
         },
         dividerline: {
             maxHeight: "1%"
@@ -86,10 +87,11 @@ export const ParamsCard =({ startValues, tokenUpdate, name, eventUpdate, usageDa
                             onClick={() => {
                                 eventUpdate(eventCode);
                                 getEventData();
-                                setIsCodeSubmitted(true);
+                                if(eData.authorized === false) alert("Invalid Event Code");
+                                else setIsCodeSubmitted(true);
                             }}
                         >
-                            Submit
+                            Log In
                         </Button>
                         <Label style={{ color: "GrayText", fontSize: "small", textAlign: "justify" }}>
                             Provided by workshop host.
@@ -147,6 +149,7 @@ export const ParamsCard =({ startValues, tokenUpdate, name, eventUpdate, usageDa
                     <div>Completion Tokens: {usageData.completion_tokens}</div>
                     <div>Prompt Tokens: {usageData.prompt_tokens}</div>
                     <div>Total Tokens: {usageData.total_tokens}</div>
+                    <div>Response Time: {usageData.response_time}</div>
                 </Label>
             </div>
             <Divider className={styles.dividerline} ></Divider>
