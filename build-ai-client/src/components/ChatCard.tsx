@@ -1,4 +1,4 @@
-import { makeStyles, Body1, Button, Card, CardFooter, CardHeader, Field, Text, Textarea } from '@fluentui/react-components';
+import { makeStyles, Body1, Button, Card, CardFooter, CardHeader, Field, Textarea, Divider, Spinner } from '@fluentui/react-components';
 import React, { useEffect, useRef, useState } from 'react';
 import { Delete24Regular, SendRegular } from "@fluentui/react-icons"
 import { MessageData } from '../interfaces/MessageData';
@@ -10,6 +10,8 @@ interface CardProps {
   onPromptEntered: (messages: MessageData[]) => void;
   messageList: MessageData[];
   onClear: () => void;
+  isLoading: boolean;
+  eventName: string;
 }
 
 const useStyles = makeStyles({
@@ -28,13 +30,22 @@ const useStyles = makeStyles({
     width: "100%",
     height: "50%",
     maxWidth: "none"
+  },
+  startCard: {
+    display: "flex",
+    maxWidth: "80%",
+    marginTop: "35%",
+    marginLeft: "20%",
+    marginRight: "20%",
+    marginBottom: "35%"
   }
 })
 
-export const ChatCard = ({ onPromptEntered, messageList, onClear }: CardProps) => {
+export const ChatCard = ({ onPromptEntered, messageList, onClear, isLoading, eventName }: CardProps) => {
   const [userPrompt, setPrompt] = useState("");
   const chat = useStyles();
   const chatContainerRef = useRef<HTMLDivElement>(null);
+  const [title, setTitle] = useState("");
 
   useEffect(() => {
     if (chatContainerRef.current) {
@@ -42,14 +53,21 @@ export const ChatCard = ({ onPromptEntered, messageList, onClear }: CardProps) =
     }
   }, [messageList]);
 
+  useEffect(() => {
+    setTitle(eventName);
+  },[eventName]);
+
+
   return (
     <Card className={chat.card}>
       <CardHeader
         style={{ height: "10vh", alignItems: "start" }}
         header={
-          <Body1 style={{ fontSize: "large" }}>
-            <h2>Chat Session</h2>
-          </Body1>
+          <div style={{maxWidth: "100%"}}>
+            <Body1 style={{ fontSize: "large" }}>
+              <h2>Chat Session</h2>
+              </Body1>
+          </div>
         }
       />
       <div id={"chatContainer"} style={{ overflowY: "auto" }} ref={chatContainerRef}>
@@ -62,9 +80,12 @@ export const ChatCard = ({ onPromptEntered, messageList, onClear }: CardProps) =
             message.role === "user" ? <Message key={index} message={message} /> : <Response key={index} message={message} />
           )
         }):
-          <Text style={{fontSize: "large"}}>Start Chatting</Text>
+        <Card className={chat.startCard}>
+          <Body1 style={{textAlign: "center"}}><h2>Start Chatting</h2></Body1>
+        </Card>
         }
       </div>
+      {isLoading && <Spinner/>}
       <CardFooter style={{ height: "10vh" }}>
         <Field className="user-query" style={{ width: "100%" }}>
           <Textarea
@@ -78,6 +99,7 @@ export const ChatCard = ({ onPromptEntered, messageList, onClear }: CardProps) =
               if (event.key === "Enter" && !event.shiftKey) {
                 onPromptEntered([...messageList, { role: "user", content: userPrompt }]);
                 setPrompt("");
+                event.preventDefault();
               }
             }}
           />

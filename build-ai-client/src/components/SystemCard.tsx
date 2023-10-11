@@ -1,4 +1,4 @@
-import { Body1, Button, Card, CardHeader, Textarea, makeStyles } from "@fluentui/react-components"
+import { Body1, Button, Card, CardHeader, Divider, Textarea, makeStyles } from "@fluentui/react-components"
 import { MessageData } from "../interfaces/MessageData";
 import { useEffect, useState } from "react";
 import { Save24Regular } from "@fluentui/react-icons";
@@ -20,7 +20,6 @@ const useStyles = makeStyles({
         flexDirection: "column",
         rowGap: "15px",
     }
-
 })
 
 export const SystemCard =({ defaultPrompt, onPromptChange}: SystemProps) => {
@@ -49,7 +48,7 @@ export const SystemCard =({ defaultPrompt, onPromptChange}: SystemProps) => {
                 </Body1>
                 }
                 />
-            <div>
+            <div style={{height: "100%"}}>
                 <Textarea
                 className="test"
                 style={{height: "12.5%", maxHeight: "30%", width: "100%" }}
@@ -74,8 +73,9 @@ export const SystemCard =({ defaultPrompt, onPromptChange}: SystemProps) => {
                     </Button>
                     {isSaved && <Body1 style={{color: "GrayText", transition: "opacity 1s", opacity: 1, textAlign: "center"}}>System Message updated</Body1>}
                 </div>
-
-            </div>     
+            </div>
+            <div><Divider></Divider> 
+            </div>       
         </Card>
     )
 }

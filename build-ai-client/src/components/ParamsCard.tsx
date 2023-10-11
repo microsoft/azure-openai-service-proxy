@@ -1,7 +1,10 @@
-import { Body1, Card, CardFooter, CardHeader, Input, Label, makeStyles } from "@fluentui/react-components"
+import { Body1, Button, Card, CardFooter, CardHeader, Divider, Input, Label, makeStyles } from "@fluentui/react-components"
 import { ApiData } from "../interfaces/ApiData";
 import {ParamInput} from "./ParamInput";
 import { useCallback, useState } from "react";
+import { EventData } from "../interfaces/EventData";
+import { UsageData } from "../interfaces/UsageData";
+import { eventInfo } from "../api/eventInfo";
 
 const useStyles = makeStyles({
         card: {
@@ -10,11 +13,20 @@ const useStyles = makeStyles({
             marginBottom: "10px",
             marginLeft: "10px",
         },
-        divider: {
+        dividerblock: {
             display: "flex", 
             flexDirection: "column", 
-            alignItems: "center", 
-            height: "1px"
+            alignItems: "right", 
+            justifyContent: "center"
+        },
+        smallbutton: {
+            width: "100%",
+            height: "50%",
+            maxWidth: "none",
+            maxHeight: "25%"
+        },
+        dividerline: {
+            maxHeight: "1%"
         }
     })
 
@@ -23,9 +35,12 @@ interface ParamsCardProps {
     tokenUpdate: (label: keyof Omit<ApiData, "messages">, newValue: number | string) => void;
     name: string;
     eventUpdate: (eventCode: string) => void;
+    usageData: UsageData;
+    maxTokens: number;
+    eventData: EventData;
 }
 
-export const ParamsCard =({ startValues, tokenUpdate, name, eventUpdate }: ParamsCardProps) => {
+export const ParamsCard =({ startValues, tokenUpdate, name, eventUpdate, usageData, maxTokens, eventData}: ParamsCardProps) => {
     const styles = useStyles();
     const updateParams = useCallback((label: keyof Omit<ApiData, "messages">) => {
         return (newValue: number | string) => {
@@ -33,6 +48,13 @@ export const ParamsCard =({ startValues, tokenUpdate, name, eventUpdate }: Param
         };
     }, [tokenUpdate]);
     const [eventCode, setEventCode] = useState("");
+    const [isCodeSubmitted, setIsCodeSubmitted] = useState(false);
+    const [eData, setEData] = useState(eventData);
+
+    const getEventData = async () => {
+        const data = await eventInfo(eventCode);
+        setEData(data);
+      }
 
     return (
         <Card className={styles.card}>
@@ -40,35 +62,64 @@ export const ParamsCard =({ startValues, tokenUpdate, name, eventUpdate }: Param
                 style={{ height: "10vh", alignItems: "start"}}
                 header={
                     <Body1 style={{ fontSize: "large" }}>
-                        <h2>Parameters</h2>
+                        <h2>Configuration</h2>
                     </Body1>
                 }
             />
-            <div className={styles.divider}>
-                <Label style={{ fontSize: "medium", marginBottom: "0.5rem" }}>
+            <div className={styles.dividerblock}>
+                <Label style={{ fontSize: "medium", marginBottom: "0.5rem", textAlign: "justify"}}>
                     <b>Event Code</b>
                 </Label>
                 <Input
-                    type="password"
-                    placeholder={"Enter your Event Code"}
-                    onChange={(e) => {
-                        setEventCode(e.target.value);
-                    }}
-                    onBlur={() => eventUpdate(eventCode)}
-                    style={{ textAlign: "center" }}
-                />
+                type="password" 
+                placeholder={"Enter your Event Code"}
+                value={eventCode}
+                onChange={(e) => {
+                    setEventCode(e.target.value);
+                }}
+                style={{ textAlign: "right" }}/>
+                
+                {!isCodeSubmitted && (
+                    <>
+                        <Button
+                            className={styles.smallbutton}
+                            onClick={() => {
+                                eventUpdate(eventCode);
+                                getEventData();
+                                setIsCodeSubmitted(true);
+                            }}
+                        >
+                            Submit
+                        </Button>
+                        <Label style={{ color: "GrayText", fontSize: "small", textAlign: "justify" }}>
+                            Provided by workshop host.
+                        </Label>
+                    </>
+                )}
+                {isCodeSubmitted && (
+                    <Label style={{ color: "GrayText", fontSize: "small", textAlign: "justify" }}>
+                        <div>Welcome to {eData.event_name}!</div>
+                        <div>
+                            <a href={eData.event_url} target="_blank" rel="noopener noreferrer">
+                                {eData.event_url_text}
+                            </a>
+                        </div>
+                    </Label>
+                )}
             </div>
-            <div className={styles.divider}>
+            <Divider className={styles.dividerline} ></Divider>
+            <div className={styles.dividerblock}>
                 <ParamInput 
                 label={"Tokens"}
-                defaultValue={startValues.max_tokens}
+                defaultValue={1}
                 onUpdate={updateParams("max_tokens")}
                 type={"number"}
                 min={1}
-                max={4000}
+                max={maxTokens}
                 />
             </div>
-            <div className={styles.divider}>
+            <Divider className={styles.dividerline} ></Divider>
+            <div className={styles.dividerblock}>
                 <ParamInput 
                 label={"Temperature"}
                 defaultValue={startValues.temperature}
@@ -78,7 +129,8 @@ export const ParamsCard =({ startValues, tokenUpdate, name, eventUpdate }: Param
                 max={1}
                 />
             </div>
-            <div className={styles.divider}>
+            <Divider className={styles.dividerline} ></Divider>
+            <div className={styles.dividerblock}>
                 <ParamInput 
                 label={"Top P"}
                 defaultValue={startValues.top_p}
@@ -88,7 +140,17 @@ export const ParamsCard =({ startValues, tokenUpdate, name, eventUpdate }: Param
                 max={1}
                 />
             </div>
-            <CardFooter style={{ height: "10vh" }}>
+            <Divider className={styles.dividerline} ></Divider>
+            <div className={styles.dividerblock}>
+                <Label style={{color: "GrayText", fontSize:"small" ,textAlign: "justify"}}>
+                    <div>Finish Reason: {usageData.finish_reason}</div>
+                    <div>Completion Tokens: {usageData.completion_tokens}</div>
+                    <div>Prompt Tokens: {usageData.prompt_tokens}</div>
+                    <div>Total Tokens: {usageData.total_tokens}</div>
+                </Label>
+            </div>
+            <Divider className={styles.dividerline} ></Divider>
+            <CardFooter style={{ height: "5vh" }}>
                 <Label
                     style={{color: "GrayText", fontSize:"small", textAlign: "center"}}>
                         {name}

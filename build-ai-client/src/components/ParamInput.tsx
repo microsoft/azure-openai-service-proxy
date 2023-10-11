@@ -6,8 +6,8 @@ interface InputProps {
     defaultValue: number | string;
     onUpdate: (newValue: number | string) => void;
     type: "text" | "number" | "password" | "search" | "time" | "email" | "tel" | "url" | "date" | "datetime-local" | "month" | "week";
-    min?: number;
-    max?: number;
+    min: number;
+    max: number;
 };
 
 export const ParamInput = ({ label, defaultValue, onUpdate, type, min, max }: InputProps) => {
@@ -16,7 +16,7 @@ export const ParamInput = ({ label, defaultValue, onUpdate, type, min, max }: In
 
     return (
         <>
-            <Label style={{ fontSize: "medium", marginBottom: "0.5rem" }}>
+            <Label style={{ fontSize: "medium", marginBottom: "0.5rem", textAlign: "justify" }}>
                 <b>{label}</b>
             </Label>
             <Input
@@ -24,16 +24,24 @@ export const ParamInput = ({ label, defaultValue, onUpdate, type, min, max }: In
                 placeholder={value.toString()}
                 onChange={(e) => {
                     const newValue = e.currentTarget.value;
-                    if ((min === undefined || parseFloat(newValue) >= min) && (max === undefined || parseFloat(newValue) <= max)) {
+                    if ((newValue === "" || ((min === undefined || parseFloat(newValue) >= min) && (max === undefined || parseFloat(newValue) <= max)))) {
                         setValue(newValue);
                     }
                 }}
-                onBlur={() => onUpdate(value)}
+                onBlur={() => {
+                    if (value === "") {
+                        onUpdate(min);
+                    } else {
+                    onUpdate(value)}
+                    }}
                 style={{ textAlign: "center" }}
                 min={min}
                 max={max}
                 value={value}
             />
+            <Label style={{ color: "GrayText", fontSize:"small", textAlign: "justify" }}>
+                Accepted Value: {min} - {max}
+            </Label>
         </>
     );
 };
