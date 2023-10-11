@@ -89,7 +89,6 @@ function App() {
         [label]: newValue
       }
     })
-    console.log("test");
   }
 
 const clearMessageList = () => {

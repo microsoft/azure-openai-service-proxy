@@ -25,6 +25,8 @@ const useStyles = makeStyles({
             maxWidth: "none",
             maxHeight: "25%",
             backgroundColor: "#f2f2f2"
+            maxHeight: "25%",
+            backgroundColor: "#f2f2f2"
         },
         dividerline: {
             maxHeight: "1%"
@@ -87,7 +89,8 @@ export const ParamsCard =({ startValues, tokenUpdate, name, eventUpdate, usageDa
                             onClick={() => {
                                 eventUpdate(eventCode);
                                 getEventData();
-                                setIsCodeSubmitted(true);
+                                if(eData.authorized === false) alert("Invalid Event Code");
+                                else setIsCodeSubmitted(true);
                             }}
                         >
                             Log In
