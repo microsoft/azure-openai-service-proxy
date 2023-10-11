@@ -40,6 +40,7 @@ function App() {
     completion_tokens: 0,
     prompt_tokens: 0,
     total_tokens: 0,
+    response_time: 0
   });
   const [maxTokens, setMaxTokens] = useState<number>(0);
   const [eventData, setEventData] = useState(defaultEventData);
@@ -64,6 +65,7 @@ function App() {
           completion_tokens: answer.usage.usage.completion_tokens,
           prompt_tokens: answer.usage.usage.prompt_tokens,
           total_tokens: answer.usage.usage.total_tokens,
+          response_time: answer.response_ms
       });
         setIsLoading(false);
       }

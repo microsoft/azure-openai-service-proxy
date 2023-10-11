@@ -13,6 +13,8 @@ interface InputProps {
 export const ParamInput = ({ label, defaultValue, onUpdate, type, min, max }: InputProps) => {
 
     const [value, setValue] = useState(defaultValue.toString());
+    const placeholder = label === "Tokens" ? (max === undefined ? min : max / 2).toString() : value;
+
 
     return (
         <>
@@ -21,7 +23,7 @@ export const ParamInput = ({ label, defaultValue, onUpdate, type, min, max }: In
             </Label>
             <Input
                 type={type}
-                placeholder={value.toString()}
+                placeholder={placeholder}
                 onChange={(e) => {
                     const newValue = e.currentTarget.value;
                     if ((newValue === "" || ((min === undefined || parseFloat(newValue) >= min) && (max === undefined || parseFloat(newValue) <= max)))) {
@@ -37,7 +39,7 @@ export const ParamInput = ({ label, defaultValue, onUpdate, type, min, max }: In
                 style={{ textAlign: "center" }}
                 min={min}
                 max={max}
-                value={value}
+
             />
             <Label style={{ color: "GrayText", fontSize:"small", textAlign: "justify" }}>
                 Accepted Value: {min} - {max}

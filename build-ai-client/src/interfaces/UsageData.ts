@@ -3,4 +3,5 @@ export interface UsageData {
     completion_tokens: number;
     prompt_tokens: number;
     total_tokens: number;
+    response_time: number;
 }
