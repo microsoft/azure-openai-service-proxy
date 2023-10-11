@@ -93,6 +93,13 @@ function App() {
 
 const clearMessageList = () => {
   setMessageList((prevMessageList) => [prevMessageList[0]]);
+  setUsageData({
+    finish_reason: "",
+    completion_tokens: 0,
+    prompt_tokens: 0,
+    total_tokens: 0,
+    response_time: 0
+  });
 };
 
 const eventCodeChange = (newEventCode: string) => {

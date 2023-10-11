@@ -38,8 +38,7 @@ export const ParamInput = ({ label, defaultValue, onUpdate, type, min, max }: In
                     }}
                 style={{ textAlign: "center" }}
                 min={min}
-                max={max}
-
+                max={max}        
             />
             <Label style={{ color: "GrayText", fontSize:"small", textAlign: "justify" }}>
                 Accepted Value: {min} - {max}

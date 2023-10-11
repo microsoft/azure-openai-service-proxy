@@ -50,12 +50,12 @@ export const ParamsCard =({ startValues, tokenUpdate, name, eventUpdate, usageDa
     }, [tokenUpdate]);
     const [eventCode, setEventCode] = useState("");
     const [isCodeSubmitted, setIsCodeSubmitted] = useState(false);
-    const [eData, setEData] = useState(eventData);
 
     const getEventData = async () => {
         const data = await eventInfo(eventCode);
-        setEData(data);
-      }
+        if (data.is_authorized) setIsCodeSubmitted(true);
+        else alert("Please enter a valid event code");
+    }
 
     return (
         <Card className={styles.card}>
@@ -87,8 +87,6 @@ export const ParamsCard =({ startValues, tokenUpdate, name, eventUpdate, usageDa
                             onClick={() => {
                                 eventUpdate(eventCode);
                                 getEventData();
-                                if(eData.authorized === false) alert("Invalid Event Code");
-                                else setIsCodeSubmitted(true);
                             }}
                         >
                             Log In
@@ -100,10 +98,10 @@ export const ParamsCard =({ startValues, tokenUpdate, name, eventUpdate, usageDa
                 )}
                 {isCodeSubmitted && (
                     <Label style={{ color: "GrayText", fontSize: "small", textAlign: "justify" }}>
-                        <div>Welcome to {eData.event_name}!</div>
+                        <div>{eventData.event_name}</div>
                         <div>
-                            <a href={eData.event_url} target="_blank" rel="noopener noreferrer">
-                                {eData.event_url_text}
+                            <a href={eventData.event_url} target="_blank" rel="noopener noreferrer">
+                                {eventData.event_url_text}
                             </a>
                         </div>
                     </Label>
