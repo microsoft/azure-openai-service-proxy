@@ -3,6 +3,7 @@
 import string
 import logging
 from datetime import datetime, timedelta
+from typing import Optional
 import pytz
 
 from pydantic import BaseModel
@@ -63,8 +64,8 @@ class Authorize:
             start_utc: datetime,
             end_utc: datetime,
             max_token_cap: int,
-            event_url: str = None,
-            event_url_text: str = None,
+            event_url: Optional[str] = None,
+            event_url_text: Optional[str] = None,
         ):
             self.event_code = event_code
             self.event_name = event_name
