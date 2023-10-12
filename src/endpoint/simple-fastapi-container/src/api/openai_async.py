@@ -3,7 +3,7 @@
 import json
 import logging
 import time
-from typing import Any
+from typing import Any, Tuple
 
 import httpx
 import openai
@@ -20,7 +20,7 @@ from tenacity import (
 
 from .configuration import OpenAIConfig
 
-HTTPX_TIMEOUT_SECONDS=30
+HTTPX_TIMEOUT_SECONDS = 30
 
 logging.basicConfig(level=logging.WARNING)
 logger = logging.getLogger(__name__)
@@ -54,15 +54,15 @@ class OpenAIAsyncManager:
     )
     async def get_openai_chat_completion(
         self, chat: PlaygroundRequest
-    ) -> openai.openai_object.OpenAIObject:
+    ) -> Tuple[openai.openai_object.OpenAIObject, str]:
         """async get openai completion"""
 
-        def get_error(response: httpx.Response) -> dict[str, dict[str, Any]] | None:
+        def get_error(response: httpx.Response) -> dict[str, dict[str, Any]]:
             """get error message from response"""
             try:
                 return json.loads(response.text).get("error")
             except json.JSONDecodeError:
-                return None
+                return {}
 
         deployment = self.openai_config.get_deployment()
 
@@ -91,7 +91,10 @@ class OpenAIAsyncManager:
         try:
             async with httpx.AsyncClient() as client:
                 response = await client.post(
-                    url, headers=headers, json=openai_request, timeout=HTTPX_TIMEOUT_SECONDS
+                    url,
+                    headers=headers,
+                    json=openai_request,
+                    timeout=HTTPX_TIMEOUT_SECONDS,
                 )
 
             if not 200 <= response.status_code < 300:

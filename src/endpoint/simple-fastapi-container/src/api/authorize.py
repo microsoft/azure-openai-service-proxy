@@ -63,8 +63,8 @@ class Authorize:
             start_utc: datetime,
             end_utc: datetime,
             max_token_cap: int,
-            event_url: str = None,
-            event_url_text: str = None,
+            event_url: str | None = None,
+            event_url_text: str | None = None,
         ):
             self.event_code = event_code
             self.event_name = event_name
@@ -88,6 +88,7 @@ class Authorize:
             table_service_client.create_table_if_not_exists(table_name=TABLE_NAME)
         except Exception as exception:
             logging.error("General exception creating table: %s", str(exception))
+            raise
 
     def __is_event_authorised_cached(self, event_code: str) -> AuthorizeResponse | None:
         """checks if event code is in the cache"""

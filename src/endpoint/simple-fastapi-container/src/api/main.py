@@ -111,7 +111,7 @@ async def startup_event():
     openai_config = OpenAIConfig(
         openai_version=OPENAI_API_VERSION,
         config_connection_string=storage_connection_string,
-        deployments=deployments
+        deployments=deployments,
     )
 
     app.state.openai_mgr = Playground(app, openai_config=openai_config)

@@ -57,12 +57,12 @@ class OpenAIAsyncManager:
     ) -> Tuple[openai.openai_object.OpenAIObject, str]:
         """async get openai completion"""
 
-        def get_error(response: httpx.Response) -> dict[str, dict[str, Any]] | None:
+        def get_error(response: httpx.Response) -> dict[str, dict[str, Any]]:
             """get error message from response"""
             try:
                 return json.loads(response.text).get("error")
             except json.JSONDecodeError:
-                return None
+                return {}
 
         deployment = self.openai_config.get_deployment()
 
