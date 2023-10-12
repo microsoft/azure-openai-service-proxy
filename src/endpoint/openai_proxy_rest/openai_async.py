@@ -3,7 +3,7 @@
 import json
 import logging
 import time
-from typing import Any
+from typing import Any, Tuple
 
 import httpx
 import openai
@@ -54,7 +54,7 @@ class OpenAIAsyncManager:
     )
     async def get_openai_chat_completion(
         self, chat: PlaygroundRequest
-    ) -> openai.openai_object.OpenAIObject:
+    ) -> Tuple[openai.openai_object.OpenAIObject, str]:
         """async get openai completion"""
 
         def get_error(response: httpx.Response) -> dict[str, dict[str, Any]] | None:

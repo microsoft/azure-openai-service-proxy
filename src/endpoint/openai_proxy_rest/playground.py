@@ -2,6 +2,7 @@
 
 
 import logging
+from typing import Tuple
 import openai
 import openai.error
 import openai.openai_object
@@ -51,7 +52,7 @@ class Playground:
 
     def __report_exception(
         self, message: str, http_status_code: int
-    ) -> PlaygroundResponse:
+    ) -> Tuple[PlaygroundResponse, int]:
         """report exception"""
 
         completion = PlaygroundResponse.empty()
@@ -113,7 +114,7 @@ class Playground:
 
         return None, None
 
-    async def call_openai_chat(self, chat: PlaygroundRequest) -> PlaygroundResponse:
+    async def call_openai_chat(self, chat: PlaygroundRequest) -> Tuple[PlaygroundResponse, int]:
         """call openai with retry"""
 
         completion, http_status_code = self.__validate_input(chat)
