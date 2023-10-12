@@ -7,6 +7,7 @@ import os
 from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.exceptions import ResponseValidationError
 from fastapi.responses import JSONResponse
+from pydantic import BaseModel
 
 from authorize import Authorize, AuthorizeResponse
 from openai_async import (
@@ -27,6 +28,15 @@ OPENAI_API_VERSION = "2023-07-01-preview"
 app = FastAPI()
 
 
+class EventResponse(BaseModel):
+    """Event info Response"""
+
+    max_token_cap: int
+
+    def __init__(self, max_token_cap: int) -> None:
+        super().__init__(max_token_cap=max_token_cap)
+
+
 @app.exception_handler(ResponseValidationError)
 async def validation_exception_handler(request, exc):
     """validation exception handler"""
@@ -38,19 +48,34 @@ async def validation_exception_handler(request, exc):
     )
 
 
+async def __authorize(headers) -> AuthorizeResponse | None:
+    """get the event code from the header"""
+    if "openai-event-code" in headers:
+        return await app.state.authorize.authorize(headers.get("openai-event-code"))
+    return None
+
+
+@app.post("/api/eventinfo", status_code=200)
+async def openai_chat(request: Request) -> AuthorizeResponse:
+    """get event info"""
+    authorize_response = await __authorize(request.headers)
+
+    if authorize_response is None or not authorize_response.is_authorized:
+        raise HTTPException(
+            status_code=401,
+            detail="Event code is not authorized",
+        )
+
+    return authorize_response
+
+
 @app.post("/api/oai_prompt", status_code=200)
-async def openai_chat(
+async def event_info(
     chat: OpenAIChatRequest, request: Request, response: Response
 ) -> OpenAIChatResponse:
     """openai chat returns chat response"""
 
-    async def authorize(headers) -> AuthorizeResponse | None:
-        """get the event code from the header"""
-        if "openai-event-code" in headers:
-            return await app.state.authorize.authorize(headers.get("openai-event-code"))
-        return None
-
-    authorize_response = await authorize(request.headers)
+    authorize_response = await __authorize(request.headers)
 
     if authorize_response is None or not authorize_response.is_authorized:
         raise HTTPException(
