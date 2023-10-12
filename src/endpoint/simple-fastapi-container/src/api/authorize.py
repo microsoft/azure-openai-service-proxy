@@ -5,9 +5,10 @@ import logging
 from datetime import datetime, timedelta
 import pytz
 
+from pydantic import BaseModel
+
 from azure.data.tables import TableServiceClient
 from azure.data.tables.aio import TableClient
-
 from azure.core.exceptions import (
     HttpResponseError,
     ServiceRequestError,
@@ -18,25 +19,65 @@ CACHE_EXPIRY_MINUTES = 10
 PARTITION_KEY = "playground"
 TABLE_NAME = "playgroundauthorization"
 
+logging.basicConfig(level=logging.WARNING)
+logger = logging.getLogger(__name__)
 
-class AuthorizeResponse:
+
+class AuthorizeResponse(BaseModel):
     """Response object for Authorize class."""
 
-    def __init__(self, is_authorized: bool, max_token_cap: int) -> None:
-        self.is_authorized = is_authorized
-        self.max_token_cap = max_token_cap
+    is_authorized: bool
+    max_token_cap: int
+    event_name: str
+    event_url: str
+    event_url_text: str
+
+    def __init__(
+        self,
+        is_authorized: bool,
+        max_token_cap: int,
+        event_name: str,
+        event_url: str,
+        event_url_text: str,
+    ) -> None:
+        super().__init__(
+            is_authorized=is_authorized,
+            max_token_cap=max_token_cap,
+            event_name=event_name,
+            event_url=event_url,
+            event_url_text=event_url_text,
+        )
 
 
 class Authorize:
     """Authorizes a user to access a specific time bound event."""
 
+    class CacheItem:
+        """Cache item for Authorize class."""
+
+        def __init__(
+            self,
+            *,
+            event_code: str,
+            event_name: str,
+            start_utc: datetime,
+            end_utc: datetime,
+            max_token_cap: int,
+            event_url: str = None,
+            event_url_text: str = None,
+        ):
+            self.event_code = event_code
+            self.event_name = event_name
+            self.start_utc = start_utc
+            self.end_utc = end_utc
+            self.max_token_cap = max_token_cap
+            self.event_url = event_url
+            self.event_url_text = event_url_text
+
     def __init__(self, connection_string) -> None:
         self.connection_string = connection_string
         self.event_cache = []
         self.cache_expiry = None
-
-        logging.basicConfig(level=logging.WARNING)
-        self.logger = logging.getLogger(__name__)
 
         # Create events playground authorization table if it does not exist
         try:
@@ -58,22 +99,35 @@ class Authorize:
                 # look for event_code in the self.event_cache list of dictionaries
                 for event in self.event_cache:
                     if event_code in event:
-                        start_utc = event.get(event_code).get("start_utc")
-                        end_utc = event.get(event_code).get("end_utc")
-                        max_token_cap = event.get(event_code).get("max_token_cap")
+                        cache_item = event.get(event_code)
+                        start_utc = cache_item.start_utc
+                        end_utc = cache_item.end_utc
+                        max_token_cap = cache_item.max_token_cap
+                        event_name = cache_item.event_name
+                        event_url = cache_item.event_url
+                        event_url_text = cache_item.event_url_text
+
                         current_time_utc = datetime.now(pytz.utc)
                         return AuthorizeResponse(
                             is_authorized=start_utc <= current_time_utc <= end_utc,
                             max_token_cap=max_token_cap,
+                            event_name=event_name,
+                            event_url=event_url,
+                            event_url_text=event_url_text,
                         )
 
         return None
 
     async def __is_event_authorized(self, event_code: str) -> AuthorizeResponse | None:
         """checks if event code is in the cache, failing that get from table"""
-        # get event code, start date and end time from table
+        # get event info from table
         # add to cache dictionary object keyed by event code
-        # check the current utc time is between start and end time
+        # check if the event is active and within the start and end times
+
+        # check if event_code is in the cache
+        cached = self.__is_event_authorised_cached(event_code)
+        if cached is not None:
+            return cached
 
         async with TableClient.from_connection_string(
             conn_str=self.connection_string, table_name=TABLE_NAME
@@ -84,26 +138,27 @@ class Authorize:
                 return authorised_response
 
             try:
-                name_filter = (
-                    f"PartitionKey eq '{PARTITION_KEY}' and RowKey eq '{event_code}'"
+                query_filter = (
+                    f"PartitionKey eq '{PARTITION_KEY}' and "
+                    f"RowKey eq '{event_code}' and Active eq true"
                 )
+                # get all columns from the table
                 queried_entities = table_client.query_entities(
-                    query_filter=name_filter,
-                    select=["StartUTC", "EndUTC", "Active", "MaxTokenCap"],
+                    query_filter=query_filter,
+                    select=[
+                        "*",
+                    ],
                 )
 
                 async for entity in queried_entities:
-                    start_utc = entity["StartUTC"]
-                    end_utc = entity["EndUTC"]
-                    active = entity.get("Active", False)
-                    max_token_cap = entity.get("MaxTokenCap", 1024)
+                    start_utc = entity.get("StartUTC", pytz.utc.localize(datetime.max))
+                    end_utc = entity.get("EndUTC", pytz.utc.localize(datetime.min))
+                    max_token_cap = entity.get("MaxTokenCap", 512)
+                    event_name = entity.get("EventName", "")
+                    event_url = entity.get("EventUrl", "")
+                    event_url_text = entity.get("EventUrlText", "")
 
-                    if max_token_cap < 1:
-                        max_token_cap = 1024
-
-                    if not active:
-                        logging.warning("Event is not active: %s", event_code)
-                        return None
+                    max_token_cap = max_token_cap if max_token_cap > 0 else 512
 
                     current_time_utc = datetime.now(pytz.utc)
 
@@ -112,25 +167,32 @@ class Authorize:
                     if not is_authorized:
                         return None
 
-                    # set cache_expiry to current time plus 10 minutes
+                    # set cache_expiry to current time plus CACHE_EXPIRY_MINUTES minutes
                     if not self.cache_expiry:
                         self.cache_expiry = datetime.now() + timedelta(
                             minutes=CACHE_EXPIRY_MINUTES
                         )
 
-                    self.event_cache.append(
-                        {
-                            event_code: {
-                                "start_utc": start_utc,
-                                "end_utc": end_utc,
-                                "max_token_cap": max_token_cap,
-                            }
-                        }
+                    # create a cache item
+                    cache_item = Authorize.CacheItem(
+                        event_code=event_code,
+                        start_utc=start_utc,
+                        end_utc=end_utc,
+                        max_token_cap=max_token_cap,
+                        event_name=event_name,
+                        event_url=event_url,
+                        event_url_text=event_url_text,
                     )
+
+                    # Add the cach item to the event_cache list of dictionaries
+                    self.event_cache.append({event_code: cache_item})
 
                     return AuthorizeResponse(
                         is_authorized=is_authorized,
                         max_token_cap=max_token_cap,
+                        event_name=event_name,
+                        event_url=event_url,
+                        event_url_text=event_url_text,
                     )
 
             except ClientAuthenticationError as auth_error:

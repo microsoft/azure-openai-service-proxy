@@ -10,14 +10,9 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
 from authorize import Authorize, AuthorizeResponse
-from openai_async import (
-    OpenAIChatRequest,
-    OpenAIChatResponse,
-    OpenAIConfig,
-)
-from openai_async import (
-    OpenAIManager as oai,
-)
+from playground import Playground, PlaygroundRequest, PlaygroundResponse
+from configuration import OpenAIConfig
+
 
 logging.basicConfig(level=logging.WARNING)
 logger = logging.getLogger(__name__)
@@ -71,9 +66,9 @@ async def openai_chat(request: Request) -> AuthorizeResponse:
 
 @app.post("/api/oai_prompt", status_code=200)
 async def event_info(
-    chat: OpenAIChatRequest, request: Request, response: Response
-) -> OpenAIChatResponse:
-    """openai chat returns chat response"""
+    chat: PlaygroundRequest, request: Request, response: Response
+) -> PlaygroundResponse:
+    """playground chat returns chat response"""
 
     authorize_response = await __authorize(request.headers)
 
@@ -115,12 +110,11 @@ async def startup_event():
 
     openai_config = OpenAIConfig(
         openai_version=OPENAI_API_VERSION,
-        gpt_model_name=GPT_MODEL_NAME,
+        config_connection_string=storage_connection_string,
         deployments=deployments,
-        request_timeout=30,
     )
 
-    app.state.openai_mgr = oai(app, openai_config=openai_config)
+    app.state.openai_mgr = Playground(app, openai_config=openai_config)
     app.state.round_robin = 0
 
 

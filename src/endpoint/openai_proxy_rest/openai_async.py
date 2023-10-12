@@ -14,16 +14,19 @@ from pydantic import BaseModel
 from tenacity import (
     retry,
     retry_if_not_exception_type,
-    RetryError,
     stop_after_attempt,
-    wait_random
+    wait_random,
 )
+
+from configuration import OpenAIConfig
+
+HTTPX_TIMEOUT_SECONDS = 30
 
 logging.basicConfig(level=logging.WARNING)
 logger = logging.getLogger(__name__)
 
 
-class OpenAIChatRequest(BaseModel):
+class PlaygroundRequest(BaseModel):
     """OpenAI Chat Request"""
 
     messages: list[dict[str, str]]
@@ -35,48 +38,6 @@ class OpenAIChatRequest(BaseModel):
     presence_penalty: float
 
 
-class OpenAIChatResponse(BaseModel):
-    """Chat Completion Response"""
-
-    assistant: dict[str, str]
-    finish_reason: str
-    response_ms: int
-    content_filtered: dict[str, dict[str, str | bool]]
-    usage: dict[str, dict[str, int]]
-    name: str
-
-    # create an empty response
-    @classmethod
-    def empty(cls):
-        """empty response"""
-        return cls(
-            assistant={},
-            finish_reason="",
-            response_ms=0,
-            content_filtered={},
-            usage={},
-            name="",
-        )
-
-
-class OpenAIConfig:
-    """OpenAI Parameters"""
-
-    def __init__(
-        self,
-        *,
-        openai_version: str,
-        gpt_model_name: str,
-        deployments: list[dict[str, str]],
-        request_timeout: int,
-    ):
-        """init in memory session manager"""
-        self.openai_version = openai_version
-        self.gpt_model_name = gpt_model_name
-        self.deployments = deployments
-        self.request_timeout = request_timeout
-
-
 class OpenAIAsyncManager:
     """OpenAI Manager"""
 
@@ -85,13 +46,14 @@ class OpenAIAsyncManager:
         self.openai_config = openai_config
         self.app = app
 
+    # retry strategy is fail fast
     @retry(
         wait=wait_random(min=0, max=2),
         stop=stop_after_attempt(1),
         retry=retry_if_not_exception_type(openai.InvalidRequestError),
     )
     async def get_openai_chat_completion(
-        self, chat: OpenAIChatRequest
+        self, chat: PlaygroundRequest
     ) -> openai.openai_object.OpenAIObject:
         """async get openai completion"""
 
@@ -102,13 +64,7 @@ class OpenAIAsyncManager:
             except json.JSONDecodeError:
                 return None
 
-        index = int(self.app.state.round_robin % len(self.openai_config.deployments))
-        self.app.state.round_robin += 1
-
-        api_version = self.openai_config.openai_version
-        endpoint_location = self.openai_config.deployments[index]["endpoint_location"]
-        endpoint_key = self.openai_config.deployments[index]["endpoint_key"]
-        deployment_name = self.openai_config.deployments[index]["deployment_name"]
+        deployment = self.openai_config.get_deployment()
 
         openai_request = {
             "messages": chat.messages,
@@ -121,18 +77,24 @@ class OpenAIAsyncManager:
         }
 
         url = (
-            f"https://{endpoint_location}.api.cognitive.microsoft.com/openai/deployments/"
-            f"{deployment_name}/chat/completions?api-version={api_version}"
+            f"https://{deployment.endpoint_location}.api.cognitive.microsoft.com/openai/deployments/"
+            f"{deployment.deployment_name}/chat/completions?api-version={deployment.api_version}"
         )
 
-        headers = {"Content-Type": "application/json", "api-key": endpoint_key}
+        headers = {
+            "Content-Type": "application/json",
+            "api-key": deployment.endpoint_key,
+        }
 
         start = time.time()
 
         try:
             async with httpx.AsyncClient() as client:
                 response = await client.post(
-                    url, headers=headers, json=openai_request, timeout=30
+                    url,
+                    headers=headers,
+                    json=openai_request,
+                    timeout=HTTPX_TIMEOUT_SECONDS,
                 )
 
             if not 200 <= response.status_code < 300:
@@ -205,173 +167,4 @@ class OpenAIAsyncManager:
                 f"Invalid response body from API: {response.text}"
             ) from exc
 
-        return openai_response, deployment_name
-
-
-class OpenAIManager:
-    """OpenAI Manager"""
-
-    def __init__(self, app: FastAPI, openai_config: OpenAIConfig):
-        """init in memory session manager"""
-        self.openai_config = openai_config
-        self.app = app
-
-    def __report_exception(
-        self, message: str, http_status_code: int
-    ) -> OpenAIChatResponse:
-        """report exception"""
-
-        completion = OpenAIChatResponse.empty()
-        completion.assistant = {"role": "assistant", "content": message}
-
-        logger.warning(msg=f"{message}")
-
-        return completion, http_status_code
-
-    def __validate_input(self, chat: OpenAIChatRequest):
-        """validate input"""
-        # do some basic input validation
-        if not chat.messages:
-            return self.__report_exception("Oops, no chat messages.", 400)
-
-        # search through the list of messages for a msg with a role of user
-        user_message = next(
-            (msg for msg in chat.messages if msg["role"] == "user"), None
-        )
-
-        if not user_message or user_message.get("content", "") == "":
-            return self.__report_exception(
-                "Oops, messages missing a user role message.", 400
-            )
-
-        # check the max_tokens is between 1 and 4096
-        if not 1 <= chat.max_tokens <= 4096:
-            return self.__report_exception(
-                "Oops, max_tokens must be between 1 and 4096.", 400
-            )
-
-        # check the temperature is between 0 and 1
-        if not 0 <= chat.temperature <= 1:
-            return self.__report_exception(
-                "Oops, temperature must be between 0 and 1.", 400
-            )
-
-        # check the top_p is between 0 and 1
-        if not 0 <= chat.top_p <= 1:
-            return self.__report_exception("Oops, top_p must be between 0 and 1.", 400)
-
-        # check the frequency_penalty is between 0 and 1
-        if not 0 <= chat.frequency_penalty <= 1:
-            return self.__report_exception(
-                "Oops, frequency_penalty must be between 0 and 1.", 400
-            )
-
-        # check the presence_penalty is between 0 and 1
-        if not 0 <= chat.presence_penalty <= 1:
-            return self.__report_exception(
-                "Oops, presence_penalty must be between 0 and 1.", 400
-            )
-
-        # check stop sequence are printable characters
-        if not chat.stop_sequence.isprintable():
-            return self.__report_exception(
-                "Oops, stop_sequence must be printable characters.", 400
-            )
-
-        return None, None
-
-    async def call_openai_chat(self, chat: OpenAIChatRequest) -> OpenAIChatResponse:
-        """call openai with retry"""
-
-        completion, http_status_code = self.__validate_input(chat)
-        if completion or http_status_code:
-            return completion, http_status_code
-
-        completion = OpenAIChatResponse.empty()
-
-        try:
-            async_mgr = OpenAIAsyncManager(self.app, self.openai_config)
-            response, deployment_name = await async_mgr.get_openai_chat_completion(chat)
-
-            if response and isinstance(response, openai.openai_object.OpenAIObject):
-                completion.response_ms = response.response_ms
-                completion.name = deployment_name
-
-                completion.usage = {
-                    "usage": {
-                        "completion_tokens": response.usage.completion_tokens,
-                        "prompt_tokens": response.usage.prompt_tokens,
-                        "total_tokens": response.usage.total_tokens,
-                        "max_tokens": chat.max_tokens
-                    }
-                }
-
-                choices = response.choices
-                if len(response.choices) > 0:
-                    choice = choices[0]
-                    filters = choice.content_filter_results
-
-                    completion.assistant = {
-                        "role": "assistant",
-                        "content": choice.message.content,
-                    }
-
-                    completion.finish_reason = choice.finish_reason
-
-                    completion.content_filtered = {
-                        "hate": {
-                            "filtered": filters.hate.filtered,
-                            "severity": filters.hate.severity,
-                        },
-                        "self_harm": {
-                            "filtered": filters.self_harm.filtered,
-                            "severity": filters.self_harm.severity,
-                        },
-                        "sexual": {
-                            "filtered": filters.sexual.filtered,
-                            "severity": filters.sexual.severity,
-                        },
-                    }
-
-            return completion, 200
-
-        except openai.error.InvalidRequestError as invalid_request_exception:
-            # this exception captures content policy violation policy
-            return self.__report_exception(
-                str(invalid_request_exception.user_message),
-                invalid_request_exception.http_status,
-            )
-
-        except openai.error.RateLimitError as rate_limit_exception:
-            return self.__report_exception(
-                "Oops, OpenAI rate limited. Please try again.",
-                rate_limit_exception.http_status,
-            )
-
-        except openai.error.ServiceUnavailableError as service_unavailable_exception:
-            return self.__report_exception(
-                "Oops, OpenAI unavailable. Please try again.",
-                service_unavailable_exception.http_status,
-            )
-
-        except openai.error.Timeout as timeout_exception:
-            return self.__report_exception(
-                "Oops, OpenAI timeout. Please try again.",
-                timeout_exception.http_status,
-            )
-
-        except openai.error.OpenAIError as openai_error_exception:
-            return self.__report_exception(
-                str(openai_error_exception.user_message),
-                openai_error_exception.http_status,
-            )
-
-        except RetryError:
-            return self.__report_exception(
-                str("OpenAI API retry limit reached..."),
-                429,
-            )
-
-        except Exception as exception:
-            logger.warning(msg=f"Global exception caught: {exception}")
-            raise exception
+        return openai_response, deployment.deployment_name

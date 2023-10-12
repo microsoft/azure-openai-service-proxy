@@ -5,10 +5,10 @@ import logging
 from datetime import datetime, timedelta
 import pytz
 
-from azure.data.tables import TableServiceClient
-from azure.data.tables.aio import TableClient
 from pydantic import BaseModel
 
+from azure.data.tables import TableServiceClient
+from azure.data.tables.aio import TableClient
 from azure.core.exceptions import (
     HttpResponseError,
     ServiceRequestError,
@@ -18,6 +18,9 @@ from azure.core.exceptions import (
 CACHE_EXPIRY_MINUTES = 10
 PARTITION_KEY = "playground"
 TABLE_NAME = "playgroundauthorization"
+
+logging.basicConfig(level=logging.WARNING)
+logger = logging.getLogger(__name__)
 
 
 class AuthorizeResponse(BaseModel):
@@ -75,9 +78,6 @@ class Authorize:
         self.connection_string = connection_string
         self.event_cache = []
         self.cache_expiry = None
-
-        logging.basicConfig(level=logging.WARNING)
-        self.logger = logging.getLogger(__name__)
 
         # Create events playground authorization table if it does not exist
         try:
@@ -167,7 +167,7 @@ class Authorize:
                     if not is_authorized:
                         return None
 
-                    # set cache_expiry to current time plus 10 minutes
+                    # set cache_expiry to current time plus CACHE_EXPIRY_MINUTES minutes
                     if not self.cache_expiry:
                         self.cache_expiry = datetime.now() + timedelta(
                             minutes=CACHE_EXPIRY_MINUTES
