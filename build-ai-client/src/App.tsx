@@ -9,6 +9,8 @@ import { SystemCard } from "./components/SystemCard";
 import { ParamsCard } from "./components/ParamsCard";
 import { useEventDataContext } from "./EventDataProvider";
 import { Unauthorised } from "./components/Unauthorised";
+import { usePromptErrorContext } from "./PromptErrorProvider";
+import { Error } from "./components/Error";
 
 const defaultSysPrompt: MessageData = {
   role: "system",
@@ -37,7 +39,8 @@ function App() {
     response_time: 0,
   });
 
-  const { eventCode, eventData, isAuthorized } = useEventDataContext();
+  const { eventCode, eventData } = useEventDataContext();
+  const { setPromptError } = usePromptErrorContext();
 
   const onPromptEntered = async (messages: MessageData[]) => {
     if (eventCode) {
@@ -50,11 +53,12 @@ function App() {
 
       const data: ApiData = { messages: updatedMessageList, ...params };
       setIsLoading(true);
-      const { answer, status } = await callApi(data, eventCode);
+      const { answer, status, error } = await callApi(data, eventCode);
+      setPromptError(error);
+
       if (status !== 200) {
         setMessageList(updatedMessageList.slice(0, 1));
-        setIsLoading(false);
-      } else {
+      } else if (answer) {
         setMessageList([...updatedMessageList, answer.assistant]);
         setName(answer.name);
         setUsageData({
@@ -64,11 +68,10 @@ function App() {
           total_tokens: answer.usage.usage.total_tokens,
           response_time: answer.response_ms,
         });
-        setIsLoading(false);
       }
-    } else {
-      alert("Please enter an event code");
     }
+
+    setIsLoading(false);
   };
 
   const onPromptChange = (newPrompt: MessageData) => {
@@ -123,6 +126,7 @@ function App() {
         />
       </section>
       <Unauthorised />
+      <Error />
     </>
   );
 }
