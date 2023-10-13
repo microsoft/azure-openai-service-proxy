@@ -73,7 +73,7 @@ export const ParamsCard =({ startValues, tokenUpdate, name, eventUpdate, usageDa
                 </Label>
                 <Input
                 type="password" 
-                placeholder={"Enter your Event Code"}
+                placeholder="Enter your Event Code"
                 value={eventCode}
                 onChange={(e) => {
                     setEventCode(e.target.value);
@@ -107,37 +107,40 @@ export const ParamsCard =({ startValues, tokenUpdate, name, eventUpdate, usageDa
                     </Label>
                 )}
             </div>
-            <Divider className={styles.dividerline} ></Divider>
+            <Divider className={styles.dividerline}></Divider>
             <div className={styles.dividerblock}>
                 <ParamInput 
-                label={"Tokens"}
-                defaultValue={1}
+                label="Tokens"
+                defaultValue={startValues.max_tokens}
                 onUpdate={updateParams("max_tokens")}
-                type={"number"}
+                type="number"
                 min={1}
                 max={maxTokens}
+                disabled={!isCodeSubmitted}
                 />
             </div>
             <Divider className={styles.dividerline} ></Divider>
             <div className={styles.dividerblock}>
                 <ParamInput 
-                label={"Temperature"}
+                label="Temperature"
                 defaultValue={startValues.temperature}
                 onUpdate={updateParams("temperature")}
-                type={"number"} 
+                type="number" 
                 min={0}
                 max={1}
+                disabled={!isCodeSubmitted}
                 />
             </div>
             <Divider className={styles.dividerline} ></Divider>
             <div className={styles.dividerblock}>
                 <ParamInput 
-                label={"Top P"}
+                label="Top P"
                 defaultValue={startValues.top_p}
                 onUpdate={updateParams("top_p")}
-                type={"number"}
+                type="number"
                 min={0}
                 max={1}
+                disabled={!isCodeSubmitted}
                 />
             </div>
             <Divider className={styles.dividerline} ></Divider>
