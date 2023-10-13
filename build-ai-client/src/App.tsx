@@ -119,8 +119,13 @@ useEffect(() => {
   return (
     <section className="App">
         <SystemCard defaultPrompt={systemPrompt} onPromptChange={onPromptChange}/>
-        <ChatCard onPromptEntered={onPromptEntered} messageList={messageList} onClear={clearMessageList} 
-        isLoading={isLoading} eventName={eventData.event_name}/>
+        <ChatCard
+          onPromptEntered={onPromptEntered}
+          messageList={messageList}
+          onClear={clearMessageList}
+          isLoading={isLoading}
+          eventName={eventData.event_name}
+          eventLoaded={eventCode !== ""} />
         <ParamsCard startValues={params} tokenUpdate={tokenUpdate} name={name} 
         eventUpdate={eventCodeChange} usageData={usageData} maxTokens={maxTokens} 
         eventData={eventData}/>

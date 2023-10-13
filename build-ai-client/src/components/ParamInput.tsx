@@ -1,44 +1,46 @@
-import React, { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Input, Label } from '@fluentui/react-components';
 
 interface InputProps {
     label: string;
-    defaultValue: number | string;
-    onUpdate: (newValue: number | string) => void;
+    defaultValue: number;
+    onUpdate: (newValue: number) => void;
     type: "text" | "number" | "password" | "search" | "time" | "email" | "tel" | "url" | "date" | "datetime-local" | "month" | "week";
     min: number;
     max: number;
+    disabled: boolean;
 };
 
-export const ParamInput = ({ label, defaultValue, onUpdate, type, min, max }: InputProps) => {
+export const ParamInput = (props: InputProps) => {
+    const { label, defaultValue, onUpdate, min, max, ...rest } = props;
+    const [value, setValue] = useState(defaultValue);
 
-    const [value, setValue] = useState(defaultValue.toString());
-    const placeholder = label === "Tokens" ? (max === undefined ? min : max / 2).toString() : value;
-
+    useEffect(() => {
+        setValue(defaultValue);
+    }, [defaultValue]);
 
     return (
         <>
             <Label style={{ fontSize: "medium", marginBottom: "0.5rem", textAlign: "justify" }}>
-                <b>{label}</b>
+                <strong>{label}</strong>
             </Label>
             <Input
-                type={type}
-                placeholder={placeholder}
                 onChange={(e) => {
                     const newValue = e.currentTarget.value;
-                    if ((newValue === "" || ((min === undefined || parseFloat(newValue) >= min) && (max === undefined || parseFloat(newValue) <= max)))) {
-                        setValue(newValue);
+                    if (newValue && (parseFloat(newValue) >= min) && (parseFloat(newValue) <= max)) {
+                        setValue(parseFloat(newValue));
                     }
                 }}
                 onBlur={() => {
-                    if (value === "") {
+                    if (!value) {
                         onUpdate(min);
                     } else {
-                    onUpdate(value)}
+                        onUpdate(value)}
                     }}
-                style={{ textAlign: "center" }}
                 min={min}
-                max={max}        
+                max={max}
+                value={value.toString()}
+                {...rest}
             />
             <Label style={{ color: "GrayText", fontSize:"small", textAlign: "justify" }}>
                 Accepted Value: {min} - {max}
