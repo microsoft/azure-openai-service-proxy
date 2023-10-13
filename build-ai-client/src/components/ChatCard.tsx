@@ -21,7 +21,6 @@ interface CardProps {
   messageList: MessageData[];
   onClear: () => void;
   isLoading: boolean;
-  eventName: string;
   eventLoaded: boolean;
 }
 
@@ -57,7 +56,6 @@ export const ChatCard = ({
   messageList,
   onClear,
   isLoading,
-  eventName,
   eventLoaded,
 }: CardProps) => {
   const [userPrompt, setPrompt] = useState("");
