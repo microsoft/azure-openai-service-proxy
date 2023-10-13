@@ -114,7 +114,9 @@ class Playground:
 
         return None, None
 
-    async def call_openai_chat(self, chat: PlaygroundRequest) -> Tuple[PlaygroundResponse, int]:
+    async def call_openai_chat(
+        self, chat: PlaygroundRequest
+    ) -> Tuple[PlaygroundResponse, int]:
         """call openai with retry"""
 
         completion, http_status_code = self.__validate_input(chat)

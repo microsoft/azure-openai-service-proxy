@@ -7,7 +7,6 @@ import os
 from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.exceptions import ResponseValidationError
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel
 
 from .authorize import Authorize, AuthorizeResponse
 from .playground import Playground, PlaygroundRequest, PlaygroundResponse
@@ -17,19 +16,9 @@ from .configuration import OpenAIConfig
 logging.basicConfig(level=logging.WARNING)
 logger = logging.getLogger(__name__)
 
-GPT_MODEL_NAME = "gpt-3.5-turbo-0613"
 OPENAI_API_VERSION = "2023-07-01-preview"
 
 app = FastAPI()
-
-
-class EventResponse(BaseModel):
-    """Event info Response"""
-
-    max_token_cap: int
-
-    def __init__(self, max_token_cap: int) -> None:
-        super().__init__(max_token_cap=max_token_cap)
 
 
 @app.exception_handler(ResponseValidationError)
