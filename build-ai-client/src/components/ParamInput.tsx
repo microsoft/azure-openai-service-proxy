@@ -27,7 +27,7 @@ export const ParamInput = (props: InputProps) => {
             <Input
                 onChange={(e) => {
                     const newValue = e.currentTarget.value;
-                    if (newValue) {
+                    if (newValue && (parseFloat(newValue) >= min) && (parseFloat(newValue) <= max)) {
                         setValue(parseFloat(newValue));
                     }
                 }}
