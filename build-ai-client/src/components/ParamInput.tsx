@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Input, Label } from '@fluentui/react-components';
 
 interface InputProps {
@@ -14,6 +14,10 @@ interface InputProps {
 export const ParamInput = (props: InputProps) => {
     const { label, defaultValue, onUpdate, min, max, ...rest } = props;
     const [value, setValue] = useState(defaultValue);
+
+    useEffect(() => {
+        setValue(defaultValue);
+    }, [defaultValue]);
 
     return (
         <>

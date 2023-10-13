@@ -111,7 +111,7 @@ export const ParamsCard =({ startValues, tokenUpdate, name, eventUpdate, usageDa
             <div className={styles.dividerblock}>
                 <ParamInput 
                 label="Tokens"
-                defaultValue={startValues.max_tokens}
+                defaultValue={maxTokens / 2}
                 onUpdate={updateParams("max_tokens")}
                 type="number"
                 min={1}
