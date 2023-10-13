@@ -12,7 +12,6 @@ type EventData = {
   url: string;
   url_text: string;
   max_token_cap: number;
-  authorized: boolean;
 };
 
 export enum AuthStatus {
@@ -53,7 +52,6 @@ const EventDataProvider: React.FC<PropsWithChildren> = ({ children }) => {
           url: data.event_url,
           url_text: data.event_url_text,
           max_token_cap: data.max_token_cap,
-          authorized: data.is_authorized,
         }));
         if (data.is_authorized) {
           setAuthStatus(AuthStatus.Authorized);
@@ -78,7 +76,7 @@ const EventDataProvider: React.FC<PropsWithChildren> = ({ children }) => {
       value={{
         eventData,
         setEventCode,
-        isAuthorized: eventData?.authorized === true,
+        isAuthorized: authStatus === AuthStatus.Authorized,
         eventCodeSet: !!eventCode,
         eventCode,
         authStatus,
