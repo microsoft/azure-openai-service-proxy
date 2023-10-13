@@ -113,7 +113,6 @@ function App() {
           messageList={messageList}
           onClear={clearMessageList}
           isLoading={isLoading}
-          eventLoaded={isAuthorized}
         />
         <ParamsCard
           startValues={params}

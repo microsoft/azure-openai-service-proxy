@@ -15,13 +15,13 @@ import { MessageData } from "../interfaces/MessageData";
 import { Message } from "./Message";
 import { Response } from "./Response";
 import "./ChatCard.module.css";
+import { useEventDataContext } from "../EventDataProvider";
 
 interface CardProps {
   onPromptEntered: (messages: MessageData[]) => void;
   messageList: MessageData[];
   onClear: () => void;
   isLoading: boolean;
-  eventLoaded: boolean;
 }
 
 const useStyles = makeStyles({
@@ -56,11 +56,10 @@ export const ChatCard = ({
   messageList,
   onClear,
   isLoading,
-  eventLoaded,
 }: CardProps) => {
-  const [userPrompt, setPrompt] = useState("");
   const chat = useStyles();
   const chatContainerRef = useRef<HTMLDivElement>(null);
+  const { isAuthorized } = useEventDataContext();
 
   useEffect(() => {
     if (chatContainerRef.current) {
@@ -106,17 +105,18 @@ export const ChatCard = ({
         )}
       </div>
       {isLoading && <Spinner />}
-      {eventLoaded && (
+      {isAuthorized && (
         <ChatInput
-          chat={chat}
-          userPrompt={userPrompt}
-          setPrompt={setPrompt}
-          onPromptEntered={onPromptEntered}
-          messageList={messageList}
+          promptSubmitted={(userPrompt) => {
+            onPromptEntered([
+              ...messageList,
+              { role: "user", content: userPrompt },
+            ]);
+          }}
           onClear={onClear}
         />
       )}
-      {!eventLoaded && (
+      {!isAuthorized && (
         <>
           <CardFooter style={{ height: "10vh" }}>
             <p>Please enter your event code to start the chat session.</p>
@@ -126,21 +126,17 @@ export const ChatCard = ({
     </Card>
   );
 };
+
 function ChatInput({
-  userPrompt,
-  setPrompt,
-  onPromptEntered,
-  messageList,
-  chat,
+  promptSubmitted,
   onClear,
 }: {
-  userPrompt: string;
-  setPrompt: React.Dispatch<React.SetStateAction<string>>;
-  onPromptEntered: (messages: MessageData[]) => void;
-  messageList: MessageData[];
-  chat: Record<"card" | "dialog" | "smallButton" | "startCard", string>;
+  promptSubmitted: (userPrompt: string) => void;
   onClear: () => void;
 }) {
+  const [userPrompt, setPrompt] = useState("");
+
+  const chat = useStyles();
   return (
     <CardFooter style={{ height: "10vh" }}>
       <Field className="user-query" style={{ width: "100%" }}>
@@ -153,10 +149,7 @@ function ChatInput({
           }}
           onKeyDown={(event) => {
             if (event.key === "Enter" && !event.shiftKey) {
-              onPromptEntered([
-                ...messageList,
-                { role: "user", content: userPrompt },
-              ]);
+              promptSubmitted(userPrompt);
               setPrompt("");
               event.preventDefault();
             }
@@ -170,10 +163,7 @@ function ChatInput({
           icon={<SendRegular />}
           iconPosition="after"
           onClick={() => {
-            onPromptEntered([
-              ...messageList,
-              { role: "user", content: userPrompt },
-            ]);
+            promptSubmitted(userPrompt);
             setPrompt("");
           }}
         >
@@ -184,9 +174,7 @@ function ChatInput({
           id="clear-button"
           icon={<Delete24Regular />}
           iconPosition="after"
-          onClick={() => {
-            onClear();
-          }}
+          onClick={onClear}
         >
           Clear Chat
         </Button>
