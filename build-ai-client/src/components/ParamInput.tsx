@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Input, Label } from '@fluentui/react-components';
 
 interface InputProps {
@@ -15,6 +15,10 @@ export const ParamInput = (props: InputProps) => {
     const { label, defaultValue, onUpdate, min, max, ...rest } = props;
     const [value, setValue] = useState(defaultValue);
 
+    useEffect(() => {
+        setValue(defaultValue);
+    }, [defaultValue]);
+
     return (
         <>
             <Label style={{ fontSize: "medium", marginBottom: "0.5rem", textAlign: "justify" }}>
@@ -23,7 +27,7 @@ export const ParamInput = (props: InputProps) => {
             <Input
                 onChange={(e) => {
                     const newValue = e.currentTarget.value;
-                    if (newValue) {
+                    if (newValue && (parseFloat(newValue) >= min) && (parseFloat(newValue) <= max)) {
                         setValue(parseFloat(newValue));
                     }
                 }}
