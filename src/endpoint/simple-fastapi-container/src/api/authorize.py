@@ -226,6 +226,10 @@ class Authorize:
         if not 6 < len(event_code) < 20:
             return None
 
+        # check event code does not user any of the azure table reserved characters for row key
+        if any(c in event_code for c in ["\\", "/", "#", "?", "\t", "\n", "\r"]):
+            return None
+
         # check event code is only printable characters
         if not all(c in string.printable for c in event_code):
             return None
