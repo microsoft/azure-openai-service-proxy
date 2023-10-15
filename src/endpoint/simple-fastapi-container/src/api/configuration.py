@@ -15,7 +15,7 @@ from azure.core.exceptions import (
 )
 
 CACHE_EXPIRY_MINUTES = 8
-PARTITION_KEY = "openai"
+PARTITION_KEY = "openai-chat"
 TABLE_NAME = "configuration"
 
 logging.basicConfig(level=logging.WARNING)
@@ -86,7 +86,7 @@ class OpenAIConfig:
             ) as table_client:
                 config = []
 
-                query_filter = f"PartitionKey eq '{PARTITION_KEY}' and active eq true"
+                query_filter = f"PartitionKey eq '{PARTITION_KEY}' and Active eq true"
                 # get all columns from the table
                 queried_entities = table_client.query_entities(
                     query_filter=query_filter,
@@ -98,9 +98,9 @@ class OpenAIConfig:
                 async for entity in queried_entities:
                     deployment_item = Deployment(
                         friendly_name=entity.get("RowKey", ""),
-                        endpoint_location=entity.get("location", ""),
-                        endpoint_key=entity.get("endpoint_key", ""),
-                        deployment_name=entity.get("deployment_name", ""),
+                        endpoint_location=entity.get("Location", ""),
+                        endpoint_key=entity.get("EndpointKey", ""),
+                        deployment_name=entity.get("DeploymentName", ""),
                         api_version=self.openai_version,
                     )
 
