@@ -10,10 +10,6 @@ param name string
 param location string
 
 @minLength(10)
-@description('List of OpenAI Deployments [{"endpoint": "","deployment_name": "","key": ""}, {"endpoint": "","deployment_name": "","key": ""}]')
-param azure_openai_deployments string
-
-@minLength(10)
 @description('Azure storage account connection string')
 param azure_storage_connection_string string
 
@@ -57,7 +53,6 @@ module api 'api.bicep' = {
     containerAppsEnvironmentName: containerApps.outputs.environmentName
     containerRegistryName: containerApps.outputs.registryName
     exists: apiAppExists
-    azure_openai_deployments: azure_openai_deployments
     azure_storage_connection_string: azure_storage_connection_string
   }
 }

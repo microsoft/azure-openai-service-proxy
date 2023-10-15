@@ -7,7 +7,6 @@ param containerAppsEnvironmentName string
 param containerRegistryName string
 param serviceName string = 'api'
 param exists bool
-param azure_openai_deployments string
 param azure_storage_connection_string string
 
 resource apiIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
@@ -27,10 +26,6 @@ module app 'core/host/container-app-upsert.bicep' = {
     containerRegistryName: containerRegistryName
     targetPort: 3100
     env: [
-      {
-        name: 'AZURE_OPENAI_DEPLOYMENTS'
-        value: azure_openai_deployments
-      }
       {
         name: 'AZURE_STORAGE_CONNECTION_STRING'
         value: azure_storage_connection_string
