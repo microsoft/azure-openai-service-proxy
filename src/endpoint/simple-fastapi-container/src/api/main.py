@@ -1,6 +1,5 @@
 """ FastAPI server for Azure OpenAI Service proxy """
 
-import json
 import logging
 import os
 
@@ -75,9 +74,7 @@ async def event_info(
         response.status_code = status_code
         return completion
     except Exception as exc:
-        raise HTTPException(
-            status_code=500, detail=f"Failed to generate response: {exc}"
-        ) from exc
+        raise HTTPException(status_code=500, detail=f"{exc}") from exc
 
 
 @app.on_event("startup")
@@ -85,26 +82,18 @@ async def startup_event():
     """startup event"""
 
     try:
-        deployment_string = os.environ["AZURE_OPENAI_DEPLOYMENTS"]
-        deployments = json.loads(deployment_string)
         storage_connection_string = os.environ["AZURE_STORAGE_CONNECTION_STRING"]
-        app.state.authorize = Authorize(storage_connection_string)
     except KeyError:
-        print(
-            "Please set the environment variables "
-            "and AZURE_OPENAI_DEPLOYMENTS "
-            "and AZURE_STORAGE_CONNECTION_STRING"
-        )
+        print("Please set the environment variable AZURE_STORAGE_CONNECTION_STRING")
         exit(1)
 
+    app.state.authorize = Authorize(storage_connection_string)
     openai_config = OpenAIConfig(
         openai_version=OPENAI_API_VERSION,
-        config_connection_string=storage_connection_string,
-        deployments=deployments,
+        connection_string=storage_connection_string,
     )
 
     app.state.openai_mgr = Playground(app, openai_config=openai_config)
-    app.state.round_robin = 0
 
 
 if __name__ == "__main__":

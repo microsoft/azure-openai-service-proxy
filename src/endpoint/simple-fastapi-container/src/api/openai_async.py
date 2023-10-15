@@ -18,7 +18,7 @@ from tenacity import (
     wait_random,
 )
 
-from .configuration import OpenAIConfig
+from .configuration import OpenAIConfig, ConfigError
 
 HTTPX_TIMEOUT_SECONDS = 30
 
@@ -50,7 +50,7 @@ class OpenAIAsyncManager:
     @retry(
         wait=wait_random(min=0, max=2),
         stop=stop_after_attempt(1),
-        retry=retry_if_not_exception_type(openai.InvalidRequestError),
+        retry=retry_if_not_exception_type((openai.InvalidRequestError, ConfigError)),
     )
     async def get_openai_chat_completion(
         self, chat: PlaygroundRequest
@@ -64,7 +64,7 @@ class OpenAIAsyncManager:
             except json.JSONDecodeError:
                 return {}
 
-        deployment = self.openai_config.get_deployment()
+        deployment = await self.openai_config.get_deployment()
 
         openai_request = {
             "messages": chat.messages,
@@ -167,4 +167,4 @@ class OpenAIAsyncManager:
                 f"Invalid response body from API: {response.text}"
             ) from exc
 
-        return openai_response, deployment.deployment_name
+        return openai_response, deployment.friendly_name
