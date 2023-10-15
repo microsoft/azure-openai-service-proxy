@@ -78,7 +78,7 @@ Event details are stored in an Azure Storage account table named `playgroundauth
 | Property     | Type     | Description                                 |
 | ------------ | -------- | ------------------------------------------- |
 | PartitionKey | string   | Must be 'playground'                        |
-| RowKey       | string   | The event code between 6 and 20 characters long. For example: myevent2022    |
+| RowKey       | string   | The event code between 6 and 20 characters long. For example: myevent2022. </br></br>Note, you can't use the following characters in the event name: 'The forward slash (/), backslash (\\), number sign (#), and question mark (?) characters' as they aren't allowed for an Azure Storage Table RowKey property. |
 | Active       | boolean  | Is the event active, true or false          |
 | MaxTokenCap  | int      | The maximum number of tokens per request. This overides the user set Max Token value for load balancing    |
 | StartUTC     | datetime | The start date and time of the event in UTC |
@@ -89,9 +89,9 @@ Event details are stored in an Azure Storage account table named `playgroundauth
 
 ### Adding an event
 
-For now, you add an event via the Azure Storage Account `Storage browser`. The `Storage browser` is available in the Azure Portal, under the `Storage account` resource. 
+For now, you add an event via the Azure Storage Account `Storage browser`. The `Storage browser` is available in the Azure Portal, under the `Storage account` resource.
 
-1. Select the Azure Storage Account resource, then select `Storage explorer (preview)` from the left-hand menu, then select `Tables` from the left-hand menu, and finally select the `playgroundauthorization` table. Add an entry using the above schema, noting that the `PartitionKey` must be `playground` and the column names are case sensitive, and you must enter dates in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format in UTC. The [worldtimebuddy](https://www.worldtimebuddy.com) is a great time resource to convert your local time to UTC. 
+1. Select the Azure Storage Account resource, then select `Storage explorer (preview)` from the left-hand menu, then select `Tables` from the left-hand menu, and finally select the `playgroundauthorization` table. Add an entry using the above schema, noting that the `PartitionKey` must be `playground` and the column names are case sensitive, and you must enter dates in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format in UTC. The [worldtimebuddy](https://www.worldtimebuddy.com) is a great time resource to convert your local time to UTC.
 
 Here is an example
 
@@ -125,9 +125,9 @@ az containerapp update -n $APP_NAME -g $RESOURCE_GROUP --subscription $SUBSCRIPT
 
 Azure OpenAI model deployments have two limits, the first being tokens per minute, the second being requests per minute. You are most likely to hit the Tokens per minute limit espically as you scale up the number of users using the system.
 
-Tokens per minute is the total number of tokens you can generate per minute. The number of tokens per call to OpenAI Chat API is the sum of the Max Token parameter, plus the tokens that make up your msg (system, assistant, and user), plus best_of parameter setting. 
+Tokens per minute is the total number of tokens you can generate per minute. The number of tokens per call to OpenAI Chat API is the sum of the Max Token parameter, plus the tokens that make up your msg (system, assistant, and user), plus best_of parameter setting.
 
-For example, you have a model deployment rated at 500K tokens per minute. 
+For example, you have a model deployment rated at 500K tokens per minute.
 
 ![](docs/media/rate_limits.png)
 
@@ -160,7 +160,7 @@ curl -X 'POST' `
   "stop_sequence": "string",
   "frequency_penalty": 0,
   "presence_penalty": 0
-}'  | ConvertFrom-Json | ConvertTo-Json 
+}'  | ConvertFrom-Json | ConvertTo-Json
 ```
 
 From Bash/zsh on macOS, Linux, and Windows WSL:
@@ -212,11 +212,11 @@ curl -X 'POST' \
 There are a number of load testing tools available. The recommended tool is JMeter as the test plan can be deployed to Azure. The JMeter test plan is located in the `loadtest` folder. The test plan is configured to run 100 concurrent users, generating 4 requests per minute.
 
 1. You'll need to update the URL in the `HTTP Request Defaults` element to point to your REST API endpoint.
-   
+
     ![update url](./docs/media/jmeter_requests.png)
 
 2. You'll need to update the `HTTP Header Manager` element to include your event code.
-   
+
     ![update event code](./docs/media/jmeter-request-header.png)
 
 ### Example load test
