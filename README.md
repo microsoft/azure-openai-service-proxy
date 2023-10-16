@@ -13,6 +13,17 @@ This repo is set up for deployment on Azure Container Apps using the configurati
 1. An Azure subscription
 2. Deployed Azure OpenAI Models
 
+
+### Required software
+
+Tested on Windows, macOS and Linux
+
+Install:
+
+1. [VS Code](https://code.visualstudio.com/)
+2. [VS Code Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
+3. [Docker](https://www.docker.com/products/docker-desktop)
+
 #### Tips
 
 1. When deploying with a different capacity, you can use the same deployment name multiple times, and the REST API will automatically load balance across the different capacity deployments. For example, you have one OpenAI deployment with a capacity of 600K requests per minute, and another deployment of 300. Add the 600K deployment to the configuration string twice so it will be called twice as often as the smaller deployment.
