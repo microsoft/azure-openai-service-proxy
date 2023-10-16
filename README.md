@@ -13,14 +13,6 @@ This repo is set up for deployment on Azure Container Apps using the configurati
 1. An Azure subscription
 2. Deployed Azure OpenAI Models
 
-### OpenAI Deployments
-
-Before you can deploy the REST API you need to have deployed the OpenAI models you want to use. Once deployed, you need to create a deployment configuration string. You can declare multiple OpenAI deployments and they are used to load balance OpenAI Chat requests using a simple [round robin](https://en.wikipedia.org/wiki/Round-robin_scheduling) schedule. It's important to ensure there are no spaces in the configuration string as it will cause the deployment to fail. The deployment configuration string format is a JSON array of objects formated as follows:
-
-```text
-[{"endpoint_location":"<Your Azure OpenAI resource location/region>","endpoint_key":"<Your Azure OpenAI resource location/region>","deployment_name","<Your OpenAI model deploymentname>"}]
-```
-
 #### Tips
 
 1. When deploying with a different capacity, you can use the same deployment name multiple times, and the REST API will automatically load balance across the different capacity deployments. For example, you have one OpenAI deployment with a capacity of 600K requests per minute, and another deployment of 300. Add the 600K deployment to the configuration string twice so it will be called twice as often as the smaller deployment.
@@ -118,6 +110,18 @@ The solution auto scales using Azure Container Apps replicas. This means that co
 
 ## Azure OpenAI Deployments
 
+### Create an Azure OpenAI deployment
+
+From the Azure Portal, select the Azure OpenAI resource, then select the `Deployments` tab, and finally select `Create deployment`. Enter a friendly name for the deployment, select the model, and the capacity. The capacity is the number of requests per minute. The capacity can be changed at any time. The deployment will take a few minutes to provision.
+
+Make a note of the following as you'll need them for the next step:
+
+1. The `Deployment name`.
+2. The `Service localtion`.
+3. The `Endpoint key`.
+
+### Configuring the Azure OpenAI deployments
+
 The REST API is designed to load balance across multiple Azure OpenAI deployments. The deployment configuration is loaded from the 'configuration' Azure Storare Account table. The table has the following schema:
 
 | Property       | Type    | Description                                             |
@@ -129,7 +133,7 @@ The REST API is designed to load balance across multiple Azure OpenAI deployment
 | DeploymentName | string  | The Azure OpenAI deployment name                        |
 | Active         | boolean | Is the deployment active, true or false                 |
 
-Ideally the deployments should be of similar TPM (Tokens Per Minute) capacity. The REST API will load balance across the deployments using a simple round robin schedule. The REST API will only load balance across active deployments. If there are no active deployments, the REST API will return a `500` service unavailable error.
+Ideally the deployments should be of similar TPM (Tokens Per Minute) capacity. The REST API will load balance across the deployments using a simple [round robin](https://en.wikipedia.org/wiki/Round-robin_scheduling) schedule. The REST API will only load balance across active deployments. If there are no active deployments, the REST API will return a `500` service unavailable error.
 
 If one deployment is of greater capacity than another, you can add the deployment to the configuration table multiple times. For example, if you have one deployment with a capacity of 600K requests per minute, and another deployment of 300. Add the 600K deployment to the configuration table twice so it will be called twice as often as the smaller deployment.
 
