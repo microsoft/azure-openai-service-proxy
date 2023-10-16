@@ -13,10 +13,9 @@ This repo is set up for deployment on Azure Container Apps using the configurati
 1. An Azure subscription
 2. Deployed Azure OpenAI Models
 
-
 ### Required software
 
-Tested on Windows, macOS and Linux
+Tested on Windows, macOS and Ubuntu 22.04.
 
 Install:
 
@@ -24,19 +23,7 @@ Install:
 2. [VS Code Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
 3. [Docker](https://www.docker.com/products/docker-desktop)
 
-#### Tips
-
-1. When deploying with a different capacity, you can use the same deployment name multiple times, and the REST API will automatically load balance across the different capacity deployments. For example, you have one OpenAI deployment with a capacity of 600K requests per minute, and another deployment of 300. Add the 600K deployment to the configuration string twice so it will be called twice as often as the smaller deployment.
-2. Keep the deployment connection string in a safe place as it contains your OpenAI deployment keys.
-3. You can also update the pool of OpenAI deployments by updating the `OPENAI_DEPLOYMENT_CONFIG` environment variable in the Azure Container App using the `az containerapp update` command. For example:
-
-```shell
-az containerapp update -n YOUR_CONTAINER_APP_NAME -g YOUR_RESOURCE_GROUP  --subscription YOUR_SUBSCRIPTION_ID --set-env-vars AZURE_OPENAI_DEPLOYMENTS='YOUR_OPENAI_DEPLOYMENT_CONFIGURATION_JSON_STRING'
-```
-
-### Deploying
-
-Steps for deployment:
+## Deploying
 
 The recommended way to deploy this app is with Dev Containers. Install the [VS Code Remote Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) and Docker, open this repository in a container and you'll be ready to go.
 
@@ -62,14 +49,15 @@ The recommended way to deploy this app is with Dev Containers. Install the [VS C
     azd up
     ```
 
-    It will prompt you to provide an `azd` environment name (like "fastapi-app"), select a subscription from your Azure account, and select a location (like "eastus"). Then it will provision the resources in your account and deploy the latest code. If you get an error with deployment, changing the location can help, as there may be availability constraints for some of the resources.
+    It will prompt you to provide an `azd` environment name (like "openai-proxy"), select a subscription from your Azure account, and select a location (like "eastus"). Then it will provision the resources in your account and deploy the latest code. If you get an error with deployment, changing the location can help, as there may be availability constraints for some of the resources.
+    
 
     On completion, the following Azure resources will be provisioned:
 
       ![](./docs/media/azure_resources.png)
 
-1. When `azd` has finished deploying, you'll see the REST endpoint docs URI in the command output. Visit that URI, and you should see the REST API docs! 🎉
-1. If make any changes to the app code, just run:
+1. When `azd` has finished deploying you'll see a link to the Azure Resource Group created for the solution.
+1. To make any changes to the app code, just run:
 
     ```shell
     azd deploy
@@ -77,14 +65,14 @@ The recommended way to deploy this app is with Dev Containers. Install the [VS C
 
 ## Time-bound event authorization
 
-Access to the REST endpoint is controlled by an event code. The REST endpoint is accessible when the current UTC is between the StartUTC and the EndUTC times and the event is active. The event code is passed in the `openai-event-code` header. If the event code is not passed, or the event is not active, or the current UTC is not between the StartUTC and the EndUTC times, the REST endpoint will return a `401` unauthorized error.
+Access to the REST endpoint is controlled by an event code. The REST endpoint is accessible when the current UTC is between the StartUTC and the EndUTC times and the event is active. The event code is passed in the `openai-event-code` header. If the event code is not passed, or the event code is not active, or the current UTC is not between the StartUTC and the EndUTC times, the REST endpoint will return a `401` unauthorized error.
 
-Event details are stored in an Azure Storage account table named `playgroundauthorization`. This table is created when the app is deployed and starts. The table has the following schema:
+Event code details are stored in an Azure Storage account table named `playgroundauthorization`. This table is created when the app is deployed and starts. The table has the following schema:
 
 | Property     | Type     | Description                                                                                                                                                                                                                                                                                                        |
 | ------------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | PartitionKey | string   | Must be 'playground'                                                                                                                                                                                                                                                                                               |
-| RowKey       | string   | The event code is between 6 and 20 characters long. For example myevent2022. </br></br>Note, you can't use the following characters in the event name: 'The forward slash (/), backslash (\\), number sign (#), and question mark (?) characters' as they aren't allowed for an Azure Storage Table RowKey property. |
+| RowKey       | string   | The event code must be between 6 and 20 characters long. For example myevent2022. </br>Note, you can't use the following characters in the event name: 'The forward slash (/), backslash (\\), number sign (#), and question mark (?) characters' as they aren't allowed for an Azure Storage Table RowKey property. |
 | Active       | boolean  | Is the event active, true, or false                                                                                                                                                                                                                                                                                 |
 | MaxTokenCap  | int      | The maximum number of tokens per request. This overrides the user set Max Token value for load balancing                                                                                                                                                                                                            |
 | StartUTC     | datetime | The start date and time of the event in UTC                                                                                                                                                                                                                                                                        |
@@ -97,7 +85,9 @@ Event details are stored in an Azure Storage account table named `playgroundauth
 
 For now, you add an event via the Azure Storage Account `Storage browser`. The `Storage browser` is available in the Azure Portal, under the `Storage account` resource.
 
-1. Select the Azure Storage Account resource, then select `Storage explorer (preview)` from the left-hand menu, then select `Tables` from the left-hand menu, and finally select the `playgroundauthorization` table. Add an entry using the above schema, noting that the `PartitionKey` must be `playground` and the column names are case sensitive, and you must enter dates in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format in UTC. The [worldtimebuddy](https://www.worldtimebuddy.com) is a great time resource to convert your local time to UTC.
+1. Select the Azure Storage Account resource, then select `Storage explorer (preview)` from the left-hand menu, then select `Tables` from the left-hand menu.
+1. Next, select the `playgroundauthorization` table. 
+2. Add an entry using the above schema, noting that the `PartitionKey` must be set to `playground` and the column names are case sensitive, and you must enter dates in [ISO 8601](https://en.wikipedia.org/wiki/ISO_8601) format in UTC. The [worldtimebuddy](https://www.worldtimebuddy.com) is a great time resource to convert your local time to UTC.
 
 Here is an example
 
@@ -115,9 +105,8 @@ ContactEmail: jsmith@example.com
 
 ### Event Code Cache
 
-Event data, namely the `EventCode`, `StartUTC`, `EndUTC`, and `MaxTokenCap` are cached in the REST API. The cache is refreshed every 10 minutes. This is to reduce the number of calls to the Azure Storage Account table. The implication of this is that if you update the event details in the Azure Storage Account table, it may take up to 10 minutes for the changes to be reflected in the REST API.
+Event data, namely the `EventCode`, `StartUTC`, `EndUTC`, and `MaxTokenCap` are cached in the REST API. The cache is refreshed every 10 minutes. Caching is to reduce the number of calls to the Azure Storage Account table. Because of caching, it may take up to 10 minutes for the changes to be reflected in the REST API.
 
-The solution auto scales using Azure Container Apps replicas. This means that containers will come online to support the load, and then scale down when the load decreases over time. The cache is not shared between the containers, so if you have multiple containers, the cache will be refreshed for each container. This means that if you update the event details in the Azure Storage Account table, it may take up to 10 minutes for the changes to be reflected in each container in the interim, some containers may be serving requests for the old event details.
 
 ## Azure OpenAI Deployments
 
@@ -150,7 +139,7 @@ If one deployment is of greater capacity than another, you can add the deploymen
 
 ## Scaling the REST API
 
-The REST API is stateless, so it can be scaled horizontally. The REST API is designed to auto-scale up and down using Azure Container Apps replicas. The REST API is configured to scale up to 20 replicas. The number of replicas can be changed from the Azure Portal or from the az cli. For example, to scale to 30 replicas using the az cli, change the:
+The REST API is stateless, so it can be scaled horizontally. The REST API is designed to auto-scale up and down using Azure Container Apps replicas. The REST API is configured to scale up to 10 replicas. The number of replicas can be changed from the Azure Portal or from the az cli. For example, to scale to 30 replicas using the az cli, change the:
 
 ```shell
 az containerapp update -n $APP_NAME -g $RESOURCE_GROUP --subscription $SUBSCRIPTION_ID --replica 30
@@ -166,9 +155,9 @@ For example, you have a model deployment rated at 500K tokens per minute.
 
 ![](docs/media/rate_limits.png)
 
-If users set the Max Token parameter to 2048, with a message of 200 tokens, and you had 100 concurrent users sending on average 6 messages per minute then the total number of tokens per minute would be (2048 + 200) *6* 100) = 1348800 tokens per minute. This is well over the 500K tokens per minute limit of the Azure OpenAI model deployment and the system would be rate-limited and the user experience would be poor.
+If users set the Max Token parameter to 2048, with a message of 200 tokens, and you had 100 concurrent users sending on average 6 messages per minute then the total number of tokens per minute would be (2048 + 200) * 6 * 100) = 1348800 tokens per minute. This is well over the 500K tokens per minute limit of the Azure OpenAI model deployment and the system would be rate-limited and the user experience would be poor.
 
-This is where the MaxTokenCap is useful for an event. The MaxTokenCap is the maximum number of tokens per request. This overrides the user's Max Token request for load balancing. For example, if you set the MaxTokenCap to 512, then the total number of tokens per minute would be (512 + 200) *6* 100) = 427200 tokens per minute. This is well under the 500K tokens per minute limit of the Azure OpenAI model deployment and will result in a better experience for everyone as it minimizes the chance of hitting the rate limit across the system.
+This is where the MaxTokenCap is useful for an event. The MaxTokenCap is the maximum number of tokens per request. This overrides the user's Max Token request for load balancing. For example, if you set the MaxTokenCap to 512, then the total number of tokens per minute would be (512 + 200) * 6 * 100) = 427200 tokens per minute. This is well under the 500K tokens per minute limit of the Azure OpenAI model deployment and will result in a better experience for everyone as it minimizes the chance of hitting the rate limit across the system.
 
 MaxTokenCap is set at the event level and is configured in the Azure Storage Account table named `playgroundauthorization`. See the section above on [adding an event](#adding-an-event) for more details.
 
