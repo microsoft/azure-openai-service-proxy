@@ -9,10 +9,6 @@ param name string
 @description('Primary location for all resources')
 param location string
 
-@minLength(10)
-@description('Azure storage account connection string')
-param azure_storage_connection_string string
-
 param apiAppExists bool = false
 
 var resourceToken = toLower(uniqueString(subscription().id, name, location))
@@ -26,6 +22,16 @@ resource resourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' = {
 
 var prefix = '${name}-${resourceToken}'
 
+// Create storage account for the service
+module storageAccount 'storage.bicep' = {
+  name: 'storage'
+  scope: resourceGroup
+  params: {
+    name: 'storage${resourceToken}'
+    location: location
+    tags: {}
+  }
+}
 
 // Container apps host (including container registry)
 module containerApps 'core/host/container-apps.bicep' = {
@@ -46,17 +52,16 @@ module api 'api.bicep' = {
   name: 'api'
   scope: resourceGroup
   params: {
-    name: replace('${take(prefix,19)}-ca', '--', '-')
+    name: replace('${take(prefix, 19)}-ca', '--', '-')
     location: location
     tags: tags
     identityName: '${prefix}-id-api'
     containerAppsEnvironmentName: containerApps.outputs.environmentName
     containerRegistryName: containerApps.outputs.registryName
     exists: apiAppExists
-    azure_storage_connection_string: azure_storage_connection_string
+    azure_storage_connection_string: storageAccount.outputs.connectionString
   }
 }
-
 
 module logAnalyticsWorkspace 'core/monitor/loganalytics.bicep' = {
   name: 'loganalytics'
@@ -76,4 +81,5 @@ output SERVICE_API_IDENTITY_PRINCIPAL_ID string = api.outputs.SERVICE_API_IDENTI
 output SERVICE_API_NAME string = api.outputs.SERVICE_API_NAME
 output SERVICE_API_URI string = api.outputs.SERVICE_API_URI
 output SERVICE_API_IMAGE_NAME string = api.outputs.SERVICE_API_IMAGE_NAME
-output SERVICE_API_ENDPOINTS array = ['${api.outputs.SERVICE_API_URI}/docs']
+output SERVICE_API_ENDPOINTS array = [ '${api.outputs.SERVICE_API_URI}/docs' ]
+output AZURE_STORAGE_ACCOUNT string = storageAccount.outputs.connectionString
