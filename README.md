@@ -133,13 +133,25 @@ The REST API is designed to load balance across multiple Azure OpenAI deployment
 | DeploymentName | string  | The Azure OpenAI deployment name                        |
 | Active         | boolean | Is the deployment active, true, or false                 |
 
-Ideally, the deployments should be of similar TPM (Tokens Per Minute) capacity. The REST API will load balance across the deployments using a simple [round robin](https://en.wikipedia.org/wiki/Round-robin_scheduling) schedule. The REST API will only load balance across active deployments. If there are no active deployments, the REST API will return a `500` service unavailable error.
+Here is an example
+
+```text
+PartitionKey: openai-chat
+RowKey: gpt-35-turbo-01
+Location: swedencentral
+EndpointKey: wd7w6d77w868sd678s
+DeploymentName: gpt-35-turbo
+Active: true
+```
+
+
+Ideally, the deployments should be of similar TPM (Tokens Per Minute) capacity. The REST API will load balance across the deployments using a simple [round robin](https://en.wikipedia.org/wiki/Round-robin_scheduling) scheduler. The REST API will only load balance across active deployments. If there are no active deployments, the REST API will return a `500` service unavailable error.
 
 If one deployment is of greater capacity than another, you can add the deployment to the configuration table multiple times. For example, if you have one deployment with a capacity of 600K requests per minute, and another deployment of 300. Add the 600K deployment to the configuration table twice so it will be called twice as often as the smaller deployment.
 
 ## Scaling the REST API
 
-The REST API is stateless, so it can be scaled horizontally. The REST API is designed to auto-scale up and down using Azure Container Apps replicas. The REST API is configured to scale up to 10 replicas. The number of replicas can be changed from the Azure Portal or from the az cli. For example, to scale to 30 replicas using the az cli, change the:
+The REST API is stateless, so scales vertically and horizontally. The REST API is designed to auto-scale up and down using Azure Container Apps replicas. The REST API is configured to scale up to 10 replicas. The number of replicas can be changed from the Azure Portal or from the az cli. For example, to scale to 30 replicas using the az cli, change the:
 
 ```shell
 az containerapp update -n $APP_NAME -g $RESOURCE_GROUP --subscription $SUBSCRIPTION_ID --replica 30
