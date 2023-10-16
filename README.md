@@ -1,6 +1,5 @@
 # Azure OpenAI Proxy
 
-
 The Azure OpenAI Proxy is a simple API that allows you to use the OpenAI API without having to expose your API key to the client. It is designed to be deployed to Azure Container Apps, which provides a managed environment for running containerized apps without having to manage the underlying infrastructure. The target use case is for hackathons and other time-bound events where you want to provide access to the OpenAI API without having to worry about exposing your API key.
 
 The solution consists of two parts, a REST API, and a web client with a similar look and feel to the official Azure OpenAI Playground. The REST API is a simple Python FastAPI app that proxies requests to the OpenAI API. The web client is a simple React app that allows you to test the API.
@@ -76,17 +75,17 @@ Access to the REST endpoint is controller by an event code. The REST endpont is 
 
 Event details are stored in an Azure Storage account table named `playgroundauthorization`. This table is created when the app is deployed and starts. The table has the following schema:
 
-| Property     | Type     | Description                                 |
-| ------------ | -------- | ------------------------------------------- |
-| PartitionKey | string   | Must be 'playground'                        |
+| Property     | Type     | Description                                                                                                                                                                                                                                                                                                        |
+| ------------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| PartitionKey | string   | Must be 'playground'                                                                                                                                                                                                                                                                                               |
 | RowKey       | string   | The event code between 6 and 20 characters long. For example: myevent2022. </br></br>Note, you can't use the following characters in the event name: 'The forward slash (/), backslash (\\), number sign (#), and question mark (?) characters' as they aren't allowed for an Azure Storage Table RowKey property. |
-| Active       | boolean  | Is the event active, true or false          |
-| MaxTokenCap  | int      | The maximum number of tokens per request. This overides the user set Max Token value for load balancing    |
-| StartUTC     | datetime | The start date and time of the event in UTC |
-| EndUTC       | datetime | The end date and time of the event in UTC   |
-| EventName    | string   | The name of the event                       |
-| ContactName  | string   | The name of the event contact               |
-| ContactEmail | string   | The email address of the event contact      |
+| Active       | boolean  | Is the event active, true or false                                                                                                                                                                                                                                                                                 |
+| MaxTokenCap  | int      | The maximum number of tokens per request. This overides the user set Max Token value for load balancing                                                                                                                                                                                                            |
+| StartUTC     | datetime | The start date and time of the event in UTC                                                                                                                                                                                                                                                                        |
+| EndUTC       | datetime | The end date and time of the event in UTC                                                                                                                                                                                                                                                                          |
+| EventName    | string   | The name of the event                                                                                                                                                                                                                                                                                              |
+| ContactName  | string   | The name of the event contact                                                                                                                                                                                                                                                                                      |
+| ContactEmail | string   | The email address of the event contact                                                                                                                                                                                                                                                                             |
 
 ### Adding an event
 
