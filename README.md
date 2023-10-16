@@ -17,7 +17,6 @@ This repo is set up for deployment on Azure Container Apps using the configurati
 
 Before you can deploy the REST API you need to have deployed the OpenAI models you want to use. Once deployed, you need to create a deployment configuration string. You can declare multiple OpenAI deployments and they are used to load balance OpenAI Chat requests using a simple [round robin](https://en.wikipedia.org/wiki/Round-robin_scheduling) schedule. It's important to ensure there are no spaces in the configuration string as it will cause the deployment to fail. The deployment configuration string format is a JSON array of objects formated as follows:
 
-
 ```text
 [{"endpoint_location":"<Your Azure OpenAI resource location/region>","endpoint_key":"<Your Azure OpenAI resource location/region>","deployment_name","<Your OpenAI model deploymentname>"}]
 ```
@@ -37,7 +36,6 @@ az containerapp update -n YOUR_CONTAINER_APP_NAME -g YOUR_RESOURCE_GROUP  --subs
 Steps for deployment:
 
 The recommeded way to deploy this app is with Dev Containers. Install the [VS Code Remote Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) and Docker, open this repository in a container and you'll be ready to go.
-
 
 1. Clone the repo:
 
@@ -60,7 +58,12 @@ The recommeded way to deploy this app is with Dev Containers. Install the [VS Co
     ```shell
     azd up
     ```
+
     It will prompt you to provide an `azd` environment name (like "fastapi-app"), select a subscription from your Azure account, and select a location (like "eastus"). Then it will provision the resources in your account and deploy the latest code. If you get an error with deployment, changing the location can help, as there may be availability constraints for some of the resources.
+
+    On completion, the following Azure resources will be provisioned:
+
+      ![](./docs/media/azure_resources.png)
 
 1. When `azd` has finished deploying, you'll see the REST endpoint docs URI in the command output. Visit that URI, and you should see the REST API docs! 🎉
 1. If make any changes to the app code, just run:
@@ -113,6 +116,23 @@ Event data, namely the `EventCode`, `StartUTC`, `EndUTC`, and `MaxTokenCap` are 
 
 The solution auto scales using Azure Container Apps replicas. This means that containers will come online to support the load, and then scale down when the load decreases over time. The cache is not shared between the containers, so if you have multiple containers, the cache will be refreshed for each container. This means that if you update the event details in the Azure Storage Account table, it may take up to 10 minutes for the changes to be reflected in each container and in the interim, some containers may be serving requests for the old event details.
 
+## Azure OpenAI Deployments
+
+The REST API is designed to load balance across multiple Azure OpenAI deployments. The deployment configuration is loaded from the 'configuration' Azure Storare Account table. The table has the following schema:
+
+| Property       | Type    | Description                                             |
+| -------------- | ------- | ------------------------------------------------------- |
+| PartitionKey   | string  | Must be 'openai-chat'                                   |
+| RowKey         | string  | The deployment friendly name                            |
+| Location       | string  | The Azure region where the OpenAI deployment is located |
+| EndpointKey    | string  | The Azure OpenAI deployment key                         |
+| DeploymentName | string  | The Azure OpenAI deployment name                        |
+| Active         | boolean | Is the deployment active, true or false                 |
+
+Ideally the deployments should be of similar TPM (Tokens Per Minute) capacity. The REST API will load balance across the deployments using a simple round robin schedule. The REST API will only load balance across active deployments. If there are no active deployments, the REST API will return a `500` service unavailable error.
+
+If one deployment is of greater capacity than another, you can add the deployment to the configuration table multiple times. For example, if you have one deployment with a capacity of 600K requests per minute, and another deployment of 300. Add the 600K deployment to the configuration table twice so it will be called twice as often as the smaller deployment.
+
 ## Scaling the REST API
 
 The REST API is stateless, so it can be scaled horizontally. The REST API is designed to auto scale up and down using Azure Container Apps replicas. The REST API is configured to scale up to 20 replicas. The number of replicas can be changed from the Azure Portal or from the az cli. For example, to scale to 30 replicas using the az cli, change the:
@@ -131,9 +151,9 @@ For example, you have a model deployment rated at 500K tokens per minute.
 
 ![](docs/media/rate_limits.png)
 
-If users set the Max Token parameter to 2048, with a message of 200 tokens, and you had 100 concurrent users sending on average 6 mesages per minute then the total number of tokens per minute would be (2048 + 200) * 6 * 100) = 1348800 tokens per minute. This is well over the 500K tokens per minute limit of the Azure OpenAI model deployment and the system would be rate limited and the user experience would be poor.
+If users set the Max Token parameter to 2048, with a message of 200 tokens, and you had 100 concurrent users sending on average 6 mesages per minute then the total number of tokens per minute would be (2048 + 200) *6* 100) = 1348800 tokens per minute. This is well over the 500K tokens per minute limit of the Azure OpenAI model deployment and the system would be rate limited and the user experience would be poor.
 
-This is where the MaxTokenCap is useful for an event. The MaxTokenCap is the maximum number of tokens per request. This overides the user Max Token request for load balancing. For example, if you set the MaxTokenCap to 512, then the total number of tokens per minute would be (512 + 200) * 6 * 100) = 427200 tokens per minute. This is well under the 500K tokens per minute limit of the Azure OpenAI model deployment and will result in a better experience for everyone as it minimises the chance of hitting the rate limit across the system.
+This is where the MaxTokenCap is useful for an event. The MaxTokenCap is the maximum number of tokens per request. This overides the user Max Token request for load balancing. For example, if you set the MaxTokenCap to 512, then the total number of tokens per minute would be (512 + 200) *6* 100) = 427200 tokens per minute. This is well under the 500K tokens per minute limit of the Azure OpenAI model deployment and will result in a better experience for everyone as it minimises the chance of hitting the rate limit across the system.
 
 MaxTokenCap is set at the event level, and is configured in the Azure Storage Account table named `playgroundauthorization`. See the section above on [adding an event](#adding-an-event) for more details.
 
