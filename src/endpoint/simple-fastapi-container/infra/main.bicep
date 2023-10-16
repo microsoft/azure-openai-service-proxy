@@ -29,7 +29,17 @@ module storageAccount 'storage.bicep' = {
   params: {
     name: 'storage${resourceToken}'
     location: location
-    tags: {}
+  }
+}
+
+// Create Azure OpenAI Service
+
+module AzureOpenAI 'core/ai/cognitiveservices.bicep' = {
+  name: 'azure-openai'
+  scope: resourceGroup
+  params: {
+    name: '${prefix}-openai'
+    location: location
   }
 }
 
