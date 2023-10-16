@@ -17,7 +17,10 @@ logger = logging.getLogger(__name__)
 
 OPENAI_API_VERSION = "2023-07-01-preview"
 
-app = FastAPI()
+app = FastAPI(
+    docs_url=None, # Disable docs (Swagger UI)
+    redoc_url=None, # Disable redoc
+)
 
 
 @app.exception_handler(ResponseValidationError)
