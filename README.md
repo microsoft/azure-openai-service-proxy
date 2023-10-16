@@ -1,5 +1,6 @@
 # Azure OpenAI Proxy
 
+
 The Azure OpenAI Proxy is a simple API that allows you to use the OpenAI API without having to expose your API key to the client. It is designed to be deployed to Azure Container Apps, which provides a managed environment for running containerized apps without having to manage the underlying infrastructure. The target use case is for hackathons and other time-bound events where you want to provide access to the OpenAI API without having to worry about exposing your API key.
 
 The solution consists of two parts, a REST API, and a web client with a similar look and feel to the official Azure OpenAI Playground. The REST API is a simple Python FastAPI app that proxies requests to the OpenAI API. The web client is a simple React app that allows you to test the API.
