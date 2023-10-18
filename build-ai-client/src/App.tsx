@@ -39,7 +39,7 @@ function App() {
     response_time: 0,
   });
 
-  const { eventCode, eventData } = useEventDataContext();
+  const { eventCode } = useEventDataContext();
   const { setPromptError } = usePromptErrorContext();
 
   const onPromptEntered = async (messages: MessageData[]) => {
@@ -122,7 +122,6 @@ function App() {
           tokenUpdate={tokenUpdate}
           name={name}
           usageData={usageData}
-          maxTokens={eventData?.max_token_cap || 0}
         />
       </section>
       <Unauthorised />

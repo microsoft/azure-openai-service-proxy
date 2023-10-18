@@ -35,10 +35,9 @@ interface ParamsCardProps {
     tokenUpdate: (label: keyof Omit<ApiData, "messages">, newValue: number | string) => void;
     name: string;
     usageData: UsageData;
-    maxTokens: number;
 }
 
-export const ParamsCard =({ startValues, tokenUpdate, name, usageData, maxTokens}: ParamsCardProps) => {
+export const ParamsCard =({ startValues, tokenUpdate, name, usageData }: ParamsCardProps) => {
     const styles = useStyles();
     const updateParams = useCallback((label: keyof Omit<ApiData, "messages">) => {
         return (newValue: number | string) => {
@@ -46,8 +45,8 @@ export const ParamsCard =({ startValues, tokenUpdate, name, usageData, maxTokens
         };
     }, [tokenUpdate]);
     const [code, setCode] = useState("");
-
     const { eventData, setEventCode, isAuthorized } = useEventDataContext();
+    const maxTokens = eventData?.max_token_cap ?? 0;
 
     return (
         <Card className={styles.card}>
