@@ -2,9 +2,8 @@ import { Body1, Button, Card, CardFooter, CardHeader, Divider, Input, Label, mak
 import { ApiData } from "../interfaces/ApiData";
 import {ParamInput} from "./ParamInput";
 import { useCallback, useState } from "react";
-import { EventData } from "../interfaces/EventData";
 import { UsageData } from "../interfaces/UsageData";
-import { eventInfo } from "../api/eventInfo";
+import { useEventDataContext } from "../EventDataProvider";
 
 const useStyles = makeStyles({
         card: {
@@ -35,27 +34,19 @@ interface ParamsCardProps {
     startValues: Omit<ApiData, "messages">;
     tokenUpdate: (label: keyof Omit<ApiData, "messages">, newValue: number | string) => void;
     name: string;
-    eventUpdate: (eventCode: string) => void;
     usageData: UsageData;
-    maxTokens: number;
-    eventData: EventData;
 }
 
-export const ParamsCard =({ startValues, tokenUpdate, name, eventUpdate, usageData, maxTokens, eventData}: ParamsCardProps) => {
+export const ParamsCard =({ startValues, tokenUpdate, name, usageData }: ParamsCardProps) => {
     const styles = useStyles();
     const updateParams = useCallback((label: keyof Omit<ApiData, "messages">) => {
         return (newValue: number | string) => {
             tokenUpdate(label, newValue);
         };
     }, [tokenUpdate]);
-    const [eventCode, setEventCode] = useState("");
-    const [isCodeSubmitted, setIsCodeSubmitted] = useState(false);
-
-    const getEventData = async () => {
-        const data = await eventInfo(eventCode);
-        if (data.is_authorized) setIsCodeSubmitted(true);
-        else alert("Please enter a valid event code");
-    }
+    const [code, setCode] = useState("");
+    const { eventData, setEventCode, isAuthorized } = useEventDataContext();
+    const maxTokens = eventData?.max_token_cap ?? 0;
 
     return (
         <Card className={styles.card}>
@@ -74,20 +65,15 @@ export const ParamsCard =({ startValues, tokenUpdate, name, eventUpdate, usageDa
                 <Input
                 type="password" 
                 placeholder="Enter your Event Code"
-                value={eventCode}
-                onChange={(e) => {
-                    setEventCode(e.target.value);
-                }}
+                value={code}
+                onChange={(e) => setCode(e.target.value)}
                 style={{ textAlign: "right" }}/>
-                
-                {!isCodeSubmitted && (
+
+                {!isAuthorized && (
                     <>
                         <Button
                             className={styles.smallbutton}
-                            onClick={() => {
-                                eventUpdate(eventCode);
-                                getEventData();
-                            }}
+                            onClick={() => setEventCode(code)}
                         >
                             Log In
                         </Button>
@@ -96,12 +82,12 @@ export const ParamsCard =({ startValues, tokenUpdate, name, eventUpdate, usageDa
                         </Label>
                     </>
                 )}
-                {isCodeSubmitted && (
+                {isAuthorized && (
                     <Label style={{ color: "GrayText", fontSize: "small", textAlign: "justify" }}>
-                        <div>{eventData.event_name}</div>
+                        <div>{eventData!.name}</div>
                         <div>
-                            <a href={eventData.event_url} target="_blank" rel="noopener noreferrer">
-                                {eventData.event_url_text}
+                            <a href={eventData!.url} target="_blank" rel="noopener noreferrer">
+                                {eventData!.url_text}
                             </a>
                         </div>
                     </Label>
@@ -116,7 +102,7 @@ export const ParamsCard =({ startValues, tokenUpdate, name, eventUpdate, usageDa
                 type="number"
                 min={1}
                 max={maxTokens}
-                disabled={!isCodeSubmitted}
+                disabled={!isAuthorized}
                 />
             </div>
             <Divider className={styles.dividerline} ></Divider>
@@ -128,7 +114,7 @@ export const ParamsCard =({ startValues, tokenUpdate, name, eventUpdate, usageDa
                 type="number" 
                 min={0}
                 max={1}
-                disabled={!isCodeSubmitted}
+                disabled={!isAuthorized}
                 />
             </div>
             <Divider className={styles.dividerline} ></Divider>
@@ -140,7 +126,7 @@ export const ParamsCard =({ startValues, tokenUpdate, name, eventUpdate, usageDa
                 type="number"
                 min={0}
                 max={1}
-                disabled={!isCodeSubmitted}
+                disabled={!isAuthorized}
                 />
             </div>
             <Divider className={styles.dividerline} ></Divider>
