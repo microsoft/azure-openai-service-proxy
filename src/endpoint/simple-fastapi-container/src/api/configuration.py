@@ -97,11 +97,11 @@ class OpenAIConfig:
 
                 async for entity in queried_entities:
                     deployment_item = Deployment(
-                        friendly_name=entity.get("RowKey", ""),
-                        endpoint_location=entity.get("Location", ""),
-                        endpoint_key=entity.get("EndpointKey", ""),
-                        deployment_name=entity.get("DeploymentName", ""),
-                        api_version=self.openai_version,
+                        friendly_name=entity.get("RowKey", "").strip(),
+                        endpoint_location=entity.get("Location", "").strip(),
+                        endpoint_key=entity.get("EndpointKey", "").strip(),
+                        deployment_name=entity.get("DeploymentName", "").strip(),
+                        api_version=self.openai_version.strip(),
                     )
 
                     config.append(deployment_item)
