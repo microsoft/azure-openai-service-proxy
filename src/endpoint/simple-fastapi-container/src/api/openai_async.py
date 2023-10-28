@@ -11,14 +11,9 @@ import openai.error
 import openai.openai_object
 from fastapi import FastAPI
 from pydantic import BaseModel
-from tenacity import (
-    retry,
-    retry_if_not_exception_type,
-    stop_after_attempt,
-    wait_random,
-)
+from tenacity import retry, stop_after_attempt, wait_random, retry_if_exception_type
 
-from .configuration import OpenAIConfig, ConfigError
+from .configuration import OpenAIConfig
 
 HTTPX_TIMEOUT_SECONDS = 30
 
@@ -50,7 +45,9 @@ class OpenAIAsyncManager:
     @retry(
         wait=wait_random(min=0, max=2),
         stop=stop_after_attempt(1),
-        retry=retry_if_not_exception_type((openai.InvalidRequestError, ConfigError)),
+        retry=retry_if_exception_type(
+            (openai.error.TryAgain, openai.error.RateLimitError)
+        ),
     )
     async def get_openai_chat_completion(
         self, chat: PlaygroundRequest
