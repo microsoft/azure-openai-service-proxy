@@ -10,7 +10,7 @@ from fastapi.exceptions import ResponseValidationError
 from fastapi.responses import JSONResponse
 
 from .authorize import Authorize, AuthorizeResponse
-from .playground import Playground, PlaygroundRequest, PlaygroundResponse
+from .chat_playground import Playground, PlaygroundRequest, PlaygroundResponse
 from .chat_completion import ChatCompletion
 from .configuration import OpenAIConfig
 

@@ -1,7 +1,5 @@
 import logging
-from typing import Tuple
 
-import openai.openai_object
 
 from fastapi import FastAPI
 from .openai_async import PlaygroundRequest
@@ -16,15 +14,6 @@ class BaseChat:
         """init in memory session manager"""
         self.openai_config = openai_config
         self.app = app
-
-    def report_exception(
-        self, message: str, http_status_code: int
-    ) -> Tuple[openai.openai_object.OpenAIObject, int]:
-        """report exception"""
-
-        logger.warning(msg=f"{message}")
-
-        return message, http_status_code
 
     def validate_input(self, chat: PlaygroundRequest):
         """validate input"""
