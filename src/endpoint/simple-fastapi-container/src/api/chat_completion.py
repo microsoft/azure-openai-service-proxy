@@ -11,7 +11,6 @@ from tenacity import RetryError
 
 from .openai_async import OpenAIAsyncManager, PlaygroundRequest
 from .configuration import OpenAIConfig
-
 from .chat import BaseChat
 
 
@@ -21,6 +20,15 @@ class ChatCompletion(BaseChat):
     def __init__(self, app: FastAPI, openai_config: OpenAIConfig):
         """init in memory session manager"""
         super().__init__(app, openai_config)
+
+    def report_exception(
+        self, message: str, http_status_code: int
+    ) -> Tuple[openai.openai_object.OpenAIObject, int]:
+        """report exception"""
+
+        super.logger.warning(msg=f"{message}")
+
+        return message, http_status_code
 
     async def call_openai_chat_completion(
         self, chat: PlaygroundRequest
