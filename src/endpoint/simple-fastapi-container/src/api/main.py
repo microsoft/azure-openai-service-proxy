@@ -3,12 +3,15 @@
 import logging
 import os
 
+import openai.openai_object
+
 from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.exceptions import ResponseValidationError
 from fastapi.responses import JSONResponse
 
 from .authorize import Authorize, AuthorizeResponse
 from .playground import Playground, PlaygroundRequest, PlaygroundResponse
+from .chat_completion import ChatCompletion
 from .configuration import OpenAIConfig
 
 
@@ -18,8 +21,8 @@ logger = logging.getLogger(__name__)
 OPENAI_API_VERSION = "2023-07-01-preview"
 
 app = FastAPI(
-    docs_url=None, # Disable docs (Swagger UI)
-    redoc_url=None, # Disable redoc
+    docs_url=None,  # Disable docs (Swagger UI)
+    redoc_url=None,  # Disable redoc
 )
 
 
@@ -42,7 +45,7 @@ async def __authorize(headers) -> AuthorizeResponse | None:
 
 
 @app.post("/api/eventinfo", status_code=200)
-async def openai_chat(request: Request) -> AuthorizeResponse:
+async def event_info(request: Request) -> AuthorizeResponse:
     """get event info"""
     authorize_response = await __authorize(request.headers)
 
@@ -55,8 +58,36 @@ async def openai_chat(request: Request) -> AuthorizeResponse:
     return authorize_response
 
 
+@app.post("/v1/chat/completions", status_code=200, response_model=None)
+async def oai_chat_complettion(
+    chat: PlaygroundRequest, request: Request, response: Response
+) -> openai.openai_object.OpenAIObject:
+    """OpenAI chat completion response"""
+
+    authorize_response = await __authorize(request.headers)
+
+    if authorize_response is None or not authorize_response.is_authorized:
+        raise HTTPException(
+            status_code=401,
+            detail="Event code is not authorized",
+        )
+
+    try:
+        if chat.max_tokens > authorize_response.max_token_cap:
+            chat.max_tokens = authorize_response.max_token_cap
+
+        (
+            completion,
+            status_code,
+        ) = await app.state.chat_completion_mgr.call_openai_chat_completion(chat)
+        response.status_code = status_code
+        return completion
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"{exc}") from exc
+
+
 @app.post("/api/oai_prompt", status_code=200)
-async def event_info(
+async def oai_playground(
     chat: PlaygroundRequest, request: Request, response: Response
 ) -> PlaygroundResponse:
     """playground chat returns chat response"""
@@ -97,6 +128,7 @@ async def startup_event():
     )
 
     app.state.openai_mgr = Playground(app, openai_config=openai_config)
+    app.state.chat_completion_mgr = ChatCompletion(app, openai_config=openai_config)
 
 
 if __name__ == "__main__":
