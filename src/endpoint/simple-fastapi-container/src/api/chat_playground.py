@@ -54,7 +54,7 @@ class Playground(BaseChat):
         completion = PlaygroundResponse.empty()
         completion.assistant = {"role": "assistant", "content": message}
 
-        super().logger.warning(msg=f"{message}")
+        self.logger.warning(msg=f"{message}")
 
         return completion, http_status_code
 
@@ -153,5 +153,5 @@ class Playground(BaseChat):
             )
 
         except Exception as exception:
-            super().logger.warning(msg=f"Global exception caught: {exception}")
+            self.logger.logger.warning(msg=f"Global exception caught: {exception}")
             raise exception

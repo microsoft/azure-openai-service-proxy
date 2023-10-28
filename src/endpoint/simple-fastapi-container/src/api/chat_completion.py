@@ -86,5 +86,5 @@ class ChatCompletion(BaseChat):
             )
 
         except Exception as exception:
-            super().logger.warning(msg=f"Global exception caught: {exception}")
+            self.logger.warning(msg=f"Global exception caught: {exception}")
             raise exception

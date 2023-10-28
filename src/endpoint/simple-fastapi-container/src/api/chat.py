@@ -6,7 +6,6 @@ from .openai_async import PlaygroundRequest
 from .configuration import OpenAIConfig
 
 logging.basicConfig(level=logging.WARNING)
-logger = logging.getLogger(__name__)
 
 
 class BaseChat:
@@ -14,6 +13,7 @@ class BaseChat:
         """init in memory session manager"""
         self.openai_config = openai_config
         self.app = app
+        self.logger = logging.getLogger(__name__)
 
     def validate_input(self, chat: PlaygroundRequest):
         """validate input"""
