@@ -37,17 +37,29 @@ async def validation_exception_handler(request, exc):
     )
 
 
-async def __authorize(headers) -> AuthorizeResponse | None:
+async def authorize(headers) -> AuthorizeResponse | None:
     """get the event code from the header"""
     if "openai-event-code" in headers:
         return await app.state.authorize.authorize(headers.get("openai-event-code"))
     return None
 
 
+async def authorize_chat_api(headers) -> list | None:
+    """validate chat complettion API request"""
+
+    if "openai-event-code" in headers:
+        chat_id = headers.get("openai-event-code")
+        id_parts = chat_id.split("/")
+        if len(id_parts) == 2 and len(id_parts[0]) > 0 and len(id_parts[1]) > 0:
+            return await app.state.authorize.authorize(id_parts[0])
+
+    return None
+
+
 @app.post("/api/eventinfo", status_code=200)
 async def event_info(request: Request) -> AuthorizeResponse:
     """get event info"""
-    authorize_response = await __authorize(request.headers)
+    authorize_response = await authorize(request.headers)
 
     if authorize_response is None or not authorize_response.is_authorized:
         raise HTTPException(
@@ -64,12 +76,12 @@ async def oai_chat_complettion(
 ) -> openai.openai_object.OpenAIObject:
     """OpenAI chat completion response"""
 
-    authorize_response = await __authorize(request.headers)
+    authorize_response = await authorize_chat_api(request.headers)
 
-    if authorize_response is None or not authorize_response.is_authorized:
+    if authorize_response is None:
         raise HTTPException(
             status_code=401,
-            detail="Event code is not authorized",
+            detail="Invalid event_code/github_id",
         )
 
     try:
@@ -92,7 +104,7 @@ async def oai_playground(
 ) -> PlaygroundResponse:
     """playground chat returns chat response"""
 
-    authorize_response = await __authorize(request.headers)
+    authorize_response = await authorize(request.headers)
 
     if authorize_response is None or not authorize_response.is_authorized:
         raise HTTPException(
