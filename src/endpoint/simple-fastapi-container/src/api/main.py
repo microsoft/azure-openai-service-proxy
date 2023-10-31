@@ -70,7 +70,7 @@ async def event_info(request: Request) -> AuthorizeResponse:
     return authorize_response
 
 
-@app.post("/v1/chat/completions", status_code=200, response_model=None)
+@app.post("/api/v1/chat/completions", status_code=200, response_model=None)
 async def oai_chat_complettion(
     chat: PlaygroundRequest, request: Request, response: Response
 ) -> openai.openai_object.OpenAIObject:
