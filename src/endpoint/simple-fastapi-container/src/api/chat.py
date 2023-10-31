@@ -21,17 +21,7 @@ class BaseChat:
         if not chat.messages:
             return self.report_exception("Oops, no chat messages.", 400)
 
-        # search through the list of messages for a msg with a role of user
-        user_message = next(
-            (msg for msg in chat.messages if msg["role"] == "user"), None
-        )
-
-        if not user_message or user_message.get("content", "") == "":
-            return self.report_exception(
-                "Oops, messages missing a user role message.", 400
-            )
-
-        # check the max_tokens is between 1 and 4096
+        # check the max_tokens is between 1 and 4000
         if not 1 <= chat.max_tokens <= 4000:
             return self.report_exception(
                 "Oops, max_tokens must be between 1 and 4000.", 400
