@@ -26,7 +26,7 @@ class ChatCompletion(BaseChat):
     ) -> Tuple[openai.openai_object.OpenAIObject, int]:
         """report exception"""
 
-        super.logger.warning(msg=f"{message}")
+        self.logger.warning(msg=f"{message}")
 
         return message, http_status_code
 
