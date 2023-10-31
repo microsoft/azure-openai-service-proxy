@@ -87,31 +87,39 @@ class Playground(BaseChat):
                 }
 
                 choices = response.choices
+
                 if len(response.choices) > 0:
                     choice = choices[0]
-                    filters = choice.content_filter_results
-
-                    completion.assistant = {
-                        "role": "assistant",
-                        "content": choice.message.content,
-                    }
-
                     completion.finish_reason = choice.finish_reason
 
-                    completion.content_filtered = {
-                        "hate": {
-                            "filtered": filters.hate.filtered,
-                            "severity": filters.hate.severity,
-                        },
-                        "self_harm": {
-                            "filtered": filters.self_harm.filtered,
-                            "severity": filters.self_harm.severity,
-                        },
-                        "sexual": {
-                            "filtered": filters.sexual.filtered,
-                            "severity": filters.sexual.severity,
-                        },
-                    }
+                    if "function_call" in choice.message:
+                        completion.assistant = {
+                            "role": "assistant",
+                            "content": choice.message.function_call,
+                        }
+
+                    else:
+                        completion.assistant = {
+                            "role": "assistant",
+                            "content": choice.message.content,
+                        }
+
+                        filters = choice.content_filter_results
+
+                        completion.content_filtered = {
+                            "hate": {
+                                "filtered": filters.hate.filtered,
+                                "severity": filters.hate.severity,
+                            },
+                            "self_harm": {
+                                "filtered": filters.self_harm.filtered,
+                                "severity": filters.self_harm.severity,
+                            },
+                            "sexual": {
+                                "filtered": filters.sexual.filtered,
+                                "severity": filters.sexual.severity,
+                            },
+                        }
 
             return completion, 200
 
@@ -153,5 +161,5 @@ class Playground(BaseChat):
             )
 
         except Exception as exception:
-            self.logger.logger.warning(msg=f"Global exception caught: {exception}")
+            self.logger.warning(msg=f"Global exception caught: {exception}")
             raise exception
