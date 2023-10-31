@@ -31,6 +31,8 @@ class PlaygroundRequest(BaseModel):
     stop_sequence: str
     frequency_penalty: float
     presence_penalty: float
+    functions: list[dict[str, Any]] | None = None
+    function_call: str | dict[str, str] = "auto"
 
 
 class OpenAIAsyncManager:
@@ -63,15 +65,31 @@ class OpenAIAsyncManager:
 
         deployment = await self.openai_config.get_deployment()
 
-        openai_request = {
-            "messages": chat.messages,
-            "max_tokens": chat.max_tokens,
-            "temperature": chat.temperature,
-            "top_p": chat.top_p,
-            "stop": chat.stop_sequence,
-            "frequency_penalty": chat.frequency_penalty,
-            "presence_penalty": chat.presence_penalty,
-        }
+        if chat.functions:
+            # https://platform.openai.com/docs/guides/gpt/function-calling
+            # function_call cabn = none, auto, or {"name": "<insert-function-name>"}
+            openai_request = {
+                "messages": chat.messages,
+                "max_tokens": chat.max_tokens,
+                "temperature": chat.temperature,
+                "top_p": chat.top_p,
+                "stop": chat.stop_sequence,
+                "frequency_penalty": chat.frequency_penalty,
+                "presence_penalty": chat.presence_penalty,
+                "functions": chat.functions,
+                "function_call": chat.function_call if chat.function_call else "auto",
+            }
+
+        else:
+            openai_request = {
+                "messages": chat.messages,
+                "max_tokens": chat.max_tokens,
+                "temperature": chat.temperature,
+                "top_p": chat.top_p,
+                "stop": chat.stop_sequence,
+                "frequency_penalty": chat.frequency_penalty,
+                "presence_penalty": chat.presence_penalty,
+            }
 
         url = (
             f"https://{deployment.endpoint_location}.api.cognitive.microsoft.com/openai/deployments/"
