@@ -1,11 +1,11 @@
-import openai.error
-import json
+''' Example of using the OpenAI Proxy Python SDK '''
 
+import json
+import openai.error
 import openai_proxy
 
 openai_proxy.api_key = "advocacy202310/gloveboxes"
 openai_proxy.api_base = "https://openai-proxy-23uljr-ca.salmonsea-82a61dba.swedencentral.azurecontainerapps.io"
-# openai_proxy.api_base = "http://localhost:8001"
 openai_proxy.api_version = "2023-07-01-preview"
 openai_proxy.api_type = "azure"
 
@@ -89,6 +89,10 @@ try:
     )
 
     print(json.dumps(response, indent=4, sort_keys=True))
+
+    # print the extracted function calls
+    for choice in response["choices"]:
+        print(choice["message"]["function_call"])
 
     # this will cause an exception as the function name is invalid
     response = openai_proxy.ChatCompletion.create(
