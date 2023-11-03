@@ -1,2 +1,2 @@
-httpx
-openai
+httpx>=0.25.0,<0.26.0
+openai>=0.28.1,<0.29.0
