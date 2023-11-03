@@ -17,6 +17,14 @@ messages = [
     {"role": "user", "content": "What's the weather like today in seattle"},
 ]
 
+poem_messages = [
+    {
+        "role": "system",
+        "content": "You are an AI assistant that writes poems in the style of William Shakespeare.",
+    },
+    {"role": "user", "content": "Write a poem about indian elephants"},
+]
+
 
 functions = [
     {
@@ -65,7 +73,7 @@ functions = [
 
 try:
     response = openai_proxy.ChatCompletion.create(
-        messages=messages,
+        messages=poem_messages,
         max_tokens=256,
         temperature=1.0,
     )
@@ -81,7 +89,6 @@ try:
     )
 
     print(json.dumps(response, indent=4, sort_keys=True))
-
 
     # this will cause an exception as the function name is invalid
     response = openai_proxy.ChatCompletion.create(
