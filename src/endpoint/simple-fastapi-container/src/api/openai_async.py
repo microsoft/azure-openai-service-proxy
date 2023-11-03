@@ -25,12 +25,12 @@ class PlaygroundRequest(BaseModel):
     """OpenAI Chat Request"""
 
     messages: list[dict[str, str]]
-    max_tokens: int = 1024
+    max_tokens: int
     temperature: float
-    top_p: float
-    stop_sequence: str
-    frequency_penalty: float
-    presence_penalty: float
+    top_p: float | None = None
+    stop_sequence: Any | None = None
+    frequency_penalty: float | None = None
+    presence_penalty: float | None = None
     functions: list[dict[str, Any]] | None = None
     function_call: str | dict[str, str] = "auto"
 
@@ -72,10 +72,6 @@ class OpenAIAsyncManager:
                 "messages": chat.messages,
                 "max_tokens": chat.max_tokens,
                 "temperature": chat.temperature,
-                "top_p": chat.top_p,
-                "stop": chat.stop_sequence,
-                "frequency_penalty": chat.frequency_penalty,
-                "presence_penalty": chat.presence_penalty,
                 "functions": chat.functions,
                 "function_call": chat.function_call if chat.function_call else "auto",
             }
@@ -85,11 +81,19 @@ class OpenAIAsyncManager:
                 "messages": chat.messages,
                 "max_tokens": chat.max_tokens,
                 "temperature": chat.temperature,
-                "top_p": chat.top_p,
-                "stop": chat.stop_sequence,
-                "frequency_penalty": chat.frequency_penalty,
-                "presence_penalty": chat.presence_penalty,
             }
+
+        if chat.top_p is not None:
+            openai_request["top_p"] = chat.top_p
+
+        if chat.stop_sequence is not None:
+            openai_request["stop"] = chat.stop_sequence
+
+        if chat.frequency_penalty is not None:
+            openai_request["frequency_penalty"] = chat.frequency_penalty
+
+        if chat.presence_penalty is not None:
+            openai_request["presence_penalty"] = chat.presence_penalty
 
         url = (
             f"https://{deployment.endpoint_location}.api.cognitive.microsoft.com/openai/deployments/"
