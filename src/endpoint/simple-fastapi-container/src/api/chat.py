@@ -34,23 +34,23 @@ class BaseChat:
             )
 
         # check the top_p is between 0 and 1
-        if not 0 <= chat.top_p <= 1:
+        if chat.top_p and not 0 <= chat.top_p <= 1:
             return self.report_exception("Oops, top_p must be between 0 and 1.", 400)
 
         # check the frequency_penalty is between 0 and 1
-        if not 0 <= chat.frequency_penalty <= 1:
+        if chat.frequency_penalty and not 0 <= chat.frequency_penalty <= 1:
             return self.report_exception(
                 "Oops, frequency_penalty must be between 0 and 1.", 400
             )
 
         # check the presence_penalty is between 0 and 1
-        if not 0 <= chat.presence_penalty <= 1:
+        if chat.presence_penalty and not 0 <= chat.presence_penalty <= 1:
             return self.report_exception(
                 "Oops, presence_penalty must be between 0 and 1.", 400
             )
 
         # check stop sequence are printable characters
-        if not chat.stop_sequence.isprintable():
+        if chat.stop_sequence and not chat.stop_sequence.isprintable():
             return self.report_exception(
                 "Oops, stop_sequence must be printable characters.", 400
             )
