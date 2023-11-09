@@ -13,6 +13,7 @@ from .authorize import Authorize, AuthorizeResponse
 from .chat_playground import Playground, PlaygroundRequest, PlaygroundResponse
 from .chat_completion import ChatCompletion
 from .configuration import OpenAIConfig
+from .rate_limit import RateLimit
 
 
 logging.basicConfig(level=logging.WARNING)
@@ -44,16 +45,16 @@ async def authorize(headers) -> AuthorizeResponse | None:
     return None
 
 
-async def authorize_chat_api(headers) -> list | None:
+async def authorize_chat_api(headers) -> (list | None, str | None):
     """validate chat complettion API request"""
 
     if "openai-event-code" in headers:
         chat_id = headers.get("openai-event-code")
         id_parts = chat_id.split("/")
         if len(id_parts) == 2 and len(id_parts[0]) > 0 and len(id_parts[1]) > 0:
-            return await app.state.authorize.authorize(id_parts[0])
+            return await app.state.authorize.authorize(id_parts[0]), id_parts[1]
 
-    return None
+    return None, None
 
 
 @app.post("/api/eventinfo", status_code=200)
@@ -76,12 +77,18 @@ async def oai_chat_complettion(
 ) -> openai.openai_object.OpenAIObject:
     """OpenAI chat completion response"""
 
-    authorize_response = await authorize_chat_api(request.headers)
+    authorize_response, user_token = await authorize_chat_api(request.headers)
 
     if authorize_response is None:
         raise HTTPException(
             status_code=401,
             detail="Invalid event_code/github_id",
+        )
+
+    if app.state.rate_limit.is_call_rate_exceeded(user_token):
+        raise HTTPException(
+            status_code=429,
+            detail="Rate limit exceeded. Try again in 10 seconds",
         )
 
     try:
@@ -141,6 +148,7 @@ async def startup_event():
 
     app.state.openai_mgr = Playground(app, openai_config=openai_config)
     app.state.chat_completion_mgr = ChatCompletion(app, openai_config=openai_config)
+    app.state.rate_limit = RateLimit()
 
 
 if __name__ == "__main__":
