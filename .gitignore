@@ -1,0 +1,24 @@
+__pycache__
+*.py[co]
+[.][v]env/
+.DS_Store
+.ruff_cache
+.env
+.coverage
+*.orig
+# .NET stuff
+bin
+obj
+appsettings.*.json
+*.csproj.user
+.mono
+src/dotnet/.vs/
+src/dotnet/VideoGPT.Terminal/Properties/
+*.user
+
+# AZD
+.azure/
+
+src/python/agent.py/VideoGPT.json
+src/python/agent/VideoGPT.json
+src/python/service/master_enriched_lite_3m.json

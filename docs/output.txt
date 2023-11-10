@@ -1,0 +1,25 @@
+{
+  "id": "chatcmpl-7blRcKeTIJI51RAsh3K8pnemadxfk",
+  "object": "chat.completion",
+  "created": 1689234868,
+  "model": "gpt-3.5-turbo-0613",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": null,
+        "function_call": {
+          "name": "get_current_weather",
+          "arguments": "{\n  \"Name\": \"Robert Smith\",\n  \"Company\": \"Contoso Insurance\",\n  \"Telephone\": \"(555) 346-9322\",\n  \"Reason\": \"interested in learning about comprehensive benefits policy\"\n}"
+        }
+      },
+      "finish_reason": "function_call"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 156,
+    "completion_tokens": 52,
+    "total_tokens": 208
+  }
+}
