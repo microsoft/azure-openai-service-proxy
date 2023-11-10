@@ -1,0 +1,7 @@
+{
+    "label": "Developer endpoints",
+    "link": {
+        "type": "generated-index",
+        "description": "Learn about how to use the OpenAI Proxy Service REST endpoints."
+    }
+}
