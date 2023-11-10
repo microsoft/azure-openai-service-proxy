@@ -1,6 +1,6 @@
 # Event authorization
 
-Access to the REST endpoint is controlled by an event code. The REST endpoint is accessible when the current UTC is between the StartUTC and the EndUTC times and the event is active. The event code is passed in the `openai-event-code` header. If the event code is not passed, or the event code is not active, or the current UTC is not between the StartUTC and the EndUTC times, the REST endpoint will return a `401` unauthorized error.
+Access to the proxy service endpoint is controlled by an event code. The proxy service is accessible when the current UTC is between the StartUTC and the EndUTC times and the event is active. The event code is passed in the `openai-event-code` header. If the event code is not passed, or the event code is not active, or the current UTC is not between the StartUTC and the EndUTC times, the proxy service will return a `401` unauthorized error.
 
 Event code details are stored in an Azure Storage account table named `playgroundauthorization`. This table is created when the app is deployed and starts. The table has the following schema:
 
