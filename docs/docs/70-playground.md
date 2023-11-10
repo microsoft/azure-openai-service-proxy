@@ -1,6 +1,6 @@
 # Using the Playground
 
-The Playground is a web-based application that allows you to test your OpenAI models. The Playground is a single page application (SPA) that is hosted in Azure Storage Static Websites. The Playground is a React application that uses the [Azure Static Web Apps](https://docs.microsoft.com/azure/static-web-apps/overview) framework.
+The Playground is a web-based application that allows users to experiment with OpenAI Chat Completions. 
 
 ## Authentication
 
