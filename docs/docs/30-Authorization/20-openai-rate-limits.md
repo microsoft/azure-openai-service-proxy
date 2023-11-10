@@ -12,4 +12,4 @@ If users set the Max Token parameter to 2048, with a message of 200 tokens, and 
 
 This is where the MaxTokenCap is useful for an event. The MaxTokenCap is the maximum number of tokens per request. This overrides the user's Max Token request for load balancing. For example, if you set the MaxTokenCap to 512, then the total number of tokens per minute would be (512 + 200) * 6 * 100) = 427200 tokens per minute. This is well under the 500K tokens per minute limit of the Azure OpenAI model deployment and will result in a better experience for everyone as it minimizes the chance of hitting the rate limit across the system.
 
-MaxTokenCap is set at the event level and is configured in the Azure Storage Account table named `playgroundauthorization`. See the section above on [adding an event](#adding-an-event) for more details.
+MaxTokenCap is set at the event level. See the next section for information about adding events and setting Max Token limits.
