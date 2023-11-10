@@ -1,3 +1,3 @@
 # Playground installation
 
-tbd
+to be completed

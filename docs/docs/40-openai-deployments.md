@@ -33,6 +33,6 @@ Active: true
 ```
 
 
-Ideally, the deployments should be of similar TPM (Tokens Per Minute) capacity. The proxy service will load balance across the deployments using a simple [round robin](https://en.wikipedia.org/wiki/Round-robin_scheduling) scheduler. The proxy service will only load balance across active deployments. If there are no active deployments, the proxy service will return a `500` service unavailable error.
+Ideally, the deployments should be similar TPM (Tokens Per Minute) capacity. The proxy service will load balance across the deployments using a simple [round robin](https://en.wikipedia.org/wiki/Round-robin_scheduling) scheduler. The proxy service will only load balance across active deployments. If there are no active deployments, the proxy service will return a `500` service unavailable error.
 
 If one deployment is of greater capacity than another, you can add the deployment to the configuration table multiple times. For example, if you have one deployment with a capacity of 600K requests per minute, and another deployment of 300. Add the 600K deployment to the configuration table twice so it will be called twice as often as the smaller deployment.

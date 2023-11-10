@@ -1,6 +1,6 @@
 # OpenAI API access
 
-The Azure OpenAI proxy service provides access to the Azure OpenAI APIs for developers to build applications, again using a time bound event code. Initially there are two REST endpoints available via the proxy, `chat completion`, and `embeddings`.
+The Azure OpenAI proxy service provides access to the Azure OpenAI APIs for developers to build applications, again using a time bound event code. Initially, there are two REST endpoints available via the proxy service, `chat completion`, and `embeddings`.
 
 ## Authentication
 
@@ -86,7 +86,7 @@ if response.status_code == 200:
 
 ## The Python OpenAI Proxy SDK
 
-There is a Python SDK that wraps the REST API calls to the Azure OpenAI proxy service. The sample mimics the official OpenAI Chat Completion Python API.
+The Python OpenAI Proxy SDK wraps the REST API calls to the proxy service. The wrapper is designed to be a drop in replacement for the official OpenAI Chat Completion Python API.
 
 ```python
 ''' Example of using the OpenAI Proxy Python SDK '''
