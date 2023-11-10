@@ -10,7 +10,7 @@ Make a note of the following as you'll need them for the next step:
 
 ## Configuring the Azure OpenAI deployments
 
-The REST API is designed to load balance across multiple Azure OpenAI deployments. The deployment configuration is loaded from the 'configuration' Azure Storage Account table. The table has the following schema:
+The proxy service is designed to load balance across multiple Azure OpenAI deployments. The deployment configuration is loaded from the 'configuration' Azure Storage Account table. The table has the following schema:
 
 | Property       | Type    | Description                                             |
 | -------------- | ------- | ------------------------------------------------------- |
@@ -33,6 +33,6 @@ Active: true
 ```
 
 
-Ideally, the deployments should be of similar TPM (Tokens Per Minute) capacity. The REST API will load balance across the deployments using a simple [round robin](https://en.wikipedia.org/wiki/Round-robin_scheduling) scheduler. The REST API will only load balance across active deployments. If there are no active deployments, the REST API will return a `500` service unavailable error.
+Ideally, the deployments should be of similar TPM (Tokens Per Minute) capacity. The proxy service will load balance across the deployments using a simple [round robin](https://en.wikipedia.org/wiki/Round-robin_scheduling) scheduler. The proxy service will only load balance across active deployments. If there are no active deployments, the proxy service will return a `500` service unavailable error.
 
 If one deployment is of greater capacity than another, you can add the deployment to the configuration table multiple times. For example, if you have one deployment with a capacity of 600K requests per minute, and another deployment of 300. Add the 600K deployment to the configuration table twice so it will be called twice as often as the smaller deployment.
