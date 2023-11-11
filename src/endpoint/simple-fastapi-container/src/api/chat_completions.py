@@ -1,14 +1,13 @@
 import logging
 from fastapi import FastAPI
 from pydantic import BaseModel
-from .config import OpenAIConfig
-
 from typing import Tuple, Any
 import openai
 import openai.error
 import openai.openai_object
 from tenacity import RetryError
 
+from .config import OpenAIConfig
 from .openai_async import OpenAIAsyncManager
 
 logging.basicConfig(level=logging.WARNING)
