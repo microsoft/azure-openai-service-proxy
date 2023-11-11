@@ -1,13 +1,42 @@
 """ OpenAI Playground chat completion """
 
 from typing import Tuple
+
 import openai
 import openai.error
 import openai.openai_object
 from fastapi import FastAPI
+from pydantic import BaseModel
 
 from .config import OpenAIConfig
-from .chat_completions import ChatCompletions, PlaygroundRequest, PlaygroundResponse
+from .chat_completions import (
+    ChatCompletions,
+    ChatCompletionsRequest,
+)
+
+
+class PlaygroundResponse(BaseModel):
+    """Playground Chat Completion Response"""
+
+    assistant: dict[str, str]
+    finish_reason: str
+    response_ms: int
+    content_filtered: dict[str, dict[str, str | bool]]
+    usage: dict[str, dict[str, int]]
+    name: str
+
+    # create an empty response
+    @classmethod
+    def empty(cls):
+        """empty response"""
+        return cls(
+            assistant={},
+            finish_reason="",
+            response_ms=0,
+            content_filtered={},
+            usage={},
+            name="",
+        )
 
 
 class Playground(ChatCompletions):
@@ -18,7 +47,7 @@ class Playground(ChatCompletions):
         super().__init__(app, openai_config)
 
     async def call_chat_playground(
-        self, chat: PlaygroundRequest
+        self, chat: ChatCompletionsRequest
     ) -> Tuple[PlaygroundResponse, int]:
         """chat playground"""
 

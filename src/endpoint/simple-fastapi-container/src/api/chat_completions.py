@@ -14,7 +14,7 @@ from .openai_async import OpenAIAsyncManager
 logging.basicConfig(level=logging.WARNING)
 
 
-class PlaygroundRequest(BaseModel):
+class ChatCompletionsRequest(BaseModel):
     """OpenAI Chat Request"""
 
     messages: list[dict[str, str]]
@@ -28,30 +28,6 @@ class PlaygroundRequest(BaseModel):
     function_call: str | dict[str, str] = "auto"
 
 
-class PlaygroundResponse(BaseModel):
-    """Playground Chat Completion Response"""
-
-    assistant: dict[str, str]
-    finish_reason: str
-    response_ms: int
-    content_filtered: dict[str, dict[str, str | bool]]
-    usage: dict[str, dict[str, int]]
-    name: str
-
-    # create an empty response
-    @classmethod
-    def empty(cls):
-        """empty response"""
-        return cls(
-            assistant={},
-            finish_reason="",
-            response_ms=0,
-            content_filtered={},
-            usage={},
-            name="",
-        )
-
-
 class ChatCompletions:
     def __init__(self, app: FastAPI, openai_config: OpenAIConfig):
         """init in memory session manager"""
@@ -59,7 +35,7 @@ class ChatCompletions:
         self.app = app
         self.logger = logging.getLogger(__name__)
 
-    def validate_input(self, chat: PlaygroundRequest):
+    def validate_input(self, chat: ChatCompletionsRequest):
         """validate input"""
         # do some basic input validation
         if not chat.messages:
@@ -111,7 +87,7 @@ class ChatCompletions:
         return message, http_status_code
 
     async def call_openai_chat_completion(
-        self, chat: PlaygroundRequest
+        self, chat: ChatCompletionsRequest
     ) -> Tuple[openai.openai_object.OpenAIObject, int]:
         """call openai with retry"""
 

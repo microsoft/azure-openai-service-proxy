@@ -9,8 +9,11 @@ from fastapi.exceptions import ResponseValidationError
 from fastapi.responses import JSONResponse
 
 from .authorize import Authorize, AuthorizeResponse
-from .chat_playground import Playground
-from .chat_completions import PlaygroundRequest, PlaygroundResponse, ChatCompletions
+from .chat_playground import Playground, PlaygroundResponse
+from .chat_completions import (
+    ChatCompletionsRequest,
+    ChatCompletions,
+)
 
 # from .chat_completions import ChatCompletions
 from .embeddings import EmbeddingsRequest, Embeddings
@@ -107,7 +110,7 @@ async def oai_embeddings(
 
 @app.post("/api/v1/chat/completions", status_code=200, response_model=None)
 async def oai_chat_complettion(
-    chat: PlaygroundRequest, request: Request, response: Response
+    chat: ChatCompletionsRequest, request: Request, response: Response
 ) -> openai.openai_object.OpenAIObject:
     """OpenAI chat completion response"""
 
@@ -141,7 +144,7 @@ async def oai_chat_complettion(
 
 @app.post("/api/oai_prompt", status_code=200)
 async def oai_playground(
-    chat: PlaygroundRequest, request: Request, response: Response
+    chat: ChatCompletionsRequest, request: Request, response: Response
 ) -> PlaygroundResponse:
     """playground chat returns chat response"""
 
