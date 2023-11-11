@@ -2,7 +2,6 @@
 
 import logging
 import os
-
 import openai.openai_object
 
 from fastapi import FastAPI, HTTPException, Request, Response
@@ -11,8 +10,9 @@ from fastapi.responses import JSONResponse
 
 from .authorize import Authorize, AuthorizeResponse
 from .chat_playground import Playground
-from .chat import PlaygroundRequest, PlaygroundResponse
-from .chat_completions import ChatCompletions
+from .chat_completions import PlaygroundRequest, PlaygroundResponse, ChatCompletions
+
+# from .chat_completions import ChatCompletions
 from .embeddings import EmbeddingsRequest, Embeddings
 from .config import OpenAIConfig
 from .rate_limit import RateLimit
@@ -88,7 +88,7 @@ async def oai_embeddings(
             detail="Invalid event_code/github_id",
         )
 
-    # if app.state.rate_limit.is_call_rate_exceeded(user_token):
+    # if app.state.rate_limit_embeddings.is_call_rate_exceeded(user_token):
     #     raise HTTPException(
     #         status_code=429,
     #         detail="Rate limit exceeded. Try again in 10 seconds",
@@ -119,7 +119,7 @@ async def oai_chat_complettion(
             detail="Invalid event_code/github_id",
         )
 
-    # if app.state.rate_limit.is_call_rate_exceeded(user_token):
+    # if app.state.rate_limit_chat_completion.is_call_rate_exceeded(user_token):
     #     raise HTTPException(
     #         status_code=429,
     #         detail="Rate limit exceeded. Try again in 10 seconds",
@@ -157,7 +157,7 @@ async def oai_playground(
         if chat.max_tokens > authorize_response.max_token_cap:
             chat.max_tokens = authorize_response.max_token_cap
 
-        completion, status_code = await app.state.openai_mgr.call_openai_chat(chat)
+        completion, status_code = await app.state.openai_mgr.call_chat_playground(chat)
         response.status_code = status_code
         return completion
     except Exception as exc:
@@ -192,7 +192,8 @@ async def startup_event():
         app, openai_config=openai_config_completions
     )
     app.state.embeddings = Embeddings(app, openai_config=openai_config_embeddings)
-    app.state.rate_limit = RateLimit()
+    app.state.rate_limit_chat_completion = RateLimit()
+    app.state.rate_limit_embeddings = RateLimit()
 
 
 if __name__ == "__main__":
