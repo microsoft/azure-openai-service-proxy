@@ -34,7 +34,6 @@ class Deployment:
         self,
         *,
         friendly_name: str = "",
-        # endpoint_location: str,
         endpoint_key: str,
         deployment_name: str,
         api_version: str,
@@ -42,7 +41,6 @@ class Deployment:
     ):
         """init deployment"""
         self.friendly_name = friendly_name
-        # self.endpoint_location = endpoint_location
         self.endpoint_key = endpoint_key
         self.deployment_name = deployment_name
         self.api_version = api_version
@@ -160,7 +158,6 @@ class OpenAIConfig:
 
         return Deployment(
             friendly_name=deployment.friendly_name,
-            # endpoint_location=deployment.endpoint_location,
             endpoint_key=deployment.endpoint_key,
             deployment_name=deployment.deployment_name,
             resource_name=deployment.resource_name,
