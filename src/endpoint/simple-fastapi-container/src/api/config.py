@@ -15,7 +15,6 @@ from azure.core.exceptions import (
 )
 
 CACHE_EXPIRY_MINUTES = 8
-PARTITION_KEY = "openai-chat"
 TABLE_NAME = "configuration"
 
 logging.basicConfig(level=logging.WARNING)
@@ -40,6 +39,7 @@ class Deployment:
         endpoint_key: str,
         deployment_name: str,
         api_version: str,
+        resource_name: str,
     ):
         """init deployment"""
         self.friendly_name = friendly_name
@@ -47,6 +47,7 @@ class Deployment:
         self.endpoint_key = endpoint_key
         self.deployment_name = deployment_name
         self.api_version = api_version
+        self.resource_name = resource_name
 
 
 class OpenAIConfig:
@@ -57,10 +58,12 @@ class OpenAIConfig:
         *,
         openai_version: str,
         connection_string: str,
+        partition_key: str,
     ):
         """init in memory config manager"""
         self.openai_version = openai_version
         self.connection_string = connection_string
+        self.partition_key = partition_key
 
         self.round_robin = 0
         self.config = None
@@ -86,7 +89,9 @@ class OpenAIConfig:
             ) as table_client:
                 config = []
 
-                query_filter = f"PartitionKey eq '{PARTITION_KEY}' and Active eq true"
+                query_filter = (
+                    f"PartitionKey eq '{self.partition_key}' and Active eq true"
+                )
                 # get all columns from the table
                 queried_entities = table_client.query_entities(
                     query_filter=query_filter,
@@ -101,6 +106,7 @@ class OpenAIConfig:
                         endpoint_location=entity.get("Location", "").strip(),
                         endpoint_key=entity.get("EndpointKey", "").strip(),
                         deployment_name=entity.get("DeploymentName", "").strip(),
+                        resource_name=entity.get("ResourceName", "").strip(),
                         api_version=self.openai_version.strip(),
                     )
 
@@ -158,5 +164,6 @@ class OpenAIConfig:
             endpoint_location=deployment.endpoint_location,
             endpoint_key=deployment.endpoint_key,
             deployment_name=deployment.deployment_name,
+            resource_name=deployment.resource_name,
             api_version=self.openai_version,
         )

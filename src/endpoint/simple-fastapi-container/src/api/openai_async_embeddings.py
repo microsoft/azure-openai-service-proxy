@@ -13,7 +13,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from tenacity import retry, stop_after_attempt, wait_random, retry_if_exception_type
 
-from .config_embeddings import OpenAIConfig
+from .config import OpenAIConfig
 
 HTTPX_TIMEOUT_SECONDS = 30
 

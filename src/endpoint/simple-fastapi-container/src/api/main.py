@@ -13,8 +13,7 @@ from .authorize import Authorize, AuthorizeResponse
 from .chat_playground import Playground, PlaygroundRequest, PlaygroundResponse
 from .chat_completion import ChatCompletion
 from .embeddings import EmbeddingsRequest, Embeddings
-from .config_chat import OpenAIConfig as OpenAIConfigChatCompletion
-from .config_embeddings import OpenAIConfig as OpenAIConfigEmbeddings
+from .config import OpenAIConfig
 from .rate_limit import RateLimit
 
 
@@ -175,14 +174,16 @@ async def startup_event():
         exit(1)
 
     app.state.authorize = Authorize(storage_connection_string)
-    openai_config = OpenAIConfigChatCompletion(
+    openai_config = OpenAIConfig(
         openai_version=OPENAI_API_VERSION,
         connection_string=storage_connection_string,
+        partition_key="openai-chat",
     )
 
-    openai_config_embeddings = OpenAIConfigEmbeddings(
+    openai_config_embeddings = OpenAIConfig(
         openai_version=OPENAI_EMBEDDINGS_API_VERSION,
         connection_string=storage_connection_string,
+        partition_key="openai-embeddings",
     )
 
     app.state.openai_mgr = Playground(app, openai_config=openai_config)

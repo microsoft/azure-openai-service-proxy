@@ -11,7 +11,7 @@ from fastapi import FastAPI
 from tenacity import RetryError
 
 from .openai_async_embeddings import OpenAIAsyncManager, EmbeddingsRequest
-from .config_embeddings import OpenAIConfig
+from .config import OpenAIConfig
 
 logging.basicConfig(level=logging.WARNING)
 
