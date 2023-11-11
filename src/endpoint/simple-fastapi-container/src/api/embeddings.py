@@ -1,13 +1,11 @@
 """ OpenAI Async Manager"""
 
-
 from typing import Tuple
 import logging
 import openai
 import openai.error
 import openai.openai_object
 from fastapi import FastAPI
-
 from tenacity import RetryError
 from pydantic import BaseModel
 
