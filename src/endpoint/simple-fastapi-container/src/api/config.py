@@ -55,12 +55,12 @@ class OpenAIConfig:
     def __init__(
         self,
         *,
-        openai_version: str,
+        api_version: str,
         connection_string: str,
         model_class: str,
     ):
         """init in memory config manager"""
-        self.openai_version = openai_version
+        self.api_version = api_version
         self.connection_string = connection_string
         self.model_class = model_class
 
@@ -106,7 +106,7 @@ class OpenAIConfig:
                         endpoint_key=entity.get("EndpointKey", "").strip(),
                         deployment_name=entity.get("DeploymentName", "").strip(),
                         resource_name=entity.get("ResourceName", "").strip(),
-                        api_version=self.openai_version.strip(),
+                        api_version=self.api_version.strip(),
                     )
 
                     config.append(deployment_item)
@@ -164,5 +164,5 @@ class OpenAIConfig:
             endpoint_key=deployment.endpoint_key,
             deployment_name=deployment.deployment_name,
             resource_name=deployment.resource_name,
-            api_version=self.openai_version,
+            api_version=self.api_version,
         )

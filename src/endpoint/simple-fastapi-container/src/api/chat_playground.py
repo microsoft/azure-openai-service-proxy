@@ -1,42 +1,15 @@
 """ OpenAI Async Manager"""
 
-
 from typing import Tuple
 import openai
 import openai.error
 import openai.openai_object
 from fastapi import FastAPI
-from pydantic import BaseModel
-
 from tenacity import RetryError
 
-from .openai_async_chat import OpenAIAsyncManager, PlaygroundRequest
+from .openai_async import OpenAIAsyncManager
 from .config import OpenAIConfig
-from .chat import BaseChat
-
-
-class PlaygroundResponse(BaseModel):
-    """Playground Chat Completion Response"""
-
-    assistant: dict[str, str]
-    finish_reason: str
-    response_ms: int
-    content_filtered: dict[str, dict[str, str | bool]]
-    usage: dict[str, dict[str, int]]
-    name: str
-
-    # create an empty response
-    @classmethod
-    def empty(cls):
-        """empty response"""
-        return cls(
-            assistant={},
-            finish_reason="",
-            response_ms=0,
-            content_filtered={},
-            usage={},
-            name="",
-        )
+from .chat import BaseChat, PlaygroundRequest, PlaygroundResponse
 
 
 class Playground(BaseChat):
@@ -70,8 +43,52 @@ class Playground(BaseChat):
         completion = PlaygroundResponse.empty()
 
         try:
-            async_mgr = OpenAIAsyncManager(self.app, self.openai_config)
-            response, deployment_name = await async_mgr.get_openai_chat_completion(chat)
+            deployment = await self.openai_config.get_deployment()
+
+            if chat.functions:
+                # https://platform.openai.com/docs/guides/gpt/function-calling
+                # function_call cabn = none, auto, or {"name": "<insert-function-name>"}
+                openai_request = {
+                    "messages": chat.messages,
+                    "max_tokens": chat.max_tokens,
+                    "temperature": chat.temperature,
+                    "functions": chat.functions,
+                    "function_call": chat.function_call
+                    if chat.function_call
+                    else "auto",
+                }
+
+            else:
+                openai_request = {
+                    "messages": chat.messages,
+                    "max_tokens": chat.max_tokens,
+                    "temperature": chat.temperature,
+                }
+
+            if chat.top_p is not None:
+                openai_request["top_p"] = chat.top_p
+
+            if chat.stop_sequence is not None:
+                openai_request["stop"] = chat.stop_sequence
+
+            if chat.frequency_penalty is not None:
+                openai_request["frequency_penalty"] = chat.frequency_penalty
+
+            if chat.presence_penalty is not None:
+                openai_request["presence_penalty"] = chat.presence_penalty
+
+            # url = (
+            #     f"https://{deployment.endpoint_location}.api.cognitive.microsoft.com/openai/deployments/"
+            #     f"{deployment.deployment_name}/chat/completions?api-version={deployment.api_version}"
+            # )
+
+            url = (
+                f"https://{deployment.resource_name}.openai.azure.com/openai/deployments/"
+                f"{deployment.deployment_name}/chat/completions?api-version={deployment.api_version}"
+            )
+
+            async_mgr = OpenAIAsyncManager(self.app, deployment)
+            response, deployment_name = await async_mgr.call_openai(openai_request, url)
 
             if response and isinstance(response, openai.openai_object.OpenAIObject):
                 completion.response_ms = response.response_ms

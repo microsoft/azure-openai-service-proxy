@@ -9,9 +9,10 @@ from fastapi import FastAPI
 
 from tenacity import RetryError
 
-from .openai_async_chat import OpenAIAsyncManager, PlaygroundRequest
+from .openai_async import OpenAIAsyncManager
+
 from .config import OpenAIConfig
-from .chat import BaseChat
+from .chat import BaseChat, PlaygroundRequest
 
 
 class ChatCompletions(BaseChat):
@@ -41,8 +42,55 @@ class ChatCompletions(BaseChat):
             return completion, http_status_code
 
         try:
-            async_mgr = OpenAIAsyncManager(self.app, self.openai_config)
-            response, deployment_name = await async_mgr.get_openai_chat_completion(chat)
+            deployment = await self.openai_config.get_deployment()
+
+            if chat.functions:
+                # https://platform.openai.com/docs/guides/gpt/function-calling
+                # function_call cabn = none, auto, or {"name": "<insert-function-name>"}
+                openai_request = {
+                    "messages": chat.messages,
+                    "max_tokens": chat.max_tokens,
+                    "temperature": chat.temperature,
+                    "functions": chat.functions,
+                    "function_call": chat.function_call
+                    if chat.function_call
+                    else "auto",
+                }
+
+            else:
+                openai_request = {
+                    "messages": chat.messages,
+                    "max_tokens": chat.max_tokens,
+                    "temperature": chat.temperature,
+                }
+
+            if chat.top_p is not None:
+                openai_request["top_p"] = chat.top_p
+
+            if chat.stop_sequence is not None:
+                openai_request["stop"] = chat.stop_sequence
+
+            if chat.frequency_penalty is not None:
+                openai_request["frequency_penalty"] = chat.frequency_penalty
+
+            if chat.presence_penalty is not None:
+                openai_request["presence_penalty"] = chat.presence_penalty
+
+            # url = (
+            #     f"https://{deployment.endpoint_location}.api.cognitive.microsoft.com/openai/deployments/"
+            #     f"{deployment.deployment_name}/chat/completions?api-version={deployment.api_version}"
+            # )
+
+            url = (
+                f"https://{deployment.resource_name}.openai.azure.com/openai/deployments/"
+                f"{deployment.deployment_name}/chat/completions?api-version={deployment.api_version}"
+            )
+
+            async_mgr = OpenAIAsyncManager(self.app, deployment)
+            response, deployment_name = await async_mgr.call_openai(openai_request, url)
+
+            # async_mgr = OpenAIAsyncManager(self.app, self.openai_config)
+            # response, deployment_name = await async_mgr.get_openai_chat_completion(chat)
 
             response["model"] = deployment_name
 

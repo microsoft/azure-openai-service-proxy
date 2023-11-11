@@ -9,11 +9,19 @@ import openai.openai_object
 from fastapi import FastAPI
 
 from tenacity import RetryError
+from pydantic import BaseModel
 
-from .openai_async_embeddings import OpenAIAsyncManager, EmbeddingsRequest
+from .openai_async import OpenAIAsyncManager
 from .config import OpenAIConfig
 
 logging.basicConfig(level=logging.WARNING)
+
+
+class EmbeddingsRequest(BaseModel):
+    """OpenAI Chat Request"""
+
+    input: str
+    model: str = ""
 
 
 class Embeddings:
@@ -36,13 +44,25 @@ class Embeddings:
         return message, http_status_code
 
     async def call_openai_embeddings(
-        self, chat: EmbeddingsRequest
+        self, embedding: EmbeddingsRequest
     ) -> Tuple[openai.openai_object.OpenAIObject, int]:
         """call openai with retry"""
 
         try:
-            async_mgr = OpenAIAsyncManager(self.app, self.openai_config)
-            response, deployment_name = await async_mgr.get_openai_embeddings(chat)
+            deployment = await self.openai_config.get_deployment()
+
+            openai_request = {
+                "input": embedding.input,
+                "model": deployment.deployment_name,
+            }
+
+            url = (
+                f"https://{deployment.resource_name}.openai.azure.com/openai/deployments/"
+                f"{deployment.deployment_name}/embeddings?api-version={self.openai_config.api_version}"
+            )
+
+            async_mgr = OpenAIAsyncManager(self.app, deployment)
+            response, deployment_name = await async_mgr.call_openai(openai_request, url)
 
             response["model"] = deployment_name
 

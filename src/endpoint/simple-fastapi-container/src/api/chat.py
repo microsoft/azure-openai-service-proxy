@@ -1,11 +1,51 @@
 import logging
-
+from typing import Any
 
 from fastapi import FastAPI
-from .openai_async_chat import PlaygroundRequest
+from pydantic import BaseModel
+
+# from .chat_playground import PlaygroundRequest
 from .config import OpenAIConfig
 
 logging.basicConfig(level=logging.WARNING)
+
+
+class PlaygroundRequest(BaseModel):
+    """OpenAI Chat Request"""
+
+    messages: list[dict[str, str]]
+    max_tokens: int
+    temperature: float
+    top_p: float | None = None
+    stop_sequence: Any | None = None
+    frequency_penalty: float | None = None
+    presence_penalty: float | None = None
+    functions: list[dict[str, Any]] | None = None
+    function_call: str | dict[str, str] = "auto"
+
+
+class PlaygroundResponse(BaseModel):
+    """Playground Chat Completion Response"""
+
+    assistant: dict[str, str]
+    finish_reason: str
+    response_ms: int
+    content_filtered: dict[str, dict[str, str | bool]]
+    usage: dict[str, dict[str, int]]
+    name: str
+
+    # create an empty response
+    @classmethod
+    def empty(cls):
+        """empty response"""
+        return cls(
+            assistant={},
+            finish_reason="",
+            response_ms=0,
+            content_filtered={},
+            usage={},
+            name="",
+        )
 
 
 class BaseChat:

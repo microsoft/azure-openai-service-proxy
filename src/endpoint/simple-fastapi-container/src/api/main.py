@@ -10,7 +10,8 @@ from fastapi.exceptions import ResponseValidationError
 from fastapi.responses import JSONResponse
 
 from .authorize import Authorize, AuthorizeResponse
-from .chat_playground import Playground, PlaygroundRequest, PlaygroundResponse
+from .chat_playground import Playground
+from .chat import PlaygroundRequest, PlaygroundResponse
 from .chat_completions import ChatCompletions
 from .embeddings import EmbeddingsRequest, Embeddings
 from .config import OpenAIConfig
@@ -175,13 +176,13 @@ async def startup_event():
 
     app.state.authorize = Authorize(storage_connection_string)
     openai_config_completions = OpenAIConfig(
-        openai_version=OPENAI_CHAT_COMPLETIONS_API_VERSION,
+        api_version=OPENAI_CHAT_COMPLETIONS_API_VERSION,
         connection_string=storage_connection_string,
         model_class="openai-chat",
     )
 
     openai_config_embeddings = OpenAIConfig(
-        openai_version=OPENAI_EMBEDDINGS_API_VERSION,
+        api_version=OPENAI_EMBEDDINGS_API_VERSION,
         connection_string=storage_connection_string,
         model_class="openai-embeddings",
     )
