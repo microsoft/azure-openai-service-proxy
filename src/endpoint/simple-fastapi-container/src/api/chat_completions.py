@@ -14,7 +14,7 @@ from .config import OpenAIConfig
 from .chat import BaseChat
 
 
-class ChatCompletion(BaseChat):
+class ChatCompletions(BaseChat):
     """OpenAI Manager"""
 
     def __init__(self, app: FastAPI, openai_config: OpenAIConfig):

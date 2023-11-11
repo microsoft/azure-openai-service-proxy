@@ -5,7 +5,6 @@ import random
 
 from datetime import datetime, timedelta
 
-
 from azure.data.tables import TableServiceClient
 from azure.data.tables.aio import TableClient
 from azure.core.exceptions import (
@@ -35,7 +34,7 @@ class Deployment:
         self,
         *,
         friendly_name: str = "",
-        endpoint_location: str,
+        # endpoint_location: str,
         endpoint_key: str,
         deployment_name: str,
         api_version: str,
@@ -43,7 +42,7 @@ class Deployment:
     ):
         """init deployment"""
         self.friendly_name = friendly_name
-        self.endpoint_location = endpoint_location
+        # self.endpoint_location = endpoint_location
         self.endpoint_key = endpoint_key
         self.deployment_name = deployment_name
         self.api_version = api_version
@@ -58,12 +57,12 @@ class OpenAIConfig:
         *,
         openai_version: str,
         connection_string: str,
-        partition_key: str,
+        model_class: str,
     ):
         """init in memory config manager"""
         self.openai_version = openai_version
         self.connection_string = connection_string
-        self.partition_key = partition_key
+        self.model_class = model_class
 
         self.round_robin = 0
         self.config = None
@@ -90,7 +89,7 @@ class OpenAIConfig:
                 config = []
 
                 query_filter = (
-                    f"PartitionKey eq '{self.partition_key}' and Active eq true"
+                    f"PartitionKey eq '{self.model_class}' and Active eq true"
                 )
                 # get all columns from the table
                 queried_entities = table_client.query_entities(
@@ -103,7 +102,7 @@ class OpenAIConfig:
                 async for entity in queried_entities:
                     deployment_item = Deployment(
                         friendly_name=entity.get("RowKey", "").strip(),
-                        endpoint_location=entity.get("Location", "").strip(),
+                        # endpoint_location=entity.get("Location", "").strip(),
                         endpoint_key=entity.get("EndpointKey", "").strip(),
                         deployment_name=entity.get("DeploymentName", "").strip(),
                         resource_name=entity.get("ResourceName", "").strip(),
@@ -161,7 +160,7 @@ class OpenAIConfig:
 
         return Deployment(
             friendly_name=deployment.friendly_name,
-            endpoint_location=deployment.endpoint_location,
+            # endpoint_location=deployment.endpoint_location,
             endpoint_key=deployment.endpoint_key,
             deployment_name=deployment.deployment_name,
             resource_name=deployment.resource_name,

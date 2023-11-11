@@ -95,8 +95,13 @@ class OpenAIAsyncManager:
         if chat.presence_penalty is not None:
             openai_request["presence_penalty"] = chat.presence_penalty
 
+        # url = (
+        #     f"https://{deployment.endpoint_location}.api.cognitive.microsoft.com/openai/deployments/"
+        #     f"{deployment.deployment_name}/chat/completions?api-version={deployment.api_version}"
+        # )
+
         url = (
-            f"https://{deployment.endpoint_location}.api.cognitive.microsoft.com/openai/deployments/"
+            f"https://{deployment.resource_name}.openai.azure.com/openai/deployments/"
             f"{deployment.deployment_name}/chat/completions?api-version={deployment.api_version}"
         )
 
