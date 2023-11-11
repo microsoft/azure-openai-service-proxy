@@ -9,7 +9,7 @@ from fastapi import FastAPI
 
 from tenacity import RetryError
 
-from .openai_async import OpenAIAsyncManager, PlaygroundRequest
+from .openai_async_chat import OpenAIAsyncManager, PlaygroundRequest
 from .configuration import OpenAIConfig
 from .chat import BaseChat
 
