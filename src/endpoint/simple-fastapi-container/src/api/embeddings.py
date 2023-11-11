@@ -2,6 +2,7 @@
 
 
 from typing import Tuple
+import logging
 import openai
 import openai.error
 import openai.openai_object
@@ -9,17 +10,21 @@ from fastapi import FastAPI
 
 from tenacity import RetryError
 
-from .openai_async_chat import OpenAIAsyncManager, PlaygroundRequest
-from .config_chat import OpenAIConfig
-from .chat import BaseChat
+from .openai_async_embeddings import OpenAIAsyncManager, EmbeddingsRequest
+from .config_embeddings import OpenAIConfig
+
+logging.basicConfig(level=logging.WARNING)
 
 
-class ChatCompletion(BaseChat):
-    """OpenAI Manager"""
+class Embeddings:
+    """OpenAI Embeddings Manager"""
 
     def __init__(self, app: FastAPI, openai_config: OpenAIConfig):
         """init in memory session manager"""
-        super().__init__(app, openai_config)
+
+        self.app = app
+        self.openai_config = openai_config
+        self.logger = logging.getLogger(__name__)
 
     def report_exception(
         self, message: str, http_status_code: int
@@ -30,19 +35,14 @@ class ChatCompletion(BaseChat):
 
         return message, http_status_code
 
-    async def call_openai_chat_completion(
-        self, chat: PlaygroundRequest
+    async def call_openai_embeddings(
+        self, chat: EmbeddingsRequest
     ) -> Tuple[openai.openai_object.OpenAIObject, int]:
         """call openai with retry"""
 
-        completion, http_status_code = self.validate_input(chat)
-
-        if completion or http_status_code:
-            return completion, http_status_code
-
         try:
             async_mgr = OpenAIAsyncManager(self.app, self.openai_config)
-            response, deployment_name = await async_mgr.get_openai_chat_completion(chat)
+            response, deployment_name = await async_mgr.get_openai_embeddings(chat)
 
             response["model"] = deployment_name
 

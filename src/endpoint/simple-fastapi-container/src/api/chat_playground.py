@@ -11,7 +11,7 @@ from pydantic import BaseModel
 from tenacity import RetryError
 
 from .openai_async_chat import OpenAIAsyncManager, PlaygroundRequest
-from .configuration import OpenAIConfig
+from .config_chat import OpenAIConfig
 from .chat import BaseChat
 
 

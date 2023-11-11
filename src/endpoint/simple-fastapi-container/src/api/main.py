@@ -12,7 +12,9 @@ from fastapi.responses import JSONResponse
 from .authorize import Authorize, AuthorizeResponse
 from .chat_playground import Playground, PlaygroundRequest, PlaygroundResponse
 from .chat_completion import ChatCompletion
-from .configuration import OpenAIConfig
+from .embeddings import EmbeddingsRequest, Embeddings
+from .config_chat import OpenAIConfig as OpenAIConfigChatCompletion
+from .config_embeddings import OpenAIConfig as OpenAIConfigEmbeddings
 from .rate_limit import RateLimit
 
 
@@ -20,6 +22,7 @@ logging.basicConfig(level=logging.WARNING)
 logger = logging.getLogger(__name__)
 
 OPENAI_API_VERSION = "2023-07-01-preview"
+OPENAI_EMBEDDINGS_API_VERSION = "2023-08-01-preview"
 
 app = FastAPI(
     docs_url=None,  # Disable docs (Swagger UI)
@@ -69,6 +72,37 @@ async def event_info(request: Request) -> AuthorizeResponse:
         )
 
     return authorize_response
+
+
+@app.post("/api/v1/ebeddings", status_code=200, response_model=None)
+async def oai_embeddings(
+    chat: EmbeddingsRequest, request: Request, response: Response
+) -> openai.openai_object.OpenAIObject:
+    """OpenAI chat completion response"""
+
+    authorize_response, user_token = await authorize_chat_api(request.headers)
+
+    if authorize_response is None:
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid event_code/github_id",
+        )
+
+    # if app.state.rate_limit.is_call_rate_exceeded(user_token):
+    #     raise HTTPException(
+    #         status_code=429,
+    #         detail="Rate limit exceeded. Try again in 10 seconds",
+    #     )
+
+    try:
+        (
+            completion,
+            status_code,
+        ) = await app.state.embeddings.call_openai_embeddings(chat)
+        response.status_code = status_code
+        return completion
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"{exc}") from exc
 
 
 @app.post("/api/v1/chat/completions", status_code=200, response_model=None)
@@ -141,13 +175,19 @@ async def startup_event():
         exit(1)
 
     app.state.authorize = Authorize(storage_connection_string)
-    openai_config = OpenAIConfig(
+    openai_config = OpenAIConfigChatCompletion(
         openai_version=OPENAI_API_VERSION,
+        connection_string=storage_connection_string,
+    )
+
+    openai_config_embeddings = OpenAIConfigEmbeddings(
+        openai_version=OPENAI_EMBEDDINGS_API_VERSION,
         connection_string=storage_connection_string,
     )
 
     app.state.openai_mgr = Playground(app, openai_config=openai_config)
     app.state.chat_completion_mgr = ChatCompletion(app, openai_config=openai_config)
+    app.state.embeddings = Embeddings(app, openai_config=openai_config_embeddings)
     app.state.rate_limit = RateLimit()
 
 

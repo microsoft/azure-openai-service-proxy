@@ -3,7 +3,7 @@ import logging
 
 from fastapi import FastAPI
 from .openai_async_chat import PlaygroundRequest
-from .configuration import OpenAIConfig
+from .config_chat import OpenAIConfig
 
 logging.basicConfig(level=logging.WARNING)
 
