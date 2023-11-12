@@ -5,10 +5,8 @@ from typing import Tuple
 import openai
 import openai.error
 import openai.openai_object
-from fastapi import FastAPI
 from pydantic import BaseModel
 
-from .config import OpenAIConfig
 from .chat_completions import (
     ChatCompletions,
     ChatCompletionsRequest,
@@ -42,10 +40,6 @@ class PlaygroundResponse(BaseModel):
 class Playground(ChatCompletions):
     """OpenAI Manager"""
 
-    def __init__(self, app: FastAPI, openai_config: OpenAIConfig):
-        """init in memory session manager"""
-        super().__init__(app, openai_config)
-
     async def call_chat_playground(
         self, chat: ChatCompletionsRequest
     ) -> Tuple[PlaygroundResponse, int]:
@@ -53,11 +47,12 @@ class Playground(ChatCompletions):
 
         completion = PlaygroundResponse.empty()
 
-        response, deployment_name = await self.call_openai_chat_completion(chat)
+        response, status_code = await self.call_openai_chat_completion(chat)
+        if status_code != 200:
+            return response, status_code
 
         if response and isinstance(response, openai.openai_object.OpenAIObject):
             completion.response_ms = response.response_ms
-            completion.name = deployment_name
 
             completion.usage = {
                 "usage": {
@@ -103,4 +98,4 @@ class Playground(ChatCompletions):
                         },
                     }
 
-        return completion, 200
+        return completion, status_code
