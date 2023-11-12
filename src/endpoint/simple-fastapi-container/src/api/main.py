@@ -111,7 +111,7 @@ async def oai_embeddings(
 @app.post("/api/v1/chat/completions", status_code=200, response_model=None)
 async def oai_chat_complettion(
     chat: ChatCompletionsRequest, request: Request, response: Response
-) -> openai.openai_object.OpenAIObject:
+) -> openai.openai_object.OpenAIObject | str:
     """OpenAI chat completion response"""
 
     authorize_response, user_token = await authorize_chat_api(request.headers)
@@ -145,7 +145,7 @@ async def oai_chat_complettion(
 @app.post("/api/oai_prompt", status_code=200)
 async def oai_playground(
     chat: ChatCompletionsRequest, request: Request, response: Response
-) -> PlaygroundResponse:
+) -> PlaygroundResponse | str:
     """playground chat returns chat response"""
 
     authorize_response = await authorize(request.headers)
