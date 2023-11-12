@@ -15,10 +15,13 @@ CALL_RATE_PER_10_SECONDS = CALL_RATE_PER_MINUTE / 6
 
 
 class RateLimit:
+    """This class is used to rate limit the api calls"""
+
     def __init__(self):
         self.tokens = {}
 
     def is_call_rate_exceeded(self, token) -> bool:
+        """This method is used to check if the rate limit has been exceeded"""
         # loop through the dictionary and delete any tokens older than 10 seconds
 
         current_time = time.time()
