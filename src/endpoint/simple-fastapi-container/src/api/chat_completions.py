@@ -31,6 +31,8 @@ class ChatCompletionsRequest(BaseModel):
 
 
 class ChatCompletions:
+    """OpenAI Chat Completions Manager"""
+
     def __init__(self, app: FastAPI, openai_config: OpenAIConfig):
         """init in memory session manager"""
         self.openai_config = openai_config
@@ -135,7 +137,8 @@ class ChatCompletions:
 
             url = (
                 f"https://{deployment.resource_name}.openai.azure.com/openai/deployments/"
-                f"{deployment.deployment_name}/chat/completions?api-version={deployment.api_version}"
+                f"{deployment.deployment_name}/chat/completions"
+                f"?api-version={deployment.api_version}"
             )
 
             async_mgr = OpenAIAsyncManager(self.app, deployment)
