@@ -56,7 +56,8 @@ class Embeddings:
 
             url = (
                 f"https://{deployment.resource_name}.openai.azure.com/openai/deployments/"
-                f"{deployment.deployment_name}/embeddings?api-version={self.openai_config.api_version}"
+                f"{deployment.deployment_name}/embeddings"
+                f"?api-version={self.openai_config.api_version}"
             )
 
             async_mgr = OpenAIAsyncManager(self.app, deployment)
