@@ -24,7 +24,7 @@ random.seed()
 
 
 class ConfigError(Exception):
-    pass
+    """Config Error"""
 
 
 class Deployment:
@@ -65,6 +65,7 @@ class OpenAIConfig:
         self.round_robin = 0
         self.config = None
         self.cache_expiry = None
+        self.deployments = {}
 
         # Create events playground authorization table if it does not exist
         try:
@@ -100,7 +101,6 @@ class OpenAIConfig:
                 async for entity in queried_entities:
                     deployment_item = Deployment(
                         friendly_name=entity.get("RowKey", "").strip(),
-                        # endpoint_location=entity.get("Location", "").strip(),
                         endpoint_key=entity.get("EndpointKey", "").strip(),
                         deployment_name=entity.get("DeploymentName", "").strip(),
                         resource_name=entity.get("ResourceName", "").strip(),
@@ -112,6 +112,18 @@ class OpenAIConfig:
                 if len(config) == 0:
                     logger.warning("No active OpenAI model deployments found.")
                     raise ConfigError(("No active OpenAI model deployments found."))
+                else:
+                    logger.warning(
+                        "Found %s active OpenAI model deployments.", len(config)
+                    )
+                    # pretty print the config
+                    for deployment in config:
+                        logger.warning(
+                            "Friendly Name: %s, Deployment Name: %s, Resource Name: %s",
+                            deployment.friendly_name,
+                            deployment.deployment_name,
+                            deployment.resource_name,
+                        )
 
                 return config
 
@@ -119,26 +131,28 @@ class OpenAIConfig:
             logger.warning("ClientAuthenticationError: %s", str(auth_error))
             raise ConfigError(
                 "ClientAuthenticationError: Can't connect to the Azure Configuration Table"
-            )
+            ) from auth_error
 
         except ServiceRequestError as request_error:
             logger.warning("ServiceRequestError: %s", str(request_error))
             raise ConfigError(
                 "ServiceResponseError: Can't connect to the Azure Configuration Table",
-            )
+            ) from request_error
 
         except HttpResponseError as response_error:
             logger.warning("HttpResponseError: %s", str(response_error))
             raise ConfigError(
                 "HttpResponseError: Can't connect to the Azure Configuration Table"
-            )
+            ) from response_error
 
         except ConfigError:
             raise
 
         except Exception as exception:
             logger.warning("Exception: %s", str(exception))
-            raise ConfigError(f"Exception in {__name__}: {str(exception)}")
+            raise ConfigError(
+                f"Exception in {__name__}: {str(exception)}"
+            ) from exception
 
     async def get_deployment(self) -> Deployment | None:
         """get deployment by name"""
