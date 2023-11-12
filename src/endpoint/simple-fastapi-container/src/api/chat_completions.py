@@ -1,7 +1,10 @@
+""" Chat Completions API """
+
 import logging
+from typing import Tuple, Any
+
 from fastapi import FastAPI
 from pydantic import BaseModel
-from typing import Tuple, Any
 import openai
 import openai.error
 import openai.openai_object

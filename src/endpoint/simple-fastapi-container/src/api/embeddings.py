@@ -1,4 +1,4 @@
-""" OpenAI Async Manager"""
+""" OpenAI Embeddings Manager """
 
 from typing import Tuple
 import logging
