@@ -111,9 +111,7 @@ class ChatCompletions:
                     "max_tokens": chat.max_tokens,
                     "temperature": chat.temperature,
                     "functions": chat.functions,
-                    "function_call": chat.function_call
-                    if chat.function_call
-                    else "auto",
+                    "function_call": chat.function_call,
                 }
 
             else:
