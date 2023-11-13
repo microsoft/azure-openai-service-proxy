@@ -20,12 +20,12 @@ class ChatCompletionsRequest(BaseModel):
     """OpenAI Chat Request"""
 
     messages: list[dict[str, str]]
-    max_tokens: int
-    temperature: float
+    max_tokens: int = None
+    temperature: float = None
     top_p: float | None = None
     stop_sequence: Any | None = None
-    frequency_penalty: float | None = None
-    presence_penalty: float | None = None
+    frequency_penalty: float = 0
+    presence_penalty: float = 0
     functions: list[dict[str, Any]] | None = None
     function_call: str | dict[str, str] = "auto"
 
@@ -46,13 +46,13 @@ class ChatCompletions:
             return self.report_exception("Oops, no chat messages.", 400)
 
         # check the max_tokens is between 1 and 4000
-        if not 1 <= chat.max_tokens <= 4000:
+        if chat.max_tokens and not 1 <= chat.max_tokens <= 4000:
             return self.report_exception(
                 "Oops, max_tokens must be between 1 and 4000.", 400
             )
 
         # check the temperature is between 0 and 1
-        if not 0 <= chat.temperature <= 1:
+        if chat.temperature and not 0 <= chat.temperature <= 1:
             return self.report_exception(
                 "Oops, temperature must be between 0 and 1.", 400
             )
@@ -121,19 +121,11 @@ class ChatCompletions:
                     "messages": chat.messages,
                     "max_tokens": chat.max_tokens,
                     "temperature": chat.temperature,
+                    "top_p": chat.top_p,
+                    "stop": chat.stop_sequence,
+                    "frequency_penalty": chat.frequency_penalty,
+                    "presence_penalty": chat.presence_penalty,
                 }
-
-            if chat.top_p is not None:
-                openai_request["top_p"] = chat.top_p
-
-            if chat.stop_sequence is not None:
-                openai_request["stop"] = chat.stop_sequence
-
-            if chat.frequency_penalty is not None:
-                openai_request["frequency_penalty"] = chat.frequency_penalty
-
-            if chat.presence_penalty is not None:
-                openai_request["presence_penalty"] = chat.presence_penalty
 
             url = (
                 f"https://{deployment.resource_name}.openai.azure.com/openai/deployments/"
