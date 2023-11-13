@@ -51,12 +51,15 @@ async def authorize(headers) -> AuthorizeResponse | None:
     return None
 
 
-async def authorize_chat_api(headers) -> (list | None, str | None):
+async def authorize_api_access(headers) -> (list | None, str | None):
     """validate chat complettion API request"""
 
-    if "openai-event-code" in headers:
-        chat_id = headers.get("openai-event-code")
-        id_parts = chat_id.split("/")
+    if "Authorization" in headers:
+        auth_header = headers.get("Authorization")
+        auth_parts = auth_header.split(" ")
+        if len(auth_parts) != 2 or auth_parts[0] != "Bearer":
+            return None, None
+        id_parts = auth_parts[1].split("/")
         if len(id_parts) == 2 and len(id_parts[0]) > 0 and len(id_parts[1]) > 0:
             return await app.state.authorize.authorize(id_parts[0]), id_parts[1]
 
@@ -77,13 +80,13 @@ async def event_info(request: Request) -> AuthorizeResponse:
     return authorize_response
 
 
-@app.post("/api/v1/ebeddings", status_code=200, response_model=None)
+@app.post("/embeddings", status_code=200, response_model=None)
 async def oai_embeddings(
     chat: EmbeddingsRequest, request: Request, response: Response
 ) -> openai.openai_object.OpenAIObject:
     """OpenAI chat completion response"""
 
-    authorize_response, user_token = await authorize_chat_api(request.headers)
+    authorize_response, user_token = await authorize_api_access(request.headers)
 
     if authorize_response is None:
         raise HTTPException(
@@ -108,13 +111,13 @@ async def oai_embeddings(
         raise HTTPException(status_code=500, detail=f"{exc}") from exc
 
 
-@app.post("/api/v1/chat/completions", status_code=200, response_model=None)
+@app.post("/chat/completions", status_code=200, response_model=None)
 async def oai_chat_complettion(
     chat: ChatCompletionsRequest, request: Request, response: Response
 ) -> openai.openai_object.OpenAIObject | str:
     """OpenAI chat completion response"""
 
-    authorize_response, user_token = await authorize_chat_api(request.headers)
+    authorize_response, user_token = await authorize_api_access(request.headers)
 
     if authorize_response is None:
         raise HTTPException(
@@ -129,7 +132,7 @@ async def oai_chat_complettion(
     #     )
 
     try:
-        if chat.max_tokens > authorize_response.max_token_cap:
+        if chat.max_tokens and chat.max_tokens > authorize_response.max_token_cap:
             chat.max_tokens = authorize_response.max_token_cap
 
         (
