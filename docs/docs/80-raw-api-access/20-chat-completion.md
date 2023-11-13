@@ -48,7 +48,6 @@ curl -X POST \
 https://YOUR_OPENAI_PROXY_ENDPOINT/api/v1/chat/completions | jq
 ```
 
-
 ## Chat completion with Python and httpx
 
 ```python

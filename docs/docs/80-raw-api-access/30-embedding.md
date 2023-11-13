@@ -12,3 +12,14 @@ curl https://api.openai.com/v1/embeddings \
     "input": "Your text string goes here"
   }'
 ```
+
+or pretty print the JSON response with `jq`
+
+```shell
+curl https://api.openai.com/v1/embeddings \
+  -H "Content-Type: application/json" \
+  -H "openai-event-code: hackathon/githubuser" \
+  -d '{
+    "input": "Your text string goes here"
+  }' | jq
+```
