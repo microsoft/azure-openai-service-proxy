@@ -8,7 +8,7 @@ import Social from '@site/src/components/social';
 
 <Social
     page_url="https://github.com/gloveboxes/azure-openai-service-proxy"
-    image_url="https://gloveboxes.github.io/OpenAI-Whisper-Transcriber-Sample/assets/images/whispering-wide-66e027604c6c49af3c4a05b6144b2f40.jpeg"
+    image_url="https://github.com/gloveboxes/azure-openai-service-proxy/raw/main/docs/static/img/openai_proxy_banner.jpeg"
     title="Azure OpenAI Proxy Service"
     description= "🏭 Get started with Azure OpenAI Proxy Service - Azure OpenAI Hacks Made Easy"
     hashtags="OpenAI"
@@ -17,7 +17,7 @@ import Social from '@site/src/components/social';
 
 ![](../static/img/openai_proxy_banner.jpeg)
 
-# Introduction to the OpenAI Proxy
+## Introduction to the OpenAI Proxy
 
 The goal of the Azure OpenAI proxy service is to simplify access to an Azure OpenAI `Playground-like` experience and a limited set of Azure OpenAI APIs for developer events, workshops, and hackathons. Access is granted using a timebound `event code`. 
 
@@ -27,13 +27,10 @@ There are two primary use cases for the Azure OpenAI proxy service:
 
 1. Access to an Azure OpenAI Web `Playground-like` experience for developers to explore the Azure OpenAI chat completion using the timebound event code.
 2. REST API access to the Azure OpenAI APIs for developers to build applications, again using a timebound event code. Initially, the proxy service supports the  `chat completion`, and `embeddings` APIs.
+3. Language SDKs for the Azure OpenAI APIs are available in the `src/sdk` folder of the GitHub repository. These SDKs are wrappers around the REST API calls that mimic the Azure OpenAI SDKs. As at the time of writing, there is a Python SDK for OpenAI chat completions and Embeddings.
 
 ## OpenAI Proxy Playground
 
 The Azure OpenAI proxy service provides a `Playground-like` experience for developers to explore the Azure OpenAI chat completion using the timebound event code.
 
-![](media/openai_proxy_playground.png)
-
-
-<!-- <iframe width="100%" height="420" src="https://www.youtube.com/embed/Io8cHdhRnYA" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe> -->
-
+![OpenAI Proxy Playground](media/openai_proxy_playground.png)
