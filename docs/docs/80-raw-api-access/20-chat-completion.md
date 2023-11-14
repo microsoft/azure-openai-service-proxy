@@ -2,7 +2,60 @@
 
 The OpenAI proxy service chat completion endpoint is a REST API that generates a response to a user's prompt. Requests are forwarded to the Azure OpenAI service and the response is returned to the caller.
 
+## Using the OpenAI SDK
+
+The event administrator will provide the:
+
+1. `PROXY_ENDPOINT_URL` - The URL of the OpenAI proxy service, eg `https://YOUR_OPENAI_PROXY_ENDPOINT/v1`. The event administrator will provide the URL, note, the `/v1` appended to the URL.
+2. `EVENT_CODE/GITHUB_USERNAME` - Access to the OpenAI proxy service is granted using a timebound event code. The event code is typically the name of the event, eg `hackathon`, followed by your GitHub username, eg `hackathon/githubuser`. The event administrator will provide the event code.
+
+The following example is from the `src/examples` folder and demonstrates how to use the OpenAI SDK to access the chat completion API.
+
+```python
+""" Test Azure OpenAI Chat Completions API """
+
+import os
+from dotenv import load_dotenv
+from openai import AzureOpenAI
+
+load_dotenv()
+
+ENDPOINT_URL = os.environ.get("PROXY_ENDPOINT_URL")
+API_KEY = os.environ.get("EVENT_CODE/GITHUB_USERNAME")
+API_VERSION = "2023-09-01-preview"
+
+# gets the API Key from environment variable AZURE_OPENAI_API_KEY
+client = AzureOpenAI(
+    azure_endpoint=ENDPOINT_URL,
+    api_key=API_KEY,
+    api_version=API_VERSION,
+)
+
+MESSAGES = [
+    {"role": "system", "content": "You are a helpful assistant."},
+    {"role": "user", "content": "Who won the world series in 2020?"},
+    {
+        "role": "assistant",
+        "content": "The Los Angeles Dodgers won the World Series in 2020.",
+    },
+    {"role": "user", "content": "Where was it played?"},
+]
+
+
+completion = client.chat.completions.create(
+    model="deployment-name",  # e.g. gpt-35-instant
+    messages=MESSAGES,
+)
+
+print(completion.model_dump_json(indent=2))
+print()
+print(completion.choices[0].message.content)
+
+```
+
 ## Chat completion with Curl
+
+You can also use `curl` to access the chat completion API.
 
 ```shell
 curl -X POST \
@@ -50,8 +103,9 @@ https://YOUR_OPENAI_PROXY_ENDPOINT/api/v1/chat/completions | jq
 
 ## Chat completion with Python and httpx
 
-```python
+You can also call the OpenAI chat completion API using Python and the httpx library.
 
+```python
 request = {
     "max_tokens": 256,
     "temperature": 1,
@@ -76,62 +130,3 @@ response = httpx.post(url=url, headers=headers, json=request, timeout=30)
 if response.status_code == 200:
     print(response.json())
 ```
-
-## The Python OpenAI Proxy SDK
-
-The Python OpenAI Proxy SDK wraps the REST API calls to the proxy service. The wrapper is designed to be a drop in replacement for the official OpenAI Chat Completion Python API.
-
-```python
-''' Example of using the OpenAI Proxy Python SDK '''
-
-import json
-import openai.error
-import openai_proxy
-
-openai_proxy.api_key = "hackathon/githubuser"
-openai_proxy.api_base = "https://YOUR_OPENAI_PROXY_ENDPOINT"
-openai_proxy.api_version = "2023-07-01-preview"
-openai_proxy.api_type = "azure"
-
-poem_messages = [
-    {
-        "role": "system",
-        "content": "You are an AI assistant that writes poems in the style of William Shakespeare.",
-    },
-    {"role": "user", "content": "Write a poem about indian elephants"},
-]
-
-try:
-    response = openai_proxy.ChatCompletion.create(
-        messages=poem_messages,
-        max_tokens=256,
-        temperature=1.0,
-    )
-
-    print(json.dumps(response, indent=4, sort_keys=True))
-
-except openai.error.InvalidRequestError as invalid_request_error:
-    print(invalid_request_error)
-
-except openai.error.AuthenticationError as authentication_error:
-    print(authentication_error)
-
-except openai.error.PermissionError as permission_error:
-    print(permission_error)
-
-except openai.error.TryAgain as try_again:
-    print(try_again)
-
-except openai.error.RateLimitError as rate_limit_error:
-    print(rate_limit_error)
-
-except openai.error.APIError as api_error:
-    print(api_error)
-
-except Exception as exception:
-    print(exception)
-```
-
-
-A complete working example can be found in the [Python OpenAI Proxy SDK](https://github.com/gloveboxes/azure-openai-service-proxy/tree/main/src/sdk/python) folder.
-
