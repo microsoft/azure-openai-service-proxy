@@ -15,6 +15,7 @@ from .chat_completions import (
     ChatCompletions,
 )
 from .completions import Completions, CompletionsRequest
+from .image_generation import ImagesGenerations, ImagesGenerationsRequst
 
 # from .chat_completions import ChatCompletions
 from .embeddings import EmbeddingsRequest, Embeddings
@@ -211,6 +212,62 @@ async def oai_chat_completion(
         raise HTTPException(status_code=500, detail=f"{exc}") from exc
 
 
+# Support for OpenAI SDK 0.28
+@app.post(
+    "/v1/engines/{engine_id}/images/generations",
+    status_code=200,
+    response_model=None,
+)
+# Support for Azure OpenAI Service SDK 1.0+
+@app.post(
+    "/v1/openai/deployments/{deployment_id}/images/generations",
+    status_code=200,
+    response_model=None,
+)
+# Support for OpenAI SDK 1.0+
+@app.post("/v1/images/generations", status_code=200, response_model=None)
+async def oai_images_generations(
+    image_generation_request: ImagesGenerationsRequst,
+    request: Request,
+    response: Response,
+    deployment_id: str = None,
+) -> openai.openai_object.OpenAIObject | str:
+    """OpenAI image generation response"""
+
+    # get the api version from the query string else use the default
+    if "api-version" in request.query_params:
+        image_generation_request.api_version = request.query_params["api-version"]
+
+    # exception thrown if not authorized
+    authorize_response, user_token = await app.state.authorize.authorize_api_access(
+        request.headers, deployment_id
+    )
+
+    if app.state.rate_limit_images_generations.is_call_rate_exceeded(user_token):
+        raise HTTPException(
+            status_code=429,
+            detail="Rate limit exceeded. Try again in 10 seconds",
+        )
+
+    try:
+        if (
+            image_generation_request.max_tokens
+            and image_generation_request.max_tokens > authorize_response.max_token_cap
+        ):
+            image_generation_request.max_tokens = authorize_response.max_token_cap
+
+        (
+            completion_response,
+            status_code,
+        ) = await app.state.images_generations_mgr.call_openai_images_generations(
+            image_generation_request
+        )
+        response.status_code = status_code
+        return completion_response
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"{exc}") from exc
+
+
 @app.post("/api/oai_prompt", status_code=200)
 async def oai_playground(
     chat: ChatCompletionsRequest, request: Request, response: Response
@@ -267,8 +324,13 @@ async def startup_event():
         app, openai_config=openai_config_completions
     )
     app.state.embeddings = Embeddings(app, openai_config=openai_config_embeddings)
+    app.state.images_generations_mgr = ImagesGenerations(
+        app, openai_config=openai_config_completions
+    )
+
     app.state.rate_limit_chat_completion = RateLimit()
     app.state.rate_limit_embeddings = RateLimit()
+    app.state.rate_limit_images_generations = RateLimit()
 
 
 if __name__ == "__main__":
