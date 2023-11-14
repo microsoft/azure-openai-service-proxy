@@ -26,7 +26,7 @@ An `event code` is typically the name of an event, eg `hackathon`, and is given 
 There are two primary use cases for the Azure OpenAI proxy service:
 
 1. Access to an Azure OpenAI Web `Playground-like` experience for developers to explore the Azure OpenAI chat completion using a timebound event code.
-2. The proxy service is designed to be a drop in replacement for the the most commonly used OpenAI REST APIs, access is granted using a timebound event code. It is compatible and interoperable with the OpenAI SDKs. Initially, the proxy service supports the `chat completion`, `completion` and `embeddings` APIs. It is compatible and interoperable with the OpenAI SDKs and initial testing has been done with the Python OpenAI SDKs and LangChain.
+2. Access to developer APIs is via REST endpoints and the OpenAI SDKs and LangChain. Access to these services is granted using a timebound event code. Initially, the proxy service supports the `chat completion`, `completion` and `embeddings` APIs.
 
 ## OpenAI Proxy Playground
 
