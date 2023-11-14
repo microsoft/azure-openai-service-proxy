@@ -1,13 +1,13 @@
 # Endpoint access
 
-The Azure OpenAI proxy service provides access to the Azure OpenAI APIs for developers to build applications, again using a time bound event code. Initially, there are two REST endpoints available via the proxy service, `chat completions`, and `embeddings`.
+The Azure OpenAI proxy service provides access to the Azure OpenAI APIs for developers to build applications, again using a time bound event code. Initially, there are three REST endpoints available via the proxy service, `chat completions`, `completions`, and `embeddings`.
 
-## Authentication
+## Access information
 
-The authorization token is made up of the event code and a user id. The user id can be any string, it's recommended to use a GitHub user name. For example, `hackathon/githubuser`.
+The event administrator will provide the:
 
-The authorization token is passed in the `openai-event-code` header of the REST Post request.
-
+1. `PROXY_ENDPOINT_URL` - The URL of the OpenAI proxy service, eg `https://YOUR_OPENAI_PROXY_ENDPOINT/v1`. The event administrator will provide the URL, note, the `/v1` appended to the URL.
+2. The `EVENT_TOKEN` is made up of two parts, the event code followed by your GitHub User Name, eg `hackathon/gloveboxes` and is used where you'd set the OpenAI API key. The event code grants timebound access to the OpenAI APIs and models. The event code is typically the name of the event, eg `hackathon`. The event administrator will provide the event code.
 
 ## Proxy service rate limits
 
