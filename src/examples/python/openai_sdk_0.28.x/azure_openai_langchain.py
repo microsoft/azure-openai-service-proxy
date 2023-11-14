@@ -20,12 +20,6 @@ openai.api_base = ENDPOINT_URL
 openai.api_version = API_VERSION
 
 
-response = openai.Completion.create(
-    engine="text-davinci-002-prod", prompt="This is a test", max_tokens=5
-)
-
-print(response)
-
 llm = AzureOpenAI(
     deployment_name=DEPLOYMENT_NAME,
     openai_api_version=API_VERSION,
