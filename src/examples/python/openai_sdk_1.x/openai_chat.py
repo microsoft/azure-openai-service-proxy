@@ -8,6 +8,7 @@ load_dotenv()
 
 ENDPOINT_URL = os.environ.get("ENDPOINT_URL")
 API_KEY = os.environ.get("API_KEY")
+MODEL_NAME = "text-davinci-002"
 
 MESSAGES = [
     {"role": "system", "content": "You are a helpful assistant."},
@@ -26,7 +27,7 @@ client = OpenAI(
 
 
 completion = client.chat.completions.create(
-    model="deployment-name", messages=MESSAGES  # e.g. gpt-35-instant
+    model=MODEL_NAME, messages=MESSAGES  # e.g. gpt-35-instant
 )
 
 print(completion.model_dump_json(indent=2))

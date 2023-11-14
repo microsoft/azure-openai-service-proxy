@@ -9,8 +9,9 @@ load_dotenv()
 ENDPOINT_URL = os.environ.get("ENDPOINT_URL")
 API_KEY = os.environ.get("API_KEY")
 API_VERSION = "2023-09-01-preview"
+MODEL_NAME = "text-davinci-002"
 
-# gets the API Key from environment variable AZURE_OPENAI_API_KEY
+
 client = AzureOpenAI(
     azure_endpoint=ENDPOINT_URL,
     api_key=API_KEY,
@@ -29,7 +30,7 @@ MESSAGES = [
 
 
 completion = client.chat.completions.create(
-    model="deployment-name",  # e.g. gpt-35-instant
+    model=MODEL_NAME,  # e.g. gpt-35-instant
     messages=MESSAGES,
 )
 

@@ -67,7 +67,6 @@ functions = [
 ]
 
 
-# gets the API Key from environment variable AZURE_OPENAI_API_KEY
 client = AzureOpenAI(
     azure_endpoint=ENDPOINT_URL,
     api_key=API_KEY,

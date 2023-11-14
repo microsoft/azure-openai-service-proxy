@@ -7,7 +7,6 @@ ENDPOINT_URL = os.environ.get("ENDPOINT_URL")
 API_KEY = os.environ.get("API_KEY")
 OPENAI_EMBEDDING_ENGINE = "text-embedding-ada-002"
 
-# gets the API Key from environment variable AZURE_OPENAI_API_KEY
 client = OpenAI(
     base_url=ENDPOINT_URL,
     api_key=API_KEY,

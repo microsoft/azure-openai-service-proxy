@@ -11,7 +11,7 @@ API_KEY = os.environ.get("API_KEY")
 API_VERSION = "2023-09-01-preview"
 OPENAI_EMBEDDING_ENGINE = "text-embedding-ada-002"
 
-# gets the API Key from environment variable AZURE_OPENAI_API_KEY
+
 client = AzureOpenAI(
     azure_endpoint=ENDPOINT_URL,
     api_key=API_KEY,
