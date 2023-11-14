@@ -19,7 +19,7 @@ import Social from '@site/src/components/social';
 
 ## Introduction to the OpenAI Proxy
 
-The goal of the Azure OpenAI proxy service is to simplify access to an Azure OpenAI `Playground-like` experience and supports Azure OpenAI SDKs and REST endpoints for developer events, workshops, and hackathons. Access is granted using a timebound `event code`.
+The goal of the Azure OpenAI proxy service is to simplify access to an Azure OpenAI `Playground-like` experience and supports Azure OpenAI SDKs, LangChain, and REST endpoints for developer events, workshops, and hackathons. Access is granted using a timebound `event code`.
 
 An `event code` is typically the name of an event, eg `hackathon`, and is given to the event attendees. The event administrator sets the period the `event code` will be active.
 
