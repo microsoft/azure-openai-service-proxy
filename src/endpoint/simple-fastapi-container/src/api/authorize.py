@@ -5,6 +5,7 @@ import logging
 from datetime import datetime, timedelta
 import pytz
 
+from fastapi import HTTPException
 from pydantic import BaseModel
 
 from azure.data.tables import TableServiceClient
@@ -216,15 +217,8 @@ class Authorize:
 
         return None
 
-    async def authorize(self, event_code: str) -> AuthorizeResponse | None:
+    async def __authorize(self, event_code: str) -> AuthorizeResponse | None:
         """Authorizes a user to access a specific time bound event."""
-
-        # check event_code is not empty
-        if not event_code:
-            return None
-
-        if not 6 < len(event_code) < 20:
-            return None
 
         # check event code does not user any of the azure table reserved characters for row key
         if any(c in event_code for c in ["\\", "/", "#", "?", "\t", "\n", "\r"]):
@@ -235,3 +229,84 @@ class Authorize:
             return None
 
         return await self.__is_event_authorized(event_code)
+
+    async def __authorize_azure_api_access(self, headers) -> (list | None, str | None):
+        """validate azure sdk formatted API request"""
+
+        if "api-key" in headers:
+            auth_parts = headers.get("api-key")
+
+            id_parts = auth_parts.split("/")
+
+            # id_parts 0 is the event code
+            # id_parts 1 is the user token
+
+            if (
+                len(id_parts) == 2
+                and 6 <= len(id_parts[0]) <= 20
+                and 1 <= len(id_parts[1]) <= 40
+            ):
+                return await self.__authorize(id_parts[0]), id_parts[1]
+
+        return None, None
+
+    async def __authorize_openai_api_access(self, headers) -> (list | None, str | None):
+        """validate openai sdk formatted API request"""
+
+        if "Authorization" in headers:
+            auth_header = headers.get("Authorization")
+            auth_parts = auth_header.split(" ")
+            if len(auth_parts) != 2 or auth_parts[0] != "Bearer":
+                return None, None
+
+            id_parts = auth_parts[1].split("/")
+
+            # id_parts 0 is the event code
+            # id_parts 1 is the user token
+
+            if (
+                len(id_parts) == 2
+                and 6 <= len(id_parts[0]) <= 20
+                and 1 <= len(id_parts[1]) <= 40
+            ):
+                return await self.__authorize(id_parts[0]), id_parts[1]
+
+        return None, None
+
+    async def authorize_playground_access(self, headers) -> AuthorizeResponse | None:
+        """get the event code from the header"""
+        if "openai-event-code" in headers:
+            authorize_response = await self.__authorize(
+                headers.get("openai-event-code")
+            )
+
+            if authorize_response is None or not authorize_response.is_authorized:
+                raise HTTPException(
+                    status_code=401,
+                    detail="Event code is not authorized",
+                )
+
+        return authorize_response
+
+    async def authorize_api_access(
+        self, headers, deployment_id
+    ) -> (list | None, str | None):
+        """authorize api access"""
+        if deployment_id is not None:
+            (
+                authorize_response,
+                user_token,
+            ) = await self.__authorize_azure_api_access(headers)
+        else:
+            (
+                authorize_response,
+                user_token,
+            ) = await self.__authorize_openai_api_access(headers)
+
+        if authorize_response is None or not authorize_response.is_authorized:
+            raise HTTPException(
+                status_code=401,
+                detail="Invalid event_code/github_id",
+            )
+
+        return authorize_response, user_token
