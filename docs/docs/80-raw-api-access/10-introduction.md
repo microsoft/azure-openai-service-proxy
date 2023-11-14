@@ -6,8 +6,10 @@ The Azure OpenAI proxy service provides access to the Azure OpenAI APIs for deve
 
 The event administrator will provide the:
 
-1. `PROXY_ENDPOINT_URL` - The URL of the OpenAI proxy service, eg `https://YOUR_OPENAI_PROXY_ENDPOINT/v1`. The event administrator will provide the URL, note, the `/v1` appended to the URL.
-2. The `EVENT_TOKEN` is made up of two parts, the event code followed by your GitHub User Name, eg `hackathon/gloveboxes` and is used where you'd set the OpenAI API key. The event code grants timebound access to the OpenAI APIs and models. The event code is typically the name of the event, eg `hackathon`. The event administrator will provide the event code.
+1. `ENDPOINT_URL` - The URL of the OpenAI proxy service, eg `https://YOUR_OPENAI_PROXY_ENDPOINT/v1`. The event administrator will provide the URL, note, the `/v1` appended to the URL.
+2. The `API_KEY` is made up of two parts, the event code followed by your GitHub User Name, seperated by a slash, eg `hackathon/gloveboxes`. The event code grants timebound access to the OpenAI APIs and models. The event code is typically the name of the event, eg `hackathon`. The event administrator will provide the event code.
+
+When the event is finishied, you can [Create and deploy an Azure OpenAI Service resource](https://learn.microsoft.com/azure/ai-services/openai/how-to/create-resource), then deploy your own OpenAI models. Then, simply replace the event `API_KEY` and `ENDPOINT_URL` with your OpenAI Service API key and endpoint URL.
 
 ## Proxy service rate limits
 

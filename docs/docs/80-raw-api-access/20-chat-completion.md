@@ -15,11 +15,11 @@ from openai import AzureOpenAI
 
 load_dotenv()
 
-ENDPOINT_URL = os.environ.get("PROXY_ENDPOINT_URL")
-API_KEY = os.environ.get("EVENT_TOKEN")
+ENDPOINT_URL = os.environ.get("ENDPOINT_URL")
+API_KEY = os.environ.get("EVENT_API_KEYTOKEN")
 API_VERSION = "2023-09-01-preview"
 
-# gets the API Key from environment variable AZURE_OPENAI_API_KEY
+
 client = AzureOpenAI(
     azure_endpoint=ENDPOINT_URL,
     api_key=API_KEY,
@@ -50,11 +50,11 @@ print(completion.choices[0].message.content)
 
 ## Chat completion with Curl
 
-You can also use `curl` to access the chat completion API.
+You can also use `curl` to access the chat completion API. Remember, the `API_KEY` is the EventCode/GitHubUserName, eg `hackathon/gloveboxes`, and the `ENDPOINT_URL` is proxy url provided by the event administrator.
 
 ```shell
 curl -X POST \
--H "openai-event-code: EVENT_TOKEN" \
+-H "openai-event-code: API_KEY" \
 -H "Content-Type: application/json" \
 -d '{
     "max_tokens": 256,
@@ -70,14 +70,14 @@ curl -X POST \
         }
     ]
 }' \
-https://YOUR_OPENAI_PROXY_ENDPOINT/v1/chat/completions
+https://ENDPOINT_URL/v1/chat/completions
 ```
 
 or pretty print the JSON response with `jq`
 
 ```shell
 curl -X POST \
--H "openai-event-code: EVENT_TOKEN" \
+-H "openai-event-code: API_KEY" \
 -H "Content-Type: application/json" \
 -d '{
     "max_tokens": 256,
@@ -93,5 +93,5 @@ curl -X POST \
         }
     ]
 }' \
-https://YOUR_OPENAI_PROXY_ENDPOINT/v1/chat/completions | jq
+https://ENDPOINT_URL/v1/chat/completions | jq
 ```

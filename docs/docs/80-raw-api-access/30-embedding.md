@@ -20,7 +20,7 @@ API_KEY = os.environ.get("EVENT_TOKEN")
 API_VERSION = "2023-09-01-preview"
 OPENAI_EMBEDDING_ENGINE = "text-embedding-ada-002"
 
-# gets the API Key from environment variable AZURE_OPENAI_API_KEY
+
 client = AzureOpenAI(
     azure_endpoint=ENDPOINT_URL,
     api_key=API_KEY,
@@ -46,14 +46,14 @@ query_embeddings = client.embeddings.create(
 print(query_embeddings.data[0].embedding)
 ```
 
-## Embeddings with Curl
+## OpenAI Embeddings with Curl
 
-You can also use `curl` to access embeddings API.
+You can also use `curl` to access the OpenAI embeddings API. Remember, the `API_KEY` is the EventCode/GitHubUserName, eg `hackathon/gloveboxes`, and the `ENDPOINT_URL` is proxy url provided by the event administrator.
 
 ```shell
-curl https://OUR_OPENAI_PROXY_ENDPOINT/v1/embeddings \
+curl https://ENDPOINT_URL/v1/embeddings \
   -H "Content-Type: application/json" \
-  -H "openai-event-code: EVENT_TOKEN" \
+  -H "openai-event-code: API_KEY" \
   -d '{
     "input": "Your text string goes here"
   }'
@@ -62,9 +62,9 @@ curl https://OUR_OPENAI_PROXY_ENDPOINT/v1/embeddings \
 or pretty print the JSON response with `jq`
 
 ```shell
-curl https://OUR_OPENAI_PROXY_ENDPOINT/v1/embeddings \
+curl https://ENDPOINT_URL/v1/embeddings \
   -H "Content-Type: application/json" \
-  -H "openai-event-code: EVENT_TOKEN" \
+  -H "openai-event-code: API_KEY" \
   -d '{
     "input": "Your text string goes here"
   }' | jq

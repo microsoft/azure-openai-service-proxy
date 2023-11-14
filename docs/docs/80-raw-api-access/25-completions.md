@@ -34,32 +34,32 @@ response = openai.Completion.create(
 print(response)
 ```
 
-## Chat completion with Curl
+## OpenAI completions with Curl
 
-You can also use `curl` to access the chat completion API.
+You can also use `curl` to access the OpenAI completions API. Remember, the `API_KEY` is the EventCode/GitHubUserName, eg `hackathon/gloveboxes`, and the `ENDPOINT_URL` is proxy url provided by the event administrator.
 
 ```shell
 curl -X POST \
--H "openai-event-code: EVENT_TOKEN" \
+-H "openai-event-code: API_KEY" \
 -H "Content-Type: application/json" \
 -d '{
     "max_tokens": 256,
     "temperature": 1,
     "prompt": "Write a poem about indian elephants"
 }' \
-https://YOUR_OPENAI_PROXY_ENDPOINT/v1/completions
+https://ENDPOINT_URL/v1/completions
 ```
 
 or pretty print the JSON response with `jq`
 
 ```shell
 curl -X POST \
--H "openai-event-code: EVENT_TOKEN" \
+-H "openai-event-code: API_KEY" \
 -H "Content-Type: application/json" \
 -d '{
     "max_tokens": 256,
     "temperature": 1,
     "prompt": "Write a poem about indian elephants"
 }' \
-https://YOUR_OPENAI_PROXY_ENDPOINT/v1/completions | jq
+https://ENDPOINT_URL/v1/completions | jq
 ```
