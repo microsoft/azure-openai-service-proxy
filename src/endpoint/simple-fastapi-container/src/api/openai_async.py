@@ -135,4 +135,4 @@ class OpenAIAsyncManager:
                 f"Invalid response body from API: {response.text}"
             ) from exc
 
-        return openai_response, self.deployment.friendly_name
+        return openai_response
