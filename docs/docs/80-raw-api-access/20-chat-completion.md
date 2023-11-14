@@ -7,7 +7,7 @@ The OpenAI proxy service chat completion endpoint is a REST API that generates a
 The event administrator will provide the:
 
 1. `PROXY_ENDPOINT_URL` - The URL of the OpenAI proxy service, eg `https://YOUR_OPENAI_PROXY_ENDPOINT/v1`. The event administrator will provide the URL, note, the `/v1` appended to the URL.
-2. `EVENT_CODE/GITHUB_USERNAME` - Access to the OpenAI proxy service is granted using a timebound event code. The event code is typically the name of the event, eg `hackathon`, followed by your GitHub username, eg `hackathon/githubuser`. The event administrator will provide the event code.
+2. The `EVENT_TOKEN` is made up of two parts, the event code followed by your GitHub User Name, eg `hackathon/gloveboxes`. The event code grants timebound access to the OpenAI APIs and models. The event code is typically the name of the event, eg `hackathon`. The event administrator will provide the event code.
 
 The following example is from the `src/examples` folder and demonstrates how to use the OpenAI SDK to access the chat completion API.
 
@@ -21,7 +21,7 @@ from openai import AzureOpenAI
 load_dotenv()
 
 ENDPOINT_URL = os.environ.get("PROXY_ENDPOINT_URL")
-API_KEY = os.environ.get("EVENT_CODE/GITHUB_USERNAME")
+API_KEY = os.environ.get("EVENT_TOKEN")
 API_VERSION = "2023-09-01-preview"
 
 # gets the API Key from environment variable AZURE_OPENAI_API_KEY
