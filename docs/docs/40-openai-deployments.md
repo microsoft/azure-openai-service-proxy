@@ -14,24 +14,21 @@ The proxy service is designed to load balance across multiple Azure OpenAI deplo
 
 | Property       | Type    | Description                                             |
 | -------------- | ------- | ------------------------------------------------------- |
-| PartitionKey   | string  | Must be 'openai-chat'                                   |
+| PartitionKey   | string  | Can be 'openai-chat', 'openai-completions', or 'openai-embeddings' |
 | RowKey         | string  | The deployment-friendly name                            |
-| Location       | string  | The Azure region where the OpenAI deployment is located |
 | EndpointKey    | string  | The Azure OpenAI deployment key                         |
 | DeploymentName | string  | The Azure OpenAI deployment name                        |
-| Active         | boolean | Is the deployment active, true, or false                 |
+| Active         | boolean | Is the deployment active, true, or false                |
 
 Here is an example
 
 ```text
 PartitionKey: openai-chat
 RowKey: gpt-35-turbo-01
-Location: swedencentral
 EndpointKey: wd7w6d77w868sd678s
 DeploymentName: gpt-35-turbo
 Active: true
 ```
-
 
 Ideally, the deployments should be similar TPM (Tokens Per Minute) capacity. The proxy service will load balance across the deployments using a simple [round robin](https://en.wikipedia.org/wiki/Round-robin_scheduling) scheduler. The proxy service will only load balance across active deployments. If there are no active deployments, the proxy service will return a `500` service unavailable error.
 
