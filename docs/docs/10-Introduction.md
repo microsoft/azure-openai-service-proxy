@@ -19,15 +19,14 @@ import Social from '@site/src/components/social';
 
 ## Introduction to the OpenAI Proxy
 
-The goal of the Azure OpenAI proxy service is to simplify access to an Azure OpenAI `Playground-like` experience and a limited set of Azure OpenAI APIs for developer events, workshops, and hackathons. Access is granted using a timebound `event code`. 
+The goal of the Azure OpenAI proxy service is to simplify access to an Azure OpenAI `Playground-like` experience and supports Azure OpenAI SDKs and REST endpoints for developer events, workshops, and hackathons. Access is granted using a timebound `event code`.
 
 An `event code` is typically the name of an event, eg `hackathon`, and is given to the event attendees. The event administrator sets the period the `event code` will be active.
 
 There are two primary use cases for the Azure OpenAI proxy service:
 
-1. Access to an Azure OpenAI Web `Playground-like` experience for developers to explore the Azure OpenAI chat completion using the timebound event code.
-2. REST API access to the Azure OpenAI APIs for developers to build applications, again using a timebound event code. Initially, the proxy service supports the  `chat completion`, and `embeddings` APIs.
-3. Language SDKs for the Azure OpenAI APIs are available in the `src/sdk` folder of the GitHub repository. These SDKs are wrappers around the REST API calls that mimic the Azure OpenAI SDKs. As at the time of writing, there is a Python SDK for OpenAI chat completions and Embeddings.
+1. Access to an Azure OpenAI Web `Playground-like` experience for developers to explore the Azure OpenAI chat completion using a timebound event code.
+2. The proxy service is designed to be a drop in replacement for the the most commonly used OpenAI REST APIs, access is granted using a timebound event code. It is compatible and interoperable with the OpenAI SDKs. Initially, the proxy service supports the `chat completion`, `completion` and `embeddings` APIs. It is compatible and interoperable with the OpenAI SDKs and initial testing has been done with the Python OpenAI SDKs and LangChain.
 
 ## OpenAI Proxy Playground
 
