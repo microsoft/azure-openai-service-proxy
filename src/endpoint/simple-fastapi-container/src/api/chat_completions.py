@@ -13,6 +13,8 @@ from tenacity import RetryError
 from .config import OpenAIConfig
 from .openai_async import OpenAIAsyncManager
 
+OPENAI_CHAT_COMPLETIONS_API_VERSION = "2023-09-01-preview"
+
 logging.basicConfig(level=logging.WARNING)
 
 
@@ -28,6 +30,7 @@ class ChatCompletionsRequest(BaseModel):
     presence_penalty: float = 0
     functions: list[dict[str, Any]] | None = None
     function_call: str | dict[str, str] = "auto"
+    api_version: str = OPENAI_CHAT_COMPLETIONS_API_VERSION
 
 
 class ChatCompletions:
@@ -128,13 +131,13 @@ class ChatCompletions:
             url = (
                 f"https://{deployment.resource_name}.openai.azure.com/openai/deployments/"
                 f"{deployment.deployment_name}/chat/completions"
-                f"?api-version={deployment.api_version}"
+                f"?api-version={chat.api_version}"
             )
 
             async_mgr = OpenAIAsyncManager(self.app, deployment)
-            response, deployment_name = await async_mgr.call_openai(openai_request, url)
+            response = await async_mgr.call_openai(openai_request, url)
 
-            response["model"] = deployment_name
+            response["model"] = deployment.friendly_name
 
             return response, 200
 
