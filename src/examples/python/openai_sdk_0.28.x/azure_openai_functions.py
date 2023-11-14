@@ -1,9 +1,20 @@
-from openai import OpenAI
+""" Test Azure OpenAI Functions API """
 
-client = OpenAI(
-    base_url="YOUR_PROXY_API_URL",
-    api_key="YOUR_EVENT_CODE/GITHUB_USERNAME",
-)
+import os
+from dotenv import load_dotenv
+import openai
+
+load_dotenv()
+
+ENDPOINT_URL = os.environ.get("ENDPOINT_URL")
+API_KEY = os.environ.get("API_KEY")
+API_VERSION = "2023-09-01-preview"
+DEPLOYMENT_NAME = "gpt-3.5-turbo"
+
+openai.api_type = "azure"
+openai.api_key = API_KEY
+openai.api_base = ENDPOINT_URL
+openai.api_version = API_VERSION
 
 messages = [
     {
@@ -61,13 +72,14 @@ functions = [
     },
 ]
 
-response = client.chat.completions.create(
+
+completion = openai.ChatCompletion.create(
+    deployment_id=DEPLOYMENT_NAME,
     messages=messages,
-    max_tokens=256,
-    model="gpt-3.5-turbo",
-    temperature=1.0,
     functions=functions,
-    function_call={"name": "get_current_weather"},
 )
 
-print(response)
+print(completion)
+print()
+print(completion.choices[0].finish_reason)
+print(completion.choices[0].message.function_call)
