@@ -1,4 +1,6 @@
-""" Test langchain with openai """ ""
+""" Test langchain with openai """
+
+# See documentation at https://gloveboxes.github.io/azure-openai-service-proxy/category/developer-endpoints/
 
 import os
 from dotenv import load_dotenv

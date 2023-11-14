@@ -1,5 +1,7 @@
 """ Test Azure OpenAI Functions API """
 
+# See documentation at https://gloveboxes.github.io/azure-openai-service-proxy/category/developer-endpoints/
+
 import os
 from dotenv import load_dotenv
 import openai

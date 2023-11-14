@@ -1,4 +1,6 @@
-''' Test chat completion with openai '''''
+''' Test chat completion with openai '''
+
+# See documentation at https://gloveboxes.github.io/azure-openai-service-proxy/category/developer-endpoints/
 
 import os
 from dotenv import load_dotenv
