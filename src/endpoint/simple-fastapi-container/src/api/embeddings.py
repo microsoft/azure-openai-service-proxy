@@ -12,14 +12,17 @@ from pydantic import BaseModel
 from .openai_async import OpenAIAsyncManager
 from .config import OpenAIConfig
 
+OPENAI_EMBEDDINGS_API_VERSION = "2023-08-01-preview"
+
 logging.basicConfig(level=logging.WARNING)
 
 
 class EmbeddingsRequest(BaseModel):
     """OpenAI Chat Request"""
 
-    input: str
+    input: str | list[str]
     model: str = ""
+    api_version: str = OPENAI_EMBEDDINGS_API_VERSION
 
 
 class Embeddings:
@@ -57,13 +60,13 @@ class Embeddings:
             url = (
                 f"https://{deployment.resource_name}.openai.azure.com/openai/deployments/"
                 f"{deployment.deployment_name}/embeddings"
-                f"?api-version={self.openai_config.api_version}"
+                f"?api-version={embedding.api_version}"
             )
 
             async_mgr = OpenAIAsyncManager(self.app, deployment)
-            response, deployment_name = await async_mgr.call_openai(openai_request, url)
+            response = await async_mgr.call_openai(openai_request, url)
 
-            response["model"] = deployment_name
+            response["model"] = deployment.friendly_name
 
             return response, 200
 
