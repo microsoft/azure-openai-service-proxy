@@ -36,14 +36,12 @@ class Deployment:
         friendly_name: str = "",
         endpoint_key: str,
         deployment_name: str,
-        api_version: str,
         resource_name: str,
     ):
         """init deployment"""
         self.friendly_name = friendly_name
         self.endpoint_key = endpoint_key
         self.deployment_name = deployment_name
-        self.api_version = api_version
         self.resource_name = resource_name
 
 
@@ -53,12 +51,10 @@ class OpenAIConfig:
     def __init__(
         self,
         *,
-        api_version: str,
         connection_string: str,
         model_class: str,
     ):
         """init in memory config manager"""
-        self.api_version = api_version
         self.connection_string = connection_string
         self.model_class = model_class
 
@@ -104,7 +100,6 @@ class OpenAIConfig:
                         endpoint_key=entity.get("EndpointKey", "").strip(),
                         deployment_name=entity.get("DeploymentName", "").strip(),
                         resource_name=entity.get("ResourceName", "").strip(),
-                        api_version=self.api_version.strip(),
                     )
 
                     config.append(deployment_item)
@@ -175,5 +170,4 @@ class OpenAIConfig:
             endpoint_key=deployment.endpoint_key,
             deployment_name=deployment.deployment_name,
             resource_name=deployment.resource_name,
-            api_version=self.api_version,
         )
