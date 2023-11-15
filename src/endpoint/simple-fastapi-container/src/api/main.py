@@ -230,7 +230,7 @@ async def oai_images_generations(
     image_generation_request: ImagesGenerationsRequst,
     request: Request,
     response: Response,
-) -> openai.openai_object.OpenAIObject | str:
+):
     """OpenAI image generation response"""
 
     # No deployment_is passed for images generation so set to dall-e
