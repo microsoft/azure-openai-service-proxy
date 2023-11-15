@@ -81,7 +81,7 @@ async def oai_embeddings(
 ) -> openai.openai_object.OpenAIObject:
     """OpenAI chat completion response"""
 
-    # get the api version from the query string else use the default
+    # get the api version from the query string
     if "api-version" in request.query_params:
         embeddings.api_version = request.query_params["api-version"]
 
@@ -129,7 +129,7 @@ async def oai_completion(
 ) -> openai.openai_object.OpenAIObject | str:
     """OpenAI completion response"""
 
-    # get the api version from the query string else use the default
+    # get the api version from the query string
     if "api-version" in request.query_params:
         completion_request.api_version = request.query_params["api-version"]
 
@@ -183,7 +183,7 @@ async def oai_chat_completion(
 ) -> openai.openai_object.OpenAIObject | str:
     """OpenAI chat completion response"""
 
-    # get the api version from the query string else use the default
+    # get the api version from the query string
     if "api-version" in request.query_params:
         chat.api_version = request.query_params["api-version"]
 
@@ -233,15 +233,15 @@ async def oai_images_generations(
 ) -> openai.openai_object.OpenAIObject | str:
     """OpenAI image generation response"""
 
-    # currently a hack - this will always force it to be Azure OpenAI Service
-    deployment_id = "dalle-2"
+    # No deployment_is passed for images generation so set to dall-e
+    deployment_id = "dall-e"
 
-    # get the api version from the query string else use the default
+    # get the api version from the query string
     if "api-version" in request.query_params:
         image_generation_request.api_version = request.query_params["api-version"]
 
     # exception thrown if not authorized
-    authorize_response, user_token = await app.state.authorize.authorize_api_access(
+    _, user_token = await app.state.authorize.authorize_api_access(
         request.headers, deployment_id
     )
 

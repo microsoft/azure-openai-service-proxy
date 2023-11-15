@@ -3,6 +3,7 @@
 from enum import Enum
 import logging
 from typing import Tuple
+import asyncio
 from fastapi import FastAPI
 import openai
 from pydantic import BaseModel
@@ -17,23 +18,31 @@ logging.basicConfig(level=logging.WARNING)
 
 
 class ResponseFormat(Enum):
+    """Response Format"""
+
     URL = "url"
     BASE64 = "base64"
 
 
 class ImageSize(Enum):
-    _256x256 = "256x256"
-    _512x512 = "512x512"
-    _1024x1024 = "1024x1024"
+    """Image Size"""
+
+    IS_256X256 = "256x256"
+    IS_512X512 = "512x512"
+    IS_1024X1024 = "1024x1024"
+
+
+class DalleTimeoutError(Exception):
+    """Raised when the Dalle request times out"""
 
 
 class ImagesGenerationsRequst(BaseModel):
     """OpenAI Images Generations Request"""
 
     prompt: str
-    response_format: ResponseFormat = None
-    image_count: int = 1
-    image_size: ImageSize = ImageSize._1024x1024
+    response_format: ResponseFormat = ResponseFormat.URL
+    n: int = 1
+    size: ImageSize = ImageSize.IS_1024X1024
     user: str = None
     api_version: str = OPENAI_IMAGES_GENERATIONS_API_VERSION
 
@@ -53,14 +62,14 @@ class ImagesGenerations:
         if not images.prompt:
             return self.report_exception("Oops, no prompt.", 400)
 
-        # check the image_count is between 1 and 10
-        if images.image_count and not 1 <= images.image_count <= 10:
+        # check the image_count is between 1 and 5
+        if images.n and not 1 <= images.n <= 5:
             return self.report_exception(
                 "Oops, image_count must be between 1 and 10.", 400
             )
 
         # check the image_size is between 256x256, 512x512, 1024x1024
-        if images.image_size and images.image_size not in ImageSize:
+        if images.size and images.size not in ImageSize:
             return self.report_exception(
                 "Oops, image_size must be 256x256, 512x512, 1024x1024.", 400
             )
@@ -87,6 +96,8 @@ class ImagesGenerations:
     ) -> Tuple[openai.openai_object.OpenAIObject, int]:
         """call openai with retry"""
 
+        retry_count = 0
+
         completion, http_status_code = self.validate_input(images)
 
         if completion or http_status_code:
@@ -97,25 +108,43 @@ class ImagesGenerations:
 
             openai_request = {
                 "prompt": images.prompt,
-                "n": images.image_count,
-                "size": images.image_size.value,
-                "response_format": images.response_format.value
-                if images.response_format
-                else "url",
-                "user": images.user,
+                "n": images.n,
+                "size": images.size.value,
+                "response_format": images.response_format.value,
             }
 
             url = (
-                f"https://{deployment.resource_name.lower()}.openai.azure.com/openai/images/generations:submit"
+                f"https://{deployment.resource_name}.openai.azure.com/openai/images/generations:submit"
                 f"?api-version={images.api_version}"
             )
 
             async_mgr = OpenAIAsyncManager(self.app, deployment)
-            response = await async_mgr.call_openai(openai_request, url)
+            response = await async_mgr.call_openai(openai_request, url, return_raw=True)
 
-            response["model"] = deployment.friendly_name
+            operation_location = response.headers["operation-location"]
+            status = ""
+            while status != "succeeded":
+                # retry 30 times which is 60 seconds
+                if retry_count > 30:
+                    raise DalleTimeoutError
 
-            return response, 200
+                await asyncio.sleep(2)
+
+                async_mgr = OpenAIAsyncManager(self.app, deployment)
+                response = await async_mgr.async_get_request(operation_location)
+
+                status = response.json()["status"]
+                retry_count += 1
+
+            response = response.json()
+
+            return response, response.get("http_status_code", 200)
+
+        except DalleTimeoutError:
+            return self.report_exception(
+                "Oops, OpenAI Dalle request timeout. Please try again.",
+                408,
+            )
 
         except openai.error.InvalidRequestError as invalid_request_exception:
             # this exception captures content policy violation policy
