@@ -133,10 +133,10 @@ class ImagesGenerations:
                 async_mgr = OpenAIAsyncManager(self.app, deployment)
                 response = await async_mgr.async_get_request(operation_location)
 
-                status = response.json()["status"]
-                retry_count += 1
+                response = response.json()
 
-            response = response.json()
+                status = response["status"]
+                retry_count += 1
 
             return response, response.get("http_status_code", 200)
 
