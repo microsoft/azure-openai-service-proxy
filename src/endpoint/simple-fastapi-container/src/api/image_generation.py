@@ -62,6 +62,11 @@ class ImagesGenerations:
         if not images.prompt:
             return self.report_exception("Oops, no prompt.", 400)
 
+        if len(images.prompt) > 1000:
+            return self.report_exception(
+                "Oops, prompt is too long. The maximum length is 1000 characters.", 400
+            )
+
         # check the image_count is between 1 and 5
         if images.n and not 1 <= images.n <= 5:
             return self.report_exception(
@@ -128,11 +133,11 @@ class ImagesGenerations:
             status = ""
 
             while status != "succeeded" and status != "failed":
-                # retry 30 times which is 30 * 2 second sleep = 60 seconds max wait
-                if retry_count >= 30:
+                # retry 20 times which is 20 * 3 second sleep = 60 seconds max wait
+                if retry_count >= 20:
                     raise DalleTimeoutError
 
-                await asyncio.sleep(2)
+                await asyncio.sleep(3)
 
                 async_mgr = OpenAIAsyncManager(self.app, deployment)
                 response = await async_mgr.call_openai_get(operation_location)
