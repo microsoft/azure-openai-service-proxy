@@ -11,7 +11,7 @@ from tenacity import RetryError
 from .config import OpenAIConfig
 from .openai_async import OpenAIAsyncManager
 
-OPENAI_IMAGES_GENERATIONS_API_VERSION = "2023-07-01-preview"
+OPENAI_IMAGES_GENERATIONS_API_VERSION = "2023-06-01-preview"
 
 logging.basicConfig(level=logging.WARNING)
 
@@ -97,8 +97,8 @@ class ImagesGenerations:
 
             openai_request = {
                 "prompt": images.prompt,
-                "image_count": images.image_count,
-                "image_size": images.image_size.value,
+                "n": images.image_count,
+                "size": images.image_size.value,
                 "response_format": images.response_format.value
                 if images.response_format
                 else "url",
@@ -106,7 +106,7 @@ class ImagesGenerations:
             }
 
             url = (
-                f"https://{deployment.resource_name}.openai.azure.com/openai/images/generations:submit"
+                f"https://{deployment.resource_name.lower()}.openai.azure.com/openai/images/generations:submit"
                 f"?api-version={images.api_version}"
             )
 

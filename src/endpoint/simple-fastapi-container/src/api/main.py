@@ -233,6 +233,7 @@ async def oai_images_generations(
 ) -> openai.openai_object.OpenAIObject | str:
     """OpenAI image generation response"""
 
+    # currently a hack - this will always force it to be Azure OpenAI Service
     deployment_id = "dalle-2"
 
     # get the api version from the query string else use the default
@@ -311,6 +312,11 @@ async def startup_event():
         model_class="openai-embeddings",
     )
 
+    openai_config_images_generations = OpenAIConfig(
+        connection_string=storage_connection_string,
+        model_class="openai-images-generations",
+    )
+
     app.state.openai_mgr = Playground(app, openai_config=openai_config_chat_completions)
     app.state.chat_completions_mgr = ChatCompletions(
         app, openai_config=openai_config_chat_completions
@@ -319,8 +325,9 @@ async def startup_event():
         app, openai_config=openai_config_completions
     )
     app.state.embeddings = Embeddings(app, openai_config=openai_config_embeddings)
+
     app.state.images_generations_mgr = ImagesGenerations(
-        app, openai_config=openai_config_completions
+        app, openai_config=openai_config_images_generations
     )
 
     app.state.rate_limit_chat_completion = RateLimit()
