@@ -264,7 +264,7 @@ async def oai_images_generations(
         raise HTTPException(status_code=500, detail=f"{exc}") from exc
 
 
-@app.post("/api/playground", status_code=200)
+@app.post("/v1/api/playground", status_code=200)
 @app.post("/api/oai_prompt", status_code=200)
 async def oai_playground(
     chat: ChatCompletionsRequest, request: Request, response: Response
