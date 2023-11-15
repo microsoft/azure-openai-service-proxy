@@ -2,16 +2,16 @@
 
 import logging
 from typing import Tuple, Any
+import httpx
 
 from fastapi import FastAPI
 from pydantic import BaseModel
 import openai
 import openai.error
 import openai.openai_object
-from tenacity import RetryError
 
 from .config import OpenAIConfig
-from .openai_async import OpenAIAsyncManager
+from .openai_async import OpenAIAsyncManager, OpenAIException
 
 OPENAI_CHAT_COMPLETIONS_API_VERSION = "2023-09-01-preview"
 
@@ -135,47 +135,28 @@ class ChatCompletions:
             )
 
             async_mgr = OpenAIAsyncManager(self.app, deployment)
-            response = await async_mgr.call_openai_post(openai_request, url)
+            response = await async_mgr.async_openai_post(openai_request, url)
 
             response["model"] = deployment.friendly_name
 
             return response, 200
 
-        except openai.error.InvalidRequestError as invalid_request_exception:
-            # this exception captures content policy violation policy
+        except httpx.ConnectError:
             return self.report_exception(
-                str(invalid_request_exception.user_message),
-                invalid_request_exception.http_status,
+                "Service connection error.",
+                504,
             )
 
-        except openai.error.RateLimitError as rate_limit_exception:
+        except httpx.ConnectTimeout:
             return self.report_exception(
-                "Oops, OpenAI rate limited. Please try again.",
-                rate_limit_exception.http_status,
+                "Service connection timeout error.",
+                504,
             )
 
-        except openai.error.ServiceUnavailableError as service_unavailable_exception:
+        except OpenAIException as openai_exception:
             return self.report_exception(
-                "Oops, OpenAI unavailable. Please try again.",
-                service_unavailable_exception.http_status,
-            )
-
-        except openai.error.Timeout as timeout_exception:
-            return self.report_exception(
-                "Oops, OpenAI timeout. Please try again.",
-                timeout_exception.http_status,
-            )
-
-        except openai.error.OpenAIError as openai_error_exception:
-            return self.report_exception(
-                str(openai_error_exception.user_message),
-                openai_error_exception.http_status,
-            )
-
-        except RetryError:
-            return self.report_exception(
-                str("OpenAI API retry limit reached..."),
-                429,
+                str(openai_exception),
+                openai_exception.http_status_code,
             )
 
         except Exception as exception:

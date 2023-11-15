@@ -121,7 +121,7 @@ class Completions:
             )
 
             async_mgr = OpenAIAsyncManager(self.app, deployment)
-            response = await async_mgr.call_openai_post(openai_request, url)
+            response = await async_mgr.async_openai_post(openai_request, url)
 
             response["model"] = deployment.friendly_name
 
