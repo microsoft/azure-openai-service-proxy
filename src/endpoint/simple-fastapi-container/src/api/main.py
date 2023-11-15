@@ -100,7 +100,7 @@ async def oai_embeddings(
         (
             completion,
             status_code,
-        ) = await app.state.embeddings.call_openai_embeddings(embeddings)
+        ) = await app.state.embeddings_mgr.call_openai_embeddings(embeddings)
         response.status_code = status_code
         return completion
     except Exception as exc:
@@ -318,13 +318,16 @@ async def startup_event():
     )
 
     app.state.openai_mgr = Playground(app, openai_config=openai_config_chat_completions)
+
     app.state.chat_completions_mgr = ChatCompletions(
         app, openai_config=openai_config_chat_completions
     )
+
     app.state.completions_mgr = Completions(
         app, openai_config=openai_config_completions
     )
-    app.state.embeddings = Embeddings(app, openai_config=openai_config_embeddings)
+
+    app.state.embeddings_mgr = Embeddings(app, openai_config=openai_config_embeddings)
 
     app.state.images_generations_mgr = ImagesGenerations(
         app, openai_config=openai_config_images_generations
