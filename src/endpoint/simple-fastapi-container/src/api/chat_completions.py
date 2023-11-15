@@ -108,7 +108,7 @@ class ChatCompletions:
 
             if chat.functions:
                 # https://platform.openai.com/docs/guides/gpt/function-calling
-                # function_call cabn = none, auto, or {"name": "<insert-function-name>"}
+                # function_call can be = none, auto, or {"name": "<insert-function-name>"}
                 openai_request = {
                     "messages": chat.messages,
                     "max_tokens": chat.max_tokens,
