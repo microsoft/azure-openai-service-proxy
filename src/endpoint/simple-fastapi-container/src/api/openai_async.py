@@ -118,11 +118,14 @@ class OpenAIAsyncManager:
 
         except httpx.ConnectError as connect_error:
             raise openai.error.ServiceUnavailableError(
-                "Service unavailable"
+                message="Service unavailable", http_status=504
             ) from connect_error
 
         except httpx.ConnectTimeout as connect_timeout:
-            raise openai.error.Timeout("Timeout error") from connect_timeout
+            raise openai.error.Timeout(
+                message="Timeout error",
+                http_status=504,
+            ) from connect_timeout
 
         if return_raw:
             return response
@@ -150,11 +153,27 @@ class OpenAIAsyncManager:
             "api-key": self.deployment.endpoint_key,
         }
 
-        async with httpx.AsyncClient() as client:
-            response = await client.get(
-                url,
-                headers=headers,
-                timeout=HTTPX_TIMEOUT_SECONDS,
-            )
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.get(
+                    url,
+                    headers=headers,
+                    timeout=HTTPX_TIMEOUT_SECONDS,
+                )
 
-        return response
+            return response
+
+        # https://stackoverflow.com/questions/50448804/when-to-use-request-timeout-and-gateway-timeout
+        # The 504 (Gateway Timeout) status code indicates that the server,
+        # while acting as a gateway or proxy, did not receive a timely response from an
+        # upstream server it needed to access in order to complete the request.
+
+        except httpx.ConnectError as connect_error:
+            raise openai.error.ServiceUnavailableError(
+                message="Service unavailable", http_status=504
+            ) from connect_error
+
+        except httpx.ConnectTimeout as connect_timeout:
+            raise openai.error.Timeout(
+                message="Timeout error", http_status=504
+            ) from connect_timeout
