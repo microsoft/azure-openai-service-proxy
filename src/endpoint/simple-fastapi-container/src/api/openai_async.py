@@ -9,7 +9,6 @@ import httpx
 import openai
 import openai.error
 import openai.openai_object
-from fastapi import FastAPI
 
 
 from .config import Deployment
@@ -32,10 +31,9 @@ class OpenAIException(Exception):
 class OpenAIAsyncManager:
     """OpenAI Manager"""
 
-    def __init__(self, app: FastAPI, deployment: Deployment):
+    def __init__(self, deployment: Deployment):
         """init in memory session manager"""
         self.deployment = deployment
-        self.app = app
 
     # retry strategy is fail fast
     # @retry(

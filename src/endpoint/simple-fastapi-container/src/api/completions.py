@@ -3,7 +3,6 @@
 import logging
 from typing import Tuple, Any
 
-from fastapi import FastAPI
 from pydantic import BaseModel
 import openai
 import openai.error
@@ -34,10 +33,9 @@ class CompletionsRequest(BaseModel):
 class Completions:
     """OpenAI Completions Manager"""
 
-    def __init__(self, app: FastAPI, openai_config: OpenAIConfig):
+    def __init__(self, openai_config: OpenAIConfig):
         """init in memory session manager"""
         self.openai_config = openai_config
-        self.app = app
         self.logger = logging.getLogger(__name__)
 
     def __validate_input(self, cr: CompletionsRequest):
@@ -120,7 +118,7 @@ class Completions:
                 f"?api-version={cr.api_version}"
             )
 
-            async_mgr = OpenAIAsyncManager(self.app, deployment)
+            async_mgr = OpenAIAsyncManager(deployment)
             response = await async_mgr.async_openai_post(openai_request, url)
 
             response["model"] = deployment.friendly_name

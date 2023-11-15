@@ -6,7 +6,6 @@ import logging
 from typing import Tuple
 import asyncio
 import httpx
-from fastapi import FastAPI
 import openai
 from pydantic import BaseModel
 
@@ -51,10 +50,9 @@ class ImagesGenerationsRequst(BaseModel):
 class ImagesGenerations:
     """OpenAI Images Generations Manager"""
 
-    def __init__(self, app: FastAPI, openai_config: OpenAIConfig):
+    def __init__(self, openai_config: OpenAIConfig):
         """init in memory session manager"""
         self.openai_config = openai_config
-        self.app = app
         self.logger = logging.getLogger(__name__)
 
     def validate_input(self, images: ImagesGenerationsRequst):
@@ -125,7 +123,7 @@ class ImagesGenerations:
                 f"?api-version={images.api_version}"
             )
 
-            async_mgr = OpenAIAsyncManager(self.app, deployment)
+            async_mgr = OpenAIAsyncManager(deployment)
             response = await async_mgr.async_post(openai_request, url)
 
             operation_location = response.headers["operation-location"]
@@ -138,7 +136,7 @@ class ImagesGenerations:
 
                 await asyncio.sleep(3)
 
-                async_mgr = OpenAIAsyncManager(self.app, deployment)
+                async_mgr = OpenAIAsyncManager(deployment)
                 response = await async_mgr.async_get(operation_location)
 
                 response = response.json()

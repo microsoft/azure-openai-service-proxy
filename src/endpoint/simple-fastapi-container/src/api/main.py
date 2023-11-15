@@ -318,20 +318,18 @@ async def startup_event():
         model_class="openai-images-generations",
     )
 
-    app.state.openai_mgr = Playground(app, openai_config=openai_config_chat_completions)
+    app.state.openai_mgr = Playground(openai_config=openai_config_chat_completions)
 
     app.state.chat_completions_mgr = ChatCompletions(
-        app, openai_config=openai_config_chat_completions
+        openai_config=openai_config_chat_completions
     )
 
-    app.state.completions_mgr = Completions(
-        app, openai_config=openai_config_completions
-    )
+    app.state.completions_mgr = Completions(openai_config=openai_config_completions)
 
-    app.state.embeddings_mgr = Embeddings(app, openai_config=openai_config_embeddings)
+    app.state.embeddings_mgr = Embeddings(openai_config=openai_config_embeddings)
 
     app.state.images_generations_mgr = ImagesGenerations(
-        app, openai_config=openai_config_images_generations
+        openai_config=openai_config_images_generations
     )
 
     app.state.rate_limit_chat_completion = RateLimit()
