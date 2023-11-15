@@ -31,12 +31,13 @@ interface ApiResponse {
 }
 
 export async function callApi(
+  endpoint: string,
   data: any,
   eventCode: string
 ): Promise<{ answer?: ApiResponse; status: number; error?: string }> {
   try {
     const response = await fetch(
-      "https://openai-proxy-23uljr-ca.salmonsea-82a61dba.swedencentral.azurecontainerapps.io/api/oai_prompt",
+      `${endpoint}/api/playground`,
       {
         method: "POST",
         headers: {

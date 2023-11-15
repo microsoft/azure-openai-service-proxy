@@ -11,7 +11,7 @@ import {
 import { AuthStatus, useEventDataContext } from "../EventDataProvider";
 
 export const Unauthorised = () => {
-  const { authStatus, setEventCode } = useEventDataContext();
+  const { authStatus, setEventConnection } = useEventDataContext();
 
   if (authStatus !== AuthStatus.NotAuthorized) {
     return null;
@@ -28,7 +28,12 @@ export const Unauthorised = () => {
           </DialogContent>
           <DialogActions>
             <DialogTrigger disableButtonEnhancement>
-              <Button appearance="primary" onClick={() => setEventCode("")}>
+              <Button
+                appearance="primary"
+                onClick={() =>
+                  setEventConnection({ eventCode: "", endpoint: "" })
+                }
+              >
                 Close
               </Button>
             </DialogTrigger>

@@ -1,7 +1,7 @@
-export async function eventInfo(eventCode: string): Promise<EventInfo> {
+export async function eventInfo(eventCode: string, endpoint: string): Promise<EventInfo> {
   try {
     const response = await fetch(
-      "https://openai-proxy-23uljr-ca.salmonsea-82a61dba.swedencentral.azurecontainerapps.io/api/eventinfo",
+      `${endpoint}/api/eventinfo`,
       {
         method: "POST",
         headers: {

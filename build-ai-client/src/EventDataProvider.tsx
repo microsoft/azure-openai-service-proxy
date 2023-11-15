@@ -1,4 +1,5 @@
 import React, {
+  Dispatch,
   PropsWithChildren,
   createContext,
   useContext,
@@ -22,31 +23,38 @@ export enum AuthStatus {
 
 export type EventDataContextValue = {
   eventData: EventData | undefined;
-  setEventCode: React.Dispatch<string>;
+  setEventConnection: Dispatch<{ eventCode: string; endpoint: string }>;
   eventCodeSet: boolean;
+  endpointSet: boolean;
   isAuthorized: boolean;
   eventCode?: string;
   authStatus: AuthStatus;
+  endpoint?: string;
 };
 
 export const EventDataContext = createContext<EventDataContextValue>({
   eventData: undefined,
-  setEventCode: (code: string) => {},
+  setEventConnection: () => {},
   isAuthorized: false,
   eventCodeSet: false,
+  endpointSet: false,
   eventCode: undefined,
   authStatus: AuthStatus.NotSet,
 });
 
 const EventDataProvider: React.FC<PropsWithChildren> = ({ children }) => {
   const [eventData, setEventData] = useState<EventData | undefined>(undefined);
-  const [eventCode, setEventCode] = useState<string>("");
   const [authStatus, setAuthStatus] = useState<AuthStatus>(AuthStatus.NotSet);
 
+  const [eventConnection, setEventConnection] = useState<{
+    eventCode: string;
+    endpoint: string;
+  }>({ eventCode: "", endpoint: "" });
+
   useEffect(() => {
-    const getEventData = async (eventCode: string) => {
+    const getEventData = async (eventCode: string, endpoint: string) => {
       try {
-        const data = await eventInfo(eventCode);
+        const data = await eventInfo(eventCode, endpoint);
         setEventData(() => ({
           name: data.event_name,
           url: data.event_url,
@@ -63,23 +71,26 @@ const EventDataProvider: React.FC<PropsWithChildren> = ({ children }) => {
       }
     };
 
-    if (!eventCode) {
+    if (!eventConnection.eventCode || !eventConnection.endpoint) {
       setAuthStatus(AuthStatus.NotSet);
       return;
     }
 
-    getEventData(eventCode);
-  }, [eventCode]);
+    getEventData(eventConnection.eventCode, eventConnection.endpoint);
+  }, [eventConnection]);
 
   return (
     <EventDataContext.Provider
       value={{
         eventData,
-        setEventCode,
         isAuthorized: authStatus === AuthStatus.Authorized,
-        eventCodeSet: !!eventCode,
-        eventCode,
+        eventCodeSet: !!eventConnection.eventCode,
+        eventCode: eventConnection.eventCode,
         authStatus,
+        endpoint: eventConnection.endpoint,
+        endpointSet: !!eventConnection.endpoint,
+        setEventConnection: ({ eventCode, endpoint }) =>
+          setEventConnection(() => ({ eventCode, endpoint })),
       }}
     >
       {children}
