@@ -37,7 +37,7 @@ class OpenAIAsyncManager:
             (openai.error.TryAgain, openai.error.RateLimitError)
         ),
     )
-    async def call_openai(
+    async def call_openai_post(
         self,
         openai_request: str,
         url: str,
@@ -143,7 +143,7 @@ class OpenAIAsyncManager:
 
         return openai_response
 
-    async def async_get_request(self, url: str):
+    async def call_openai_get(self, url: str):
         """async get request"""
         headers = {
             "Content-Type": "application/json",

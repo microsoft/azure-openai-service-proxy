@@ -135,7 +135,7 @@ class ChatCompletions:
             )
 
             async_mgr = OpenAIAsyncManager(self.app, deployment)
-            response = await async_mgr.call_openai(openai_request, url)
+            response = await async_mgr.call_openai_post(openai_request, url)
 
             response["model"] = deployment.friendly_name
 

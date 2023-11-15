@@ -119,7 +119,9 @@ class ImagesGenerations:
             )
 
             async_mgr = OpenAIAsyncManager(self.app, deployment)
-            response = await async_mgr.call_openai(openai_request, url, return_raw=True)
+            response = await async_mgr.call_openai_post(
+                openai_request, url, return_raw=True
+            )
 
             operation_location = response.headers["operation-location"]
             status = ""
@@ -131,7 +133,7 @@ class ImagesGenerations:
                 await asyncio.sleep(2)
 
                 async_mgr = OpenAIAsyncManager(self.app, deployment)
-                response = await async_mgr.async_get_request(operation_location)
+                response = await async_mgr.call_openai_get(operation_location)
 
                 response = response.json()
 
