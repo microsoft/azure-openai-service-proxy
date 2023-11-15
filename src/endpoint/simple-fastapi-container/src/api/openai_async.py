@@ -46,7 +46,7 @@ class OpenAIAsyncManager:
     async def async_openai_post(
         self, openai_request: str, url: str
     ) -> Tuple[openai.openai_object.OpenAIObject, str]:
-        """async get openai completion"""
+        """async openai post"""
 
         headers = {
             "Content-Type": "application/json",
@@ -89,7 +89,7 @@ class OpenAIAsyncManager:
         return openai_response
 
     async def async_post(self, openai_request: str, url: str):
-        """rest post"""
+        """async rest post"""
 
         headers = {
             "Content-Type": "application/json",
