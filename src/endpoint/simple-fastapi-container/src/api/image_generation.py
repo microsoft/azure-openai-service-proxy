@@ -21,7 +21,7 @@ class ResponseFormat(Enum):
     """Response Format"""
 
     URL = "url"
-    BASE64 = "base64"
+    BASE64 = "b64_json"
 
 
 class ImageSize(Enum):
