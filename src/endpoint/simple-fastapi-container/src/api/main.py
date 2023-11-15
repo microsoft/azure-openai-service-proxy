@@ -15,6 +15,7 @@ from .chat_completions import (
     ChatCompletions,
 )
 from .completions import Completions, CompletionsRequest
+from .image_generation import ImagesGenerations, ImagesGenerationsRequst
 
 # from .chat_completions import ChatCompletions
 from .embeddings import EmbeddingsRequest, Embeddings
@@ -80,7 +81,7 @@ async def oai_embeddings(
 ) -> openai.openai_object.OpenAIObject:
     """OpenAI chat completion response"""
 
-    # get the api version from the query string else use the default
+    # get the api version from the query string
     if "api-version" in request.query_params:
         embeddings.api_version = request.query_params["api-version"]
 
@@ -128,7 +129,7 @@ async def oai_completion(
 ) -> openai.openai_object.OpenAIObject | str:
     """OpenAI completion response"""
 
-    # get the api version from the query string else use the default
+    # get the api version from the query string
     if "api-version" in request.query_params:
         completion_request.api_version = request.query_params["api-version"]
 
@@ -182,7 +183,7 @@ async def oai_chat_completion(
 ) -> openai.openai_object.OpenAIObject | str:
     """OpenAI chat completion response"""
 
-    # get the api version from the query string else use the default
+    # get the api version from the query string
     if "api-version" in request.query_params:
         chat.api_version = request.query_params["api-version"]
 
@@ -207,6 +208,58 @@ async def oai_chat_completion(
         ) = await app.state.chat_completions_mgr.call_openai_chat_completion(chat)
         response.status_code = status_code
         return completion
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"{exc}") from exc
+
+
+# Support for OpenAI SDK 0.28
+@app.post(
+    "/v1/engines/{engine_id}/images/generations",
+    status_code=200,
+    response_model=None,
+)
+# Support for Azure OpenAI Service SDK 1.0+
+@app.post(
+    "/v1/openai/images/generations:submit",
+    status_code=200,
+    response_model=None,
+)
+# Support for OpenAI SDK 1.0+
+@app.post("/v1/images/generations", status_code=200, response_model=None)
+async def oai_images_generations(
+    image_generation_request: ImagesGenerationsRequst,
+    request: Request,
+    response: Response,
+) -> openai.openai_object.OpenAIObject | str:
+    """OpenAI image generation response"""
+
+    # No deployment_is passed for images generation so set to dall-e
+    deployment_id = "dall-e"
+
+    # get the api version from the query string
+    if "api-version" in request.query_params:
+        image_generation_request.api_version = request.query_params["api-version"]
+
+    # exception thrown if not authorized
+    _, user_token = await app.state.authorize.authorize_api_access(
+        request.headers, deployment_id
+    )
+
+    if app.state.rate_limit_images_generations.is_call_rate_exceeded(user_token):
+        raise HTTPException(
+            status_code=429,
+            detail="Rate limit exceeded. Try again in 10 seconds",
+        )
+
+    try:
+        (
+            completion_response,
+            status_code,
+        ) = await app.state.images_generations_mgr.call_openai_images_generations(
+            image_generation_request
+        )
+        response.status_code = status_code
+        return completion_response
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"{exc}") from exc
 
@@ -259,6 +312,11 @@ async def startup_event():
         model_class="openai-embeddings",
     )
 
+    openai_config_images_generations = OpenAIConfig(
+        connection_string=storage_connection_string,
+        model_class="openai-images-generations",
+    )
+
     app.state.openai_mgr = Playground(app, openai_config=openai_config_chat_completions)
     app.state.chat_completions_mgr = ChatCompletions(
         app, openai_config=openai_config_chat_completions
@@ -267,8 +325,14 @@ async def startup_event():
         app, openai_config=openai_config_completions
     )
     app.state.embeddings = Embeddings(app, openai_config=openai_config_embeddings)
+
+    app.state.images_generations_mgr = ImagesGenerations(
+        app, openai_config=openai_config_images_generations
+    )
+
     app.state.rate_limit_chat_completion = RateLimit()
     app.state.rate_limit_embeddings = RateLimit()
+    app.state.rate_limit_images_generations = RateLimit()
 
 
 if __name__ == "__main__":

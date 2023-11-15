@@ -38,7 +38,10 @@ class OpenAIAsyncManager:
         ),
     )
     async def call_openai(
-        self, openai_request: str, url: str
+        self,
+        openai_request: str,
+        url: str,
+        return_raw: bool = False,
     ) -> Tuple[openai.openai_object.OpenAIObject, str]:
         """async get openai completion"""
 
@@ -121,6 +124,9 @@ class OpenAIAsyncManager:
         except httpx.ConnectTimeout as connect_timeout:
             raise openai.error.Timeout("Timeout error") from connect_timeout
 
+        if return_raw:
+            return response
+
         # calculate response time in milliseconds
         end = time.time()
         response_ms = int((end - start) * 1000)
@@ -136,3 +142,19 @@ class OpenAIAsyncManager:
             ) from exc
 
         return openai_response
+
+    async def async_get_request(self, url: str):
+        """async get request"""
+        headers = {
+            "Content-Type": "application/json",
+            "api-key": self.deployment.endpoint_key,
+        }
+
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                url,
+                headers=headers,
+                timeout=HTTPX_TIMEOUT_SECONDS,
+            )
+
+        return response
