@@ -114,7 +114,8 @@ class ImagesGenerations:
             }
 
             url = (
-                f"https://{deployment.resource_name}.openai.azure.com/openai/images/generations:submit"
+                f"https://{deployment.resource_name}.openai.azure.com"
+                "/openai/images/generations:submit"
                 f"?api-version={images.api_version}"
             )
 
@@ -125,9 +126,10 @@ class ImagesGenerations:
 
             operation_location = response.headers["operation-location"]
             status = ""
+
             while status != "succeeded":
-                # retry 30 times which is 60 seconds
-                if retry_count > 30:
+                # retry 30 times which is 30 * 2 second sleep = 60 seconds max wait
+                if retry_count >= 30:
                     raise DalleTimeoutError
 
                 await asyncio.sleep(2)
