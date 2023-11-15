@@ -3,7 +3,7 @@
 import json
 import logging
 import time
-from typing import Any, Tuple
+from typing import Tuple
 
 import httpx
 import openai
@@ -11,7 +11,6 @@ import openai.error
 import openai.openai_object
 from fastapi import FastAPI
 
-from tenacity import retry, stop_after_attempt, wait_random, retry_if_exception_type
 
 from .config import Deployment
 
@@ -19,6 +18,15 @@ HTTPX_TIMEOUT_SECONDS = 30
 
 logging.basicConfig(level=logging.WARNING)
 logger = logging.getLogger(__name__)
+
+
+class OpenAIException(Exception):
+    """OpenAI Exception"""
+
+    def __init__(self, message: str, status_code: int):
+        """init"""
+        super().__init__(message)
+        self.http_status_code = status_code
 
 
 class OpenAIAsyncManager:
@@ -30,27 +38,15 @@ class OpenAIAsyncManager:
         self.app = app
 
     # retry strategy is fail fast
-    @retry(
-        wait=wait_random(min=0, max=2),
-        stop=stop_after_attempt(1),
-        retry=retry_if_exception_type(
-            (openai.error.TryAgain, openai.error.RateLimitError)
-        ),
-    )
-    async def call_openai_post(
-        self,
-        openai_request: str,
-        url: str,
-        return_raw: bool = False,
+    # @retry(
+    #     wait=wait_random(min=0, max=2),
+    #     stop=stop_after_attempt(1),
+    #     retry=retry_if_exception_type((OpenAIRetryException)),
+    # )
+    async def async_openai_post(
+        self, openai_request: str, url: str
     ) -> Tuple[openai.openai_object.OpenAIObject, str]:
         """async get openai completion"""
-
-        def get_error(response: httpx.Response) -> dict[str, dict[str, Any]]:
-            """get error message from response"""
-            try:
-                return json.loads(response.text).get("error")
-            except json.JSONDecodeError:
-                return {}
 
         headers = {
             "Content-Type": "application/json",
@@ -59,76 +55,22 @@ class OpenAIAsyncManager:
 
         start = time.time()
 
-        try:
-            async with httpx.AsyncClient() as client:
-                response = await client.post(
-                    url,
-                    headers=headers,
-                    json=openai_request,
-                    timeout=HTTPX_TIMEOUT_SECONDS,
-                )
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                url,
+                headers=headers,
+                json=openai_request,
+                timeout=HTTPX_TIMEOUT_SECONDS,
+            )
 
-            if not 200 <= response.status_code < 300:
-                error = get_error(response)
-
-                if response.status_code in [400, 404, 415]:
-                    message = error.get("message", "Bad request")
-                    param = error.get("param")
-                    code = error.get("code")
-
-                    raise openai.error.InvalidRequestError(
-                        message=message,
-                        param=param,
-                        code=code,
-                        http_status=response.status_code,
-                    )
-
-                elif response.status_code == 401:
-                    message = error.get("message", "Unauthorized")
-
-                    raise openai.error.AuthenticationError(
-                        message=message, http_status=response.status_code
-                    )
-
-                elif response.status_code == 403:
-                    message = error.get("message", "Permission Error")
-
-                    raise openai.error.PermissionError(
-                        message=message, http_status=response.status_code
-                    )
-
-                elif response.status_code == 409:
-                    message = error.get("message", "Try Again")
-
-                    raise openai.error.TryAgain(
-                        message=message, http_status=response.status_code
-                    )
-
-                elif response.status_code == 429:
-                    message = error.get("message", "Rate limited.")
-
-                    raise openai.error.RateLimitError(
-                        message=message,
-                        http_status=response.status_code,
-                    )
-                else:
-                    message = error.get("message", "OpenAI Error")
-
-                    raise openai.error.APIError(message=message)
-
-        except httpx.ConnectError as connect_error:
-            raise openai.error.ServiceUnavailableError(
-                message="Service unavailable", http_status=504
-            ) from connect_error
-
-        except httpx.ConnectTimeout as connect_timeout:
-            raise openai.error.Timeout(
-                message="Timeout error",
-                http_status=504,
-            ) from connect_timeout
-
-        if return_raw:
-            return response
+        if not 200 <= response.status_code < 300:
+            # note, for future reference 409 and 429 were retryable with tenactiy
+            raise OpenAIException(
+                message=json.loads(response.text)
+                .get("error")
+                .get("message", "OpenAI Error"),
+                status_code=response.status_code,
+            )
 
         # calculate response time in milliseconds
         end = time.time()
@@ -140,40 +82,45 @@ class OpenAIAsyncManager:
             )
 
         except Exception as exc:
-            raise openai.APIError(
-                f"Invalid response body from API: {response.text}"
+            raise OpenAIException(
+                message="Invalid response body from API", status_code=400
             ) from exc
 
         return openai_response
 
-    async def call_openai_get(self, url: str):
-        """async get request"""
+    async def async_post(self, openai_request: str, url: str):
+        """rest post"""
+
         headers = {
             "Content-Type": "application/json",
             "api-key": self.deployment.endpoint_key,
         }
 
-        try:
-            async with httpx.AsyncClient() as client:
-                response = await client.get(
-                    url,
-                    headers=headers,
-                    timeout=HTTPX_TIMEOUT_SECONDS,
-                )
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                url,
+                headers=headers,
+                json=openai_request,
+                timeout=HTTPX_TIMEOUT_SECONDS,
+            )
 
-            return response
+        response.raise_for_status()
+        return response
 
-        # https://stackoverflow.com/questions/50448804/when-to-use-request-timeout-and-gateway-timeout
-        # The 504 (Gateway Timeout) status code indicates that the server,
-        # while acting as a gateway or proxy, did not receive a timely response from an
-        # upstream server it needed to access in order to complete the request.
+    async def async_get(self, url: str):
+        """async get request"""
 
-        except httpx.ConnectError as connect_error:
-            raise openai.error.ServiceUnavailableError(
-                message="Service unavailable", http_status=504
-            ) from connect_error
+        headers = {
+            "Content-Type": "application/json",
+            "api-key": self.deployment.endpoint_key,
+        }
 
-        except httpx.ConnectTimeout as connect_timeout:
-            raise openai.error.Timeout(
-                message="Timeout error", http_status=504
-            ) from connect_timeout
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                url,
+                headers=headers,
+                timeout=HTTPX_TIMEOUT_SECONDS,
+            )
+
+        response.raise_for_status()
+        return response
