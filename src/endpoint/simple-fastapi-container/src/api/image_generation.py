@@ -65,7 +65,7 @@ class ImagesGenerations:
         # check the image_count is between 1 and 5
         if images.n and not 1 <= images.n <= 5:
             return self.report_exception(
-                "Oops, image_count must be between 1 and 10.", 400
+                "Oops, image_count must be between 1 and 5 inclusive.", 400
             )
 
         # check the image_size is between 256x256, 512x512, 1024x1024
@@ -77,7 +77,7 @@ class ImagesGenerations:
         # check the response_format is url or base64
         if images.response_format and images.response_format not in ResponseFormat:
             return self.report_exception(
-                "Oops, response_format must be url or base64.", 400
+                "Oops, response_format must be url or b64_json.", 400
             )
 
         return None, None
