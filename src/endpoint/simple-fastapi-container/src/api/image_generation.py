@@ -8,10 +8,10 @@ import openai
 from pydantic import BaseModel
 from tenacity import RetryError
 
-from api.config import OpenAIConfig
-from api.openai_async import OpenAIAsyncManager
+from .config import OpenAIConfig
+from .openai_async import OpenAIAsyncManager
 
-OPENAI_IMAGES_GENERATIONS_API_VERSION = "2023-09-01-preview"
+OPENAI_IMAGES_GENERATIONS_API_VERSION = "2023-07-01-preview"
 
 logging.basicConfig(level=logging.WARNING)
 
@@ -106,8 +106,7 @@ class ImagesGenerations:
             }
 
             url = (
-                f"https://{deployment.resource_name}.openai.azure.com/openai/deployments/"
-                f"{deployment.deployment_name}/chat/completions"
+                f"https://{deployment.resource_name}.openai.azure.com/openai/images/generations:submit"
                 f"?api-version={images.api_version}"
             )
 

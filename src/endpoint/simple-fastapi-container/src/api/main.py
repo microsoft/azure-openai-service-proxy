@@ -220,7 +220,7 @@ async def oai_chat_completion(
 )
 # Support for Azure OpenAI Service SDK 1.0+
 @app.post(
-    "/v1/openai/deployments/{deployment_id}/images/generations",
+    "/v1/openai/images/generations:submit",
     status_code=200,
     response_model=None,
 )
@@ -230,9 +230,10 @@ async def oai_images_generations(
     image_generation_request: ImagesGenerationsRequst,
     request: Request,
     response: Response,
-    deployment_id: str = None,
 ) -> openai.openai_object.OpenAIObject | str:
     """OpenAI image generation response"""
+
+    deployment_id = "dalle-2"
 
     # get the api version from the query string else use the default
     if "api-version" in request.query_params:
@@ -250,12 +251,6 @@ async def oai_images_generations(
         )
 
     try:
-        if (
-            image_generation_request.max_tokens
-            and image_generation_request.max_tokens > authorize_response.max_token_cap
-        ):
-            image_generation_request.max_tokens = authorize_response.max_token_cap
-
         (
             completion_response,
             status_code,
