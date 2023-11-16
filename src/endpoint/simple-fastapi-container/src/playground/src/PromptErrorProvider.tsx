@@ -7,7 +7,7 @@ export type PromptErrorValue = {
 
 const PromptErrorContext = createContext<PromptErrorValue>({
   promptError: undefined,
-  setPromptError: (error: string | undefined) => {},
+  setPromptError: () => {},
 });
 
 const PromptErrorProvider: React.FC<PropsWithChildren> = ({ children }) => {

@@ -9,7 +9,7 @@ import {
   Textarea,
   Spinner,
 } from "@fluentui/react-components";
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Delete24Regular, SendRegular } from "@fluentui/react-icons";
 import { MessageData } from "../interfaces/MessageData";
 import { Message } from "./Message";

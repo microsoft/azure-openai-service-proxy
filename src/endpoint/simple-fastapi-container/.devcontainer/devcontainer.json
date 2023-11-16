@@ -6,7 +6,8 @@
 	// See https://containers.dev/implementors/features/
 	"features": {
 		"ghcr.io/devcontainers/features/docker-in-docker:2": {},
-		"ghcr.io/azure/azure-dev/azd:latest": {}
+		"ghcr.io/azure/azure-dev/azd:latest": {},
+		"ghcr.io/devcontainers/features/node": {}
     },
 
 	// Configure tool-specific properties.
@@ -19,7 +20,8 @@
 				"ms-python.vscode-pylance",
 				"charliermarsh.ruff",
 				"ms-azuretools.vscode-docker",
-				"ms-azuretools.vscode-bicep"
+				"ms-azuretools.vscode-bicep",
+				"esbenp.prettier-vscode"
 			],
 			// Set *default* container specific settings.json values on container create.
 			"settings": {
@@ -42,7 +44,7 @@
 	"forwardPorts": [3100],
 
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "python3 -m pip install -r requirements-dev.txt && pre-commit install",
+	"postCreateCommand": "python3 -m pip install -r requirements-dev.txt && pre-commit install && cd src/playground && . ${NVM_DIR}/nvm.sh && nvm install && npm i",
 
 	// Comment out to connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
 	"remoteUser": "vscode"
