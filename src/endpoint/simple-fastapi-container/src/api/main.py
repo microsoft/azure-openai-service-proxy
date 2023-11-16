@@ -17,10 +17,10 @@ from .chat_completions import (
 from .completions import Completions, CompletionsRequest
 from .image_generation import ImagesGenerations, ImagesGenerationsRequst
 
-# from .chat_completions import ChatCompletions
 from .embeddings import EmbeddingsRequest, Embeddings
 from .config import OpenAIConfig
 from .rate_limit import RateLimit
+from .management import Management, NewEventResponse, NewEventRequest
 
 
 logging.basicConfig(level=logging.WARNING)
@@ -41,6 +41,27 @@ async def validation_exception_handler(request, exc):
     return JSONResponse(
         content={"message": "Response validation error"}, status_code=400
     )
+
+
+@app.post("/v1/management/addevent", status_code=200)
+async def management_authorize(
+    event: NewEventRequest, request: Request
+) -> NewEventResponse:
+    """get event info"""
+
+    authorize_response = await app.state.authorize.authorize_management_access(
+        request.headers
+    )
+
+    if authorize_response is None:
+        raise HTTPException(
+            status_code=401,
+            detail="Event code is not authorized",
+        )
+
+    new_event = app.state.management.add_new_event(event)
+
+    return new_event
 
 
 @app.post("/api/eventinfo", status_code=200)
@@ -298,6 +319,7 @@ async def startup_event():
         exit(1)
 
     app.state.authorize = Authorize(storage_connection_string)
+    app.state.management = Management(storage_connection_string)
     openai_config_chat_completions = OpenAIConfig(
         connection_string=storage_connection_string,
         model_class="openai-chat",
