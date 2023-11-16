@@ -1,0 +1,10 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
+
+name: simple-fastapi-container-app
+metadata:
+  template: simple-fastapi-container-app@0.0.1
+services:
+  api:
+    project: ./src
+    language: py
+    host: containerapp
