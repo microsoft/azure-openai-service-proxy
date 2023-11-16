@@ -1,7 +1,8 @@
-""" Authorize a user to access playground based specific time bound event."""
+""" Authorize a user to access to an event based specific time bound event."""
 
 import string
 import logging
+import uuid
 from datetime import datetime, timedelta
 import pytz
 
@@ -16,9 +17,11 @@ from azure.core.exceptions import (
     ClientAuthenticationError,
 )
 
+MAX_AUTH_TOKEN_LENGTH = 40
 CACHE_EXPIRY_MINUTES = 10
-PARTITION_KEY = "playground"
-TABLE_NAME = "playgroundauthorization"
+EVENT_AUTHORISATION_PARTITION_KEY = "event"
+EVENT_AUTHORIZATION_TABLE_NAME = "authorization"
+MANAGEMENT_TABLE_NAME = "management"
 
 logging.basicConfig(level=logging.WARNING)
 logger = logging.getLogger(__name__)
@@ -80,13 +83,15 @@ class Authorize:
         self.event_cache = []
         self.cache_expiry = None
 
-        # Create events playground authorization table if it does not exist
+        # Create events authorization table if it does not exist
         try:
             table_service_client = TableServiceClient.from_connection_string(
                 conn_str=self.connection_string
             )
 
-            table_service_client.create_table_if_not_exists(table_name=TABLE_NAME)
+            table_service_client.create_table_if_not_exists(
+                table_name=EVENT_AUTHORIZATION_TABLE_NAME
+            )
         except Exception as exception:
             logging.error("General exception creating table: %s", str(exception))
             raise
@@ -132,7 +137,7 @@ class Authorize:
             return cached
 
         async with TableClient.from_connection_string(
-            conn_str=self.connection_string, table_name=TABLE_NAME
+            conn_str=self.connection_string, table_name=EVENT_AUTHORIZATION_TABLE_NAME
         ) as table_client:
             # check if event_code is in the cache
             authorised_response = self.__is_event_authorised_cached(event_code)
@@ -141,7 +146,7 @@ class Authorize:
 
             try:
                 query_filter = (
-                    f"PartitionKey eq '{PARTITION_KEY}' and "
+                    f"PartitionKey eq '{EVENT_AUTHORISATION_PARTITION_KEY}' and "
                     f"RowKey eq '{event_code}' and Active eq true"
                 )
                 # get all columns from the table
@@ -243,8 +248,8 @@ class Authorize:
 
             if (
                 len(id_parts) == 2
-                and 6 <= len(id_parts[0]) <= 20
-                and 1 <= len(id_parts[1]) <= 40
+                and 6 <= len(id_parts[0]) <= MAX_AUTH_TOKEN_LENGTH
+                and 1 <= len(id_parts[1]) <= MAX_AUTH_TOKEN_LENGTH
             ):
                 return await self.__authorize(id_parts[0]), id_parts[1]
 
@@ -266,8 +271,8 @@ class Authorize:
 
             if (
                 len(id_parts) == 2
-                and 6 <= len(id_parts[0]) <= 20
-                and 1 <= len(id_parts[1]) <= 40
+                and 6 <= len(id_parts[0]) <= MAX_AUTH_TOKEN_LENGTH
+                and 1 <= len(id_parts[1]) <= MAX_AUTH_TOKEN_LENGTH
             ):
                 return await self.__authorize(id_parts[0]), id_parts[1]
 
@@ -310,3 +315,76 @@ class Authorize:
             )
 
         return authorize_response, user_token
+
+    async def authorize_management_access(self, headers):
+        """authorize management access"""
+
+        if "Authorization" in headers:
+            auth_header = headers.get("Authorization")
+            auth_parts = auth_header.split(" ")
+            if len(auth_parts) != 2 or auth_parts[0] != "Bearer":
+                raise HTTPException(
+                    status_code=401,
+                    detail="Invalid authorization header",
+                )
+
+            guid = auth_parts[1]
+            # check guid is valid by loading up as a guid
+            try:
+                guid = uuid.UUID(guid)
+            except ValueError as exc:
+                raise HTTPException(
+                    status_code=401,
+                    detail="Invalid authorization header",
+                ) from exc
+
+            async with TableClient.from_connection_string(
+                conn_str=self.connection_string, table_name=MANAGEMENT_TABLE_NAME
+            ) as table_client:
+                try:
+                    query_filter = (
+                        f"PartitionKey eq 'management' and "
+                        f"RowKey eq '{guid}' and Active eq true"
+                    )
+                    # get all columns from the table
+                    queried_entities = table_client.query_entities(
+                        query_filter=query_filter,
+                        select=[
+                            "*",
+                        ],
+                    )
+
+                    async for entity in queried_entities:
+                        return entity.get("RowKey", None)
+
+                except ClientAuthenticationError as auth_error:
+                    logging.error("ClientAuthenticationError: %s", auth_error.message)
+                    raise HTTPException(
+                        status_code=401,
+                        detail="Invalid authorization header",
+                    ) from auth_error
+
+                except ServiceRequestError as service_request_error:
+                    logging.error(
+                        "ServiceResponseError: %s", service_request_error.message
+                    )
+                    raise HTTPException(
+                        status_code=401,
+                        detail="Invalid authorization header",
+                    ) from service_request_error
+
+                except HttpResponseError as response_error:
+                    logging.error("HttpResponseError: %s", response_error.message)
+                    raise HTTPException(
+                        status_code=401,
+                        detail="Invalid authorization header",
+                    ) from response_error
+
+                except Exception as exception:
+                    logging.error(
+                        "General exception in event_authorized: %s", str(exception)
+                    )
+                    raise HTTPException(
+                        status_code=401,
+                        detail="Invalid authorization header",
+                    ) from exception
