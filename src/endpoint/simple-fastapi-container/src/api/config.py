@@ -14,7 +14,7 @@ from azure.core.exceptions import (
 )
 
 CACHE_EXPIRY_MINUTES = 8
-TABLE_NAME = "configuration"
+CONFIGURATION_TABLE_NAME = "configuration"
 
 logging.basicConfig(level=logging.WARNING)
 logger = logging.getLogger(__name__)
@@ -63,13 +63,15 @@ class OpenAIConfig:
         self.cache_expiry = None
         self.deployments = {}
 
-        # Create events playground authorization table if it does not exist
+        # Create configuration table if it does not exist
         try:
             table_service_client = TableServiceClient.from_connection_string(
                 conn_str=self.connection_string
             )
 
-            table_service_client.create_table_if_not_exists(table_name=TABLE_NAME)
+            table_service_client.create_table_if_not_exists(
+                table_name=CONFIGURATION_TABLE_NAME
+            )
         except Exception as exception:
             logging.error("General exception creating table: %s", str(exception))
             raise
@@ -79,7 +81,7 @@ class OpenAIConfig:
 
         try:
             async with TableClient.from_connection_string(
-                conn_str=self.connection_string, table_name=TABLE_NAME
+                conn_str=self.connection_string, table_name=CONFIGURATION_TABLE_NAME
             ) as table_client:
                 config = []
 
