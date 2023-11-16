@@ -9,4 +9,3 @@ async-lru>=2.0.4, <2.1.0
 pytz
 azure-core>=1.29.4, <2.0.0
 azure-data-tables>=12.4.4, <13.0.0
-starlette
