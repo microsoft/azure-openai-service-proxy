@@ -20,7 +20,11 @@ from .image_generation import ImagesGenerations, ImagesGenerationsRequst
 from .embeddings import EmbeddingsRequest, Embeddings
 from .config import OpenAIConfig
 from .rate_limit import RateLimit
-from .management import Management, NewEventResponse, NewEventRequest
+from .management import (
+    Management,
+    NewEventResponse,
+    NewEventRequest,
+)
 
 
 logging.basicConfig(level=logging.WARNING)
@@ -49,6 +53,7 @@ async def management_authorize(
 ) -> NewEventResponse:
     """get event info"""
 
+    # raises expection if not authenticated
     authorize_response = await app.state.authorize.authorize_management_access(
         request.headers
     )
@@ -56,12 +61,10 @@ async def management_authorize(
     if authorize_response is None:
         raise HTTPException(
             status_code=401,
-            detail="Event code is not authorized",
+            detail="Not authenticated.",
         )
 
-    new_event = app.state.management.add_new_event(event)
-
-    return new_event
+    return app.state.management.add_new_event(event)
 
 
 @app.post("/api/eventinfo", status_code=200)
