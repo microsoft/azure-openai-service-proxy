@@ -3,7 +3,10 @@ import logging
 import uuid
 from datetime import datetime
 from pydantic import BaseModel
+from fastapi import HTTPException
+from azure.core.exceptions import AzureError
 from azure.data.tables import TableServiceClient, TableClient
+
 
 logging.basicConfig(level=logging.WARNING)
 
@@ -125,9 +128,23 @@ class Management:
                     # Add the event request to the table
                     table_client.create_entity(entity=event_entity)
 
+        except AzureError as azure_error:
+            self.logging.error(
+                "HTTP response exception adding event request: %s", azure_error.message
+            )
+            raise HTTPException(
+                status_code=504,
+                detail="Create management authorization table failed. AzureError.",
+            ) from azure_error
+
         except Exception as exception:
-            self.logging.error("General exception creating table: %s", str(exception))
-            raise
+            self.logging.error(
+                "General exception creating table: %s", exception.args[0]
+            )
+            raise HTTPException(
+                status_code=500,
+                detail="Create management authorization table failed.",
+            ) from exception
 
     def add_new_event(self, event_request: NewEventRequest):
         """Add an event request to the management table"""
@@ -172,8 +189,20 @@ class Management:
                 event_url=event_request.event_url,
             )
 
+        except AzureError as azure_error:
+            self.logging.error(
+                "HTTP response exception adding event request: %s", azure_error.message
+            )
+            raise HTTPException(
+                status_code=504,
+                detail="Add event request failed. AzureError.",
+            ) from azure_error
+
         except Exception as exception:
             self.logging.error(
-                "General exception adding event request: %s", str(exception)
+                "General exception adding event request: %s", exception.args[0]
             )
-            raise
+            raise HTTPException(
+                status_code=500,
+                detail="Add event request failed.",
+            ) from exception
