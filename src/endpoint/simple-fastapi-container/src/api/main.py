@@ -68,6 +68,7 @@ async def management_authorize(
 
 
 @app.post("/api/eventinfo", status_code=200)
+@app.post("/v1/api/eventinfo", status_code=200)
 async def event_info(request: Request) -> AuthorizeResponse:
     """get event info"""
     authorize_response = await app.state.authorize.authorize_playground_access(
