@@ -7,6 +7,7 @@ import openai.openai_object
 from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.exceptions import ResponseValidationError
 from fastapi.responses import JSONResponse
+from starlette.middleware.cors import CORSMiddleware
 
 from .authorize import Authorize, AuthorizeResponse
 from .chat_playground import Playground, PlaygroundResponse
@@ -31,6 +32,15 @@ app = FastAPI(
     # redoc_url=None,  # Disable redoc
 )
 
+# Enable CORS for all orgins
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 @app.exception_handler(ResponseValidationError)
 async def validation_exception_handler(request, exc):
@@ -43,6 +53,8 @@ async def validation_exception_handler(request, exc):
     )
 
 
+@app.post("/v1/api/eventinfo", status_code=200)
+# Legacy, move to versioned endpoints where possible
 @app.post("/api/eventinfo", status_code=200)
 async def event_info(request: Request) -> AuthorizeResponse:
     """get event info"""
