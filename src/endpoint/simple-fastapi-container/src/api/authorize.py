@@ -12,9 +12,7 @@ from pydantic import BaseModel
 from azure.data.tables import TableServiceClient
 from azure.data.tables.aio import TableClient
 from azure.core.exceptions import (
-    HttpResponseError,
-    ServiceRequestError,
-    ClientAuthenticationError,
+    AzureError,
 )
 
 MAX_AUTH_TOKEN_LENGTH = 40
@@ -92,9 +90,23 @@ class Authorize:
             table_service_client.create_table_if_not_exists(
                 table_name=EVENT_AUTHORIZATION_TABLE_NAME
             )
+
+        except AzureError as azure_error:
+            logging.error(
+                "Azure Error creating table: %s",
+                azure_error.message,
+            )
+            raise HTTPException(
+                status_code=504,
+                detail=azure_error.message,
+            ) from azure_error
+
         except Exception as exception:
             logging.error("General exception creating table: %s", str(exception))
-            raise
+            raise HTTPException(
+                status_code=500,
+                detail="General exception creating table.",
+            ) from exception
 
     def __is_event_authorised_cached(self, event_code: str) -> AuthorizeResponse | None:
         """checks if event code is in the cache"""
@@ -133,17 +145,12 @@ class Authorize:
 
         # check if event_code is in the cache
         cached = self.__is_event_authorised_cached(event_code)
-        if cached is not None:
+        if cached:
             return cached
 
         async with TableClient.from_connection_string(
             conn_str=self.connection_string, table_name=EVENT_AUTHORIZATION_TABLE_NAME
         ) as table_client:
-            # check if event_code is in the cache
-            authorised_response = self.__is_event_authorised_cached(event_code)
-            if authorised_response is not None:
-                return authorised_response
-
             try:
                 query_filter = (
                     f"PartitionKey eq '{EVENT_AUTHORISATION_PARTITION_KEY}' and "
@@ -172,7 +179,10 @@ class Authorize:
                     is_authorized = start_utc <= current_time_utc <= end_utc
 
                     if not is_authorized:
-                        return None
+                        raise HTTPException(
+                            status_code=401,
+                            detail="Authentication failed. Event is not active.",
+                        )
 
                     # set cache_expiry to current time plus CACHE_EXPIRY_MINUTES minutes
                     if not self.cache_expiry:
@@ -202,94 +212,126 @@ class Authorize:
                         event_url_text=event_url_text,
                     )
 
-            except ClientAuthenticationError as auth_error:
-                logging.error("ClientAuthenticationError: %s", auth_error.message)
-                return None
+                raise HTTPException(
+                    status_code=401,
+                    detail="Authentication failed. Event code not found.",
+                )
 
-            except ServiceRequestError as service_request_error:
-                logging.error("ServiceResponseError: %s", service_request_error.message)
-                return None
+            except HTTPException:
+                raise
 
-            except HttpResponseError as response_error:
-                logging.error("HttpResponseError: %s", response_error.message)
-                return None
+            except AzureError as azure_error:
+                logging.error(" AzureError: %s", str(azure_error))
+                raise HTTPException(
+                    status_code=401,
+                    detail="Authentication failed. AzureError.",
+                ) from azure_error
 
             except Exception as exception:
                 logging.error(
                     "General exception in event_authorized: %s", str(exception)
                 )
-                return None
-
-        return None
+                raise HTTPException(
+                    status_code=401,
+                    detail="Authentication failed. General exception.",
+                ) from exception
 
     async def __authorize(self, event_code: str) -> AuthorizeResponse | None:
         """Authorizes a user to access a specific time bound event."""
 
         # check event code does not user any of the azure table reserved characters for row key
         if any(c in event_code for c in ["\\", "/", "#", "?", "\t", "\n", "\r"]):
-            return None
+            raise HTTPException(
+                status_code=401,
+                detail="Authentication failed. Invalid event_code.",
+            )
 
         # check event code is only printable characters
         if not all(c in string.printable for c in event_code):
-            return None
+            raise HTTPException(
+                status_code=401,
+                detail="Authentication failed. Invalid event_code.",
+            )
 
         return await self.__is_event_authorized(event_code)
 
     async def __authorize_azure_api_access(self, headers) -> (list | None, str | None):
         """validate azure sdk formatted API request"""
 
-        if "api-key" in headers:
-            auth_parts = headers.get("api-key")
+        if "api-key" not in headers:
+            raise HTTPException(
+                status_code=401,
+                detail="Authentication failed.",
+            )
 
-            id_parts = auth_parts.split("/")
+        auth_parts = headers.get("api-key")
 
-            # id_parts 0 is the event code
-            # id_parts 1 is the user token
+        id_parts = auth_parts.split("/")
 
-            if (
-                len(id_parts) == 2
-                and 6 <= len(id_parts[0]) <= MAX_AUTH_TOKEN_LENGTH
-                and 1 <= len(id_parts[1]) <= MAX_AUTH_TOKEN_LENGTH
-            ):
-                return await self.__authorize(id_parts[0]), id_parts[1]
+        # id_parts 0 is the event code
+        # id_parts 1 is the user token
 
-        return None, None
+        if (
+            len(id_parts) == 2
+            and 6 <= len(id_parts[0]) <= MAX_AUTH_TOKEN_LENGTH
+            and 1 <= len(id_parts[1]) <= MAX_AUTH_TOKEN_LENGTH
+        ):
+            return await self.__authorize(id_parts[0]), id_parts[1]
+
+        raise HTTPException(
+            status_code=401,
+            detail="Authentication failed.",
+        )
 
     async def __authorize_openai_api_access(self, headers) -> (list | None, str | None):
         """validate openai sdk formatted API request"""
 
-        if "Authorization" in headers:
-            auth_header = headers.get("Authorization")
-            auth_parts = auth_header.split(" ")
-            if len(auth_parts) != 2 or auth_parts[0] != "Bearer":
-                return None, None
+        if "Authorization" not in headers:
+            raise HTTPException(
+                status_code=401,
+                detail="Authentication failed.",
+            )
 
-            id_parts = auth_parts[1].split("/")
+        auth_header = headers.get("Authorization")
+        auth_parts = auth_header.split(" ")
+        if len(auth_parts) != 2 or auth_parts[0] != "Bearer":
+            raise HTTPException(
+                status_code=401,
+                detail="Authentication failed.",
+            )
 
-            # id_parts 0 is the event code
-            # id_parts 1 is the user token
+        id_parts = auth_parts[1].split("/")
 
-            if (
-                len(id_parts) == 2
-                and 6 <= len(id_parts[0]) <= MAX_AUTH_TOKEN_LENGTH
-                and 1 <= len(id_parts[1]) <= MAX_AUTH_TOKEN_LENGTH
-            ):
-                return await self.__authorize(id_parts[0]), id_parts[1]
+        # id_parts 0 is the event code
+        # id_parts 1 is the user token
 
-        return None, None
+        if (
+            len(id_parts) == 2
+            and 6 <= len(id_parts[0]) <= MAX_AUTH_TOKEN_LENGTH
+            and 1 <= len(id_parts[1]) <= MAX_AUTH_TOKEN_LENGTH
+        ):
+            return await self.__authorize(id_parts[0]), id_parts[1]
+
+        raise HTTPException(
+            status_code=401,
+            detail="Authentication failed.",
+        )
 
     async def authorize_playground_access(self, headers) -> AuthorizeResponse | None:
         """get the event code from the header"""
-        if "openai-event-code" in headers:
-            authorize_response = await self.__authorize(
-                headers.get("openai-event-code")
+        if "openai-event-code" not in headers:
+            raise HTTPException(
+                status_code=401,
+                detail="Authentication failed.",
             )
 
-            if authorize_response is None or not authorize_response.is_authorized:
-                raise HTTPException(
-                    status_code=401,
-                    detail="Event code is not authorized",
-                )
+        authorize_response = await self.__authorize(headers.get("openai-event-code"))
+
+        if authorize_response is None or not authorize_response.is_authorized:
+            raise HTTPException(
+                status_code=401,
+                detail="Authentication failed.",
+            )
 
         return authorize_response
 
@@ -319,72 +361,77 @@ class Authorize:
     async def authorize_management_access(self, headers):
         """authorize management access"""
 
-        if "Authorization" in headers:
-            auth_header = headers.get("Authorization")
-            auth_parts = auth_header.split(" ")
-            if len(auth_parts) != 2 or auth_parts[0] != "Bearer":
-                raise HTTPException(
-                    status_code=401,
-                    detail="Invalid authorization header",
+        if "Authorization" not in headers:
+            raise HTTPException(
+                status_code=401,
+                detail="Authentication failed.",
+            )
+
+        auth_header = headers.get("Authorization")
+        auth_parts = auth_header.split(" ")
+
+        if len(auth_parts) != 2 or auth_parts[0] != "Bearer":
+            raise HTTPException(
+                status_code=401,
+                detail="Authentication failed. Invalid Token.",
+            )
+
+        guid = auth_parts[1]
+        # check guid is valid by loading up as a guid
+        try:
+            guid = uuid.UUID(guid)
+        except ValueError as exc:
+            raise HTTPException(
+                status_code=401,
+                detail="Authentication failed. Invalid Token.",
+            ) from exc
+
+        async with TableClient.from_connection_string(
+            conn_str=self.connection_string, table_name=MANAGEMENT_TABLE_NAME
+        ) as table_client:
+            try:
+                query_filter = (
+                    f"PartitionKey eq 'management' and "
+                    f"RowKey eq '{guid}' and Active eq true"
+                )
+                # get all columns from the table
+                queried_entities = table_client.query_entities(
+                    query_filter=query_filter,
+                    select=[
+                        "*",
+                    ],
                 )
 
-            guid = auth_parts[1]
-            # check guid is valid by loading up as a guid
-            try:
-                guid = uuid.UUID(guid)
-            except ValueError as exc:
+                management_uuid = None
+                async for entity in queried_entities:
+                    management_uuid = entity.get("RowKey", None)
+
+                if management_uuid:
+                    return management_uuid
+
                 raise HTTPException(
                     status_code=401,
-                    detail="Invalid authorization header",
-                ) from exc
+                    detail="Authentication failed.",
+                )
 
-            async with TableClient.from_connection_string(
-                conn_str=self.connection_string, table_name=MANAGEMENT_TABLE_NAME
-            ) as table_client:
-                try:
-                    query_filter = (
-                        f"PartitionKey eq 'management' and "
-                        f"RowKey eq '{guid}' and Active eq true"
-                    )
-                    # get all columns from the table
-                    queried_entities = table_client.query_entities(
-                        query_filter=query_filter,
-                        select=[
-                            "*",
-                        ],
-                    )
+            except HTTPException:
+                raise
 
-                    async for entity in queried_entities:
-                        return entity.get("RowKey", None)
+            except AzureError as azure_error:
+                logging.error(
+                    "Authentication failed. Azure Error: %s",
+                    azure_error.message,
+                )
+                raise HTTPException(
+                    status_code=401,
+                    detail=azure_error.message,
+                ) from azure_error
 
-                except ClientAuthenticationError as auth_error:
-                    logging.error("ClientAuthenticationError: %s", auth_error.message)
-                    raise HTTPException(
-                        status_code=401,
-                        detail="Invalid authorization header",
-                    ) from auth_error
-
-                except ServiceRequestError as service_request_error:
-                    logging.error(
-                        "ServiceResponseError: %s", service_request_error.message
-                    )
-                    raise HTTPException(
-                        status_code=401,
-                        detail="Invalid authorization header",
-                    ) from service_request_error
-
-                except HttpResponseError as response_error:
-                    logging.error("HttpResponseError: %s", response_error.message)
-                    raise HTTPException(
-                        status_code=401,
-                        detail="Invalid authorization header",
-                    ) from response_error
-
-                except Exception as exception:
-                    logging.error(
-                        "General exception in event_authorized: %s", str(exception)
-                    )
-                    raise HTTPException(
-                        status_code=401,
-                        detail="Invalid authorization header",
-                    ) from exception
+            except Exception as exception:
+                logging.error(
+                    "General exception in management authorize: %s", str(exception)
+                )
+                raise HTTPException(
+                    status_code=401,
+                    detail="Authentication failed. General exception.",
+                ) from exception
