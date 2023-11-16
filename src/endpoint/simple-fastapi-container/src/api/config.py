@@ -4,13 +4,11 @@ import logging
 import random
 
 from datetime import datetime, timedelta
-
+from fastapi import HTTPException
 from azure.data.tables import TableServiceClient
 from azure.data.tables.aio import TableClient
 from azure.core.exceptions import (
-    HttpResponseError,
-    ServiceRequestError,
-    ClientAuthenticationError,
+    AzureError,
 )
 
 CACHE_EXPIRY_MINUTES = 8
@@ -124,31 +122,18 @@ class OpenAIConfig:
 
                 return config
 
-        except ClientAuthenticationError as auth_error:
-            logger.warning("ClientAuthenticationError: %s", str(auth_error))
-            raise ConfigError(
-                "ClientAuthenticationError: Can't connect to the Azure Configuration Table"
-            ) from auth_error
-
-        except ServiceRequestError as request_error:
-            logger.warning("ServiceRequestError: %s", str(request_error))
-            raise ConfigError(
-                "ServiceResponseError: Can't connect to the Azure Configuration Table",
-            ) from request_error
-
-        except HttpResponseError as response_error:
-            logger.warning("HttpResponseError: %s", str(response_error))
-            raise ConfigError(
-                "HttpResponseError: Can't connect to the Azure Configuration Table"
-            ) from response_error
-
-        except ConfigError:
-            raise
+        except AzureError as azure_error:
+            logger.warning("AzureError: %s", str(azure_error))
+            raise HTTPException(
+                status_code=504,
+                detail="AzureError: Can't connect to the Azure Configuration Table",
+            ) from azure_error
 
         except Exception as exception:
             logger.warning("Exception: %s", str(exception))
-            raise ConfigError(
-                f"Exception in {__name__}: {str(exception)}"
+            raise HTTPException(
+                status_code=500,
+                detail="Exception: Can't connect to the Azure Configuration Table",
             ) from exception
 
     async def get_deployment(self) -> Deployment | None:

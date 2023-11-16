@@ -1,13 +1,12 @@
 """ Images Generations API """
 
 from enum import Enum
-import json
 import logging
 from typing import Tuple
 import asyncio
-import httpx
 import openai
 from pydantic import BaseModel
+from fastapi import HTTPException
 
 from .config import OpenAIConfig
 from .openai_async import OpenAIAsyncManager
@@ -55,6 +54,18 @@ class ImagesGenerations:
         self.openai_config = openai_config
         self.logger = logging.getLogger(__name__)
 
+    def report_exception(
+        self, message: str, http_status_code: int
+    ) -> Tuple[openai.openai_object.OpenAIObject, int]:
+        """report exception"""
+
+        self.logger.warning(msg=f"{message}")
+
+        raise HTTPException(
+            status_code=http_status_code,
+            detail=message,
+        )
+
     def validate_input(self, images: ImagesGenerationsRequst):
         """validate input"""
         # do some basic input validation
@@ -84,17 +95,6 @@ class ImagesGenerations:
                 "Oops, response_format must be url or b64_json.", 400
             )
 
-        return None, None
-
-    def report_exception(
-        self, message: str, http_status_code: int
-    ) -> Tuple[openai.openai_object.OpenAIObject, int]:
-        """report exception"""
-
-        self.logger.warning(msg=f"{message}")
-
-        return message, http_status_code
-
     async def call_openai_images_generations(
         self, images: ImagesGenerationsRequst
     ) -> Tuple[openai.openai_object.OpenAIObject, int]:
@@ -102,74 +102,44 @@ class ImagesGenerations:
 
         retry_count = 0
 
-        completion, http_status_code = self.validate_input(images)
+        self.validate_input(images)
 
-        if completion or http_status_code:
-            return completion, http_status_code
+        deployment = await self.openai_config.get_deployment()
 
-        try:
-            deployment = await self.openai_config.get_deployment()
+        openai_request = {
+            "prompt": images.prompt,
+            "n": images.n,
+            "size": images.size.value,
+            "response_format": images.response_format.value,
+        }
 
-            openai_request = {
-                "prompt": images.prompt,
-                "n": images.n,
-                "size": images.size.value,
-                "response_format": images.response_format.value,
-            }
+        url = (
+            f"https://{deployment.resource_name}.openai.azure.com"
+            "/openai/images/generations:submit"
+            f"?api-version={images.api_version}"
+        )
 
-            url = (
-                f"https://{deployment.resource_name}.openai.azure.com"
-                "/openai/images/generations:submit"
-                f"?api-version={images.api_version}"
-            )
+        async_mgr = OpenAIAsyncManager(deployment)
+        response = await async_mgr.async_post(openai_request, url)
+
+        operation_location = response.headers["operation-location"]
+        status = ""
+
+        while status != "succeeded" and status != "failed":
+            # retry 20 times which is 20 * 3 second sleep = 60 seconds max wait
+            if retry_count >= 20:
+                raise HTTPException(
+                    status_code=408, detail="OpenAI Dalle request retry exceeded"
+                )
+
+            await asyncio.sleep(3)
 
             async_mgr = OpenAIAsyncManager(deployment)
-            response = await async_mgr.async_post(openai_request, url)
+            response = await async_mgr.async_get(operation_location)
 
-            operation_location = response.headers["operation-location"]
-            status = ""
+            response = response.json()
 
-            while status != "succeeded" and status != "failed":
-                # retry 20 times which is 20 * 3 second sleep = 60 seconds max wait
-                if retry_count >= 20:
-                    raise DalleTimeoutError
+            status = response["status"]
+            retry_count += 1
 
-                await asyncio.sleep(3)
-
-                async_mgr = OpenAIAsyncManager(deployment)
-                response = await async_mgr.async_get(operation_location)
-
-                response = response.json()
-
-                status = response["status"]
-                retry_count += 1
-
-            return response, response.get("http_status_code", 200)
-
-        except DalleTimeoutError:
-            return self.report_exception(
-                "OpenAI Dalle request retry exceeded",
-                408,
-            )
-
-        except httpx.ConnectError:
-            return self.report_exception(
-                "Service connection error.",
-                504,
-            )
-
-        except httpx.ConnectTimeout:
-            return self.report_exception(
-                "Service connection timeout error.",
-                504,
-            )
-
-        except httpx.HTTPStatusError as http_status_error:
-            return self.report_exception(
-                json.loads(http_status_error.response.text).get("error").get("message"),
-                http_status_error.response.status_code,
-            )
-
-        except Exception as exception:
-            self.logger.warning(msg=f"Global exception caught: {exception}")
-            raise exception
+        return response, response.get("http_status_code", 200)

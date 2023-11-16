@@ -24,8 +24,6 @@ class NewEventRequest(BaseModel):
     max_token_cap: int
     event_url: str
     event_url_text: str
-    contact_name: str
-    contact_email: str
     organizer_name: str
     organizer_email: str
 
@@ -37,8 +35,6 @@ class NewEventRequest(BaseModel):
         max_token_cap: int,
         event_url: str,
         event_url_text: str,
-        contact_name: str,
-        contact_email: str,
         organizer_name: str,
         organizer_email: str,
     ) -> None:
@@ -49,8 +45,6 @@ class NewEventRequest(BaseModel):
             max_token_cap=max_token_cap,
             event_url=event_url,
             event_url_text=event_url_text,
-            contact_name=contact_name,
-            contact_email=contact_email,
             organizer_name=organizer_name,
             organizer_email=organizer_email,
         )
@@ -61,8 +55,6 @@ class NewEventResponse(BaseModel):
     """Response object for Authorize class."""
 
     event_code: str
-    contact_name: str
-    contact_email: str
     organizer_name: str
     organizer_email: str
     start_utc: datetime
@@ -161,8 +153,6 @@ class Management:
             "MaxTokenCap": event_request.max_token_cap,
             "EventUrl": event_request.event_url,
             "EventUrlText": event_request.event_url_text,
-            "ContactName": event_request.contact_name,
-            "ContactEmail": event_request.contact_email,
             "OrganizerName": event_request.organizer_name,
             "OrganizerEmail": event_request.organizer_email,
         }
@@ -179,8 +169,6 @@ class Management:
             # create and return a NewEventResponse
             return NewEventResponse(
                 event_code=row_key,
-                contact_name=event_request.contact_name,
-                contact_email=event_request.contact_email,
                 organizer_name=event_request.organizer_name,
                 organizer_email=event_request.organizer_email,
                 start_utc=event_request.start_utc,

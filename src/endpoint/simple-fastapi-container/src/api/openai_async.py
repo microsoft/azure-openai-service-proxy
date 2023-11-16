@@ -4,6 +4,7 @@ import json
 import logging
 import time
 from typing import Tuple
+from fastapi import HTTPException
 
 import httpx
 import openai
@@ -53,22 +54,44 @@ class OpenAIAsyncManager:
 
         start = time.time()
 
-        async with httpx.AsyncClient() as client:
-            response = await client.post(
-                url,
-                headers=headers,
-                json=openai_request,
-                timeout=HTTPX_TIMEOUT_SECONDS,
-            )
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    url,
+                    headers=headers,
+                    json=openai_request,
+                    timeout=HTTPX_TIMEOUT_SECONDS,
+                )
 
-        if not 200 <= response.status_code < 300:
-            # note, for future reference 409 and 429 were retryable with tenactiy
-            raise OpenAIException(
-                message=json.loads(response.text)
-                .get("error")
-                .get("message", "OpenAI Error"),
-                status_code=response.status_code,
-            )
+            if not 200 <= response.status_code < 300:
+                # note, for future reference 409 and 429 were retryable with tenactiy
+                raise HTTPException(
+                    status_code=response.status_code,
+                    detail=json.loads(response.text)
+                    .get("error")
+                    .get("message", "OpenAI Error"),
+                )
+
+        except HTTPException:
+            raise
+
+        except httpx.ConnectError as exc:
+            raise HTTPException(
+                status_code=504,
+                detail="Service connection error.",
+            ) from exc
+
+        except httpx.ConnectTimeout as exc:
+            raise HTTPException(
+                status_code=504,
+                detail="Service connection timeout error.",
+            ) from exc
+
+        except Exception as exc:
+            raise HTTPException(
+                status_code=500,
+                detail="OpenAI API call failed",
+            ) from exc
 
         # calculate response time in milliseconds
         end = time.time()
@@ -80,8 +103,9 @@ class OpenAIAsyncManager:
             )
 
         except Exception as exc:
-            raise OpenAIException(
-                message="Invalid response body from API", status_code=400
+            raise HTTPException(
+                status_code=400,
+                detail="Invalid response body from API",
             ) from exc
 
         return openai_response
@@ -94,16 +118,43 @@ class OpenAIAsyncManager:
             "api-key": self.deployment.endpoint_key,
         }
 
-        async with httpx.AsyncClient() as client:
-            response = await client.post(
-                url,
-                headers=headers,
-                json=openai_request,
-                timeout=HTTPX_TIMEOUT_SECONDS,
-            )
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    url,
+                    headers=headers,
+                    json=openai_request,
+                    timeout=HTTPX_TIMEOUT_SECONDS,
+                )
 
-        response.raise_for_status()
-        return response
+            response.raise_for_status()
+            return response
+
+        except httpx.HTTPStatusError as http_status_error:
+            raise HTTPException(
+                status_code=http_status_error.response.status_code,
+                detail=json.loads(http_status_error.response.text)
+                .get("error")
+                .get("message", "OpenAI Error"),
+            ) from http_status_error
+
+        except httpx.ConnectError as exc:
+            raise HTTPException(
+                status_code=504,
+                detail="Service connection error.",
+            ) from exc
+
+        except httpx.ConnectTimeout as exc:
+            raise HTTPException(
+                status_code=504,
+                detail="Service connection timeout error.",
+            ) from exc
+
+        except Exception as exc:
+            raise HTTPException(
+                status_code=500,
+                detail="OpenAI API call failed",
+            ) from exc
 
     async def async_get(self, url: str):
         """async get request"""
@@ -113,12 +164,42 @@ class OpenAIAsyncManager:
             "api-key": self.deployment.endpoint_key,
         }
 
-        async with httpx.AsyncClient() as client:
-            response = await client.get(
-                url,
-                headers=headers,
-                timeout=HTTPX_TIMEOUT_SECONDS,
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.get(
+                    url,
+                    headers=headers,
+                    timeout=HTTPX_TIMEOUT_SECONDS,
+                )
+
+            response.raise_for_status()
+            return response
+
+        except httpx.HTTPStatusError as http_status_error:
+            detail = (
+                json.loads(http_status_error.response.text)
+                .get("error")
+                .get("message", "OpenAI Error")
             )
 
-        response.raise_for_status()
-        return response
+            raise HTTPException(
+                status_code=http_status_error.response.status_code, detail=detail
+            ) from http_status_error
+
+        except httpx.ConnectError as exc:
+            raise HTTPException(
+                status_code=504,
+                detail="Service connection error.",
+            ) from exc
+
+        except httpx.ConnectTimeout as exc:
+            raise HTTPException(
+                status_code=504,
+                detail="Service connection timeout error.",
+            ) from exc
+
+        except Exception as exc:
+            raise HTTPException(
+                status_code=500,
+                detail="OpenAI API call failed",
+            ) from exc

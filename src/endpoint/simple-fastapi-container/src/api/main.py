@@ -120,15 +120,12 @@ async def oai_embeddings(
             detail="Rate limit exceeded. Try again in 10 seconds",
         )
 
-    try:
-        (
-            completion,
-            status_code,
-        ) = await app.state.embeddings_mgr.call_openai_embeddings(embeddings)
-        response.status_code = status_code
-        return completion
-    except Exception as exc:
-        raise HTTPException(status_code=500, detail=f"{exc}") from exc
+    (
+        completion,
+        status_code,
+    ) = await app.state.embeddings_mgr.call_openai_embeddings(embeddings)
+    response.status_code = status_code
+    return completion
 
 
 # Support for OpenAI SDK 0.28
@@ -168,21 +165,18 @@ async def oai_completion(
             detail="Rate limit exceeded. Try again in 10 seconds",
         )
 
-    try:
-        if (
-            completion_request.max_tokens
-            and completion_request.max_tokens > authorize_response.max_token_cap
-        ):
-            completion_request.max_tokens = authorize_response.max_token_cap
+    if (
+        completion_request.max_tokens
+        and completion_request.max_tokens > authorize_response.max_token_cap
+    ):
+        completion_request.max_tokens = authorize_response.max_token_cap
 
-        (
-            completion_response,
-            status_code,
-        ) = await app.state.completions_mgr.call_openai_completion(completion_request)
-        response.status_code = status_code
-        return completion_response
-    except Exception as exc:
-        raise HTTPException(status_code=500, detail=f"{exc}") from exc
+    (
+        completion_response,
+        status_code,
+    ) = await app.state.completions_mgr.call_openai_completion(completion_request)
+    response.status_code = status_code
+    return completion_response
 
 
 # Support for OpenAI SDK 0.28
@@ -222,18 +216,16 @@ async def oai_chat_completion(
             detail="Rate limit exceeded. Try again in 10 seconds",
         )
 
-    try:
-        if chat.max_tokens and chat.max_tokens > authorize_response.max_token_cap:
-            chat.max_tokens = authorize_response.max_token_cap
+    if chat.max_tokens and chat.max_tokens > authorize_response.max_token_cap:
+        chat.max_tokens = authorize_response.max_token_cap
 
-        (
-            completion,
-            status_code,
-        ) = await app.state.chat_completions_mgr.call_openai_chat_completion(chat)
-        response.status_code = status_code
-        return completion
-    except Exception as exc:
-        raise HTTPException(status_code=500, detail=f"{exc}") from exc
+    (
+        completion,
+        status_code,
+    ) = await app.state.chat_completions_mgr.call_openai_chat_completion(chat)
+
+    response.status_code = status_code
+    return completion
 
 
 # Support for OpenAI SDK 0.28
@@ -275,17 +267,14 @@ async def oai_images_generations(
             detail="Rate limit exceeded. Try again in 10 seconds",
         )
 
-    try:
-        (
-            completion_response,
-            status_code,
-        ) = await app.state.images_generations_mgr.call_openai_images_generations(
-            image_generation_request
-        )
-        response.status_code = status_code
-        return completion_response
-    except Exception as exc:
-        raise HTTPException(status_code=500, detail=f"{exc}") from exc
+    (
+        completion_response,
+        status_code,
+    ) = await app.state.images_generations_mgr.call_openai_images_generations(
+        image_generation_request
+    )
+    response.status_code = status_code
+    return completion_response
 
 
 @app.post("/v1/api/playground", status_code=200)
@@ -300,15 +289,12 @@ async def oai_playground(
         request.headers
     )
 
-    try:
-        if chat.max_tokens > authorize_response.max_token_cap:
-            chat.max_tokens = authorize_response.max_token_cap
+    if chat.max_tokens > authorize_response.max_token_cap:
+        chat.max_tokens = authorize_response.max_token_cap
 
-        completion, status_code = await app.state.openai_mgr.call_chat_playground(chat)
-        response.status_code = status_code
-        return completion
-    except Exception as exc:
-        raise HTTPException(status_code=500, detail=f"{exc}") from exc
+    completion, status_code = await app.state.openai_mgr.call_chat_playground(chat)
+    response.status_code = status_code
+    return completion
 
 
 @app.on_event("startup")
@@ -317,9 +303,13 @@ async def startup_event():
 
     try:
         storage_connection_string = os.environ["AZURE_STORAGE_CONNECTION_STRING"]
-    except KeyError:
+    except KeyError as key_error:
         print("Please set the environment variable AZURE_STORAGE_CONNECTION_STRING")
-        exit(1)
+        raise HTTPException(
+            status_code=500,
+            detail="Please set the environment variable AZURE_STORAGE_CONNECTION_STRING",
+        ) from key_error
+        # exit(1)
 
     app.state.authorize = Authorize(storage_connection_string)
     app.state.management = Management(storage_connection_string)

@@ -7,8 +7,7 @@ from pydantic import BaseModel
 import openai
 import openai.error
 import openai.openai_object
-from tenacity import RetryError
-
+from fastapi import HTTPException
 from .config import OpenAIConfig
 from .openai_async import OpenAIAsyncManager
 
@@ -37,6 +36,18 @@ class Completions:
         """init in memory session manager"""
         self.openai_config = openai_config
         self.logger = logging.getLogger(__name__)
+
+    def __report_exception(
+        self, message: str, http_status_code: int
+    ) -> Tuple[openai.openai_object.OpenAIObject, int]:
+        """report exception"""
+
+        self.logger.warning(msg=f"{message}")
+
+        raise HTTPException(
+            status_code=http_status_code,
+            detail=message,
+        )
 
     def __validate_input(self, cr: CompletionsRequest):
         """validate input"""
@@ -78,90 +89,34 @@ class Completions:
                 "Oops, stop_sequence must be printable characters.", 400
             )
 
-        return None, None
-
-    def __report_exception(
-        self, message: str, http_status_code: int
-    ) -> Tuple[openai.openai_object.OpenAIObject, int]:
-        """report exception"""
-
-        self.logger.warning(msg=f"{message}")
-
-        return message, http_status_code
-
     async def call_openai_completion(
         self, cr: CompletionsRequest
     ) -> Tuple[openai.openai_object.OpenAIObject, int]:
         """call openai with retry"""
 
-        completion, http_status_code = self.__validate_input(cr)
+        self.__validate_input(cr)
 
-        if completion or http_status_code:
-            return completion, http_status_code
+        deployment = await self.openai_config.get_deployment()
 
-        try:
-            deployment = await self.openai_config.get_deployment()
+        openai_request = {
+            "prompt": cr.prompt,
+            "max_tokens": cr.max_tokens,
+            "temperature": cr.temperature,
+            "top_p": cr.top_p,
+            "stop": cr.stop,
+            "frequency_penalty": cr.frequency_penalty,
+            "presence_penalty": cr.presence_penalty,
+        }
 
-            openai_request = {
-                "prompt": cr.prompt,
-                "max_tokens": cr.max_tokens,
-                "temperature": cr.temperature,
-                "top_p": cr.top_p,
-                "stop": cr.stop,
-                "frequency_penalty": cr.frequency_penalty,
-                "presence_penalty": cr.presence_penalty,
-            }
+        url = (
+            f"https://{deployment.resource_name}.openai.azure.com/openai/deployments/"
+            f"{deployment.deployment_name}/completions"
+            f"?api-version={cr.api_version}"
+        )
 
-            url = (
-                f"https://{deployment.resource_name}.openai.azure.com/openai/deployments/"
-                f"{deployment.deployment_name}/completions"
-                f"?api-version={cr.api_version}"
-            )
+        async_mgr = OpenAIAsyncManager(deployment)
+        response = await async_mgr.async_openai_post(openai_request, url)
 
-            async_mgr = OpenAIAsyncManager(deployment)
-            response = await async_mgr.async_openai_post(openai_request, url)
+        response["model"] = deployment.friendly_name
 
-            response["model"] = deployment.friendly_name
-
-            return response, 200
-
-        except openai.error.InvalidRequestError as invalid_request_exception:
-            # this exception captures content policy violation policy
-            return self.__report_exception(
-                str(invalid_request_exception.user_message),
-                invalid_request_exception.http_status,
-            )
-
-        except openai.error.RateLimitError as rate_limit_exception:
-            return self.__report_exception(
-                "Oops, OpenAI rate limited. Please try again.",
-                rate_limit_exception.http_status,
-            )
-
-        except openai.error.ServiceUnavailableError as service_unavailable_exception:
-            return self.__report_exception(
-                "Oops, OpenAI unavailable. Please try again.",
-                service_unavailable_exception.http_status,
-            )
-
-        except openai.error.Timeout as timeout_exception:
-            return self.__report_exception(
-                "Oops, OpenAI timeout. Please try again.",
-                timeout_exception.http_status,
-            )
-
-        except openai.error.OpenAIError as openai_error_exception:
-            return self.__report_exception(
-                str(openai_error_exception.user_message),
-                openai_error_exception.http_status,
-            )
-
-        except RetryError:
-            return self.__report_exception(
-                str("OpenAI API retry limit reached..."),
-                429,
-            )
-
-        except Exception as exception:
-            self.logger.warning(msg=f"Global exception caught: {exception}")
-            raise exception
+        return response, 200
