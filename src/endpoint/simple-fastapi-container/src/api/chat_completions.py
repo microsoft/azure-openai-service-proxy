@@ -53,10 +53,10 @@ class ChatCompletions:
         if not chat.messages:
             self.__throw_validation_error("Oops, no chat messages.", 400)
 
-        # check the max_tokens is between 1 and 4000
-        if chat.max_tokens and not 1 <= chat.max_tokens <= 4000:
+        # check the max_tokens is between 1 and 4096
+        if chat.max_tokens and not 1 <= chat.max_tokens <= 4096:
             self.__throw_validation_error(
-                "Oops, max_tokens must be between 1 and 4000.", 400
+                "Oops, max_tokens must be between 1 and 4096.", 400
             )
 
         # check the temperature is between 0 and 1
