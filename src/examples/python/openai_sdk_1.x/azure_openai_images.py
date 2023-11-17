@@ -1,7 +1,5 @@
 """ generate images from OpenAI Dall-e model"""
 
-# write code to post json to OpenAI API
-
 import os
 import json
 from dotenv import load_dotenv
