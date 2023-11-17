@@ -26,6 +26,8 @@ from .management import (
     NewEventResponse,
     NewEventRequest,
     EventItemResponse,
+    ModelDeploymentRequest,
+    ModelDeploymentResponse,
 )
 
 
@@ -56,16 +58,7 @@ async def management_list_active_events(
     """get event info"""
 
     # raises expection if not authenticated
-    authorize_response = await app.state.authorize.authorize_management_access(
-        request.headers
-    )
-
-    if authorize_response is None:
-        raise HTTPException(
-            status_code=401,
-            detail="Not authenticated.",
-        )
-
+    await app.state.authorize.authorize_management_access(request.headers)
     return await app.state.management.list_events(query)
 
 
@@ -76,17 +69,33 @@ async def management_add_new(
     """get event info"""
 
     # raises expection if not authenticated
-    authorize_response = await app.state.authorize.authorize_management_access(
-        request.headers
-    )
-
-    if authorize_response is None:
-        raise HTTPException(
-            status_code=401,
-            detail="Not authenticated.",
-        )
-
+    await app.state.authorize.authorize_management_access(request.headers)
     return await app.state.management.add_new_event(event)
+
+
+@app.post(
+    "/v1/api/management/modeldeployment/upsert", status_code=200, response_model=None
+)
+async def management_deployment_upsert(
+    deployment: ModelDeploymentRequest, request: Request
+) -> None:
+    """get event info"""
+
+    # raises expection if not authenticated
+    await app.state.authorize.authorize_management_access(request.headers)
+    return await app.state.management.upsert_model_deployment(deployment)
+
+
+# list model deployments
+@app.get("/v1/api/management/modeldeployment/list/{query}", status_code=200)
+async def management_deployment_list(
+    query: str, request: Request
+) -> list[ModelDeploymentResponse]:
+    """get models deployed info"""
+
+    # raises expection if not authenticated
+    await app.state.authorize.authorize_management_access(request.headers)
+    return await app.state.management.list_model_deployments(query)
 
 
 # Support for OpenAI SDK 0.28

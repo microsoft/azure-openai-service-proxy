@@ -2,6 +2,7 @@
 import logging
 import uuid
 from datetime import datetime
+from enum import Enum
 from pydantic import BaseModel
 from fastapi import HTTPException
 from azure.core.exceptions import AzureError
@@ -14,6 +15,57 @@ logging.basicConfig(level=logging.WARNING)
 MANAGEMENT_TABLE_NAME = "management"
 EVENT_AUTHORIZATION_TABLE_NAME = "authorization"
 EVENT_AUTHORISATION_PARTITION_KEY = "event"
+CONFIGURATION_TABLE_NAME = "configuration"
+
+
+# create a model type enum
+class DeploymentClass(Enum):
+    """Deployment Class."""
+
+    OPENAI_CHAT = "openai-chat"
+    OPENAI_COMPLETIONS = "openai-completions"
+    OPENAI_EMBEDDINGS = "openai-embeddings"
+    OPENAI_IMAGES_GENERATIONS = "openai-images-generations"
+
+
+class ModelDeploymentRequest(BaseModel):
+    """Model Deployment Request."""
+
+    deployment_class: DeploymentClass
+    friendly_name: str
+    deployment_name: str
+    endpoint_key: str
+    resource_name: str
+    active: bool = True
+
+
+class ModelDeploymentResponse(BaseModel):
+    """Model Deployment Response."""
+
+    deployment_class: DeploymentClass
+    friendly_name: str
+    deployment_name: str
+    endpoint_key: str
+    resource_name: str
+    active: bool = True
+
+    def __init__(
+        self,
+        deployment_class: DeploymentClass,
+        friendly_name: str,
+        deployment_name: str,
+        endpoint_key: str,
+        resource_name: str,
+        active: bool,
+    ) -> None:
+        super().__init__(
+            deployment_class=deployment_class,
+            friendly_name=friendly_name,
+            deployment_name=deployment_name,
+            endpoint_key=endpoint_key,
+            resource_name=resource_name,
+            active=active,
+        )
 
 
 class EventItemResponse(BaseModel):
@@ -304,4 +356,110 @@ class Management:
             raise HTTPException(
                 status_code=500,
                 detail="Get event request failed.",
+            ) from exception
+
+    async def upsert_model_deployment(self, model_deployment: ModelDeploymentRequest):
+        """Upsert a model deployment to the configuration table"""
+
+        model_entity = {
+            "PartitionKey": model_deployment.deployment_class.value,
+            "RowKey": model_deployment.friendly_name,
+            "DeploymentName": model_deployment.deployment_name,
+            "Active": model_deployment.active,
+            "EndpointKey": model_deployment.endpoint_key,
+            "ResourceName": model_deployment.resource_name,
+        }
+
+        try:
+            table_client = TableClient.from_connection_string(
+                conn_str=self.connection_string,
+                table_name=CONFIGURATION_TABLE_NAME,
+            )
+
+            table_client.upsert_entity(entity=model_entity)
+
+        except AzureError as azure_error:
+            self.logging.error(
+                "HTTP response exception adding model deployment: %s",
+                azure_error.message,
+            )
+            raise HTTPException(
+                status_code=504,
+                detail="Add model deployment failed. AzureError.",
+            ) from azure_error
+
+        except Exception as exception:
+            self.logging.error(
+                "General exception adding model deployment: %s", exception.args[0]
+            )
+            raise HTTPException(
+                status_code=500,
+                detail="Add model deployment failed.",
+            ) from exception
+
+    async def list_model_deployments(self, query: str):
+        """list model deployments from the configuration table"""
+
+        try:
+            async with AsyncTableClient.from_connection_string(
+                conn_str=self.connection_string,
+                table_name=CONFIGURATION_TABLE_NAME,
+            ) as table_client:
+                model_deployments = []
+                query = query.lower()
+
+                if query == "all":
+                    query_filter = ""
+                elif query == "active":
+                    query_filter = "Active eq true"
+                else:
+                    raise HTTPException(
+                        status_code=400,
+                        detail="Invalid query path.",
+                    )
+
+                # get all columns from the table
+                queried_entities = table_client.query_entities(
+                    query_filter=query_filter,
+                    select=[
+                        "*",
+                    ],
+                )
+
+                async for entity in queried_entities:
+                    model_deployment = ModelDeploymentResponse(
+                        deployment_class=DeploymentClass(
+                            entity.get("PartitionKey", "").strip()
+                        ),
+                        friendly_name=entity.get("RowKey", "").strip(),
+                        deployment_name=entity.get("DeploymentName", "").strip(),
+                        endpoint_key="*********",
+                        resource_name=entity.get("ResourceName", "").strip(),
+                        active=entity.get("Active"),
+                    )
+
+                    model_deployments.append(model_deployment)
+
+                return model_deployments
+
+        except HTTPException:
+            raise
+
+        except AzureError as azure_error:
+            self.logging.error(
+                "HTTP response exception getting model deployment: %s",
+                azure_error.message,
+            )
+            raise HTTPException(
+                status_code=504,
+                detail="Get model deployment failed. AzureError.",
+            ) from azure_error
+
+        except Exception as exception:
+            self.logging.error(
+                "General exception getting model deployment: %s", exception.args[0]
+            )
+            raise HTTPException(
+                status_code=500,
+                detail="Get model deployment failed.",
             ) from exception
