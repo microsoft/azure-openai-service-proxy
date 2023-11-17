@@ -11,7 +11,6 @@ The following example demonstrates how to use `cURL` to access the Image Generat
 ```shell
 curl -X POST -H "Content-Type: application/json" -H "api-key: API_KEY" -d '{
   "prompt": "cute picture of a cat",
-  "n": 5,
   "size": "1024x1024",
   "n": 2
 }' https://PROXY_ENDPOINT_URL/v1/api/images/generations | jq
