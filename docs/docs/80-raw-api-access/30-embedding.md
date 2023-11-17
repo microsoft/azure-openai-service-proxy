@@ -16,7 +16,7 @@ from openai import AzureOpenAI
 load_dotenv()
 
 ENDPOINT_URL = os.environ.get("PROXY_ENDPOINT_URL")
-API_KEY = os.environ.get("EVENT_TOKEN")
+API_KEY = os.environ.get("API_KEY")
 API_VERSION = "2023-09-01-preview"
 OPENAI_EMBEDDING_ENGINE = "text-embedding-ada-002"
 
@@ -48,12 +48,12 @@ print(query_embeddings.data[0].embedding)
 
 ## OpenAI Embeddings with Curl
 
-You can also use `curl` to access the OpenAI embeddings API. Remember, the `API_KEY` is the EventCode/GitHubUserName, eg `hackathon/gloveboxes`, and the `ENDPOINT_URL` is proxy url provided by the event administrator.
+You can also use `cURL` to access the OpenAI embeddings API. Remember, the `API_KEY` is the EventCode/GitHubUserName, eg `hackathon/gloveboxes`, and the `ENDPOINT_URL` is proxy url provided by the event administrator.
 
 ```shell
 curl https://ENDPOINT_URL/v1/embeddings \
   -H "Content-Type: application/json" \
-  -H "openai-event-code: API_KEY" \
+  -H "api-key: API_KEY" \
   -d '{
     "input": "Your text string goes here"
   }'
@@ -64,7 +64,7 @@ or pretty print the JSON response with `jq`
 ```shell
 curl https://ENDPOINT_URL/v1/embeddings \
   -H "Content-Type: application/json" \
-  -H "openai-event-code: API_KEY" \
+  -H "api-key: API_KEY" \
   -d '{
     "input": "Your text string goes here"
   }' | jq

@@ -1,19 +1,13 @@
-# Using the Playground
+# The Playground
 
-The Playground is a web-based application that allows users to experiment with OpenAI Chat Completions. 
+The Azure OpenAI proxy service provides a `Playground like` experience for developers to explore the Azure OpenAI chat completion using the time bound event code. The Playground is UX modeled on the official Azure OpenAI Playground, so if you've used the official Playground, you'll be familiar with the Playground.
 
-## Authentication
+## Playground Authentication
 
-An event attendee needs to authenticate to the Playground using an event code. The event code is validated and the current time is checked against the event start and end times of the event. If the event code is valid and the event is active, then the attendee is allowed to use the Playground.
+Access the Playground is with an event code. The event code is validated and the current time is checked against the event start and end times of the event. If the event code is valid and the event is active, then the attendee is allowed to use the Playground.
 
-The Azure OpenAI proxy service provides a `Playground like` experience for developers to explore the Azure OpenAI chat completion using the time bound event code.
+![The Azure OpenAI Playground-like experience](media/openai_proxy_playground.png)
 
-![](media/openai_proxy_playground.png)
+## Opening the Playground
 
-<!-- :::tip
-
-The event start time and end time are in UTC (Universal Coordinated Time).
-
-::: -->
-
-
+To open the Playground, open a browser and navigate to the following URL, replacing `YOUR_OPENAI_PROXY_ENDPOINT` with the URL of the Azure OpenAI proxy service.

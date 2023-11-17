@@ -9,7 +9,7 @@ curl -X 'POST' `
   'https://YOUR_REST_ENDPOINT/api/oai_prompt' `
   -H 'accept: application/json' `
   -H 'Content-Type: application/json' `
-  -H 'openai-event-code: YOUREVENTCODE' `
+  -H 'api-key: API_KEY' `
   -d '{
   "messages": [
     {"role": "system", "content":"What is this about"},
@@ -31,7 +31,7 @@ curl -X 'POST' \
   'https://YOUR_REST_ENDPOINT/api/oai_prompt' \
   -H 'accept: application/json' \
   -H 'Content-Type: application/json' \
-  -H 'openai-event-code: YOUREVENTCODE' \
+  -H 'api-key: API_KEY' \
   -d '{
   "messages": [
     {"role": "system", "content":"What is this about"},
@@ -53,7 +53,7 @@ curl -X 'POST' \
   'https://YOUR_REST_ENDPOINT/api/oai_prompt' \
   -H 'accept: application/json' \
   -H 'Content-Type: application/json' \
-  -H 'openai-event-code: YOUREVENTCODE' \
+  -H 'api-key: API_KEY' \
   -d '{
   "messages": [
     {"role": "system", "content":"What is this about"},
