@@ -263,7 +263,7 @@ async def oai_images_generations(
 
 
 # This path is used by the playground
-@app.post("/api/eventinfo", status_code=200)
+@app.post("/api/eventinfo", status_code=200, deprecated=True)
 @app.post("/v1/api/eventinfo", status_code=200)
 async def event_info(request: Request) -> AuthorizeResponse:
     """get event info"""
@@ -281,7 +281,7 @@ async def event_info(request: Request) -> AuthorizeResponse:
 
 
 @app.post("/v1/api/playground", status_code=200)
-@app.post("/api/oai_prompt", status_code=200)
+@app.post("/api/oai_prompt", status_code=200, deprecated=True)
 async def oai_playground(
     chat: ChatCompletionsRequest, request: Request, response: Response
 ) -> PlaygroundResponse | str:
@@ -355,12 +355,12 @@ async def startup_event():
     app.state.rate_limit_images_generations = RateLimit()
 
 
-static_files_dir = (
+STATIC_FILES_DIR = (
     "src/playground/dist"
     if os.environ["ENVIRONMENT"] == "development"
     else "playground/dist"
 )
-app.mount("/", StaticFiles(directory=static_files_dir, html=True), name="static")
+app.mount("/", StaticFiles(directory=STATIC_FILES_DIR, html=True), name="static")
 
 if __name__ == "__main__":
     import uvicorn
