@@ -31,23 +31,19 @@ interface ApiResponse {
 }
 
 export async function callApi(
-  endpoint: string,
   data: any,
   eventCode: string
 ): Promise<{ answer?: ApiResponse; status: number; error?: string }> {
   try {
-    const response = await fetch(
-      `${endpoint}/api/playground`,
-      {
-        method: "POST",
-        headers: {
-          accept: "application/json",
-          "Content-Type": "application/json",
-          "openai-event-code": eventCode,
-        },
-        body: JSON.stringify(data),
-      }
-    );
+    const response = await fetch(`/api/playground`, {
+      method: "POST",
+      headers: {
+        accept: "application/json",
+        "Content-Type": "application/json",
+        "openai-event-code": eventCode,
+      },
+      body: JSON.stringify(data),
+    });
     if (response.status === 200) {
       const responseanswer = await response.json();
       return { answer: responseanswer, status: response.status };

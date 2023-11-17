@@ -65,9 +65,8 @@ export const ParamsCard = ({
     },
     [tokenUpdate]
   );
-  const [eventCode, setEventCode] = useState("");
-  const [endpoint, setEndpoint] = useState("");
-  const { eventData, isAuthorized, setEventConnection } = useEventDataContext();
+  const [code, setCode] = useState("");
+  const { eventData, isAuthorized, setEventCode } = useEventDataContext();
   const maxTokens = eventData?.max_token_cap ?? 0;
 
   return (
@@ -93,27 +92,8 @@ export const ParamsCard = ({
         <Input
           type="password"
           placeholder="Enter your Event Code"
-          value={eventCode}
-          onChange={(e) => setEventCode(e.target.value)}
-          style={{ textAlign: "right" }}
-        />
-
-        <br />
-
-        <Label
-          style={{
-            fontSize: "medium",
-            marginBottom: "0.5rem",
-            textAlign: "justify",
-          }}
-        >
-          <b>Event Endpoint</b>
-        </Label>
-        <Input
-          type="url"
-          placeholder="Enter your endpoint"
-          value={endpoint}
-          onChange={(e) => setEndpoint(e.target.value)}
+          value={code}
+          onChange={(e) => setCode(e.target.value)}
           style={{ textAlign: "right" }}
         />
 
@@ -121,7 +101,7 @@ export const ParamsCard = ({
           <>
             <Button
               className={styles.smallbutton}
-              onClick={() => setEventConnection({ eventCode, endpoint })}
+              onClick={() => setEventCode(code)}
             >
               Log In
             </Button>

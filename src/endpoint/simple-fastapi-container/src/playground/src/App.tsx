@@ -39,11 +39,11 @@ function App() {
     response_time: 0,
   });
 
-  const { eventCode, endpoint } = useEventDataContext();
+  const { eventCode } = useEventDataContext();
   const { setPromptError } = usePromptErrorContext();
 
   const onPromptEntered = async (messages: MessageData[]) => {
-    if (eventCode && endpoint) {
+    if (eventCode) {
       const userMessage = messages[messages.length - 1];
       const updatedMessageList = [
         ...messageList,
@@ -53,7 +53,7 @@ function App() {
 
       const data: ApiData = { messages: updatedMessageList, ...params };
       setIsLoading(true);
-      const { answer, status, error } = await callApi(endpoint, data, eventCode);
+      const { answer, status, error } = await callApi(data, eventCode);
       setPromptError(error);
 
       if (status !== 200) {

@@ -23,21 +23,18 @@ export enum AuthStatus {
 
 export type EventDataContextValue = {
   eventData: EventData | undefined;
-  setEventConnection: Dispatch<{ eventCode: string; endpoint: string }>;
+  setEventCode: Dispatch<string>;
   eventCodeSet: boolean;
-  endpointSet: boolean;
   isAuthorized: boolean;
   eventCode?: string;
   authStatus: AuthStatus;
-  endpoint?: string;
 };
 
 export const EventDataContext = createContext<EventDataContextValue>({
   eventData: undefined,
-  setEventConnection: () => {},
+  setEventCode: () => {},
   isAuthorized: false,
   eventCodeSet: false,
-  endpointSet: false,
   eventCode: undefined,
   authStatus: AuthStatus.NotSet,
 });
@@ -46,15 +43,12 @@ const EventDataProvider: React.FC<PropsWithChildren> = ({ children }) => {
   const [eventData, setEventData] = useState<EventData | undefined>(undefined);
   const [authStatus, setAuthStatus] = useState<AuthStatus>(AuthStatus.NotSet);
 
-  const [eventConnection, setEventConnection] = useState<{
-    eventCode: string;
-    endpoint: string;
-  }>({ eventCode: "", endpoint: "" });
+  const [eventCode, setEventCode] = useState<string>("");
 
   useEffect(() => {
-    const getEventData = async (eventCode: string, endpoint: string) => {
+    const getEventData = async (eventCode: string) => {
       try {
-        const data = await eventInfo(eventCode, endpoint);
+        const data = await eventInfo(eventCode);
         setEventData(() => ({
           name: data.event_name,
           url: data.event_url,
@@ -71,26 +65,23 @@ const EventDataProvider: React.FC<PropsWithChildren> = ({ children }) => {
       }
     };
 
-    if (!eventConnection.eventCode || !eventConnection.endpoint) {
+    if (!eventCode) {
       setAuthStatus(AuthStatus.NotSet);
       return;
     }
 
-    getEventData(eventConnection.eventCode, eventConnection.endpoint);
-  }, [eventConnection]);
+    getEventData(eventCode);
+  }, [eventCode]);
 
   return (
     <EventDataContext.Provider
       value={{
         eventData,
         isAuthorized: authStatus === AuthStatus.Authorized,
-        eventCodeSet: !!eventConnection.eventCode,
-        eventCode: eventConnection.eventCode,
+        eventCodeSet: !!eventCode,
         authStatus,
-        endpoint: eventConnection.endpoint,
-        endpointSet: !!eventConnection.endpoint,
-        setEventConnection: ({ eventCode, endpoint }) =>
-          setEventConnection(() => ({ eventCode, endpoint })),
+        setEventCode: (eventCode) => setEventCode(() => eventCode),
+        eventCode,
       }}
     >
       {children}
