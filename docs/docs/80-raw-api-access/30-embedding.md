@@ -51,18 +51,7 @@ print(query_embeddings.data[0].embedding)
 You can also use `cURL` to access the OpenAI embeddings API. Remember, the `API_KEY` is the EventCode/GitHubUserName, eg `hackathon/gloveboxes`, and the `ENDPOINT_URL` is proxy url provided by the event administrator.
 
 ```shell
-curl https://ENDPOINT_URL/v1/embeddings \
-  -H "Content-Type: application/json" \
-  -H "api-key: API_KEY" \
-  -d '{
-    "input": "Your text string goes here"
-  }'
-```
-
-or pretty print the JSON response with `jq`
-
-```shell
-curl https://ENDPOINT_URL/v1/embeddings \
+curl https://ENDPOINT_URL/v1/api/embeddings \
   -H "Content-Type: application/json" \
   -H "api-key: API_KEY" \
   -d '{

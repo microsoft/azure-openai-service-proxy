@@ -47,19 +47,5 @@ curl -X POST \
     "temperature": 1,
     "prompt": "Write a poem about indian elephants"
 }' \
-https://ENDPOINT_URL/v1/completions
-```
-
-or pretty print the JSON response with `jq`
-
-```shell
-curl -X POST \
--H "api-key: API_KEY" \
--H "Content-Type: application/json" \
--d '{
-    "max_tokens": 256,
-    "temperature": 1,
-    "prompt": "Write a poem about indian elephants"
-}' \
-https://ENDPOINT_URL/v1/completions | jq
+https://ENDPOINT_URL/v1/api/completions | jq
 ```

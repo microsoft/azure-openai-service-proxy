@@ -70,28 +70,5 @@ curl -X POST \
         }
     ]
 }' \
-https://ENDPOINT_URL/v1/chat/completions
-```
-
-or pretty print the JSON response with `jq`
-
-```shell
-curl -X POST \
--H "api-key: API_KEY" \
--H "Content-Type: application/json" \
--d '{
-    "max_tokens": 256,
-    "temperature": 1,
-    "messages": [
-        {
-            "role": "system",
-            "content": "You are an AI assistant that writes poems in the style of William Shakespeare."
-        },
-        {
-            "role": "user",
-            "content": "Write a poem about indian elephants"
-        }
-    ]
-}' \
-https://ENDPOINT_URL/v1/chat/completions | jq
+https://ENDPOINT_URL/v1/api/chat/completions | jq
 ```
