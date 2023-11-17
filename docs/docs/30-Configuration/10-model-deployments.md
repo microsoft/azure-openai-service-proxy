@@ -12,12 +12,14 @@ There a Management API for adding Azure OpenAI model deployments to the system. 
 
 ### Model deployment classes
 
-The following is a list of the valid model deployment classes supported by the Azure OpenAI proxy service.
+The following is a list of the valid deployment classes supported by the Azure OpenAI proxy service.
 
-- `openai-chat`: gpt-35-turbo, gpt-35-turbo-16k or newer.
-- `openai-completions`: davinci-002 or newer.
-- `openai-embeddings`: text-embedding-ada-002 or newer.
-- `openai-images-generations`: No model is deployed.
+| Model deployment class | Models | Description |
+| ---------------------- | ------ | ----------- |
+| `openai-chat` | gpt-35-turbo, gpt-35-turbo-16k, or newer | This is the model deployment class for the Azure OpenAI Chat Completions API. |
+| `openai-completions` | davinci-002 or newer | This is the model deployment class for the Azure OpenAI Completions API. |
+| `openai-embeddings` | text-embedding-ada-002 or newer | This is the model deployment class for the Azure OpenAI Embeddings API. |
+| `openai-images-generations` | No model is deploy, just an Azure OpenAI resource in a location that supports the Images Generations API | This is the model deployment class for the Azure OpenAI Images Generations API. |
 
 ### Load balancing
 

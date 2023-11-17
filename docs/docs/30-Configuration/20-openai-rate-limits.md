@@ -1,4 +1,4 @@
-# Rate limits
+# Managing Rate limits
 
 Azure OpenAI model deployments have two limits, the first being tokens per minute, and the second being requests per minute. You are most likely to hit the Tokens per minute limit especially as you scale up the number of users using the system.
 

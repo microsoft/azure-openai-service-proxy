@@ -1,7 +1,7 @@
 {
-    "label": "Authorization",
+    "label": "Proxy Management",
     "link": {
         "type": "generated-index",
-        "description": "Learn how to set up event authorization."
+        "description": "Learn how to manage the Azure OpenAI Proxy."
     }
 }

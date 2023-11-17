@@ -4,12 +4,15 @@
 
 As at November 2023, the proxy supports the following model deployment classes:
 
-- `openai-chat` - `gpt-35-turbo`, `gpt-35-turbo-16k` or newer. This is the model deployment class for the Azure OpenAI Chat Completions API.
-- `openai-completions` - `davinci-002` or newer. This is the model deployment class for the Azure OpenAI Completions API.
-- `openai-embeddings` - `text-embedding-ada-002` or newer. This is the model deployment class for the Azure OpenAI Embeddings API.
-- `openai-images-generations` - No model is deploy, just an Azure OpenAI resource in a location that supports the Images Generations API. This is the model deployment class for the Azure OpenAI Images Generations API.
+| Model deployment class | Models | Description |
+| ---------------------- | ------ | ----------- |
+| `openai-chat` | gpt-35-turbo, gpt-35-turbo-16k, or newer | This is the model deployment class for the Azure OpenAI Chat Completions API. |
+| `openai-completions` | davinci-002 or newer | This is the model deployment class for the Azure OpenAI Completions API. |
+| `openai-embeddings` | text-embedding-ada-002 or newer | This is the model deployment class for the Azure OpenAI Embeddings API. |
+| `openai-images-generations` | No model is deploy, just an Azure OpenAI resource in a location that supports the Images Generations API | This is the model deployment class for the Azure OpenAI Images Generations API. |
 
-::: tip
+
+:::tip
 
 You can deploy multiple models of the same model deployment class. For example, you can deploy multiple `gpt-35-turbo` models, you'd give them different `friendly_name` and `deployment_name` values. The proxy will round robin across the models of the same model deployment class to balance the load.
 
