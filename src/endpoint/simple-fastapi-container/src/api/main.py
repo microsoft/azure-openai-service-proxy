@@ -25,6 +25,7 @@ from .management import (
     Management,
     NewEventResponse,
     NewEventRequest,
+    EventItemResponse,
 )
 
 
@@ -48,8 +49,28 @@ async def validation_exception_handler(request, exc):
     )
 
 
+@app.get("/v1/api/management/listevents/{query}", status_code=200)
+async def management_list_active_events(
+    query: str, request: Request
+) -> list[EventItemResponse]:
+    """get event info"""
+
+    # raises expection if not authenticated
+    authorize_response = await app.state.authorize.authorize_management_access(
+        request.headers
+    )
+
+    if authorize_response is None:
+        raise HTTPException(
+            status_code=401,
+            detail="Not authenticated.",
+        )
+
+    return await app.state.management.list_events(query)
+
+
 @app.post("/v1/api/management/addevent", status_code=200)
-async def management_authorize(
+async def management_add_new(
     event: NewEventRequest, request: Request
 ) -> NewEventResponse:
     """get event info"""
@@ -65,7 +86,7 @@ async def management_authorize(
             detail="Not authenticated.",
         )
 
-    return app.state.management.add_new_event(event)
+    return await app.state.management.add_new_event(event)
 
 
 # Support for OpenAI SDK 0.28
@@ -357,9 +378,10 @@ async def startup_event():
 
 STATIC_FILES_DIR = (
     "src/playground/dist"
-    if os.environ["ENVIRONMENT"] == "development"
+    if os.environ.get("ENVIRONMENT") == "development"
     else "playground/dist"
 )
+
 app.mount("/", StaticFiles(directory=STATIC_FILES_DIR, html=True), name="static")
 
 if __name__ == "__main__":
