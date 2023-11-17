@@ -13,3 +13,7 @@ The event administrator will provide the:
 
 1. `ENDPOINT_URL` - The URL of the OpenAI proxy service, eg `https://YOUR_OPENAI_PROXY_ENDPOINT/v1/api`. The event administrator will provide the URL, note, the `/v1/api` appended to the end of URL.
 2. The `API_KEY` is made up of two parts, the event code followed by your GitHub User Name, seperated by a slash, eg `hackathon/gloveboxes`. The event code grants timebound access to the OpenAI APIs and models. The event code is typically the name of the event, eg `hackathon`. The event administrator will provide the event code.
+
+## Examples
+
+There are examples in the `src/examples` folder that demonstrate how to use the proxy service to access the Azure OpenAI APIs.
