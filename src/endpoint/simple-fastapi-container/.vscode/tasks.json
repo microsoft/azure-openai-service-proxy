@@ -4,7 +4,7 @@
     {
       "type": "npm",
       "options": {
-        "cwd": "${workspaceFolder}/client"
+        "cwd": "${workspaceFolder}/src/playground"
       },
       "script": "install",
       "label": "npm: install"
