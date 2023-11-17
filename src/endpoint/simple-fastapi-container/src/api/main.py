@@ -67,23 +67,6 @@ async def management_authorize(
     return app.state.management.add_new_event(event)
 
 
-@app.post("/api/eventinfo", status_code=200)
-@app.post("/v1/api/eventinfo", status_code=200)
-async def event_info(request: Request) -> AuthorizeResponse:
-    """get event info"""
-    authorize_response = await app.state.authorize.authorize_playground_access(
-        request.headers
-    )
-
-    if authorize_response is None or not authorize_response.is_authorized:
-        raise HTTPException(
-            status_code=401,
-            detail="Event code is not authorized",
-        )
-
-    return authorize_response
-
-
 # Support for OpenAI SDK 0.28
 @app.post(
     "/v1/engines/{engine_id}/embeddings",
@@ -276,6 +259,24 @@ async def oai_images_generations(
     )
     response.status_code = status_code
     return completion_response
+
+
+# This path is used by the playground
+@app.post("/api/eventinfo", status_code=200)
+@app.post("/v1/api/eventinfo", status_code=200)
+async def event_info(request: Request) -> AuthorizeResponse:
+    """get event info"""
+    authorize_response = await app.state.authorize.authorize_playground_access(
+        request.headers
+    )
+
+    if authorize_response is None or not authorize_response.is_authorized:
+        raise HTTPException(
+            status_code=401,
+            detail="Event code is not authorized",
+        )
+
+    return authorize_response
 
 
 @app.post("/v1/api/playground", status_code=200)
