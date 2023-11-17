@@ -1,0 +1,25 @@
+{
+  "short_name": "Azure OpenAI Workshop Playground",
+  "name": "Azure OpenAI Workshop Playground",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "chat-menu-icon.svg",
+      "type": "image/svg+xml",
+      "sizes": "24x24"
+    },
+    {
+      "src": "chat-regular-icon.svg",
+      "type":"image/svg+xml",
+      "sizes": "24x24"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#000000",
+  "background_color": "#ffffff"
+}

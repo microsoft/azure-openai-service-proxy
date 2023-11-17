@@ -1,0 +1,21 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "type": "npm",
+      "options": {
+        "cwd": "${workspaceFolder}/src/playground"
+      },
+      "script": "install",
+      "label": "npm: install"
+    },
+    {
+      "type": "npm",
+      "options": {
+        "cwd": "${workspaceFolder}/src/playground"
+      },
+      "script": "build",
+      "label": "npm: build"
+    }
+  ]
+}

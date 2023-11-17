@@ -1,0 +1,18 @@
+.chatInput {
+    position: sticky;
+    bottom: 0;
+    flex: 0 0 100px;
+    padding-top: 12px;
+    padding-bottom: 24px;
+    padding-left: 24px;
+    padding-right: 24px;
+    width: 100%;
+    max-width: 1028px;
+  }
+
+.chatContainer{
+  display: flex;
+  flex-direction: column-reverse;
+  overflow-y: auto;
+  background-color: #f2f2f2;
+}

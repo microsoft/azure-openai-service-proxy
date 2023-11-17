@@ -1,19 +1,42 @@
 {
-    // Use IntelliSense to learn about possible attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
-    "version": "0.2.0",
-    "configurations": [
-      {
-        "name": "Main (FastAPI)",
-        "type": "python",
-        "request": "launch",
-        "module": "uvicorn",
-        "args": ["src.api.main:app", "--reload"],
-        "jinja": true,
-        "justMyCode": true,
-        "envFile": "${workspaceFolder}/.env"
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "AOAI Proxy",
+      "type": "python",
+      "request": "launch",
+      "module": "uvicorn",
+      "args": ["src.api.main:app", "--reload"],
+      "jinja": true,
+      "justMyCode": true,
+      "envFile": "${workspaceFolder}/.env"
+    },
+    {
+      "name": "Playground",
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/src/playground",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "preLaunchTask": "npm: install",
+      "env": {
+        "API_URL": "http://localhost:8000"
       }
-    ]
-  }
-  
+    }
+  ],
+
+  "compounds": [
+    {
+      "name": "Run all",
+      "configurations": ["AOAI Proxy", "Playground"],
+      "presentation": {
+        "hidden": false,
+        "group": "Frontend",
+        "order": 1
+      }
+    }
+  ]
+}
