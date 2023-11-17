@@ -52,13 +52,13 @@ Event data, namely the `EventCode`, `StartUTC`, `EndUTC`, and `MaxTokenCap` are 
 There a Management API for adding Azure OpenAI model deployments to the system. The API is secured with a Management ID token. The Management ID token is stored in the Azure Storage Account `management` table. The `management` table is created when the proxy service is deployed and started.
 
 ```shell
-curl -X POST -H "Content-Type: application/json" -H "Authorization: Bearer YOUR_MANAGEMENT_ID_TOKEN" -d '{
+curl -X PATCH -H "Content-Type: application/json" -H "Authorization: Bearer YOUR_MANAGEMENT_ID_TOKEN" -d '{
     "deployment_class": "openai-chat",
-    "friendly_name" : "chat-glovebox",
-    "deployment_name": "turbo-gpt",
-    "endpoint_key": "1234455",
-    "resource_name": "my-resource-name",
-    "active": false
+    "friendly_name" : "YOUR_AZURE_OPENAI_DEPLOYMENT_FRIENDLY_NAME",
+    "deployment_name": "YOUR_AZURE_OPENAI_DEPLOYMENT_NAME",
+    "endpoint_key": "YOUR_AZURE_OPENAI_ENDPOINT_KEY",
+    "resource_name": "YOUR_AZURE_OPENAI_RESOURCE_NAME",
+    "active": true
 }' https://YOUR_OPENAI_PROXY_ENDPOINT/v1/api/management/modeldeployment/upsert
 ```
 
