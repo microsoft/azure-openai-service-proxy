@@ -75,7 +75,7 @@ async def management_add_new(
     return await app.state.management.add_new_event(event)
 
 
-@app.post(
+@app.patch(
     "/v1/api/management/modeldeployment/upsert", status_code=200, response_model=None
 )
 async def management_deployment_upsert(
