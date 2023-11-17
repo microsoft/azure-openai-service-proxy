@@ -48,7 +48,7 @@ async def validation_exception_handler(request, exc):
     )
 
 
-@app.post("/v1/management/addevent", status_code=200)
+@app.post("/v1/api/management/addevent", status_code=200)
 async def management_authorize(
     event: NewEventRequest, request: Request
 ) -> NewEventResponse:
@@ -70,18 +70,18 @@ async def management_authorize(
 
 # Support for OpenAI SDK 0.28
 @app.post(
-    "/v1/engines/{engine_id}/embeddings",
+    "/v1/api/engines/{engine_id}/embeddings",
     status_code=200,
     response_model=None,
 )
 # Support for Azure OpenAI Service SDK 1.0+
 @app.post(
-    "/v1/openai/deployments/{deployment_id}/embeddings",
+    "/v1/api/openai/deployments/{deployment_id}/embeddings",
     status_code=200,
     response_model=None,
 )
 # Support for OpenAI SDK 1.0+
-@app.post("/v1/embeddings", status_code=200, response_model=None)
+@app.post("/v1/api/embeddings", status_code=200, response_model=None)
 async def oai_embeddings(
     embeddings: EmbeddingsRequest,
     request: Request,
@@ -115,18 +115,18 @@ async def oai_embeddings(
 
 # Support for OpenAI SDK 0.28
 @app.post(
-    "/v1/engines/{engine_id}/completions",
+    "/v1/api/engines/{engine_id}/completions",
     status_code=200,
     response_model=None,
 )
 # Support for Azure OpenAI Service SDK 1.0+
 @app.post(
-    "/v1/openai/deployments/{deployment_id}/completions",
+    "/v1/api/openai/deployments/{deployment_id}/completions",
     status_code=200,
     response_model=None,
 )
 # Support for OpenAI SDK 1.0+
-@app.post("/v1/completions", status_code=200, response_model=None)
+@app.post("/v1/api/completions", status_code=200, response_model=None)
 async def oai_completion(
     completion_request: CompletionsRequest,
     request: Request,
@@ -166,18 +166,18 @@ async def oai_completion(
 
 # Support for OpenAI SDK 0.28
 @app.post(
-    "/v1/engines/{engine_id}/chat/completions",
+    "/v1/api/engines/{engine_id}/chat/completions",
     status_code=200,
     response_model=None,
 )
 # Support for Azure OpenAI Service SDK 1.0+
 @app.post(
-    "/v1/openai/deployments/{deployment_id}/chat/completions",
+    "/v1/api/openai/deployments/{deployment_id}/chat/completions",
     status_code=200,
     response_model=None,
 )
 # Support for OpenAI SDK 1.0+
-@app.post("/v1/chat/completions", status_code=200, response_model=None)
+@app.post("/v1/api/chat/completions", status_code=200, response_model=None)
 async def oai_chat_completion(
     chat: ChatCompletionsRequest,
     request: Request,
@@ -215,18 +215,18 @@ async def oai_chat_completion(
 
 # Support for OpenAI SDK 0.28
 @app.post(
-    "/v1/engines/{engine_id}/images/generations",
+    "/v1/api/engines/{engine_id}/images/generations",
     status_code=200,
     response_model=None,
 )
 # Support for Azure OpenAI Service SDK 1.0+
 @app.post(
-    "/v1/openai/images/generations:submit",
+    "/v1/api/openai/images/generations:submit",
     status_code=200,
     response_model=None,
 )
 # Support for OpenAI SDK 1.0+
-@app.post("/v1/images/generations", status_code=200, response_model=None)
+@app.post("/v1/api/images/generations", status_code=200, response_model=None)
 async def oai_images_generations(
     image_generation_request: ImagesGenerationsRequst,
     request: Request,
