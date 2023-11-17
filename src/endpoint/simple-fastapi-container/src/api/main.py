@@ -51,7 +51,8 @@ async def validation_exception_handler(request, exc):
     )
 
 
-@app.get("/v1/api/management/listevents/{query}", status_code=200)
+@app.get("/v1/api/management/events/list/{query}", status_code=200)
+@app.get("/v1/api/management/listevents/{query}", status_code=200, deprecated=True)
 async def management_list_active_events(
     query: str, request: Request
 ) -> list[EventItemResponse]:
@@ -62,7 +63,8 @@ async def management_list_active_events(
     return await app.state.management.list_events(query)
 
 
-@app.post("/v1/api/management/addevent", status_code=200)
+@app.post("/v1/api/management/events/add", status_code=200)
+@app.post("/v1/api/management/addevent", status_code=200, deprecated=True)
 async def management_add_new(
     event: NewEventRequest, request: Request
 ) -> NewEventResponse:
