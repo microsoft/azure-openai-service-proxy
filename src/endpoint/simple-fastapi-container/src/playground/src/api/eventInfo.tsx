@@ -1,17 +1,16 @@
+import { API_VERSION } from "../constants";
+
 export async function eventInfo(eventCode: string): Promise<EventInfo> {
   try {
-    const response = await fetch(
-      `/api/eventinfo`,
-      {
-        method: "POST",
-        headers: {
-          accept: "application/json",
-          "Content-Type": "application/json",
-          "openai-event-code": eventCode,
-        },
-        body: JSON.stringify(eventCode),
-      }
-    );
+    const response = await fetch(`${API_VERSION}/api/eventinfo`, {
+      method: "POST",
+      headers: {
+        accept: "application/json",
+        "Content-Type": "application/json",
+        "openai-event-code": eventCode,
+      },
+      body: JSON.stringify(eventCode),
+    });
     const data = await response.json();
     return data;
   } catch (error) {

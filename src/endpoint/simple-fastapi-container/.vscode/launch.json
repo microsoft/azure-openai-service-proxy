@@ -23,7 +23,7 @@
       "runtimeArgs": ["run", "dev"],
       "preLaunchTask": "npm: install",
       "env": {
-        "API_URL": "http://localhost:8000/v1"
+        "API_URL": "http://localhost:8000"
       }
     }
   ],

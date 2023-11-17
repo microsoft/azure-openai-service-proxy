@@ -1,3 +1,5 @@
+import { API_VERSION } from "../constants";
+
 interface ApiResponse {
   assistant: {
     role: string;
@@ -35,7 +37,7 @@ export async function callApi(
   eventCode: string
 ): Promise<{ answer?: ApiResponse; status: number; error?: string }> {
   try {
-    const response = await fetch(`/api/playground`, {
+    const response = await fetch(`${API_VERSION}/api/playground`, {
       method: "POST",
       headers: {
         accept: "application/json",

@@ -8,6 +8,14 @@
       },
       "script": "install",
       "label": "npm: install"
+    },
+    {
+      "type": "npm",
+      "options": {
+        "cwd": "${workspaceFolder}/src/playground"
+      },
+      "script": "build",
+      "label": "npm: build"
     }
   ]
 }

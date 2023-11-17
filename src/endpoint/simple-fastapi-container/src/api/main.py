@@ -7,6 +7,7 @@ import openai.openai_object
 from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.exceptions import ResponseValidationError
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 
 from .authorize import Authorize, AuthorizeResponse
 from .chat_playground import Playground, PlaygroundResponse
@@ -352,6 +353,13 @@ async def startup_event():
     app.state.rate_limit_embeddings = RateLimit()
     app.state.rate_limit_images_generations = RateLimit()
 
+
+static_files_dir = (
+    "src/playground/dist"
+    if os.environ["ENVIRONMENT"] == "development"
+    else "playground/dist"
+)
+app.mount("/", StaticFiles(directory=static_files_dir, html=True), name="static")
 
 if __name__ == "__main__":
     import uvicorn

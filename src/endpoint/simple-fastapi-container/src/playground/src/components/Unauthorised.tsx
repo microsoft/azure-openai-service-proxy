@@ -31,9 +31,7 @@ export const Unauthorised = () => {
             <DialogTrigger disableButtonEnhancement>
               <Button
                 appearance="primary"
-                onClick={() =>
-                  setEventConnection({ eventCode: "", endpoint: "" })
-                }
+                onClick={() => setEventConnection("")}
               >
                 Close
               </Button>
