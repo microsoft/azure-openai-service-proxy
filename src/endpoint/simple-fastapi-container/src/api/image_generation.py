@@ -11,7 +11,7 @@ from fastapi import HTTPException
 from .config import OpenAIConfig
 from .openai_async import OpenAIAsyncManager
 
-OPENAI_IMAGES_GENERATIONS_API_VERSION = "2023-06-01-preview"
+OPENAI_IMAGES_GENERATIONS_API_VERSION = "2023-12-01-preview"
 
 logging.basicConfig(level=logging.WARNING)
 
@@ -44,6 +44,7 @@ class ImagesGenerationsRequst(BaseModel):
     size: ImageSize = ImageSize.IS_1024X1024
     user: str = None
     api_version: str = OPENAI_IMAGES_GENERATIONS_API_VERSION
+    model: str = None
 
 
 class ImagesGenerations:
@@ -95,6 +96,12 @@ class ImagesGenerations:
                 "Oops, response_format must be url or b64_json.", 400
             )
 
+        # if there is a provided model it must be dall-e-3
+        if images.model and images.model != "dall-e-3":
+            return self.report_exception(
+                "Oops, if a model is provided it must be dall-e-3.", 400
+            )
+
     async def call_openai_images_generations(
         self, images: ImagesGenerationsRequst
     ) -> Tuple[openai.openai_object.OpenAIObject, int]:
@@ -106,6 +113,13 @@ class ImagesGenerations:
 
         deployment = await self.openai_config.get_deployment()
 
+        # if a model is provided and the deployment we got doesn't match
+        # the model name then keep trying to get a deployment until we
+        # get one that matches the model name
+        if images.model and deployment.deployment_name != images.model:
+            while images.model != deployment.deployment_name:
+                deployment = await self.openai_config.get_deployment()
+
         openai_request = {
             "prompt": images.prompt,
             "n": images.n,
@@ -114,9 +128,17 @@ class ImagesGenerations:
         }
 
         url = (
-            f"https://{deployment.resource_name}.openai.azure.com"
-            "/openai/images/generations:submit"
-            f"?api-version={images.api_version}"
+            (
+                f"https://{deployment.resource_name}.openai.azure.com"
+                "/openai/images/generations:submit"
+                f"?api-version={images.api_version}"
+            )
+            if images.model is None
+            else (
+                f"https://{deployment.resource_name}.openai.azure.com"
+                f"/openai/deployment/{images.model}/images/generations"
+                f"?api-version={images.api_version}"
+            )
         )
 
         async_mgr = OpenAIAsyncManager(deployment)
