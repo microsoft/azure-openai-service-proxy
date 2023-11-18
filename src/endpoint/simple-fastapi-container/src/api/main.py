@@ -7,6 +7,7 @@ import openai.openai_object
 from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.exceptions import ResponseValidationError
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 
 from .authorize import Authorize, AuthorizeResponse
 from .chat_playground import Playground, PlaygroundResponse
@@ -438,7 +439,7 @@ STATIC_FILES_DIR = (
     else "playground/dist"
 )
 
-# app.mount("/", StaticFiles(directory=STATIC_FILES_DIR, html=True), name="static")
+app.mount("/", StaticFiles(directory=STATIC_FILES_DIR, html=True), name="static")
 
 if __name__ == "__main__":
     import uvicorn
