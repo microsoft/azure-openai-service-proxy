@@ -1,19 +1,18 @@
 import {
   Body1,
-  Button,
   Card,
   CardFooter,
   CardHeader,
-  Divider,
-  Input,
   Label,
   makeStyles,
 } from "@fluentui/react-components";
 import { ApiData } from "../interfaces/ApiData";
 import { ParamInput } from "./ParamInput";
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import { UsageData } from "../interfaces/UsageData";
 import { useEventDataContext } from "../EventDataProvider";
+import { DividerBlock } from "./DividerBlock";
+import { EventCodeInput } from "./EventCodeInput";
 
 const useStyles = makeStyles({
   card: {
@@ -21,19 +20,6 @@ const useStyles = makeStyles({
     marginRight: "10px",
     marginBottom: "10px",
     marginLeft: "10px",
-  },
-  dividerblock: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "right",
-    justifyContent: "center",
-  },
-  smallbutton: {
-    width: "100%",
-    height: "50%",
-    maxWidth: "none",
-    maxHeight: "25%",
-    backgroundColor: "#f2f2f2",
   },
   dividerline: {
     maxHeight: "1%",
@@ -65,8 +51,7 @@ export const ParamsCard = ({
     },
     [tokenUpdate]
   );
-  const [code, setCode] = useState("");
-  const { eventData, isAuthorized, setEventCode } = useEventDataContext();
+  const { eventData, isAuthorized } = useEventDataContext();
   const maxTokens = eventData?.max_token_cap ?? 0;
 
   return (
@@ -79,66 +64,10 @@ export const ParamsCard = ({
           </Body1>
         }
       />
-      <div className={styles.dividerblock}>
-        <Label
-          style={{
-            fontSize: "medium",
-            marginBottom: "0.5rem",
-            textAlign: "justify",
-          }}
-        >
-          <b>Event Code</b>
-        </Label>
-        <Input
-          type="password"
-          placeholder="Enter your Event Code"
-          value={code}
-          onChange={(e) => setCode(e.target.value)}
-          style={{ textAlign: "right" }}
-        />
 
-        {!isAuthorized && (
-          <>
-            <Button
-              className={styles.smallbutton}
-              onClick={() => setEventCode(code)}
-            >
-              Log In
-            </Button>
-            <Label
-              style={{
-                color: "GrayText",
-                fontSize: "small",
-                textAlign: "justify",
-              }}
-            >
-              Provided by workshop host.
-            </Label>
-          </>
-        )}
-        {isAuthorized && (
-          <Label
-            style={{
-              color: "GrayText",
-              fontSize: "small",
-              textAlign: "justify",
-            }}
-          >
-            <div>{eventData!.name}</div>
-            <div>
-              <a
-                href={eventData!.url}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {eventData!.url_text}
-              </a>
-            </div>
-          </Label>
-        )}
-      </div>
-      <Divider className={styles.dividerline}></Divider>
-      <div className={styles.dividerblock}>
+      <EventCodeInput />
+
+      <DividerBlock>
         <ParamInput
           label="Tokens"
           defaultValue={maxTokens / 2}
@@ -148,9 +77,9 @@ export const ParamsCard = ({
           max={maxTokens}
           disabled={!isAuthorized}
         />
-      </div>
-      <Divider className={styles.dividerline}></Divider>
-      <div className={styles.dividerblock}>
+      </DividerBlock>
+
+      <DividerBlock>
         <ParamInput
           label="Temperature"
           defaultValue={startValues.temperature}
@@ -160,9 +89,9 @@ export const ParamsCard = ({
           max={1}
           disabled={!isAuthorized}
         />
-      </div>
-      <Divider className={styles.dividerline}></Divider>
-      <div className={styles.dividerblock}>
+      </DividerBlock>
+
+      <DividerBlock>
         <ParamInput
           label="Top P"
           defaultValue={startValues.top_p}
@@ -172,9 +101,9 @@ export const ParamsCard = ({
           max={1}
           disabled={!isAuthorized}
         />
-      </div>
-      <Divider className={styles.dividerline}></Divider>
-      <div className={styles.dividerblock}>
+      </DividerBlock>
+
+      <DividerBlock>
         <Label
           style={{ color: "GrayText", fontSize: "small", textAlign: "justify" }}
         >
@@ -184,8 +113,8 @@ export const ParamsCard = ({
           <div>Total Tokens: {usageData.total_tokens}</div>
           <div>Response Time: {usageData.response_time} ms</div>
         </Label>
-      </div>
-      <Divider className={styles.dividerline}></Divider>
+      </DividerBlock>
+
       <CardFooter style={{ height: "5vh" }}>
         <Label
           style={{ color: "GrayText", fontSize: "small", textAlign: "center" }}

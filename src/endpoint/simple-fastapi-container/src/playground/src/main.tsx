@@ -6,6 +6,21 @@ import reportWebVitals from "./reportWebVitals";
 import { FluentProvider, webLightTheme } from "@fluentui/react-components";
 import { EventDataProvider } from "./EventDataProvider";
 import { PromptErrorProvider } from "./PromptErrorProvider";
+import { RouterProvider, createBrowserRouter } from "react-router-dom";
+import { Chat } from "./pages/Chat";
+
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <App />,
+    children: [
+      {
+        path: "/",
+        element: <Chat />,
+      },
+    ],
+  },
+]);
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
@@ -15,7 +30,7 @@ root.render(
     <FluentProvider theme={webLightTheme}>
       <EventDataProvider>
         <PromptErrorProvider>
-          <App />
+          <RouterProvider router={router} />
         </PromptErrorProvider>
       </EventDataProvider>
     </FluentProvider>
