@@ -70,5 +70,5 @@ curl -X POST \
         }
     ]
 }' \
-https://ENDPOINT_URL/v1/api/chat/completions | jq
+https://ENDPOINT_URL/v1/api/openai/deployments/davinci/completions | jq
 ```
