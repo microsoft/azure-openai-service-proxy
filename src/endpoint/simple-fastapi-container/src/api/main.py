@@ -434,7 +434,7 @@ async def startup_event():
 
 
 STATIC_FILES_DIR = (
-    "src/playground/dist"
+    "src/playground"
     if os.environ.get("ENVIRONMENT") == "development"
     else "playground/dist"
 )
