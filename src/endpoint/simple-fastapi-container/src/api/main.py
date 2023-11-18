@@ -246,6 +246,7 @@ async def oai_chat_completion(
     return completion
 
 
+# Support for Dall-e-3 and beyond
 # Azure OpenAI Images
 @app.post(
     "/v1/api/openai/deployments/{deployment_id}/images/generations",
@@ -281,24 +282,21 @@ async def oai_images(
     return completion_response
 
 
+# Support for Dall-e-2
 # Support for OpenAI SDK 0.28
 @app.post(
     "/v1/api/engines/{engine_id}/images/generations",
     status_code=200,
     response_model=None,
-    deprecated=True,
 )
 # Support for Azure OpenAI Service SDK 1.0+
 @app.post(
     "/v1/api/openai/images/generations:submit",
     status_code=200,
     response_model=None,
-    deprecated=True,
 )
 # Support for OpenAI SDK 1.0+
-@app.post(
-    "/v1/api/images/generations", status_code=200, response_model=None, deprecated=True
-)
+@app.post("/v1/api/images/generations", status_code=200, response_model=None)
 async def oai_images_generations(
     image_generation_request: ImagesGenerationsRequst,
     request: Request,
