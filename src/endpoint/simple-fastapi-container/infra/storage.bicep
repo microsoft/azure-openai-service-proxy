@@ -57,6 +57,34 @@ resource storage 'Microsoft.Storage/storageAccounts@2022-05-01' = {
   }
 }
 
+resource table_service 'Microsoft.Storage/storageAccounts/tableServices@2023-01-01' = {
+  parent: storage
+  name: 'default'
+  properties: {
+    cors: {
+      corsRules: []
+    }
+  }
+}
+
+resource configuration_table 'Microsoft.Storage/storageAccounts/tableServices/tables@2023-01-01' = {
+  parent: table_service
+  name: 'configuration'
+  properties: {}
+}
+
+resource authorization_table 'Microsoft.Storage/storageAccounts/tableServices/tables@2023-01-01' = {
+  parent: table_service
+  name: 'authorization'
+  properties: {}
+}
+
+resource management_table 'Microsoft.Storage/storageAccounts/tableServices/tables@2023-01-01' = {
+  parent: table_service
+  name: 'management'
+  properties: {}
+}
+
 var storageAccountKeys = listKeys(storage.id, '2021-04-01')
 var connectionString = 'DefaultEndpointsProtocol=https;AccountName=${name};AccountKey=${storageAccountKeys.keys[0].value};EndpointSuffix=core.windows.net'
 
