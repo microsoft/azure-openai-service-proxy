@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.002.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "azure_openai_embeddings", "azure_openai_embeddings.csproj", "{F6B15027-F1BA-45FF-9D7A-901734679508}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F6B15027-F1BA-45FF-9D7A-901734679508}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F6B15027-F1BA-45FF-9D7A-901734679508}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F6B15027-F1BA-45FF-9D7A-901734679508}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F6B15027-F1BA-45FF-9D7A-901734679508}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {9E7D9B59-42C9-418C-8C7D-41427D304213}
+	EndGlobalSection
+EndGlobal
