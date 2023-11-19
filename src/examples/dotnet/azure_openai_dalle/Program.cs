@@ -1,7 +1,4 @@
-﻿// Dall-e-3 example
-// YOUR_EVENT_AUTH_TOKEN is the API key and consists of your EVENT_CODE/GITHUB_USERNAME
-
-using System.Text;
+﻿using System.Text;
 using DotNetEnv;
 
 class Program
