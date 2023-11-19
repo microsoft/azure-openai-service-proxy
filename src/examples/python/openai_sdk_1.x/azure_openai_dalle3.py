@@ -3,16 +3,18 @@ import os
 from dotenv import load_dotenv
 import openai  # for handling error types
 
-from openai import OpenAI
+# from openai import OpenAI
+from openai import AzureOpenAI
 
 load_dotenv()
 
 ENDPOINT_URL = os.environ.get("ENDPOINT_URL")
 API_KEY = os.environ.get("API_KEY")
 
-client = OpenAI(
+client = AzureOpenAI(
     base_url=ENDPOINT_URL,
     api_key=API_KEY,
+    api_version="2023-12-01-preview",
 )
 
 prompt = (
@@ -31,7 +33,7 @@ image_params = {
 ## -- You can uncomment the lines below to include these non-default parameters --
 
 ## -- DALL-E 3 exclusive parameters --
-image_params.update({"model": "dall-e-3"})  # Upgrade the model name to dall-e-3
+# image_params.update({"model": "dall-e-3"})  # Upgrade the model name to dall-e-3
 # image_params.update({"size": "1792x1024"})  # 1792x1024 or 1024x1792 available for DALL-E 3
 image_params.update(
     {"quality": "hd"}
