@@ -13,7 +13,7 @@ class Program
 
         // Get the key from the environment variables
         string api_key = Environment.GetEnvironmentVariable("YOUR_EVENT_AUTH_TOKEN");
-        string endpoint = Environment.GetEnvironmentVariable("YOUR_AZURE_OPENAI_PROXY_URL") + "/v1/api/openai/deployments/test/images/generations";
+        string endpoint = Environment.GetEnvironmentVariable("YOUR_AZURE_OPENAI_PROXY_URL") + "/v1/api/openai/deployments/dalle3/images/generations";
 
         var client = new HttpClient();
 
