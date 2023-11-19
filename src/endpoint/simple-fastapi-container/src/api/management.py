@@ -26,6 +26,7 @@ class DeploymentClass(Enum):
     OPENAI_COMPLETIONS = "openai-completions"
     OPENAI_EMBEDDINGS = "openai-embeddings"
     OPENAI_IMAGES_GENERATIONS = "openai-images-generations"
+    OPENAI_IMAGES = "openai-images"
 
 
 class ModelDeploymentRequest(BaseModel):

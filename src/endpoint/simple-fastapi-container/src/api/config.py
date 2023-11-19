@@ -21,10 +21,6 @@ logger = logging.getLogger(__name__)
 random.seed()
 
 
-class ConfigError(Exception):
-    """Config Error"""
-
-
 class Deployment:
     """Deployment"""
 
@@ -106,7 +102,14 @@ class OpenAIConfig:
 
                 if len(config) == 0:
                     logger.warning("No active OpenAI model deployments found.")
-                    raise ConfigError(("No active OpenAI model deployments found."))
+                    # 503 Service Unavailable
+                    # The server cannot handle the request (because it is overloaded or down for
+                    # maintenance). Generally, this is a temporary state
+                    # https://en.wikipedia.org/wiki/List_of_HTTP_status_codes
+                    raise HTTPException(
+                        detail="No active OpenAI model deployments found.",
+                        status_code=503,
+                    )
                 else:
                     logger.warning(
                         "Found %s active OpenAI model deployments.", len(config)
@@ -121,6 +124,9 @@ class OpenAIConfig:
                         )
 
                 return config
+
+        except HTTPException:
+            raise
 
         except AzureError as azure_error:
             logger.warning("AzureError: %s", str(azure_error))

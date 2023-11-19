@@ -14,7 +14,7 @@ import openai.openai_object
 
 from .config import Deployment
 
-HTTPX_TIMEOUT_SECONDS = 30
+HTTPX_TIMEOUT_SECONDS = 60
 
 logging.basicConfig(level=logging.WARNING)
 logger = logging.getLogger(__name__)
