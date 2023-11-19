@@ -2,22 +2,24 @@
 using Azure.AI.OpenAI;
 using DotNetEnv;
 
-internal class Program
+Env.Load();
+
+// Get the key from the environment variables
+string? key = Environment.GetEnvironmentVariable("YOUR_EVENT_AUTH_TOKEN");
+string? endpoint = Environment.GetEnvironmentVariable("YOUR_AZURE_OPENAI_PROXY_URL");
+
+if (key == null || endpoint == null)
 {
-    private static void Main(string[] args)
-    {
-        Env.Load();
+    Console.WriteLine("Please set the YOUR_EVENT_AUTH_TOKEN and YOUR_AZURE_OPENAI_PROXY_URL environment variables.");
+    return;
+}
 
-        // Get the key from the environment variables
-        string key = Environment.GetEnvironmentVariable("YOUR_EVENT_AUTH_TOKEN");
-        string endpoint = Environment.GetEnvironmentVariable("YOUR_AZURE_OPENAI_PROXY_URL") + "/v1/api";
+var client = new OpenAIClient(new Uri(endpoint + "/v1/api"), new Azure.AzureKeyCredential(key));
 
-        var client = new OpenAIClient(new Uri(endpoint), new Azure.AzureKeyCredential(key));
-
-        CompletionsOptions completionsOptions = new()
-        {
-            DeploymentName = "text-davinci-003",
-            Prompts =
+CompletionsOptions completionsOptions = new()
+{
+    DeploymentName = "text-davinci-003",
+    Prompts =
     {
         "How are you today?",
         "What is Azure OpenAI?",
@@ -25,13 +27,11 @@ internal class Program
         "Generate a proof of Euler's identity",
         "Describe in single words only the good things that come into your mind about your mother."
     },
-        };
+};
 
-        Azure.Response<Completions> completionsResponse = client.GetCompletions(completionsOptions);
+Azure.Response<Completions> completionsResponse = client.GetCompletions(completionsOptions);
 
-        foreach (Choice choice in completionsResponse.Value.Choices)
-        {
-            Console.WriteLine($"Response for prompt {choice.Index}: {choice.Text}");
-        }
-    }
+foreach (Choice choice in completionsResponse.Value.Choices)
+{
+    Console.WriteLine($"Response for prompt {choice.Index}: {choice.Text}");
 }

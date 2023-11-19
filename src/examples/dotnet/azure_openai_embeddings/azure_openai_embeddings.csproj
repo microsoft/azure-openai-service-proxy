@@ -8,8 +8,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Azure.AI.OpenAI" Version="1.0.0-beta.9" />
-    <PackageReference Include="DotNetEnv" Version="2.5.0" />
+    <PackageReference Include="Azure.AI.OpenAI" />
+    <PackageReference Include="DotNetEnv" />
   </ItemGroup>
 
 </Project>
