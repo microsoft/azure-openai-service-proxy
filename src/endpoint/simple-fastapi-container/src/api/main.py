@@ -7,6 +7,7 @@ import openai.openai_object
 from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.exceptions import ResponseValidationError
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 
 from .authorize import Authorize, AuthorizeResponse
 from .chat_playground import Playground, PlaygroundResponse
@@ -16,6 +17,7 @@ from .chat_completions import (
 )
 from .completions import Completions, CompletionsRequest
 from .image_generation import ImagesGenerations, ImagesGenerationsRequst
+from .images import ImagesRequest, Images
 
 from .embeddings import EmbeddingsRequest, Embeddings
 from .config import OpenAIConfig
@@ -27,6 +29,7 @@ from .management import (
     EventItemResponse,
     ModelDeploymentRequest,
     ModelDeploymentResponse,
+    DeploymentClass,
 )
 
 
@@ -244,6 +247,43 @@ async def oai_chat_completion(
     return completion
 
 
+# Support for Dall-e-3 and beyond
+# Azure OpenAI Images
+@app.post(
+    "/v1/api/openai/deployments/{deployment_id}/images/generations",
+    status_code=200,
+    response_model=None,
+)
+# OpenAI Images
+@app.post(
+    "/v1/api/images/generations",
+    status_code=200,
+    response_model=None,
+)
+async def oai_images(
+    images_request: ImagesRequest,
+    request: Request,
+    response: Response,
+    deployment_id: str = None,
+):
+    """OpenAI image generation response"""
+
+    # get the api version from the query string
+    if "api-version" in request.query_params:
+        images_request.api_version = request.query_params["api-version"]
+
+    # exception thrown if not authorized
+    await app.state.authorize.authorize_api_access(request.headers, deployment_id)
+
+    (
+        completion_response,
+        status_code,
+    ) = await app.state.images_mgr.call_openai_images_generations(images_request)
+    response.status_code = status_code
+    return completion_response
+
+
+# Support for Dall-e-2
 # Support for OpenAI SDK 0.28
 @app.post(
     "/v1/api/engines/{engine_id}/images/generations",
@@ -349,22 +389,27 @@ async def startup_event():
     app.state.management = Management(storage_connection_string)
     openai_config_chat_completions = OpenAIConfig(
         connection_string=storage_connection_string,
-        model_class="openai-chat",
+        model_class=DeploymentClass.OPENAI_CHAT.value,
     )
 
     openai_config_completions = OpenAIConfig(
         connection_string=storage_connection_string,
-        model_class="openai-completions",
+        model_class=DeploymentClass.OPENAI_COMPLETIONS.value,
     )
 
     openai_config_embeddings = OpenAIConfig(
         connection_string=storage_connection_string,
-        model_class="openai-embeddings",
+        model_class=DeploymentClass.OPENAI_EMBEDDINGS.value,
+    )
+
+    openai_config_images = OpenAIConfig(
+        connection_string=storage_connection_string,
+        model_class=DeploymentClass.OPENAI_IMAGES.value,
     )
 
     openai_config_images_generations = OpenAIConfig(
         connection_string=storage_connection_string,
-        model_class="openai-images-generations",
+        model_class=DeploymentClass.OPENAI_IMAGES_GENERATIONS.value,
     )
 
     app.state.openai_mgr = Playground(openai_config=openai_config_chat_completions)
@@ -381,18 +426,20 @@ async def startup_event():
         openai_config=openai_config_images_generations
     )
 
+    app.state.images_mgr = Images(openai_config=openai_config_images)
+
     app.state.rate_limit_chat_completion = RateLimit()
     app.state.rate_limit_embeddings = RateLimit()
     app.state.rate_limit_images_generations = RateLimit()
 
 
 STATIC_FILES_DIR = (
-    "src/playground/dist"
+    "src/playground"
     if os.environ.get("ENVIRONMENT") == "development"
     else "playground/dist"
 )
 
-# app.mount("/", StaticFiles(directory=STATIC_FILES_DIR, html=True), name="static")
+app.mount("/", StaticFiles(directory=STATIC_FILES_DIR, html=True), name="static")
 
 if __name__ == "__main__":
     import uvicorn
