@@ -1,9 +1,20 @@
 ﻿// Replace with your Azure OpenAI key
 using Azure.AI.OpenAI;
+using DotNetEnv;
 
-string key = "YOUR_EVENT_CODE/YOUR_GITHUB_USERNAME";
-string endpoint = "https://YOUR_AZURE_OPENAI_PROXY_URL/v1/api";
-var client = new OpenAIClient(new Uri(endpoint), new Azure.AzureKeyCredential(key));
+Env.Load();
+
+// Get the key from the environment variables
+string? key = Environment.GetEnvironmentVariable("YOUR_EVENT_AUTH_TOKEN");
+string? endpoint = Environment.GetEnvironmentVariable("YOUR_AZURE_OPENAI_PROXY_URL");
+
+if (key == null || endpoint == null)
+{
+    Console.WriteLine("Please set the YOUR_EVENT_AUTH_TOKEN and YOUR_AZURE_OPENAI_PROXY_URL environment variables.");
+    return;
+}
+
+var client = new OpenAIClient(new Uri(endpoint + "/v1/api"), new Azure.AzureKeyCredential(key));
 
 CompletionsOptions completionsOptions = new()
 {
