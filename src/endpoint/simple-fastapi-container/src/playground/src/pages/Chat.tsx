@@ -1,33 +1,37 @@
 import { useState } from "react";
 import { ChatCard } from "../components/ChatCard";
 import { SystemCard } from "../components/SystemCard";
-import { UsageData } from "../interfaces/UsageData";
-import { useEventDataContext } from "../EventDataProvider";
-import { usePromptErrorContext } from "../PromptErrorProvider";
-import { MessageData } from "../interfaces/MessageData";
-import { ApiData } from "../interfaces/ApiData";
-import { callApi } from "../api/api";
+import { usePromptErrorContext } from "../providers/PromptErrorProvider";
 import { ParamsCard } from "../components/ParamsCard";
+import { useOpenAIClientContext } from "../providers/OpenAIProvider";
+import type { ChatMessage, GetChatCompletionsOptions } from "@azure/openai";
 
-const defaultSysPrompt: MessageData = {
+type UsageData = {
+  finish_reason: string;
+  completion_tokens: number;
+  prompt_tokens: number;
+  total_tokens: number;
+  response_time: number;
+};
+
+const defaultSysPrompt: ChatMessage = {
   role: "system",
   content: "You are an AI assistant that helps people find information.",
 };
 
-const defaultParamValues: Omit<ApiData, "messages"> = {
-  max_tokens: 512,
+const defaultParamValues: GetChatCompletionsOptions = {
+  maxTokens: 512,
   temperature: 0.7,
-  top_p: 0.95,
-  stop_sequence: "Stop sequences",
-  frequency_penalty: 0,
-  presence_penalty: 0,
+  topP: 0.95,
+  stop: ["Stop sequences"],
+  frequencyPenalty: 0,
+  presencePenalty: 0,
 };
 
 export const Chat = () => {
   const [systemPrompt, setSystemPrompt] = useState(defaultSysPrompt);
   const [messageList, setMessageList] = useState([defaultSysPrompt]);
 
-  const [name, setName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [usageData, setUsageData] = useState<UsageData>({
     finish_reason: "",
@@ -37,11 +41,11 @@ export const Chat = () => {
     response_time: 0,
   });
 
-  const { eventCode } = useEventDataContext();
   const { setPromptError } = usePromptErrorContext();
+  const { client } = useOpenAIClientContext();
 
-  const onPromptEntered = async (messages: MessageData[]) => {
-    if (eventCode) {
+  const onPromptEntered = async (messages: ChatMessage[]) => {
+    if (client) {
       const userMessage = messages[messages.length - 1];
       const updatedMessageList = [
         ...messageList,
@@ -49,30 +53,55 @@ export const Chat = () => {
       ];
       setMessageList(updatedMessageList);
 
-      const data: ApiData = { messages: updatedMessageList, ...params };
       setIsLoading(true);
-      const { answer, status, error } = await callApi(data, eventCode);
-      setPromptError(error);
+      try {
+        const start = Date.now();
+        const chatCompletions = await client.getChatCompletions(
+          "proxy",
+          updatedMessageList.map((m) => ({
+            content: m.content,
+            role: m.role,
+          })),
+          params
+        );
+        const end = Date.now();
 
-      if (status !== 200) {
+        const totalTime = end - start;
+
+        const choices = chatCompletions.choices;
+
+        for (const choice of choices) {
+          const message = choice.message;
+          if (!message) {
+            continue;
+          }
+          setMessageList((current) => [...current, message]);
+
+          setUsageData((current) => ({
+            ...current,
+            finish_reason: choice.finishReason || current.finish_reason,
+            completion_tokens:
+              chatCompletions.usage?.completionTokens ||
+              current.completion_tokens,
+            prompt_tokens:
+              chatCompletions.usage?.promptTokens || current.prompt_tokens,
+            total_tokens:
+              chatCompletions.usage?.totalTokens || current.total_tokens,
+            response_time: totalTime,
+          }));
+        }
+
+        setIsLoading(false);
+      } catch (error) {
         setMessageList(updatedMessageList.slice(0, 1));
-      } else if (answer) {
-        setMessageList([...updatedMessageList, answer.assistant]);
-        setName(answer.name);
-        setUsageData({
-          finish_reason: answer.finish_reason,
-          completion_tokens: answer.usage.usage.completion_tokens,
-          prompt_tokens: answer.usage.usage.prompt_tokens,
-          total_tokens: answer.usage.usage.total_tokens,
-          response_time: answer.response_ms,
-        });
+        setPromptError(error + "");
+
+        setIsLoading(false);
       }
     }
-
-    setIsLoading(false);
   };
 
-  const onPromptChange = (newPrompt: MessageData) => {
+  const onPromptChange = (newPrompt: ChatMessage) => {
     if (newPrompt !== systemPrompt) {
       setSystemPrompt(newPrompt);
       messageList[0] = newPrompt;
@@ -93,7 +122,7 @@ export const Chat = () => {
   const [params, setParams] = useState(defaultParamValues);
 
   const tokenUpdate = (
-    label: keyof Omit<ApiData, "messages">,
+    label: keyof GetChatCompletionsOptions,
     newValue: number | string
   ) => {
     setParams((params) => {
@@ -121,7 +150,6 @@ export const Chat = () => {
       <ParamsCard
         startValues={params}
         tokenUpdate={tokenUpdate}
-        name={name}
         usageData={usageData}
       />
     </>

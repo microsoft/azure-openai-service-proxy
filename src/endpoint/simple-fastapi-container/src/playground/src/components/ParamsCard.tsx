@@ -1,18 +1,17 @@
 import {
   Body1,
   Card,
-  CardFooter,
   CardHeader,
   Label,
   makeStyles,
 } from "@fluentui/react-components";
-import { ApiData } from "../interfaces/ApiData";
 import { ParamInput } from "./ParamInput";
 import { useCallback } from "react";
 import { UsageData } from "../interfaces/UsageData";
-import { useEventDataContext } from "../EventDataProvider";
+import { useEventDataContext } from "../providers/EventDataProvider";
 import { DividerBlock } from "./DividerBlock";
 import { EventCodeInput } from "./EventCodeInput";
+import type { GetChatCompletionsOptions } from "@azure/openai";
 
 const useStyles = makeStyles({
   card: {
@@ -27,24 +26,22 @@ const useStyles = makeStyles({
 });
 
 interface ParamsCardProps {
-  startValues: Omit<ApiData, "messages">;
+  startValues: GetChatCompletionsOptions;
   tokenUpdate: (
-    label: keyof Omit<ApiData, "messages">,
+    label: keyof GetChatCompletionsOptions,
     newValue: number | string
   ) => void;
-  name: string;
   usageData: UsageData;
 }
 
 export const ParamsCard = ({
   startValues,
   tokenUpdate,
-  name,
   usageData,
 }: ParamsCardProps) => {
   const styles = useStyles();
   const updateParams = useCallback(
-    (label: keyof Omit<ApiData, "messages">) => {
+    (label: keyof GetChatCompletionsOptions) => {
       return (newValue: number | string) => {
         tokenUpdate(label, newValue);
       };
@@ -71,7 +68,7 @@ export const ParamsCard = ({
         <ParamInput
           label="Tokens"
           defaultValue={maxTokens / 2}
-          onUpdate={updateParams("max_tokens")}
+          onUpdate={updateParams("maxTokens")}
           type="number"
           min={1}
           max={maxTokens}
@@ -82,7 +79,7 @@ export const ParamsCard = ({
       <DividerBlock>
         <ParamInput
           label="Temperature"
-          defaultValue={startValues.temperature}
+          defaultValue={startValues.temperature || 0}
           onUpdate={updateParams("temperature")}
           type="number"
           min={0}
@@ -94,8 +91,8 @@ export const ParamsCard = ({
       <DividerBlock>
         <ParamInput
           label="Top P"
-          defaultValue={startValues.top_p}
-          onUpdate={updateParams("top_p")}
+          defaultValue={startValues.topP || 0}
+          onUpdate={updateParams("topP")}
           type="number"
           min={0}
           max={1}
@@ -114,14 +111,6 @@ export const ParamsCard = ({
           <div>Response Time: {usageData.response_time} ms</div>
         </Label>
       </DividerBlock>
-
-      <CardFooter style={{ height: "5vh" }}>
-        <Label
-          style={{ color: "GrayText", fontSize: "small", textAlign: "center" }}
-        >
-          {name}
-        </Label>
-      </CardFooter>
     </Card>
   );
 };

@@ -8,7 +8,10 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@fluentui/react-components";
-import { AuthStatus, useEventDataContext } from "../EventDataProvider";
+import {
+  AuthStatus,
+  useEventDataContext,
+} from "../providers/EventDataProvider";
 
 export const Unauthorised = () => {
   const { authStatus, setEventCode: setEventConnection } =

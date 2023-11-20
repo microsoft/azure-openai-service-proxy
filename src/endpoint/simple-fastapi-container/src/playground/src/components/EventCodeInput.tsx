@@ -1,6 +1,6 @@
 import { Button, Input, Label, makeStyles } from "@fluentui/react-components";
 import { useState } from "react";
-import { useEventDataContext } from "../EventDataProvider";
+import { useEventDataContext } from "../providers/EventDataProvider";
 import { DividerBlock } from "./DividerBlock";
 
 const useStyles = makeStyles({

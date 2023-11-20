@@ -1,4 +1,4 @@
-import { useEventDataContext } from "../EventDataProvider";
+import { useEventDataContext } from "../providers/EventDataProvider";
 
 export const Image = () => {
   const { eventCode } = useEventDataContext();
