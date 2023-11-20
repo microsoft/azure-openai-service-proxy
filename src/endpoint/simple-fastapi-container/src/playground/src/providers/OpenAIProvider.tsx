@@ -26,7 +26,7 @@ const OpenAIClientProvider: React.FC<PropsWithChildren> = ({ children }) => {
       setClient(
         new OpenAIClient(
           `${window.location.origin}/${API_VERSION}/api`,
-          new AzureKeyCredential(`${eventCode}/playgroud`),
+          new AzureKeyCredential(`${eventCode}`),
           {
             allowInsecureConnection: true,
           }
