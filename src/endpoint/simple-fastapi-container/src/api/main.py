@@ -255,7 +255,7 @@ async def oai_chat_completion(
 # Support for Dall-e-3 and beyond
 # Azure OpenAI Images
 @app.post(
-    "/v1/api/deployments/{deployment_id}/images/generations",
+    "/v1/api/openai/deployments/{deployment_id}/images/generations",
     status_code=200,
     response_model=None,
 )
