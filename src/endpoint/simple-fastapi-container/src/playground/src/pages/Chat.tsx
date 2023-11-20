@@ -2,7 +2,7 @@ import { useState } from "react";
 import { ChatCard } from "../components/ChatCard";
 import { SystemCard } from "../components/SystemCard";
 import { usePromptErrorContext } from "../providers/PromptErrorProvider";
-import { ParamsCard } from "../components/ParamsCard";
+import { ParamsCard } from "../components/ChatParamsCard";
 import { useOpenAIClientContext } from "../providers/OpenAIProvider";
 import type { ChatMessage, GetChatCompletionsOptions } from "@azure/openai";
 
