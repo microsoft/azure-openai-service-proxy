@@ -1,8 +1,4 @@
-import {
-  Body1,
-  CardHeader,
-  Label,
-} from "@fluentui/react-components";
+import { Label } from "@fluentui/react-components";
 import { ParamInput } from "./ParamInput";
 import { useCallback } from "react";
 import { UsageData } from "../interfaces/UsageData";
@@ -38,16 +34,7 @@ export const ChatParamsCard = ({
   const maxTokens = eventData?.max_token_cap ?? 0;
 
   return (
-    <Card>
-      <CardHeader
-        style={{ height: "10vh", alignItems: "start" }}
-        header={
-          <Body1 style={{ fontSize: "large" }}>
-            <h2>Configuration</h2>
-          </Body1>
-        }
-      />
-
+    <Card header="Configuration">
       <EventCodeInput />
 
       <DividerBlock>

@@ -1,10 +1,4 @@
-import {
-  Body1,
-  CardHeader,
-  Label,
-  Select,
-  useId,
-} from "@fluentui/react-components";
+import { Label, Select, useId } from "@fluentui/react-components";
 import { Card } from "./Card";
 import { EventCodeInput } from "./EventCodeInput";
 import { DividerBlock } from "./DividerBlock";
@@ -28,16 +22,7 @@ export const ImageParamsCard = ({
   const selectId = useId("size");
   const { isAuthorized } = useEventDataContext();
   return (
-    <Card>
-      <CardHeader
-        style={{ height: "10vh", alignItems: "start" }}
-        header={
-          <Body1 style={{ fontSize: "large" }}>
-            <h2>Configuration</h2>
-          </Body1>
-        }
-      />
-
+    <Card header="Configuration">
       <EventCodeInput />
 
       <DividerBlock>

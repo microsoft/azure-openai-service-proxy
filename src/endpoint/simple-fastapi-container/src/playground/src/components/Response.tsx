@@ -1,12 +1,33 @@
-import styles from "./Response.module.css";
 import Markdown from "react-markdown";
 import { ChatMessage } from "@azure/openai";
+import { makeStyles, shorthands } from "@fluentui/react-components";
 
 interface Props {
   message: ChatMessage;
 }
 
+const useStyles = makeStyles({
+  container: {
+    display: "flex",
+    justifyContent: "flex-start",
+    marginBottom: "20px",
+    maxWidth: "80%",
+  },
+  response: {
+    fontSize: "large",
+    textAlign: "left",
+    color: "white",
+    backgroundColor: "#8661C5",
+    boxShadow:
+      "0px 2px 4px rgba(0, 0, 0, 0.14), 0px 0px 2px rgba(0, 0, 0, 0.12)",
+    ...shorthands.padding("20px"),
+    ...shorthands.borderRadius("8px"),
+    ...shorthands.outline("transparent solid 1px"),
+  },
+});
+
 export const Response = ({ message }: Props) => {
+  const styles = useStyles();
   return (
     <div className={styles.container}>
       <div className={styles.response}>
