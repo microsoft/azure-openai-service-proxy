@@ -3,10 +3,11 @@
 import logging
 import os
 import openai.openai_object
+from typing import AsyncGenerator
 
 from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.exceptions import ResponseValidationError
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 
 from .authorize import Authorize, AuthorizeResponse
@@ -216,8 +217,9 @@ async def oai_chat_completion(
     chat: ChatCompletionsRequest,
     request: Request,
     response: Response,
+    # stream_response: StreamingResponse,
     deployment_id: str = None,
-) -> openai.openai_object.OpenAIObject | str:
+) -> openai.openai_object.OpenAIObject | str | StreamingResponse:
     """OpenAI chat completion response"""
 
     # get the api version from the query string
@@ -243,8 +245,11 @@ async def oai_chat_completion(
         status_code,
     ) = await app.state.chat_completions_mgr.call_openai_chat_completion(chat)
 
-    response.status_code = status_code
-    return completion
+    if isinstance(completion, AsyncGenerator):
+        return StreamingResponse(completion)
+    else:
+        response.status_code = status_code
+        return completion
 
 
 # Support for Dall-e-3 and beyond
