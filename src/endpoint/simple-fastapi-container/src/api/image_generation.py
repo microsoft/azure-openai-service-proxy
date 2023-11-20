@@ -3,12 +3,11 @@
 from enum import Enum
 import logging
 from typing import Tuple
-import asyncio
 import openai
 from pydantic import BaseModel
-from fastapi import HTTPException
+from fastapi import HTTPException, Request, Response
 
-from .config import OpenAIConfig
+from .config import Deployment, OpenAIConfig
 from .openai_async import OpenAIAsyncManager
 
 OPENAI_IMAGES_GENERATIONS_API_VERSION = "2023-06-01-preview"
@@ -96,11 +95,9 @@ class ImagesGenerations:
             )
 
     async def call_openai_images_generations(
-        self, images: ImagesGenerationsRequst
-    ) -> Tuple[openai.openai_object.OpenAIObject, int]:
+        self, images: ImagesGenerationsRequst, request: Request, response: Response
+    ) -> Tuple[Deployment, openai.openai_object.OpenAIObject, int]:
         """call openai with retry"""
-
-        retry_count = 0
 
         self.validate_input(images)
 
@@ -120,26 +117,48 @@ class ImagesGenerations:
         )
 
         async_mgr = OpenAIAsyncManager(deployment)
-        response = await async_mgr.async_post(openai_request, url)
+        dalle_response = await async_mgr.async_post(openai_request, url)
 
-        operation_location = response.headers["operation-location"]
-        status = ""
+        for value in dalle_response.headers:
+            if value == "operation-location":
+                original_location = dalle_response.headers[value]
+                port = f":{request.url.port}" if request.url.port else ""
+                original_location_suffix = original_location.split("/openai", 1)[1]
 
-        while status != "succeeded" and status != "failed":
-            # retry 20 times which is 20 * 3 second sleep = 60 seconds max wait
-            if retry_count >= 20:
-                raise HTTPException(
-                    status_code=408, detail="OpenAI Dalle request retry exceeded"
+                proxy_location = (
+                    f"{request.url.scheme}://{request.url.hostname}{port}"
+                    f"/v1/api/{deployment.friendly_name}/openai{original_location_suffix}"
                 )
+                response.headers.append(value, proxy_location)
+            else:
+                response.headers.append(value, dalle_response.headers[value])
 
-            await asyncio.sleep(3)
+        return dalle_response.json(), dalle_response.status_code
 
-            async_mgr = OpenAIAsyncManager(deployment)
-            response = await async_mgr.async_get(operation_location)
+    async def call_openai_images_get(
+        self,
+        friendly_name: str,
+        image_id: str,
+        api_version: str = OPENAI_IMAGES_GENERATIONS_API_VERSION,
+    ):
+        """call openai with retry"""
 
-            response = response.json()
+        deployment = await self.openai_config.get_deployment_by_friendly_name(
+            friendly_name
+        )
 
-            status = response["status"]
-            retry_count += 1
+        if deployment is None:
+            return self.report_exception(
+                "Oops, failed to find service to generate image.", 404
+            )
 
-        return response, response.get("http_status_code", 200)
+        url = (
+            f"https://{deployment.resource_name}.openai.azure.com"
+            f"/openai/operations/images/{image_id}"
+            f"?api-version={api_version}"
+        )
+
+        async_mgr = OpenAIAsyncManager(deployment)
+        dalle_response = await async_mgr.async_get(url)
+
+        return dalle_response.json(), dalle_response.status_code
