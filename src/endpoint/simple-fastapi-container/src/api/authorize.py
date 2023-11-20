@@ -9,7 +9,6 @@ import pytz
 from fastapi import HTTPException
 from pydantic import BaseModel
 
-from azure.data.tables import TableServiceClient
 from azure.data.tables.aio import TableClient
 from azure.core.exceptions import (
     AzureError,
@@ -80,33 +79,6 @@ class Authorize:
         self.connection_string = connection_string
         self.event_cache = []
         self.cache_expiry = None
-
-        # Create events authorization table if it does not exist
-        try:
-            table_service_client = TableServiceClient.from_connection_string(
-                conn_str=self.connection_string
-            )
-
-            table_service_client.create_table_if_not_exists(
-                table_name=EVENT_AUTHORIZATION_TABLE_NAME
-            )
-
-        except AzureError as azure_error:
-            logging.error(
-                "Azure Error creating table: %s",
-                azure_error.message,
-            )
-            raise HTTPException(
-                status_code=504,
-                detail=azure_error.message,
-            ) from azure_error
-
-        except Exception as exception:
-            logging.error("General exception creating table: %s", str(exception))
-            raise HTTPException(
-                status_code=500,
-                detail="General exception creating table.",
-            ) from exception
 
     def __is_event_authorised_cached(self, event_code: str) -> AuthorizeResponse | None:
         """checks if event code is in the cache"""

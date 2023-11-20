@@ -6,7 +6,7 @@ from enum import Enum
 from pydantic import BaseModel
 from fastapi import HTTPException
 from azure.core.exceptions import AzureError
-from azure.data.tables import TableServiceClient, TableClient
+from azure.data.tables import TableClient
 from azure.data.tables.aio import TableClient as AsyncTableClient
 
 
@@ -169,14 +169,6 @@ class Management:
 
         # Create management authorization table if it does not exist
         try:
-            table_service_client = TableServiceClient.from_connection_string(
-                conn_str=self.connection_string
-            )
-
-            table_service_client.create_table_if_not_exists(
-                table_name=MANAGEMENT_TABLE_NAME
-            )
-
             # check if there is a row in the table with a partition key of "management"
             table_client = TableClient.from_connection_string(
                 conn_str=self.connection_string, table_name=MANAGEMENT_TABLE_NAME
