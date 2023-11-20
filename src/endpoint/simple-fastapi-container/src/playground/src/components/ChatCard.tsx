@@ -2,7 +2,6 @@ import {
   makeStyles,
   Body1,
   Button,
-  Card,
   CardFooter,
   CardHeader,
   Field,
@@ -16,6 +15,7 @@ import { Response } from "./Response";
 import "./ChatCard.module.css";
 import { useEventDataContext } from "../providers/EventDataProvider";
 import type { ChatMessage } from "@azure/openai";
+import { Card } from "./Card";
 
 interface CardProps {
   onPromptEntered: (messages: ChatMessage[]) => void;
@@ -26,12 +26,8 @@ interface CardProps {
 
 const useStyles = makeStyles({
   card: {
-    height: "100vh",
     display: "flex",
-    marginTop: "10px",
-    marginRight: "10px",
-    marginBottom: "10px",
-    marginLeft: "10px",
+    height: "calc(100vh - 70px)",
   },
   dialog: {
     display: "block",
