@@ -164,3 +164,27 @@ class OpenAIConfig:
             deployment_name=deployment.deployment_name,
             resource_name=deployment.resource_name,
         )
+
+    async def get_deployment_by_friendly_name(
+        self, friendly_name: str
+    ) -> Deployment | None:
+        """get deployment by friendly name"""
+
+        # set cache_expiry to current time plus CACHE_EXPIRY_MINUTES minutes
+        if self.cache_expiry is None or datetime.now() > self.cache_expiry:
+            logger.warning("Loading configuration from Azure Table Storage")
+            self.deployments = await self.__load_config()
+            self.cache_expiry = datetime.now() + timedelta(
+                minutes=CACHE_EXPIRY_MINUTES + random.randint(0, 4)
+            )
+
+        for deployment in self.deployments:
+            if deployment.friendly_name == friendly_name:
+                return Deployment(
+                    friendly_name=deployment.friendly_name,
+                    endpoint_key=deployment.endpoint_key,
+                    deployment_name=deployment.deployment_name,
+                    resource_name=deployment.resource_name,
+                )
+
+        return None

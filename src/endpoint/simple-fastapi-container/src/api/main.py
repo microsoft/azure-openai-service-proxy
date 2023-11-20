@@ -353,9 +353,9 @@ async def oai_images_generations(
     return completion_response.json()
 
 
-@app.get("/v1/api/{deployment_id}/openai/operations/images/{image_id}")
+@app.get("/v1/api/{friendly_name}/openai/operations/images/{image_id}")
 async def oai_images_get(
-    deployment_id: str,
+    friendly_name: str,
     image_id: str,
     request: Request,
     response: Response,
@@ -368,11 +368,14 @@ async def oai_images_get(
     # exception thrown if not authorized
     await app.state.authorize.authorize_api_access(request.headers, deployment_id)
 
+    if "api-version" in request.query_params:
+        api_version = request.query_params["api-version"]
+
     (
         completion_response,
         status_code,
     ) = await app.state.images_generations_mgr.call_openai_images_get(
-        deployment_id, image_id
+        friendly_name, image_id, api_version
     )
     response.status_code = status_code
     return completion_response.json()

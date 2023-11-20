@@ -121,17 +121,27 @@ class ImagesGenerations:
 
         return deployment, response, response.status_code
 
-    async def call_openai_images_get(self, deployment_id: str, image_id: str):
+    async def call_openai_images_get(
+        self,
+        friendly_name: str,
+        image_id: str,
+        api_version: str = OPENAI_IMAGES_GENERATIONS_API_VERSION,
+    ):
         """call openai with retry"""
 
         deployment = await self.openai_config.get_deployment_by_friendly_name(
-            deployment_id
+            friendly_name
         )
+
+        if deployment is None:
+            return self.report_exception(
+                "Oops, failed to find service to generate image.", 404
+            )
 
         url = (
             f"https://{deployment.resource_name}.openai.azure.com"
             f"/openai/operations/images/{image_id}"
-            f"?api-version={OPENAI_IMAGES_GENERATIONS_API_VERSION}"
+            f"?api-version={api_version}"
         )
 
         async_mgr = OpenAIAsyncManager(deployment)
