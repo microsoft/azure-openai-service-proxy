@@ -9,7 +9,7 @@ import openai
 import openai.error
 import openai.openai_object
 
-from .config import OpenAIConfig
+from .configuration import OpenAIConfig
 from .openai_async import OpenAIAsyncManager
 
 OPENAI_CHAT_COMPLETIONS_API_VERSION = "2023-09-01-preview"

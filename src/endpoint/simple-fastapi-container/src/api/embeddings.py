@@ -8,7 +8,7 @@ import openai.openai_object
 from pydantic import BaseModel
 
 from .openai_async import OpenAIAsyncManager
-from .config import OpenAIConfig
+from .configuration import OpenAIConfig
 
 OPENAI_EMBEDDINGS_API_VERSION = "2023-08-01-preview"
 
