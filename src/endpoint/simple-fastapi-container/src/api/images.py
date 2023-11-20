@@ -7,7 +7,7 @@ import openai
 from pydantic import BaseModel
 from fastapi import HTTPException
 
-from .config import OpenAIConfig
+from .configuration import OpenAIConfig
 from .openai_async import OpenAIAsyncManager
 
 OPENAI_IMAGES_GENERATIONS_API_VERSION = "2023-12-01-preview"

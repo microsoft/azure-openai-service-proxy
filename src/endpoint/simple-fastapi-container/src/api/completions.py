@@ -8,7 +8,7 @@ import openai
 import openai.error
 import openai.openai_object
 from fastapi import HTTPException
-from .config import OpenAIConfig
+from .configuration import OpenAIConfig
 from .openai_async import OpenAIAsyncManager
 
 OPENAI_COMPLETIONS_API_VERSION = "2023-09-01-preview"

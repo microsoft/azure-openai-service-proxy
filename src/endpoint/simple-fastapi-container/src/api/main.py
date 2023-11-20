@@ -21,7 +21,7 @@ from .image_generation import ImagesGenerations, ImagesGenerationsRequst
 from .images import ImagesRequest, Images
 
 from .embeddings import EmbeddingsRequest, Embeddings
-from .config import OpenAIConfig
+from .configuration import OpenAIConfig
 from .rate_limit import RateLimit
 from .management import (
     Management,

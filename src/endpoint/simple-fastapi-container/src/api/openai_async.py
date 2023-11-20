@@ -12,7 +12,7 @@ import openai.error
 import openai.openai_object
 
 
-from .config import Deployment
+from .configuration import Deployment
 
 HTTPX_TIMEOUT_SECONDS = 60
 
