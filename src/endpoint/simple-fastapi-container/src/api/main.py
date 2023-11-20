@@ -11,7 +11,6 @@ from fastapi.responses import JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 
 from .authorize import Authorize, AuthorizeResponse
-from .chat_playground import Playground, PlaygroundResponse
 from .chat_completions import (
     ChatCompletionsRequest,
     ChatCompletions,
@@ -368,41 +367,18 @@ async def oai_images_get(
 
 
 # This path is used by the playground
-@app.post("/api/eventinfo", status_code=200, deprecated=True)
 @app.post("/v1/api/eventinfo", status_code=200)
 async def event_info(request: Request) -> AuthorizeResponse:
     """get event info"""
-    authorize_response = await app.state.authorize.authorize_playground_access(
-        request.headers
-    )
 
-    if authorize_response is None or not authorize_response.is_authorized:
-        raise HTTPException(
-            status_code=401,
-            detail="Event code is not authorized",
-        )
-
-    return authorize_response
-
-
-@app.post("/v1/api/playground", status_code=200)
-@app.post("/api/oai_prompt", status_code=200, deprecated=True)
-async def oai_playground(
-    chat: ChatCompletionsRequest, request: Request, response: Response
-) -> PlaygroundResponse | str:
-    """playground chat returns chat response"""
+    deployment_id = "event_info"
 
     # exception thrown if not authorized
-    authorize_response = await app.state.authorize.authorize_playground_access(
-        request.headers
+    authorize_response, _ = await app.state.authorize.authorize_api_access(
+        request.headers, deployment_id
     )
 
-    if chat.max_tokens > authorize_response.max_token_cap:
-        chat.max_tokens = authorize_response.max_token_cap
-
-    completion, status_code = await app.state.openai_mgr.call_chat_playground(chat)
-    response.status_code = status_code
-    return completion
+    return authorize_response
 
 
 @app.on_event("startup")
@@ -445,8 +421,6 @@ async def startup_event():
         connection_string=storage_connection_string,
         model_class=DeploymentClass.OPENAI_IMAGES_GENERATIONS.value,
     )
-
-    app.state.openai_mgr = Playground(openai_config=openai_config_chat_completions)
 
     app.state.chat_completions_mgr = ChatCompletions(
         openai_config=openai_config_chat_completions
