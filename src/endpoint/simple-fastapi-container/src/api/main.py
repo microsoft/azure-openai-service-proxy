@@ -11,7 +11,6 @@ from fastapi.responses import JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 
 from .authorize import Authorize, AuthorizeResponse
-from .chat_playground import Playground, PlaygroundResponse
 from .chat_completions import (
     ChatCompletionsRequest,
     ChatCompletions,
@@ -329,28 +328,14 @@ async def oai_images_generations(
         )
 
     (
-        deployment,
         completion_response,
         status_code,
     ) = await app.state.images_generations_mgr.call_openai_images_generations(
-        image_generation_request
+        image_generation_request, request, response
     )
     response.status_code = status_code
-    for value in completion_response.headers:
-        if value == "operation-location":
-            original_location = completion_response.headers[value]
-            port = f":{request.url.port}" if request.url.port else ""
-            original_location_suffix = original_location.split("/openai", 1)[1]
 
-            proxy_location = (
-                f"{request.url.scheme}://{request.url.hostname}{port}"
-                f"/v1/api/{deployment.friendly_name}/openai{original_location_suffix}"
-            )
-            response.headers.append(value, proxy_location)
-        else:
-            response.headers.append(value, completion_response.headers[value])
-
-    return completion_response.json()
+    return completion_response
 
 
 @app.get("/v1/api/{friendly_name}/openai/operations/images/{image_id}")
@@ -378,45 +363,22 @@ async def oai_images_get(
         friendly_name, image_id, api_version
     )
     response.status_code = status_code
-    return completion_response.json()
+    return completion_response
 
 
 # This path is used by the playground
-@app.post("/api/eventinfo", status_code=200, deprecated=True)
 @app.post("/v1/api/eventinfo", status_code=200)
 async def event_info(request: Request) -> AuthorizeResponse:
     """get event info"""
-    authorize_response = await app.state.authorize.authorize_playground_access(
-        request.headers
-    )
 
-    if authorize_response is None or not authorize_response.is_authorized:
-        raise HTTPException(
-            status_code=401,
-            detail="Event code is not authorized",
-        )
-
-    return authorize_response
-
-
-@app.post("/v1/api/playground", status_code=200)
-@app.post("/api/oai_prompt", status_code=200, deprecated=True)
-async def oai_playground(
-    chat: ChatCompletionsRequest, request: Request, response: Response
-) -> PlaygroundResponse | str:
-    """playground chat returns chat response"""
+    deployment_id = "event_info"
 
     # exception thrown if not authorized
-    authorize_response = await app.state.authorize.authorize_playground_access(
-        request.headers
+    authorize_response, _ = await app.state.authorize.authorize_api_access(
+        request.headers, deployment_id
     )
 
-    if chat.max_tokens > authorize_response.max_token_cap:
-        chat.max_tokens = authorize_response.max_token_cap
-
-    completion, status_code = await app.state.openai_mgr.call_chat_playground(chat)
-    response.status_code = status_code
-    return completion
+    return authorize_response
 
 
 @app.on_event("startup")
@@ -459,8 +421,6 @@ async def startup_event():
         connection_string=storage_connection_string,
         model_class=DeploymentClass.OPENAI_IMAGES_GENERATIONS.value,
     )
-
-    app.state.openai_mgr = Playground(openai_config=openai_config_chat_completions)
 
     app.state.chat_completions_mgr = ChatCompletions(
         openai_config=openai_config_chat_completions
