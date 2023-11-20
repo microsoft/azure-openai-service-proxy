@@ -3,12 +3,11 @@
 from enum import Enum
 import logging
 from typing import Tuple
-import asyncio
 import openai
 from pydantic import BaseModel
 from fastapi import HTTPException
 
-from .config import OpenAIConfig
+from .config import Deployment, OpenAIConfig
 from .openai_async import OpenAIAsyncManager
 
 OPENAI_IMAGES_GENERATIONS_API_VERSION = "2023-06-01-preview"
@@ -97,10 +96,8 @@ class ImagesGenerations:
 
     async def call_openai_images_generations(
         self, images: ImagesGenerationsRequst
-    ) -> Tuple[openai.openai_object.OpenAIObject, int]:
+    ) -> Tuple[Deployment, openai.openai_object.OpenAIObject, int]:
         """call openai with retry"""
-
-        retry_count = 0
 
         self.validate_input(images)
 
@@ -122,24 +119,32 @@ class ImagesGenerations:
         async_mgr = OpenAIAsyncManager(deployment)
         response = await async_mgr.async_post(openai_request, url)
 
-        operation_location = response.headers["operation-location"]
-        status = ""
+        return deployment, response, response.status_code
 
-        while status != "succeeded" and status != "failed":
-            # retry 20 times which is 20 * 3 second sleep = 60 seconds max wait
-            if retry_count >= 20:
-                raise HTTPException(
-                    status_code=408, detail="OpenAI Dalle request retry exceeded"
-                )
+    async def call_openai_images_get(
+        self,
+        friendly_name: str,
+        image_id: str,
+        api_version: str = OPENAI_IMAGES_GENERATIONS_API_VERSION,
+    ):
+        """call openai with retry"""
 
-            await asyncio.sleep(3)
+        deployment = await self.openai_config.get_deployment_by_friendly_name(
+            friendly_name
+        )
 
-            async_mgr = OpenAIAsyncManager(deployment)
-            response = await async_mgr.async_get(operation_location)
+        if deployment is None:
+            return self.report_exception(
+                "Oops, failed to find service to generate image.", 404
+            )
 
-            response = response.json()
+        url = (
+            f"https://{deployment.resource_name}.openai.azure.com"
+            f"/openai/operations/images/{image_id}"
+            f"?api-version={api_version}"
+        )
 
-            status = response["status"]
-            retry_count += 1
+        async_mgr = OpenAIAsyncManager(deployment)
+        response = await async_mgr.async_get(url)
 
-        return response, response.get("http_status_code", 200)
+        return response, response.status_code

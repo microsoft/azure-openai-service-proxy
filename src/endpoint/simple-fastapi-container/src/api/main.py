@@ -255,7 +255,7 @@ async def oai_chat_completion(
 # Support for Dall-e-3 and beyond
 # Azure OpenAI Images
 @app.post(
-    "/v1/api/deployments/{deployment_id}/images/generations",
+    "/v1/api/openai/deployments/{deployment_id}/images/generations",
     status_code=200,
     response_model=None,
 )
@@ -329,13 +329,56 @@ async def oai_images_generations(
         )
 
     (
+        deployment,
         completion_response,
         status_code,
     ) = await app.state.images_generations_mgr.call_openai_images_generations(
         image_generation_request
     )
     response.status_code = status_code
-    return completion_response
+    for value in completion_response.headers:
+        if value == "operation-location":
+            original_location = completion_response.headers[value]
+            port = f":{request.url.port}" if request.url.port else ""
+            original_location_suffix = original_location.split("/openai", 1)[1]
+
+            proxy_location = (
+                f"{request.url.scheme}://{request.url.hostname}{port}"
+                f"/v1/api/{deployment.friendly_name}/openai{original_location_suffix}"
+            )
+            response.headers.append(value, proxy_location)
+        else:
+            response.headers.append(value, completion_response.headers[value])
+
+    return completion_response.json()
+
+
+@app.get("/v1/api/{friendly_name}/openai/operations/images/{image_id}")
+async def oai_images_get(
+    friendly_name: str,
+    image_id: str,
+    request: Request,
+    response: Response,
+):
+    """OpenAI image generation response"""
+
+    # No deployment_is passed for images generation so set to dall-e
+    deployment_id = "dall-e"
+
+    # exception thrown if not authorized
+    await app.state.authorize.authorize_api_access(request.headers, deployment_id)
+
+    if "api-version" in request.query_params:
+        api_version = request.query_params["api-version"]
+
+    (
+        completion_response,
+        status_code,
+    ) = await app.state.images_generations_mgr.call_openai_images_get(
+        friendly_name, image_id, api_version
+    )
+    response.status_code = status_code
+    return completion_response.json()
 
 
 # This path is used by the playground
