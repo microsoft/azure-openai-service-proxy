@@ -1,7 +1,7 @@
 """ Chat Completions API """
 
 import logging
-from typing import Tuple, Any
+from typing import Tuple, Any, AsyncGenerator
 
 from pydantic import BaseModel
 from fastapi import HTTPException
@@ -23,6 +23,7 @@ class ChatCompletionsRequest(BaseModel):
     messages: list[dict[str, str]]
     max_tokens: int = None
     temperature: float = None
+    stream: bool = False
     top_p: float | None = None
     stop_sequence: Any | None = None
     frequency_penalty: float = 0
@@ -88,8 +89,9 @@ class ChatCompletions:
             )
 
     async def call_openai_chat_completion(
-        self, chat: ChatCompletionsRequest
-    ) -> Tuple[openai.openai_object.OpenAIObject, int]:
+        self,
+        chat: ChatCompletionsRequest,
+    ) -> Tuple[openai.openai_object.OpenAIObject, int] | AsyncGenerator:
         """call openai with retry"""
 
         self.validate_input(chat)
@@ -112,6 +114,7 @@ class ChatCompletions:
                 "messages": chat.messages,
                 "max_tokens": chat.max_tokens,
                 "temperature": chat.temperature,
+                "stream": chat.stream,
                 "top_p": chat.top_p,
                 "stop": chat.stop_sequence,
                 "frequency_penalty": chat.frequency_penalty,
@@ -125,8 +128,11 @@ class ChatCompletions:
         )
 
         async_mgr = OpenAIAsyncManager(deployment)
-        response = await async_mgr.async_openai_post(openai_request, url)
 
-        response["model"] = deployment.friendly_name
+        if chat.stream:
+            response = await async_mgr.async_post_streaming(openai_request, url)
+        else:
+            response = await async_mgr.async_openai_post(openai_request, url)
+            response["model"] = deployment.friendly_name
 
         return response, 200
