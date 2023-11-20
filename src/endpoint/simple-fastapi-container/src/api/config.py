@@ -142,8 +142,8 @@ class OpenAIConfig:
                 detail="Exception: Can't connect to the Azure Configuration Table",
             ) from exception
 
-    async def get_deployment(self) -> Deployment | None:
-        """get deployment by name"""
+    async def load_deploymemt_cache(self) -> None:
+        """update deployments"""
 
         # set cache_expiry to current time plus CACHE_EXPIRY_MINUTES minutes
         if self.cache_expiry is None or datetime.now() > self.cache_expiry:
@@ -152,6 +152,11 @@ class OpenAIConfig:
             self.cache_expiry = datetime.now() + timedelta(
                 minutes=CACHE_EXPIRY_MINUTES + random.randint(0, 4)
             )
+
+    async def get_deployment(self) -> Deployment | None:
+        """get deployment by name"""
+
+        await self.load_deploymemt_cache()
 
         index = int(self.round_robin % len(self.deployments))
         self.round_robin += 1
@@ -170,13 +175,7 @@ class OpenAIConfig:
     ) -> Deployment | None:
         """get deployment by friendly name"""
 
-        # set cache_expiry to current time plus CACHE_EXPIRY_MINUTES minutes
-        if self.cache_expiry is None or datetime.now() > self.cache_expiry:
-            logger.warning("Loading configuration from Azure Table Storage")
-            self.deployments = await self.__load_config()
-            self.cache_expiry = datetime.now() + timedelta(
-                minutes=CACHE_EXPIRY_MINUTES + random.randint(0, 4)
-            )
+        await self.load_deploymemt_cache()
 
         for deployment in self.deployments:
             if deployment.friendly_name == friendly_name:

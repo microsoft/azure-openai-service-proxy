@@ -5,7 +5,7 @@ import logging
 from typing import Tuple
 import openai
 from pydantic import BaseModel
-from fastapi import HTTPException
+from fastapi import HTTPException, Request, Response
 
 from .config import Deployment, OpenAIConfig
 from .openai_async import OpenAIAsyncManager
@@ -95,7 +95,7 @@ class ImagesGenerations:
             )
 
     async def call_openai_images_generations(
-        self, images: ImagesGenerationsRequst
+        self, images: ImagesGenerationsRequst, request: Request, response: Response
     ) -> Tuple[Deployment, openai.openai_object.OpenAIObject, int]:
         """call openai with retry"""
 
@@ -117,9 +117,23 @@ class ImagesGenerations:
         )
 
         async_mgr = OpenAIAsyncManager(deployment)
-        response = await async_mgr.async_post(openai_request, url)
+        dalle_response = await async_mgr.async_post(openai_request, url)
 
-        return deployment, response, response.status_code
+        for value in dalle_response.headers:
+            if value == "operation-location":
+                original_location = dalle_response.headers[value]
+                port = f":{request.url.port}" if request.url.port else ""
+                original_location_suffix = original_location.split("/openai", 1)[1]
+
+                proxy_location = (
+                    f"{request.url.scheme}://{request.url.hostname}{port}"
+                    f"/v1/api/{deployment.friendly_name}/openai{original_location_suffix}"
+                )
+                response.headers.append(value, proxy_location)
+            else:
+                response.headers.append(value, dalle_response.headers[value])
+
+        return dalle_response.json(), dalle_response.status_code
 
     async def call_openai_images_get(
         self,
@@ -145,6 +159,6 @@ class ImagesGenerations:
         )
 
         async_mgr = OpenAIAsyncManager(deployment)
-        response = await async_mgr.async_get(url)
+        dalle_response = await async_mgr.async_get(url)
 
-        return response, response.status_code
+        return dalle_response.json(), dalle_response.status_code
