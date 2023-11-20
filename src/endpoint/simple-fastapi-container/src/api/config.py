@@ -5,7 +5,6 @@ import random
 
 from datetime import datetime, timedelta
 from fastapi import HTTPException
-from azure.data.tables import TableServiceClient
 from azure.data.tables.aio import TableClient
 from azure.core.exceptions import (
     AzureError,
@@ -56,19 +55,6 @@ class OpenAIConfig:
         self.config = None
         self.cache_expiry = None
         self.deployments = {}
-
-        # Create configuration table if it does not exist
-        try:
-            table_service_client = TableServiceClient.from_connection_string(
-                conn_str=self.connection_string
-            )
-
-            table_service_client.create_table_if_not_exists(
-                table_name=CONFIGURATION_TABLE_NAME
-            )
-        except Exception as exception:
-            logging.error("General exception creating table: %s", str(exception))
-            raise
 
     async def __load_config(self) -> dict[str, str]:
         """load configuration from azure table storage"""
