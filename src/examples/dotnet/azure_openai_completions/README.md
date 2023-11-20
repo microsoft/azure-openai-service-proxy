@@ -1,5 +1,6 @@
 # Nuget Packages
 
-```pwsh
+```shell
 dotnet add package Azure.AI.OpenAI --prerelease
+dotnet add package DotNetEnv
 ```
