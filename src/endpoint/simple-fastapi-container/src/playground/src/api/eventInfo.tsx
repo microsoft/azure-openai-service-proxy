@@ -7,7 +7,7 @@ export async function eventInfo(eventCode: string): Promise<EventInfo> {
       headers: {
         accept: "application/json",
         "Content-Type": "application/json",
-        "openai-event-code": eventCode,
+        "api-key": eventCode,
       },
       body: JSON.stringify(eventCode),
     });
