@@ -428,18 +428,23 @@ class Management:
                 )
 
                 async for entity in queried_entities:
-                    model_deployment = ModelDeploymentResponse(
-                        deployment_class=DeploymentClass(
-                            entity.get("PartitionKey", "").strip()
-                        ),
-                        friendly_name=entity.get("RowKey", "").strip(),
-                        deployment_name=entity.get("DeploymentName", "").strip(),
-                        endpoint_key="*********",
-                        resource_name=entity.get("ResourceName", "").strip(),
-                        active=entity.get("Active"),
-                    )
+                    try:
+                        deployment_class = DeploymentClass(entity.get("PartitionKey"))
 
-                    model_deployments.append(model_deployment)
+                        model_deployment = ModelDeploymentResponse(
+                            deployment_class=deployment_class,
+                            friendly_name=entity.get("RowKey", "").strip(),
+                            deployment_name=entity.get("DeploymentName", "").strip(),
+                            endpoint_key="*********",
+                            resource_name=entity.get("ResourceName", "").strip(),
+                            active=entity.get("Active"),
+                        )
+
+                        model_deployments.append(model_deployment)
+                    except ValueError:
+                        self.logging.error(
+                            "Invalid deployment class: %s", entity.get("PartitionKey")
+                        )
 
                 return model_deployments
 
