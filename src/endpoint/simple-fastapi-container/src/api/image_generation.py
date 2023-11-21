@@ -136,7 +136,6 @@ class ImagesGenerations:
                     f"/v1/api/{deployment.friendly_name}/openai{original_location_suffix}"
                 )
 
-            self.logger.error("proxy_location: %s", proxy_location)
             response.headers.append("operation-location", proxy_location)
 
         return dalle_response.json(), dalle_response.status_code
