@@ -1,6 +1,6 @@
 import { makeStyles } from "@fluentui/react-components";
 import { ImageParamsCard } from "../components/ImageParamsCard";
-import { ImageGenerationOptions, ImageGenerations } from "@azure/openai";
+import { ImageGenerationOptions } from "@azure/openai";
 import { useState } from "react";
 import { useEventDataContext } from "../providers/EventDataProvider";
 import { ImageCard, ImageDetails } from "../components/ImageCard";
@@ -44,7 +44,7 @@ export const Image = () => {
       return;
     }
 
-    const id = Date.now()
+    const id = Date.now();
 
     setImages((current) => [...current, { prompt, loaded: false, id }]);
 
