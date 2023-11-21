@@ -21,7 +21,7 @@ client = AzureOpenAI(
 )
 
 response = client.completions.create(
-    model=MODEL_NAME, prompt="This is a test", max_tokens=5
+    model=MODEL_NAME, prompt="write a 50 word poem about elephants", max_tokens=512
 )
 
 print(response)

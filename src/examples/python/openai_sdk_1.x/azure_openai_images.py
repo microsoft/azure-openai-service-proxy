@@ -21,8 +21,8 @@ def generate_images(prompt):
 
     data = {
         "prompt": prompt,
-        "n": 5,
-        "size": "512x512",
+        "n": 1,
+        "size": "1024x1024",
     }
 
     response = httpx.post(url, headers=headers, json=data, timeout=30)

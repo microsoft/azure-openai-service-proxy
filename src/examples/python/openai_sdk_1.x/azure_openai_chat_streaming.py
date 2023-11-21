@@ -3,7 +3,7 @@
 import os
 import time
 from dotenv import load_dotenv
-from openai import OpenAI
+from openai import AzureOpenAI
 
 load_dotenv()
 
@@ -13,10 +13,10 @@ API_VERSION = "2023-09-01-preview"
 MODEL_NAME = "text-davinci-002"
 
 
-client = OpenAI(
+client = AzureOpenAI(
     base_url=ENDPOINT_URL,
     api_key=API_KEY,
-    # api_version=API_VERSION,
+    api_version=API_VERSION,
 )
 
 MESSAGES = [
