@@ -119,19 +119,16 @@ class ImagesGenerations:
         async_mgr = OpenAIAsyncManager(deployment)
         dalle_response = await async_mgr.async_post(openai_request, url)
 
-        for value in dalle_response.headers:
-            if value == "operation-location":
-                original_location = dalle_response.headers[value]
-                port = f":{request.url.port}" if request.url.port else ""
-                original_location_suffix = original_location.split("/openai", 1)[1]
+        if "operation-location" in dalle_response.headers:
+            original_location = dalle_response.headers["operation-location"]
+            port = f":{request.url.port}" if request.url.port else ""
+            original_location_suffix = original_location.split("/openai", 1)[1]
 
-                proxy_location = (
-                    f"{request.url.scheme}://{request.url.hostname}{port}"
-                    f"/v1/api/{deployment.friendly_name}/openai{original_location_suffix}"
-                )
-                response.headers.append(value, proxy_location)
-            else:
-                response.headers.append(value, dalle_response.headers[value])
+            proxy_location = (
+                f"{request.url.scheme}://{request.url.hostname}{port}"
+                f"/v1/api/{deployment.friendly_name}/openai{original_location_suffix}"
+            )
+            response.headers.append("operation-location", proxy_location)
 
         return dalle_response.json(), dalle_response.status_code
 

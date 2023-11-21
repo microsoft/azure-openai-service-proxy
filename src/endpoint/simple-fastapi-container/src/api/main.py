@@ -9,6 +9,7 @@ from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.exceptions import ResponseValidationError
 from fastapi.responses import JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
 
 from .authorize import Authorize, AuthorizeResponse
 from .chat_completions import (
@@ -441,11 +442,18 @@ async def startup_event():
     app.state.rate_limit_images_generations = RateLimit()
 
 
-STATIC_FILES_DIR = (
-    "src/playground"
-    if os.environ.get("ENVIRONMENT") == "development"
-    else "playground/dist"
-)
+STATIC_FILES_DIR = "playground/dist"
+
+if os.environ.get("ENVIRONMENT") == "development":
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
+    STATIC_FILES_DIR = "src/playground"
 
 app.mount("/", StaticFiles(directory=STATIC_FILES_DIR, html=True), name="static")
 

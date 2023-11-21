@@ -15,8 +15,9 @@ const useStyles = makeStyles({
 
 export const EventCodeInput = () => {
   const styles = useStyles();
-  const [code, setCode] = useState("");
-  const { eventData, isAuthorized, setEventCode } = useEventDataContext();
+  const { eventData, isAuthorized, setEventCode, eventCode } =
+    useEventDataContext();
+  const [code, setCode] = useState(eventCode || "");
 
   return (
     <DividerBlock>
