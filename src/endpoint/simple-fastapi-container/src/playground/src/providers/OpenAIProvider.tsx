@@ -28,7 +28,7 @@ const OpenAIClientProvider: React.FC<PropsWithChildren> = ({ children }) => {
           `${window.location.origin}/${API_VERSION}/api`,
           new AzureKeyCredential(`${eventCode}`),
           {
-            allowInsecureConnection: true,
+            allowInsecureConnection: process.env.ENVIRONMENT === "development",
           }
         )
       );
