@@ -1,10 +1,4 @@
-import {
-  Body1,
-  Card,
-  CardHeader,
-  Label,
-  makeStyles,
-} from "@fluentui/react-components";
+import { Label } from "@fluentui/react-components";
 import { ParamInput } from "./ParamInput";
 import { useCallback } from "react";
 import { UsageData } from "../interfaces/UsageData";
@@ -12,20 +6,9 @@ import { useEventDataContext } from "../providers/EventDataProvider";
 import { DividerBlock } from "./DividerBlock";
 import { EventCodeInput } from "./EventCodeInput";
 import type { GetChatCompletionsOptions } from "@azure/openai";
+import { Card } from "./Card";
 
-const useStyles = makeStyles({
-  card: {
-    marginTop: "10px",
-    marginRight: "10px",
-    marginBottom: "10px",
-    marginLeft: "10px",
-  },
-  dividerline: {
-    maxHeight: "1%",
-  },
-});
-
-interface ParamsCardProps {
+interface ChatParamsCardProps {
   startValues: GetChatCompletionsOptions;
   tokenUpdate: (
     label: keyof GetChatCompletionsOptions,
@@ -34,12 +17,11 @@ interface ParamsCardProps {
   usageData: UsageData;
 }
 
-export const ParamsCard = ({
+export const ChatParamsCard = ({
   startValues,
   tokenUpdate,
   usageData,
-}: ParamsCardProps) => {
-  const styles = useStyles();
+}: ChatParamsCardProps) => {
   const updateParams = useCallback(
     (label: keyof GetChatCompletionsOptions) => {
       return (newValue: number | string) => {
@@ -52,16 +34,7 @@ export const ParamsCard = ({
   const maxTokens = eventData?.max_token_cap ?? 0;
 
   return (
-    <Card className={styles.card}>
-      <CardHeader
-        style={{ height: "10vh", alignItems: "start" }}
-        header={
-          <Body1 style={{ fontSize: "large" }}>
-            <h2>Configuration</h2>
-          </Body1>
-        }
-      />
-
+    <Card header="Configuration">
       <EventCodeInput />
 
       <DividerBlock>

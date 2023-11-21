@@ -2,9 +2,10 @@ import { useState } from "react";
 import { ChatCard } from "../components/ChatCard";
 import { SystemCard } from "../components/SystemCard";
 import { usePromptErrorContext } from "../providers/PromptErrorProvider";
-import { ParamsCard } from "../components/ChatParamsCard";
+import { ChatParamsCard } from "../components/ChatParamsCard";
 import { useOpenAIClientContext } from "../providers/OpenAIProvider";
 import type { ChatMessage, GetChatCompletionsOptions } from "@azure/openai";
+import { makeStyles } from "@fluentui/react-components";
 
 type UsageData = {
   finish_reason: string;
@@ -27,6 +28,15 @@ const defaultParamValues: GetChatCompletionsOptions = {
   frequencyPenalty: 0,
   presencePenalty: 0,
 };
+
+const useStyles = makeStyles({
+  container: {
+    textAlign: "center",
+    display: "grid",
+    gridTemplateColumns: "1.5fr 2.5fr 1fr",
+    gridGap: "1px",
+  },
+});
 
 export const Chat = () => {
   const [systemPrompt, setSystemPrompt] = useState(defaultSysPrompt);
@@ -133,8 +143,10 @@ export const Chat = () => {
     });
   };
 
+  const styles = useStyles();
+
   return (
-    <>
+    <section className={styles.container}>
       <SystemCard
         defaultPrompt={systemPrompt}
         onPromptChange={onPromptChange}
@@ -147,11 +159,11 @@ export const Chat = () => {
         isLoading={isLoading}
       />
 
-      <ParamsCard
+      <ChatParamsCard
         startValues={params}
         tokenUpdate={tokenUpdate}
         usageData={usageData}
       />
-    </>
+    </section>
   );
 };

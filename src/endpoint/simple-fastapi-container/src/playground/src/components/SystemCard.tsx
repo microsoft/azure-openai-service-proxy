@@ -1,8 +1,6 @@
 import {
   Body1,
   Button,
-  Card,
-  CardHeader,
   Divider,
   Textarea,
   makeStyles,
@@ -10,6 +8,7 @@ import {
 import { useEffect, useState } from "react";
 import { Save24Regular } from "@fluentui/react-icons";
 import type { ChatMessage } from "@azure/openai";
+import { Card } from "./Card";
 
 interface SystemProps {
   defaultPrompt: ChatMessage;
@@ -17,12 +16,6 @@ interface SystemProps {
 }
 
 const useStyles = makeStyles({
-  card: {
-    marginTop: "10px",
-    marginRight: "10px",
-    marginBottom: "10px",
-    marginLeft: "10px",
-  },
   wrapper: {
     display: "flex",
     flexDirection: "column",
@@ -46,15 +39,7 @@ export const SystemCard = ({ defaultPrompt, onPromptChange }: SystemProps) => {
   }, [isSaved]);
 
   return (
-    <Card className={styles.card}>
-      <CardHeader
-        style={{ height: "10vh", alignItems: "start" }}
-        header={
-          <Body1 style={{ fontSize: "large" }}>
-            <h2>System Message</h2>
-          </Body1>
-        }
-      />
+    <Card header="System Message">
       <div style={{ height: "100%" }}>
         <Textarea
           className="test"

@@ -2,9 +2,7 @@ import {
   makeStyles,
   Body1,
   Button,
-  Card,
   CardFooter,
-  CardHeader,
   Field,
   Textarea,
   Spinner,
@@ -13,9 +11,9 @@ import { useEffect, useRef, useState } from "react";
 import { Delete24Regular, SendRegular } from "@fluentui/react-icons";
 import { Message } from "./Message";
 import { Response } from "./Response";
-import "./ChatCard.module.css";
 import { useEventDataContext } from "../providers/EventDataProvider";
 import type { ChatMessage } from "@azure/openai";
+import { Card } from "./Card";
 
 interface CardProps {
   onPromptEntered: (messages: ChatMessage[]) => void;
@@ -26,12 +24,8 @@ interface CardProps {
 
 const useStyles = makeStyles({
   card: {
-    height: "100vh",
     display: "flex",
-    marginTop: "10px",
-    marginRight: "10px",
-    marginBottom: "10px",
-    marginLeft: "10px",
+    height: "calc(100vh - 70px)",
   },
   dialog: {
     display: "block",
@@ -69,17 +63,7 @@ export const ChatCard = ({
   }, [messageList]);
 
   return (
-    <Card className={chat.card}>
-      <CardHeader
-        style={{ height: "10vh", alignItems: "start" }}
-        header={
-          <div style={{ maxWidth: "100%" }}>
-            <Body1 style={{ fontSize: "large" }}>
-              <h2>Chat Session</h2>
-            </Body1>
-          </div>
-        }
-      />
+    <Card className={chat.card} header="Chat Session">
       <div
         id={"chatContainer"}
         style={{ overflowY: "auto" }}

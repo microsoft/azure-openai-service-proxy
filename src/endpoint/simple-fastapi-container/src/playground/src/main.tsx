@@ -8,6 +8,7 @@ import { EventDataProvider } from "./providers/EventDataProvider";
 import { PromptErrorProvider } from "./providers/PromptErrorProvider";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import { Chat } from "./pages/Chat";
+import { Image } from "./pages/Image";
 import { OpenAIClientProvider } from "./providers/OpenAIProvider";
 
 const router = createBrowserRouter([
@@ -18,6 +19,10 @@ const router = createBrowserRouter([
       {
         path: "/",
         element: <Chat />,
+      },
+      {
+        path: "/images",
+        element: <Image />,
       },
     ],
   },
