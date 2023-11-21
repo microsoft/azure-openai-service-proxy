@@ -2,8 +2,9 @@
 
 import logging
 import os
-import openai.openai_object
 from typing import AsyncGenerator
+import openai.openai_object
+
 
 from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.exceptions import ResponseValidationError
@@ -204,9 +205,15 @@ async def oai_completion(
     status_code=200,
     response_model=None,
 )
-# Support for Azure OpenAI Service SDK 1.0+
+# Support for .NET Azure OpenAI Service SDK
 @app.post(
     "/v1/api/openai/deployments/{deployment_id}/chat/completions",
+    status_code=200,
+    response_model=None,
+)
+# Support for Python Azure OpenAI SDK 1.0+
+@app.post(
+    "/v1/api/deployments/{deployment_id}/chat/completions",
     status_code=200,
     response_model=None,
 )
