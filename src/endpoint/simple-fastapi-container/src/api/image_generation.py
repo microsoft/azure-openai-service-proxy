@@ -1,5 +1,6 @@
 """ Images Generations API """
 
+import os
 from enum import Enum
 import logging
 from typing import Tuple
@@ -124,10 +125,18 @@ class ImagesGenerations:
             port = f":{request.url.port}" if request.url.port else ""
             original_location_suffix = original_location.split("/openai", 1)[1]
 
-            proxy_location = (
-                f"{request.url.scheme}://{request.url.hostname}{port}"
-                f"/v1/api/{deployment.friendly_name}/openai{original_location_suffix}"
-            )
+            if os.environ.get("ENVIRONMENT") == "development":
+                proxy_location = (
+                    f"http://{request.url.hostname}{port}"
+                    f"/v1/api/{deployment.friendly_name}/openai{original_location_suffix}"
+                )
+            else:
+                proxy_location = (
+                    f"https://{request.url.hostname}{port}"
+                    f"/v1/api/{deployment.friendly_name}/openai{original_location_suffix}"
+                )
+
+            self.logger.error("proxy_location: %s", proxy_location)
             response.headers.append("operation-location", proxy_location)
 
         return dalle_response.json(), dalle_response.status_code
