@@ -8,7 +8,7 @@ export default defineConfig(({ mode }) => {
     plugins: [react()],
     server: {
       proxy: {
-        "/api": env.API_URL,
+        "/v1": env.API_URL,
       },
     },
   };

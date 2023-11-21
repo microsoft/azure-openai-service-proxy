@@ -4,8 +4,24 @@ import "./index.css";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import { FluentProvider, webLightTheme } from "@fluentui/react-components";
-import { EventDataProvider } from "./EventDataProvider";
-import { PromptErrorProvider } from "./PromptErrorProvider";
+import { EventDataProvider } from "./providers/EventDataProvider";
+import { PromptErrorProvider } from "./providers/PromptErrorProvider";
+import { RouterProvider, createBrowserRouter } from "react-router-dom";
+import { Chat } from "./pages/Chat";
+import { OpenAIClientProvider } from "./providers/OpenAIProvider";
+
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <App />,
+    children: [
+      {
+        path: "/",
+        element: <Chat />,
+      },
+    ],
+  },
+]);
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
@@ -14,9 +30,11 @@ root.render(
   <React.StrictMode>
     <FluentProvider theme={webLightTheme}>
       <EventDataProvider>
-        <PromptErrorProvider>
-          <App />
-        </PromptErrorProvider>
+        <OpenAIClientProvider>
+          <PromptErrorProvider>
+            <RouterProvider router={router} />
+          </PromptErrorProvider>
+        </OpenAIClientProvider>
       </EventDataProvider>
     </FluentProvider>
   </React.StrictMode>

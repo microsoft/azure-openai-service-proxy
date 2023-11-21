@@ -11,15 +11,15 @@ import {
 } from "@fluentui/react-components";
 import { useEffect, useRef, useState } from "react";
 import { Delete24Regular, SendRegular } from "@fluentui/react-icons";
-import { MessageData } from "../interfaces/MessageData";
 import { Message } from "./Message";
 import { Response } from "./Response";
 import "./ChatCard.module.css";
-import { useEventDataContext } from "../EventDataProvider";
+import { useEventDataContext } from "../providers/EventDataProvider";
+import type { ChatMessage } from "@azure/openai";
 
 interface CardProps {
-  onPromptEntered: (messages: MessageData[]) => void;
-  messageList: MessageData[];
+  onPromptEntered: (messages: ChatMessage[]) => void;
+  messageList: ChatMessage[];
   onClear: () => void;
   isLoading: boolean;
 }

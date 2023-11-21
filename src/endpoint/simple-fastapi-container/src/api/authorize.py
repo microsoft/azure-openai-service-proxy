@@ -289,24 +289,6 @@ class Authorize:
             detail="Authentication failed.",
         )
 
-    async def authorize_playground_access(self, headers) -> AuthorizeResponse | None:
-        """get the event code from the header"""
-        if "openai-event-code" not in headers:
-            raise HTTPException(
-                status_code=401,
-                detail="Authentication failed.",
-            )
-
-        authorize_response = await self.__authorize(headers.get("openai-event-code"))
-
-        if authorize_response is None or not authorize_response.is_authorized:
-            raise HTTPException(
-                status_code=401,
-                detail="Authentication failed.",
-            )
-
-        return authorize_response
-
     async def authorize_api_access(
         self, headers, deployment_id
     ) -> (list | None, str | None):

@@ -6,7 +6,7 @@ import React, {
   useEffect,
   useState,
 } from "react";
-import { eventInfo } from "./api/eventInfo";
+import { eventInfo } from "../api/eventInfo";
 
 type EventData = {
   name: string;

@@ -4,12 +4,14 @@
   "private": true,
   "type": "module",
   "dependencies": {
+    "@azure/openai": "^1.0.0-beta.7",
     "@fluentui/react-components": "^9.34.0",
     "@fluentui/react-icons": "^2.0.218",
     "axios": "^1.5.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-markdown": "^9.0.0",
+    "react-router-dom": "^6.19.0",
     "rehype-external-links": "^3.0.0",
     "remark-gfm": "^4.0.0",
     "web-vitals": "^2.1.4"
