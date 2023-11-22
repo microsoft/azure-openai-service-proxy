@@ -4,7 +4,6 @@ import { useCallback } from "react";
 import { UsageData } from "../interfaces/UsageData";
 import { useEventDataContext } from "../providers/EventDataProvider";
 import { DividerBlock } from "./DividerBlock";
-import { EventCodeInput } from "./EventCodeInput";
 import type { GetChatCompletionsOptions } from "@azure/openai";
 import { Card } from "./Card";
 
@@ -35,8 +34,6 @@ export const ChatParamsCard = ({
 
   return (
     <Card header="Configuration">
-      <EventCodeInput />
-
       <DividerBlock>
         <ParamInput
           label="Tokens"

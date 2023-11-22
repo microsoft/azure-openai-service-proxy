@@ -1,6 +1,5 @@
 import { Label, Select, useId } from "@fluentui/react-components";
 import { Card } from "./Card";
-import { EventCodeInput } from "./EventCodeInput";
 import { DividerBlock } from "./DividerBlock";
 import { ParamInput } from "./ParamInput";
 import { ImageGenerationOptions } from "@azure/openai";
@@ -23,8 +22,6 @@ export const ImageParamsCard = ({
   const { isAuthorized } = useEventDataContext();
   return (
     <Card header="Configuration">
-      <EventCodeInput />
-
       <DividerBlock>
         <ParamInput
           label="Number of images"
