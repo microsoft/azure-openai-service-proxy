@@ -4,7 +4,11 @@ import { SystemCard } from "../components/SystemCard";
 import { usePromptErrorContext } from "../providers/PromptErrorProvider";
 import { ChatParamsCard } from "../components/ChatParamsCard";
 import { useOpenAIClientContext } from "../providers/OpenAIProvider";
-import type { ChatMessage, GetChatCompletionsOptions } from "@azure/openai";
+import type {
+  ChatMessage,
+  FunctionDefinition,
+  GetChatCompletionsOptions,
+} from "@azure/openai";
 import { makeStyles } from "@fluentui/react-components";
 
 type UsageData = {
@@ -27,6 +31,7 @@ const defaultParamValues: GetChatCompletionsOptions = {
   stop: ["Stop sequences"],
   frequencyPenalty: 0,
   presencePenalty: 0,
+  functionCall: "auto",
 };
 
 const useStyles = makeStyles({
@@ -41,6 +46,7 @@ const useStyles = makeStyles({
 export const Chat = () => {
   const [systemPrompt, setSystemPrompt] = useState(defaultSysPrompt);
   const [messageList, setMessageList] = useState([defaultSysPrompt]);
+  const [params, setParams] = useState(defaultParamValues);
 
   const [isLoading, setIsLoading] = useState(false);
   const [usageData, setUsageData] = useState<UsageData>({
@@ -69,7 +75,7 @@ export const Chat = () => {
         const chatCompletions = await client.getChatCompletions(
           "proxy",
           updatedMessageList.map((m) => ({
-            content: m.content,
+            content: m.content || m.functionCall?.arguments || "",
             role: m.role,
           })),
           params
@@ -129,8 +135,6 @@ export const Chat = () => {
     });
   };
 
-  const [params, setParams] = useState(defaultParamValues);
-
   const tokenUpdate = (
     label: keyof GetChatCompletionsOptions,
     newValue: number | string
@@ -143,6 +147,9 @@ export const Chat = () => {
     });
   };
 
+  const functionsChange = (functions: FunctionDefinition[]) =>
+    setParams((params) => ({ ...params, functions }));
+
   const styles = useStyles();
 
   return (
@@ -150,6 +157,7 @@ export const Chat = () => {
       <SystemCard
         defaultPrompt={systemPrompt}
         onPromptChange={onPromptChange}
+        functionsChange={functionsChange}
       />
 
       <ChatCard
@@ -163,6 +171,7 @@ export const Chat = () => {
         startValues={params}
         tokenUpdate={tokenUpdate}
         usageData={usageData}
+        functions={params.functions}
       />
     </section>
   );

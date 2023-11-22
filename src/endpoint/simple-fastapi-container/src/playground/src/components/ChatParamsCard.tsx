@@ -1,11 +1,15 @@
-import { Label } from "@fluentui/react-components";
+import { Label, Select } from "@fluentui/react-components";
 import { ParamInput } from "./ParamInput";
 import { useCallback } from "react";
 import { UsageData } from "../interfaces/UsageData";
 import { useEventDataContext } from "../providers/EventDataProvider";
 import { DividerBlock } from "./DividerBlock";
-import type { GetChatCompletionsOptions } from "@azure/openai";
+import type {
+  FunctionDefinition,
+  GetChatCompletionsOptions,
+} from "@azure/openai";
 import { Card } from "./Card";
+import { ParamInputLabel } from "./ParamInputLabel";
 
 interface ChatParamsCardProps {
   startValues: GetChatCompletionsOptions;
@@ -14,12 +18,14 @@ interface ChatParamsCardProps {
     newValue: number | string
   ) => void;
   usageData: UsageData;
+  functions: FunctionDefinition[] | undefined;
 }
 
 export const ChatParamsCard = ({
   startValues,
   tokenUpdate,
   usageData,
+  functions,
 }: ChatParamsCardProps) => {
   const updateParams = useCallback(
     (label: keyof GetChatCompletionsOptions) => {
@@ -68,6 +74,29 @@ export const ChatParamsCard = ({
           max={1}
           disabled={!isAuthorized}
         />
+      </DividerBlock>
+
+      <DividerBlock>
+        <>
+          <ParamInputLabel label="OpenAI Functions" id="functions" />
+          <Select
+            id="functions"
+            disabled={!isAuthorized || (functions !== undefined && functions.length === 0)}
+            onChange={(e) => {
+              const newValue = e.currentTarget.value;
+              if (newValue) {
+                tokenUpdate("functionCall", newValue);
+              }
+            }}
+          >
+            <option value="auto">auto</option>
+            {functions && functions.map((f) => (
+              <option key={f.name} value={f.name}>
+                {f.name}
+              </option>
+            ))}
+          </Select>
+        </>
       </DividerBlock>
 
       <DividerBlock>

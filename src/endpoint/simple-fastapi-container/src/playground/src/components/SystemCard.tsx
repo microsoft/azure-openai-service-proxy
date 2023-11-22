@@ -5,14 +5,18 @@ import {
   Textarea,
   makeStyles,
 } from "@fluentui/react-components";
-import { useEffect, useState } from "react";
+import { Dispatch, useEffect, useState } from "react";
 import { Save24Regular } from "@fluentui/react-icons";
-import type { ChatMessage } from "@azure/openai";
-import { Card } from "./Card";
+import type { ChatMessage, FunctionDefinition } from "@azure/openai";
+import { Card, CardHeader } from "./Card";
+import { DividerBlock } from "./DividerBlock";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { solarizedlight } from "react-syntax-highlighter/dist/esm/styles/prism";
 
 interface SystemProps {
   defaultPrompt: ChatMessage;
-  onPromptChange: (newPrompt: ChatMessage) => void;
+  onPromptChange: Dispatch<ChatMessage>;
+  functionsChange: Dispatch<FunctionDefinition[]>;
 }
 
 const useStyles = makeStyles({
@@ -23,9 +27,15 @@ const useStyles = makeStyles({
   },
 });
 
-export const SystemCard = ({ defaultPrompt, onPromptChange }: SystemProps) => {
+export const SystemCard = ({
+  defaultPrompt,
+  onPromptChange,
+  functionsChange,
+}: SystemProps) => {
   const [sysPrompt, setPrompt] = useState(defaultPrompt.content || "");
   const [isSaved, setSaved] = useState(false);
+  const [functions, setFunctions] = useState<string>("");
+  const [editFunctions, setEditFunctions] = useState(false);
   const styles = useStyles();
 
   useEffect(() => {
@@ -38,13 +48,21 @@ export const SystemCard = ({ defaultPrompt, onPromptChange }: SystemProps) => {
     return () => clearTimeout(timeout);
   }, [isSaved]);
 
+  useEffect(() => {
+    if (functions) {
+      functionsChange(JSON.parse(functions));
+    }
+  }, [functions]);
+
   return (
     <Card header="System Message">
-      <div style={{ height: "100%" }}>
+      <div>
         <Textarea
           className="test"
-          style={{ height: "12.5%", maxHeight: "30%", width: "100%" }}
+          style={{ width: "100%" }}
           value={sysPrompt}
+          textarea={{ rows: 10 }}
+          resize="vertical"
           onChange={(event) => {
             setPrompt(event.target.value);
           }}
@@ -83,6 +101,63 @@ export const SystemCard = ({ defaultPrompt, onPromptChange }: SystemProps) => {
       <div>
         <Divider></Divider>
       </div>
+      <DividerBlock>
+        <CardHeader header="OpenAI Functions" />
+        {!editFunctions && (
+          <div onClick={() => setEditFunctions(true)}>
+            <SyntaxHighlighter language="json" style={solarizedlight}>
+              {functions === ""
+                ? "[]"
+                : JSON.stringify(JSON.parse(functions), null, 2)}
+            </SyntaxHighlighter>
+          </div>
+        )}
+        {editFunctions && (
+          <div>
+            <Textarea
+              style={{ width: "100%" }}
+              resize="vertical"
+              textarea={{ rows: 25, style: { maxHeight: "fit-content" } }}
+              value={functions || `[]`}
+              onChange={(_, data) => {
+                setFunctions(data.value);
+              }}
+            />
+            <div className={styles.wrapper} style={{ padding: "15px" }}>
+              <Button
+                icon={<Save24Regular />}
+                iconPosition="after"
+                onClick={() => {
+                  try {
+                    const j = JSON.parse(functions);
+                    if (!Array.isArray(j)) {
+                      throw new Error("Functions JSON invalid");
+                    }
+                    setSaved(true);
+                    setEditFunctions(false);
+                  } catch (e) {
+                    console.warn("Functions JSON invalid", e);
+                  }
+                }}
+              >
+                Save Changes
+              </Button>
+              {isSaved && (
+                <Body1
+                  style={{
+                    color: "GrayText",
+                    transition: "opacity 1s",
+                    opacity: 1,
+                    textAlign: "center",
+                  }}
+                >
+                  Functions updated
+                </Body1>
+              )}
+            </div>
+          </div>
+        )}
+      </DividerBlock>
     </Card>
   );
 };
