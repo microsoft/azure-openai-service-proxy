@@ -1,7 +1,9 @@
 """ dalle-3 and beyond """
 
 from fastapi import APIRouter, Request, Response, FastAPI
-from src.api.images import ImagesRequest
+
+# pylint: disable=E0402
+from ..images import ImagesRequest
 
 
 class Images:

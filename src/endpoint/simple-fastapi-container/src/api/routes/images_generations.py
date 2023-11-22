@@ -1,7 +1,9 @@
 """ dalle-3 and beyond """
 
 from fastapi import APIRouter, Request, Response, FastAPI, HTTPException
-from src.api.image_generation import ImagesGenerationsRequst
+
+# pylint: disable=E0402
+from ..image_generation import ImagesGenerationsRequst
 
 
 class ImagesGenerations:

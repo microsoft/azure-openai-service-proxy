@@ -4,7 +4,9 @@ from typing import AsyncGenerator
 from fastapi import APIRouter, Request, Response, HTTPException, FastAPI
 from fastapi.responses import StreamingResponse
 import openai.openai_object
-from src.api.chat_completions import ChatCompletionsRequest
+
+# pylint: disable=E0402
+from ..chat_completions import ChatCompletionsRequest
 
 
 class ChatCompletions:

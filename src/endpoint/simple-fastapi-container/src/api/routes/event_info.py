@@ -1,7 +1,9 @@
 """ event_info route """
 
 from fastapi import APIRouter, Request, FastAPI
-from src.api.authorize import AuthorizeResponse
+
+# pylint: disable=E0402
+from ..authorize import AuthorizeResponse
 
 
 class EventInfo:
