@@ -1,9 +1,8 @@
-# routes/management.py
+""" Management routes """
 
-from fastapi import APIRouter, Request, Depends
-from ..main import get_app
+from fastapi import APIRouter, Request, FastAPI
 
-from ..management import (
+from src.api.management import (
     NewEventResponse,
     NewEventRequest,
     EventItemResponse,
@@ -11,53 +10,65 @@ from ..management import (
     ModelDeploymentResponse,
 )
 
-router = APIRouter()
 
+class Management:
+    """Management routes"""
 
-@router.get("/management/events/list/{query}", status_code=200)
-@router.get("/management/listevents/{query}", status_code=200, deprecated=True)
-async def management_list_active_events(
-    query: str, request: Request, app=Depends(get_app)
-) -> list[EventItemResponse]:
-    """get event info"""
+    def __init__(self, app: FastAPI, prefix: str, tags: list[str]):
+        self.app = app
+        self.router = APIRouter()
+        self.prefix = prefix
+        self.tags = tags
+        self.__include_router()
 
-    # raises expection if not authenticated
-    await app.state.authorize.authorize_management_access(request.headers)
-    return await app.state.management.list_events(query)
+    def __include_router(self):
+        """include router"""
 
+        @self.router.get("/management/events/list/{query}", status_code=200)
+        @self.router.get(
+            "/management/listevents/{query}", status_code=200, deprecated=True
+        )
+        async def management_list_active_events(
+            query: str, request: Request
+        ) -> list[EventItemResponse]:
+            """get event info"""
 
-@router.post("/management/events/add", status_code=200)
-@router.post("/management/addevent", status_code=200, deprecated=True)
-async def management_add_new(
-    event: NewEventRequest, request: Request, app=Depends(get_app)
-) -> NewEventResponse:
-    """get event info"""
+            # raises expection if not authenticated
+            await self.app.state.authorize.authorize_management_access(request.headers)
+            return await self.app.state.management.list_events(query)
 
-    # raises expection if not authenticated
-    await app.state.authorize.authorize_management_access(request.headers)
-    return await app.state.management.add_new_event(event)
+        @self.router.post("/management/events/add", status_code=200)
+        @self.router.post("/management/addevent", status_code=200, deprecated=True)
+        async def management_add_new(
+            event: NewEventRequest, request: Request
+        ) -> NewEventResponse:
+            """get event info"""
 
+            # raises expection if not authenticated
+            await self.app.state.authorize.authorize_management_access(request.headers)
+            return await self.app.state.management.add_new_event(event)
 
-@router.patch(
-    "/management/modeldeployment/upsert", status_code=200, response_model=None
-)
-async def management_deployment_upsert(
-    deployment: ModelDeploymentRequest, request: Request, app=Depends(get_app)
-) -> None:
-    """get event info"""
+        @self.router.patch(
+            "/management/modeldeployment/upsert", status_code=200, response_model=None
+        )
+        async def management_deployment_upsert(
+            deployment: ModelDeploymentRequest, request: Request
+        ) -> None:
+            """get event info"""
 
-    # raises expection if not authenticated
-    await app.state.authorize.authorize_management_access(request.headers)
-    return await app.state.management.upsert_model_deployment(deployment)
+            # raises expection if not authenticated
+            await self.app.state.authorize.authorize_management_access(request.headers)
+            return await self.app.state.management.upsert_model_deployment(deployment)
 
+        # list model deployments
+        @self.router.get("/management/modeldeployment/list/{query}", status_code=200)
+        async def management_deployment_list(
+            query: str, request: Request
+        ) -> list[ModelDeploymentResponse]:
+            """get models deployed info"""
 
-# list model deployments
-@router.get("/management/modeldeployment/list/{query}", status_code=200)
-async def management_deployment_list(
-    query: str, request: Request, app=Depends(get_app)
-) -> list[ModelDeploymentResponse]:
-    """get models deployed info"""
+            # raises expection if not authenticated
+            await self.app.state.authorize.authorize_management_access(request.headers)
+            return await self.app.state.management.list_model_deployments(query)
 
-    # raises expection if not authenticated
-    await app.state.authorize.authorize_management_access(request.headers)
-    return await app.state.management.list_model_deployments(query)
+        self.app.include_router(self.router, prefix=self.prefix, tags=self.tags)
