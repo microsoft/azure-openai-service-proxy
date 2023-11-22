@@ -2,7 +2,9 @@
 
 from fastapi import APIRouter, Request, Response, HTTPException, FastAPI
 import openai.openai_object
-from src.api.embeddings import EmbeddingsRequest
+
+# pylint: disable=E0402
+from ..embeddings import EmbeddingsRequest
 
 
 class Embeddings:

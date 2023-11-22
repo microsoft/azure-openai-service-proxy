@@ -2,7 +2,8 @@
 
 from fastapi import APIRouter, Request, FastAPI
 
-from src.api.management import (
+# pylint: disable=E0402
+from ..management import (
     NewEventResponse,
     NewEventRequest,
     EventItemResponse,

@@ -2,7 +2,9 @@
 
 from fastapi import APIRouter, Request, Response, HTTPException, FastAPI
 import openai.openai_object
-from src.api.completions import CompletionsRequest
+
+# pylint: disable=E0402
+from ..completions import CompletionsRequest
 
 
 class Completions:
