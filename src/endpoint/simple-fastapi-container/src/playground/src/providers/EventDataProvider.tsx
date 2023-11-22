@@ -39,11 +39,16 @@ export const EventDataContext = createContext<EventDataContextValue>({
   authStatus: AuthStatus.NotSet,
 });
 
+const EVENT_CODE_STORAGE_KEY = "aoai:playground:eventCode";
+const storage = localStorage;
+
 const EventDataProvider: React.FC<PropsWithChildren> = ({ children }) => {
   const [eventData, setEventData] = useState<EventData | undefined>(undefined);
   const [authStatus, setAuthStatus] = useState<AuthStatus>(AuthStatus.NotSet);
 
-  const [eventCode, setEventCode] = useState<string>("");
+  const [eventCode, setEventCode] = useState<string>(
+    storage.getItem(EVENT_CODE_STORAGE_KEY) || ""
+  );
 
   useEffect(() => {
     const getEventData = async (eventCode: string) => {
@@ -57,6 +62,7 @@ const EventDataProvider: React.FC<PropsWithChildren> = ({ children }) => {
         }));
         if (data.is_authorized) {
           setAuthStatus(AuthStatus.Authorized);
+          storage.setItem(EVENT_CODE_STORAGE_KEY, eventCode);
         } else {
           setAuthStatus(AuthStatus.NotAuthorized);
         }
@@ -66,6 +72,7 @@ const EventDataProvider: React.FC<PropsWithChildren> = ({ children }) => {
     };
 
     if (!eventCode) {
+      storage.removeItem(EVENT_CODE_STORAGE_KEY);
       setAuthStatus(AuthStatus.NotSet);
       return;
     }
