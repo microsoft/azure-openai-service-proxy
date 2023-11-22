@@ -2,37 +2,38 @@
 
 import logging
 import os
-from typing import AsyncGenerator
-import openai.openai_object
 
 
-from fastapi import FastAPI, HTTPException, Request, Response
+from fastapi import FastAPI, HTTPException
 from fastapi.exceptions import ResponseValidationError
-from fastapi.responses import JSONResponse, StreamingResponse
+from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 
-from .authorize import Authorize, AuthorizeResponse
+from .authorize import Authorize
 from .chat_completions import (
-    ChatCompletionsRequest,
     ChatCompletions,
 )
-from .completions import Completions, CompletionsRequest
-from .image_generation import ImagesGenerations, ImagesGenerationsRequst
-from .images import ImagesRequest, Images
+from .completions import Completions
+from .image_generation import ImagesGenerations
+from .images import Images
 
-from .embeddings import EmbeddingsRequest, Embeddings
+from .embeddings import Embeddings
 from .configuration import OpenAIConfig
 from .rate_limit import RateLimit
 from .management import (
     Management,
-    NewEventResponse,
-    NewEventRequest,
-    EventItemResponse,
-    ModelDeploymentRequest,
-    ModelDeploymentResponse,
     DeploymentClass,
 )
+
+
+from .routes.management import Management as management_router
+from .routes.embeddings import Embeddings as embeddings_router
+from .routes.completions import Completions as completions_router
+from .routes.chat_completions import ChatCompletions as chat_completions_router
+from .routes.images import Images as images_router
+from .routes.images_generations import ImagesGenerations as images_generations_router
+from .routes.event_info import EventInfo as eventinfo_router
 
 
 logging.basicConfig(level=logging.WARNING)
@@ -44,6 +45,15 @@ app = FastAPI(
 )
 
 
+management_router(app, "/v1/api", ["management"])
+embeddings_router(app, "/v1/api", ["embeddings"])
+completions_router(app, "/v1/api", ["completions"])
+chat_completions_router(app, "/v1/api", ["chat_completions"])
+images_router(app, "/v1/api", ["images"])
+images_generations_router(app, "/v1/api", ["images_generations"])
+eventinfo_router(app, "/v1/api", ["eventinfo"])
+
+
 @app.exception_handler(ResponseValidationError)
 async def validation_exception_handler(request, exc):
     """validation exception handler"""
@@ -53,340 +63,6 @@ async def validation_exception_handler(request, exc):
     return JSONResponse(
         content={"message": "Response validation error"}, status_code=400
     )
-
-
-@app.get("/v1/api/management/events/list/{query}", status_code=200)
-@app.get("/v1/api/management/listevents/{query}", status_code=200, deprecated=True)
-async def management_list_active_events(
-    query: str, request: Request
-) -> list[EventItemResponse]:
-    """get event info"""
-
-    # raises expection if not authenticated
-    await app.state.authorize.authorize_management_access(request.headers)
-    return await app.state.management.list_events(query)
-
-
-@app.post("/v1/api/management/events/add", status_code=200)
-@app.post("/v1/api/management/addevent", status_code=200, deprecated=True)
-async def management_add_new(
-    event: NewEventRequest, request: Request
-) -> NewEventResponse:
-    """get event info"""
-
-    # raises expection if not authenticated
-    await app.state.authorize.authorize_management_access(request.headers)
-    return await app.state.management.add_new_event(event)
-
-
-@app.patch(
-    "/v1/api/management/modeldeployment/upsert", status_code=200, response_model=None
-)
-async def management_deployment_upsert(
-    deployment: ModelDeploymentRequest, request: Request
-) -> None:
-    """get event info"""
-
-    # raises expection if not authenticated
-    await app.state.authorize.authorize_management_access(request.headers)
-    return await app.state.management.upsert_model_deployment(deployment)
-
-
-# list model deployments
-@app.get("/v1/api/management/modeldeployment/list/{query}", status_code=200)
-async def management_deployment_list(
-    query: str, request: Request
-) -> list[ModelDeploymentResponse]:
-    """get models deployed info"""
-
-    # raises expection if not authenticated
-    await app.state.authorize.authorize_management_access(request.headers)
-    return await app.state.management.list_model_deployments(query)
-
-
-# Support for OpenAI SDK 0.28
-@app.post(
-    "/v1/api/engines/{engine_id}/embeddings",
-    status_code=200,
-    response_model=None,
-)
-# Support for Azure OpenAI Service SDK 1.0+
-@app.post(
-    "/v1/api/openai/deployments/{deployment_id}/embeddings",
-    status_code=200,
-    response_model=None,
-)
-# Support for OpenAI SDK 1.0+
-@app.post("/v1/api/embeddings", status_code=200, response_model=None)
-async def oai_embeddings(
-    embeddings: EmbeddingsRequest,
-    request: Request,
-    response: Response,
-    deployment_id: str = None,
-) -> openai.openai_object.OpenAIObject:
-    """OpenAI chat completion response"""
-
-    # get the api version from the query string
-    if "api-version" in request.query_params:
-        embeddings.api_version = request.query_params["api-version"]
-
-    # exception thrown if not authorized
-    _, user_token = await app.state.authorize.authorize_api_access(
-        request.headers, deployment_id
-    )
-
-    if app.state.rate_limit_embeddings.is_call_rate_exceeded(user_token):
-        raise HTTPException(
-            status_code=429,
-            detail="Rate limit exceeded. Try again in 10 seconds",
-        )
-
-    (
-        completion,
-        status_code,
-    ) = await app.state.embeddings_mgr.call_openai_embeddings(embeddings)
-    response.status_code = status_code
-    return completion
-
-
-# Support for OpenAI SDK 0.28
-@app.post(
-    "/v1/api/engines/{engine_id}/completions",
-    status_code=200,
-    response_model=None,
-)
-# Support for Azure OpenAI Service SDK 1.0+
-@app.post(
-    "/v1/api/openai/deployments/{deployment_id}/completions",
-    status_code=200,
-    response_model=None,
-)
-# Support for OpenAI SDK 1.0+
-@app.post("/v1/api/completions", status_code=200, response_model=None)
-async def oai_completion(
-    completion_request: CompletionsRequest,
-    request: Request,
-    response: Response,
-    deployment_id: str = None,
-) -> openai.openai_object.OpenAIObject | str:
-    """OpenAI completion response"""
-
-    # get the api version from the query string
-    if "api-version" in request.query_params:
-        completion_request.api_version = request.query_params["api-version"]
-
-    # exception thrown if not authorized
-    authorize_response, user_token = await app.state.authorize.authorize_api_access(
-        request.headers, deployment_id
-    )
-
-    if app.state.rate_limit_chat_completion.is_call_rate_exceeded(user_token):
-        raise HTTPException(
-            status_code=429,
-            detail="Rate limit exceeded. Try again in 10 seconds",
-        )
-
-    if (
-        completion_request.max_tokens
-        and completion_request.max_tokens > authorize_response.max_token_cap
-    ):
-        completion_request.max_tokens = authorize_response.max_token_cap
-
-    (
-        completion_response,
-        status_code,
-    ) = await app.state.completions_mgr.call_openai_completion(completion_request)
-    response.status_code = status_code
-    return completion_response
-
-
-# Support for OpenAI SDK 0.28
-@app.post(
-    "/v1/api/engines/{engine_id}/chat/completions",
-    status_code=200,
-    response_model=None,
-)
-# Support for .NET Azure OpenAI Service SDK
-@app.post(
-    "/v1/api/openai/deployments/{deployment_id}/chat/completions",
-    status_code=200,
-    response_model=None,
-)
-# Support for Python Azure OpenAI SDK 1.0+
-@app.post(
-    "/v1/api/deployments/{deployment_id}/chat/completions",
-    status_code=200,
-    response_model=None,
-)
-# Support for OpenAI SDK 1.0+
-@app.post("/v1/api/chat/completions", status_code=200, response_model=None)
-async def oai_chat_completion(
-    chat: ChatCompletionsRequest,
-    request: Request,
-    response: Response,
-    # stream_response: StreamingResponse,
-    deployment_id: str = None,
-) -> openai.openai_object.OpenAIObject | str | StreamingResponse:
-    """OpenAI chat completion response"""
-
-    # get the api version from the query string
-    if "api-version" in request.query_params:
-        chat.api_version = request.query_params["api-version"]
-
-    # exception thrown if not authorized
-    authorize_response, user_token = await app.state.authorize.authorize_api_access(
-        request.headers, deployment_id
-    )
-
-    if app.state.rate_limit_chat_completion.is_call_rate_exceeded(user_token):
-        raise HTTPException(
-            status_code=429,
-            detail="Rate limit exceeded. Try again in 10 seconds",
-        )
-
-    if chat.max_tokens and chat.max_tokens > authorize_response.max_token_cap:
-        chat.max_tokens = authorize_response.max_token_cap
-
-    (
-        completion,
-        status_code,
-    ) = await app.state.chat_completions_mgr.call_openai_chat_completion(chat)
-
-    if isinstance(completion, AsyncGenerator):
-        return StreamingResponse(completion)
-    else:
-        response.status_code = status_code
-        return completion
-
-
-# Support for Dall-e-3 and beyond
-# Azure OpenAI Images
-@app.post(
-    "/v1/api/openai/deployments/{deployment_id}/images/generations",
-    status_code=200,
-    response_model=None,
-)
-# OpenAI Images
-@app.post(
-    "/v1/api/images/generations",
-    status_code=200,
-    response_model=None,
-)
-async def oai_images(
-    images_request: ImagesRequest,
-    request: Request,
-    response: Response,
-    deployment_id: str = None,
-):
-    """OpenAI image generation response"""
-
-    # get the api version from the query string
-    if "api-version" in request.query_params:
-        images_request.api_version = request.query_params["api-version"]
-
-    # exception thrown if not authorized
-    await app.state.authorize.authorize_api_access(request.headers, deployment_id)
-
-    (
-        completion_response,
-        status_code,
-    ) = await app.state.images_mgr.call_openai_images_generations(images_request)
-    response.status_code = status_code
-    return completion_response
-
-
-# Support for Dall-e-2
-# Support for OpenAI SDK 0.28
-@app.post(
-    "/v1/api/engines/{engine_id}/images/generations",
-    status_code=200,
-    response_model=None,
-)
-# Support for Azure OpenAI Service SDK 1.0+
-@app.post(
-    "/v1/api/openai/images/generations:submit",
-    status_code=200,
-    response_model=None,
-)
-# Support for OpenAI SDK 1.0+
-@app.post("/v1/api/images/generations", status_code=200, response_model=None)
-async def oai_images_generations(
-    image_generation_request: ImagesGenerationsRequst,
-    request: Request,
-    response: Response,
-):
-    """OpenAI image generation response"""
-
-    # No deployment_is passed for images generation so set to dall-e
-    deployment_id = "dall-e"
-
-    # get the api version from the query string
-    if "api-version" in request.query_params:
-        image_generation_request.api_version = request.query_params["api-version"]
-
-    # exception thrown if not authorized
-    _, user_token = await app.state.authorize.authorize_api_access(
-        request.headers, deployment_id
-    )
-
-    if app.state.rate_limit_images_generations.is_call_rate_exceeded(user_token):
-        raise HTTPException(
-            status_code=429,
-            detail="Rate limit exceeded. Try again in 10 seconds",
-        )
-
-    (
-        completion_response,
-        status_code,
-    ) = await app.state.images_generations_mgr.call_openai_images_generations(
-        image_generation_request, request, response
-    )
-    response.status_code = status_code
-
-    return completion_response
-
-
-@app.get("/v1/api/{friendly_name}/openai/operations/images/{image_id}")
-async def oai_images_get(
-    friendly_name: str,
-    image_id: str,
-    request: Request,
-    response: Response,
-):
-    """OpenAI image generation response"""
-
-    # No deployment_is passed for images generation so set to dall-e
-    deployment_id = "dall-e"
-
-    # exception thrown if not authorized
-    await app.state.authorize.authorize_api_access(request.headers, deployment_id)
-
-    if "api-version" in request.query_params:
-        api_version = request.query_params["api-version"]
-
-    (
-        completion_response,
-        status_code,
-    ) = await app.state.images_generations_mgr.call_openai_images_get(
-        friendly_name, image_id, api_version
-    )
-    response.status_code = status_code
-    return completion_response
-
-
-# This path is used by the playground
-@app.post("/v1/api/eventinfo", status_code=200)
-async def event_info(request: Request) -> AuthorizeResponse:
-    """get event info"""
-
-    deployment_id = "event_info"
-
-    # exception thrown if not authorized
-    authorize_response, _ = await app.state.authorize.authorize_api_access(
-        request.headers, deployment_id
-    )
-
-    return authorize_response
 
 
 @app.on_event("startup")
