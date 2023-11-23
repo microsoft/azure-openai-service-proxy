@@ -3,17 +3,25 @@
 from fastapi import APIRouter, Request, FastAPI
 
 # pylint: disable=E0402
-from ..authorize import AuthorizeResponse
+from ..authorize import AuthorizeResponse, Authorize
 
 
 class EventInfo:
     """Completion route"""
 
-    def __init__(self, app: FastAPI, prefix: str, tags: list[str]):
+    def __init__(
+        self,
+        app: FastAPI,
+        authorize: Authorize,
+        prefix: str,
+        tags: list[str],
+    ):
         self.app = app
         self.router = APIRouter()
         self.prefix = prefix
         self.tags = tags
+        self.authorize = authorize
+
         self.__include_router()
 
     def __include_router(self):
@@ -29,8 +37,10 @@ class EventInfo:
             deployment_id = "event_info"
 
             # exception thrown if not authorized
-            authorize_response, _ = await self.app.state.authorize.authorize_api_access(
-                request.headers, deployment_id
+            authorize_response = await self.authorize.authorize_api_access(
+                headers=request.headers,
+                deployment_id=deployment_id,
+                request_class=__name__,
             )
 
             return authorize_response

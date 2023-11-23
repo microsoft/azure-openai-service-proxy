@@ -1,19 +1,39 @@
 """ dalle-3 and beyond """
 
-from fastapi import APIRouter, Request, Response, FastAPI, HTTPException
+from fastapi import Request, Response, FastAPI
+
 
 # pylint: disable=E0402
-from ..image_generation import ImagesGenerationsRequst
+from .request_manager import RequestManager
+from ..image_generation import (
+    ImagesGenerationsRequst,
+    ImagesGenerations as RequestMgr,
+)
+from ..authorize import Authorize
+from ..management import DeploymentClass
 
 
-class ImagesGenerations:
+class ImagesGenerations(RequestManager):
     """Completion route"""
 
-    def __init__(self, app: FastAPI, prefix: str, tags: list[str]):
-        self.app = app
-        self.router = APIRouter()
-        self.prefix = prefix
-        self.tags = tags
+    def __init__(
+        self,
+        app: FastAPI,
+        authorize: Authorize,
+        connection_string: str,
+        prefix: str,
+        tags: list[str],
+    ):
+        super().__init__(
+            app=app,
+            authorize=authorize,
+            connection_string=connection_string,
+            prefix=prefix,
+            tags=tags,
+            deployment_class=DeploymentClass.OPENAI_IMAGES_GENERATIONS.value,
+            request_class_mgr=RequestMgr,
+        )
+
         self.__include_router()
 
     def __include_router(self):
@@ -51,17 +71,7 @@ class ImagesGenerations:
                 ]
 
             # exception thrown if not authorized
-            _, user_token = await self.app.state.authorize.authorize_api_access(
-                request.headers, deployment_id
-            )
-
-            if self.app.state.rate_limit_images_generations.is_call_rate_exceeded(
-                user_token
-            ):
-                raise HTTPException(
-                    status_code=429,
-                    detail="Rate limit exceeded. Try again in 10 seconds",
-                )
+            await self.authorize_request(deployment_id=deployment_id, request=request)
 
             (
                 completion_response,
@@ -85,9 +95,10 @@ class ImagesGenerations:
             # No deployment_is passed for images generation so set to dall-e
             deployment_id = "dall-e"
 
-            # exception thrown if not authorized
-            await self.app.state.authorize.authorize_api_access(
-                request.headers, deployment_id
+            await self.authorize.authorize_api_access(
+                headers=request.headers,
+                deployment_id=deployment_id,
+                request_class=__name__,
             )
 
             if "api-version" in request.query_params:
@@ -96,7 +107,7 @@ class ImagesGenerations:
             (
                 completion_response,
                 status_code,
-            ) = await self.app.state.images_generations_mgr.call_openai_images_get(
+            ) = await self.request_class_mgr.call_openai_images_get(
                 friendly_name, image_id, api_version
             )
             response.status_code = status_code

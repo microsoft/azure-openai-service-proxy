@@ -1,20 +1,36 @@
 """ completion routes """
 
-from fastapi import APIRouter, Request, Response, HTTPException, FastAPI
+from fastapi import Request, Response, FastAPI
 import openai.openai_object
 
 # pylint: disable=E0402
-from ..completions import CompletionsRequest
+from .request_manager import RequestManager
+from ..completions import CompletionsRequest, Completions as RequestMgr
+from ..authorize import Authorize
+from ..management import DeploymentClass
 
 
-class Completions:
+class Completions(RequestManager):
     """Completion route"""
 
-    def __init__(self, app: FastAPI, prefix: str, tags: list[str]):
-        self.app = app
-        self.router = APIRouter()
-        self.prefix = prefix
-        self.tags = tags
+    def __init__(
+        self,
+        app: FastAPI,
+        authorize: Authorize,
+        connection_string: str,
+        prefix: str,
+        tags: list[str],
+    ):
+        super().__init__(
+            app=app,
+            authorize=authorize,
+            connection_string=connection_string,
+            prefix=prefix,
+            tags=tags,
+            deployment_class=DeploymentClass.OPENAI_COMPLETIONS.value,
+            request_class_mgr=RequestMgr,
+        )
+
         self.__include_router()
 
     def __include_router(self):
@@ -47,20 +63,9 @@ class Completions:
                 completion_request.api_version = request.query_params["api-version"]
 
             # exception thrown if not authorized
-            (
-                authorize_response,
-                user_token,
-            ) = await self.app.state.authorize.authorize_api_access(
-                request.headers, deployment_id
+            authorize_response = await self.authorize_request(
+                deployment_id=deployment_id, request=request
             )
-
-            if self.app.state.rate_limit_chat_completion.is_call_rate_exceeded(
-                user_token
-            ):
-                raise HTTPException(
-                    status_code=429,
-                    detail="Rate limit exceeded. Try again in 10 seconds",
-                )
 
             if (
                 completion_request.max_tokens
@@ -71,9 +76,8 @@ class Completions:
             (
                 completion_response,
                 status_code,
-            ) = await self.app.state.completions_mgr.call_openai_completion(
-                completion_request
-            )
+            ) = await self.request_class_mgr.call_openai_completion(completion_request)
+
             response.status_code = status_code
             return completion_response
 

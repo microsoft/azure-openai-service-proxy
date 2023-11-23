@@ -1,22 +1,44 @@
 """ chat completion routes """
 
 from typing import AsyncGenerator
-from fastapi import APIRouter, Request, Response, HTTPException, FastAPI
+from fastapi import Request, Response, FastAPI
 from fastapi.responses import StreamingResponse
 import openai.openai_object
 
+
 # pylint: disable=E0402
-from ..chat_completions import ChatCompletionsRequest
+from .request_manager import RequestManager
+from ..chat_completions import (
+    ChatCompletionsRequest,
+    ChatCompletions as RequestMgr,
+)
+from ..authorize import Authorize
+
+from ..management import DeploymentClass
 
 
-class ChatCompletions:
+class ChatCompletions(RequestManager):
     """Completion route"""
 
-    def __init__(self, app: FastAPI, prefix: str, tags: list[str]):
-        self.app = app
-        self.router = APIRouter()
-        self.prefix = prefix
-        self.tags = tags
+    def __init__(
+        self,
+        *,
+        app: FastAPI,
+        authorize: Authorize,
+        connection_string: str,
+        prefix: str,
+        tags: list[str],
+    ):
+        super().__init__(
+            app=app,
+            authorize=authorize,
+            connection_string=connection_string,
+            prefix=prefix,
+            tags=tags,
+            deployment_class=DeploymentClass.OPENAI_CHAT.value,
+            request_class_mgr=RequestMgr,
+        )
+
         self.__include_router()
 
     def __include_router(self):
@@ -54,21 +76,9 @@ class ChatCompletions:
             if "api-version" in request.query_params:
                 chat.api_version = request.query_params["api-version"]
 
-            # exception thrown if not authorized
-            (
-                authorize_response,
-                user_token,
-            ) = await self.app.state.authorize.authorize_api_access(
-                request.headers, deployment_id
+            authorize_response = await self.authorize_request(
+                deployment_id=deployment_id, request=request
             )
-
-            if self.app.state.rate_limit_chat_completion.is_call_rate_exceeded(
-                user_token
-            ):
-                raise HTTPException(
-                    status_code=429,
-                    detail="Rate limit exceeded. Try again in 10 seconds",
-                )
 
             if chat.max_tokens and chat.max_tokens > authorize_response.max_token_cap:
                 chat.max_tokens = authorize_response.max_token_cap
@@ -76,9 +86,7 @@ class ChatCompletions:
             (
                 completion,
                 status_code,
-            ) = await self.app.state.chat_completions_mgr.call_openai_chat_completion(
-                chat
-            )
+            ) = await self.request_class_mgr.call_openai_chat_completion(chat)
 
             if isinstance(completion, AsyncGenerator):
                 return StreamingResponse(completion)
