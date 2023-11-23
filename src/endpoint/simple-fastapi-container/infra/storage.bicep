@@ -85,6 +85,30 @@ resource management_table 'Microsoft.Storage/storageAccounts/tableServices/table
   properties: {}
 }
 
+// add storage queue service
+resource queue_service 'Microsoft.Storage/storageAccounts/queueServices@2023-01-01' = {
+  parent: storage
+  name: 'default'
+  properties: {
+    cors: {
+      corsRules: []
+    }
+  }
+}
+
+resource monitor_queue 'Microsoft.Storage/storageAccounts/queueServices/queues@2023-01-01' = {
+  parent: queue_service
+  name: 'monitor'
+  properties: {}
+}
+
+resource notifications_queue 'Microsoft.Storage/storageAccounts/queueServices/queues@2023-01-01' = {
+  parent: queue_service
+  name: 'notifications'
+  properties: {}
+}
+
+
 var storageAccountKeys = listKeys(storage.id, '2021-04-01')
 var connectionString = 'DefaultEndpointsProtocol=https;AccountName=${name};AccountKey=${storageAccountKeys.keys[0].value};EndpointSuffix=core.windows.net'
 
