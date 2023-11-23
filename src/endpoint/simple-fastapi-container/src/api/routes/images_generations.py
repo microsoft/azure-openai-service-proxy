@@ -52,8 +52,6 @@ class ImagesGenerations(RequestManager):
             status_code=200,
             response_model=None,
         )
-        # Support for OpenAI SDK 1.0+
-        @self.router.post("/images/generations", status_code=200, response_model=None)
         async def oai_images_generations(
             image_generation_request: ImagesGenerationsRequst,
             request: Request,
