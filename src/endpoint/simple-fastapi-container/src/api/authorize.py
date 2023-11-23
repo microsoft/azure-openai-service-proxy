@@ -28,17 +28,6 @@ logger = logging.getLogger(__name__)
 class AuthorizeResponse(MonitorEntity):
     """Response object for Authorize class."""
 
-    # is_authorized: bool
-    # max_token_cap: int
-    # event_code: str
-    # user_token: str
-    # event_name: str
-    # event_url: str
-    # event_url_text: str
-    # organizer_name: str
-    # organizer_email: str
-    # request_class: str
-
     def __init__(
         self,
         is_authorized: bool,

@@ -56,7 +56,6 @@ management_router(
     prefix="/v1/api",
     tags=["management"],
 )
-
 completions_router(
     app=app,
     authorize=authorize,

@@ -25,6 +25,7 @@ class RequestManager:
         self.authorize = authorize
         self.prefix = prefix
         self.tags = tags
+        self.deployment_class = deployment_class
 
         openai_config = OpenAIConfig(
             connection_string=connection_string,
@@ -44,7 +45,7 @@ class RequestManager:
         authorize_response = await self.authorize.authorize_api_access(
             headers=request.headers,
             deployment_id=deployment_id,
-            request_class=__name__,
+            request_class=self.deployment_class,
         )
 
         if self.rate_limit.is_call_rate_exceeded(authorize_response.user_token):
