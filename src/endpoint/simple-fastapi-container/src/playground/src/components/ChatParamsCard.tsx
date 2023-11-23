@@ -5,7 +5,6 @@ import { UsageData } from "../interfaces/UsageData";
 import { useEventDataContext } from "../providers/EventDataProvider";
 import { DividerBlock } from "./DividerBlock";
 import type {
-  FunctionDefinition,
   GetChatCompletionsOptions,
 } from "@azure/openai";
 import { Card } from "./Card";
@@ -18,14 +17,12 @@ interface ChatParamsCardProps {
     newValue: number | string
   ) => void;
   usageData: UsageData;
-  functions: FunctionDefinition[] | undefined;
 }
 
 export const ChatParamsCard = ({
   startValues,
   tokenUpdate,
   usageData,
-  functions,
 }: ChatParamsCardProps) => {
   const updateParams = useCallback(
     (label: keyof GetChatCompletionsOptions) => {
@@ -37,6 +34,7 @@ export const ChatParamsCard = ({
   );
   const { eventData, isAuthorized } = useEventDataContext();
   const maxTokens = eventData?.max_token_cap ?? 0;
+  const functions = startValues.functions;
 
   return (
     <Card header="Configuration">
@@ -82,8 +80,7 @@ export const ChatParamsCard = ({
           <Select
             id="functions"
             disabled={
-              !isAuthorized ||
-              (functions !== undefined && functions.length === 0)
+              !isAuthorized || functions === undefined || functions.length === 0
             }
             onChange={(e) => {
               const newValue = e.currentTarget.value;
