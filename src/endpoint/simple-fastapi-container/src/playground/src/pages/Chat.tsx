@@ -7,6 +7,7 @@ import { useOpenAIClientContext } from "../providers/OpenAIProvider";
 import type {
   ChatMessage,
   FunctionDefinition,
+  FunctionName,
   GetChatCompletionsOptions,
 } from "@azure/openai";
 import { makeStyles } from "@fluentui/react-components";
@@ -78,7 +79,13 @@ export const Chat = () => {
             content: m.content || m.functionCall?.arguments || "",
             role: m.role,
           })),
-          params
+          {
+            ...params,
+            functionCall:
+              params.functionCall === "auto"
+                ? params.functionCall
+                : ({ name: params.functionCall } as FunctionName),
+          }
         );
         const end = Date.now();
 

@@ -1,7 +1,5 @@
 import { ChatMessage } from "@azure/openai";
 import { makeStyles, shorthands } from "@fluentui/react-components";
-import SyntaxHighlighter from "react-syntax-highlighter";
-import { solarizedlight } from "react-syntax-highlighter/dist/esm/styles/prism";
 
 interface Props {
   message: ChatMessage;
@@ -31,26 +29,9 @@ const useStyles = makeStyles({
 export const Message = ({ message }: Props) => {
   const styles = useStyles();
 
-  if (message.content) {
-    return (
-      <div className={styles.container}>
-        <div className={styles.message}>{message.content}</div>
-      </div>
-    );
-  }
-
-  if (message.functionCall) {
-    return (
-      <div className={styles.container}>
-        <div className={styles.message}>
-          <h3>Function Call</h3>
-          <SyntaxHighlighter language="json" style={solarizedlight}>
-            {JSON.stringify(message.functionCall, null, 2)}
-          </SyntaxHighlighter>
-        </div>
-      </div>
-    );
-  }
-
-  return null;
+  return (
+    <div className={styles.container}>
+      <div className={styles.message}>{message.content}</div>
+    </div>
+  );
 };
