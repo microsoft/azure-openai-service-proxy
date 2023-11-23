@@ -48,12 +48,6 @@ export const SystemCard = ({
     return () => clearTimeout(timeout);
   }, [isSaved]);
 
-  useEffect(() => {
-    if (functions) {
-      functionsChange(JSON.parse(functions));
-    }
-  }, [functions]);
-
   return (
     <Card header="System Message">
       <div>
@@ -133,6 +127,9 @@ export const SystemCard = ({
                     if (!Array.isArray(j)) {
                       throw new Error("Functions JSON invalid");
                     }
+                    functionsChange(
+                      (j as FunctionDefinition[])
+                    );
                     setSaved(true);
                     setEditFunctions(false);
                   } catch (e) {

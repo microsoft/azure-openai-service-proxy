@@ -37,7 +37,10 @@ export const Chat = () => {
         const chatCompletions = await client.getChatCompletions(
           "proxy",
           messages.filter((m) => m.content),
-          state.params
+          {
+            ...state.params,
+            functions: state.params.functions?.filter((f) => f.name),
+          }
         );
         const end = Date.now();
 

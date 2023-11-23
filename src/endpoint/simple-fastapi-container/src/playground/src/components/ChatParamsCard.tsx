@@ -4,9 +4,7 @@ import { useCallback } from "react";
 import { UsageData } from "../interfaces/UsageData";
 import { useEventDataContext } from "../providers/EventDataProvider";
 import { DividerBlock } from "./DividerBlock";
-import type {
-  GetChatCompletionsOptions,
-} from "@azure/openai";
+import type { GetChatCompletionsOptions } from "@azure/openai";
 import { Card } from "./Card";
 import { ParamInputLabel } from "./ParamInputLabel";
 
@@ -95,11 +93,13 @@ export const ChatParamsCard = ({
             </optgroup>
             <optgroup label="Custom Functions">
               {functions &&
-                functions.map((f) => (
-                  <option key={f.name} value={f.name}>
-                    {f.name}
-                  </option>
-                ))}
+                functions
+                  .filter((f) => f.name)
+                  .map((f) => (
+                    <option key={f.name} value={f.name}>
+                      {f.name}
+                    </option>
+                  ))}
             </optgroup>
           </Select>
         </>
