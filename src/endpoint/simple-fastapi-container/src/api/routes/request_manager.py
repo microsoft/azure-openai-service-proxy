@@ -1,3 +1,5 @@
+""" Request Manager base class """
+
 from fastapi import APIRouter, FastAPI, Request, HTTPException
 
 # pylint: disable=E0402
