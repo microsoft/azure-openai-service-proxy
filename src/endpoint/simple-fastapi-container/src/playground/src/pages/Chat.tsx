@@ -1,33 +1,17 @@
-import { useState } from "react";
+import { useReducer } from "react";
 import { ChatCard } from "../components/ChatCard";
 import { SystemCard } from "../components/SystemCard";
 import { usePromptErrorContext } from "../providers/PromptErrorProvider";
 import { ChatParamsCard } from "../components/ChatParamsCard";
 import { useOpenAIClientContext } from "../providers/OpenAIProvider";
-import type { ChatMessage, GetChatCompletionsOptions } from "@azure/openai";
+import type {
+  ChatMessage,
+  FunctionDefinition,
+  GetChatCompletionsOptions,
+} from "@azure/openai";
 import { makeStyles } from "@fluentui/react-components";
-
-type UsageData = {
-  finish_reason: string;
-  completion_tokens: number;
-  prompt_tokens: number;
-  total_tokens: number;
-  response_time: number;
-};
-
-const defaultSysPrompt: ChatMessage = {
-  role: "system",
-  content: "You are an AI assistant that helps people find information.",
-};
-
-const defaultParamValues: GetChatCompletionsOptions = {
-  maxTokens: 512,
-  temperature: 0.7,
-  topP: 0.95,
-  stop: ["Stop sequences"],
-  frequencyPenalty: 0,
-  presencePenalty: 0,
-};
+import { reducer } from "../reducers/Chat.reducers";
+import { INITIAL_STATE } from "../reducers/Chat.state";
 
 const useStyles = makeStyles({
   container: {
@@ -39,130 +23,87 @@ const useStyles = makeStyles({
 });
 
 export const Chat = () => {
-  const [systemPrompt, setSystemPrompt] = useState(defaultSysPrompt);
-  const [messageList, setMessageList] = useState([defaultSysPrompt]);
-
-  const [isLoading, setIsLoading] = useState(false);
-  const [usageData, setUsageData] = useState<UsageData>({
-    finish_reason: "",
-    completion_tokens: 0,
-    prompt_tokens: 0,
-    total_tokens: 0,
-    response_time: 0,
-  });
+  const [state, dispatch] = useReducer(reducer, INITIAL_STATE);
 
   const { setPromptError } = usePromptErrorContext();
   const { client } = useOpenAIClientContext();
 
   const onPromptEntered = async (messages: ChatMessage[]) => {
     if (client) {
-      const userMessage = messages[messages.length - 1];
-      const updatedMessageList = [
-        ...messageList,
-        { role: "user", content: userMessage.content },
-      ];
-      setMessageList(updatedMessageList);
-
-      setIsLoading(true);
+      dispatch({ type: "chatStart", payload: messages[messages.length - 1] });
       try {
         const start = Date.now();
+
         const chatCompletions = await client.getChatCompletions(
           "proxy",
-          updatedMessageList.map((m) => ({
-            content: m.content,
-            role: m.role,
-          })),
-          params
+          messages.filter((m) => m.content),
+          {
+            ...state.params,
+            functions: state.params.functions?.filter((f) => f.name),
+          }
         );
         const end = Date.now();
 
-        const totalTime = end - start;
-
-        const choices = chatCompletions.choices;
-
-        for (const choice of choices) {
-          const message = choice.message;
-          if (!message) {
-            continue;
-          }
-          setMessageList((current) => [...current, message]);
-
-          setUsageData((current) => ({
-            ...current,
-            finish_reason: choice.finishReason || current.finish_reason,
-            completion_tokens:
-              chatCompletions.usage?.completionTokens ||
-              current.completion_tokens,
-            prompt_tokens:
-              chatCompletions.usage?.promptTokens || current.prompt_tokens,
-            total_tokens:
-              chatCompletions.usage?.totalTokens || current.total_tokens,
-            response_time: totalTime,
-          }));
-        }
-
-        setIsLoading(false);
+        dispatch({
+          type: "chatComplete",
+          payload: {
+            choices: chatCompletions.choices,
+            totalTime: end - start,
+            completionTokens: chatCompletions.usage?.completionTokens,
+            promptTokens: chatCompletions.usage?.promptTokens,
+            totalTokens: chatCompletions.usage?.totalTokens,
+          },
+        });
       } catch (error) {
-        setMessageList(updatedMessageList.slice(0, 1));
+        dispatch({ type: "chatError" });
         setPromptError(error + "");
-
-        setIsLoading(false);
       }
     }
   };
 
   const onPromptChange = (newPrompt: ChatMessage) => {
-    if (newPrompt !== systemPrompt) {
-      setSystemPrompt(newPrompt);
-      messageList[0] = newPrompt;
-    }
+    dispatch({ type: "updateSystemMessage", payload: newPrompt });
   };
 
   const clearMessageList = () => {
-    setMessageList((prevMessageList) => [prevMessageList[0]]);
-    setUsageData({
-      finish_reason: "",
-      completion_tokens: 0,
-      prompt_tokens: 0,
-      total_tokens: 0,
-      response_time: 0,
-    });
+    dispatch({ type: "clearMessages" });
   };
-
-  const [params, setParams] = useState(defaultParamValues);
 
   const tokenUpdate = (
-    label: keyof GetChatCompletionsOptions,
-    newValue: number | string
+    name: keyof GetChatCompletionsOptions,
+    value: number | string
   ) => {
-    setParams((params) => {
-      return {
-        ...params,
-        [label]: newValue,
-      };
-    });
+    if (name === "functionCall") {
+      dispatch({ type: "updateFunctionCall", payload: value as string });
+    } else {
+      dispatch({ type: "updateParameters", payload: { name, value } });
+    }
   };
+
+  const functionsChange = (functions: FunctionDefinition[]) =>
+    dispatch({ type: "updateFunctions", payload: functions });
 
   const styles = useStyles();
 
   return (
     <section className={styles.container}>
       <SystemCard
-        defaultPrompt={systemPrompt}
+        defaultPrompt={state.messages[0]}
         onPromptChange={onPromptChange}
+        functionsChange={functionsChange}
       />
 
       <ChatCard
         onPromptEntered={onPromptEntered}
-        messageList={messageList}
+        messageList={state.messages}
         onClear={clearMessageList}
-        isLoading={isLoading}
+        isLoading={state.isLoading}
       />
 
       <ChatParamsCard
-        startValues={params}
+        startValues={state.params}
         tokenUpdate={tokenUpdate}
-        usageData={usageData}
+        usageData={state.usageData}
       />
     </section>
   );

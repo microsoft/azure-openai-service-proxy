@@ -28,6 +28,7 @@ const useStyles = makeStyles({
 
 export const Message = ({ message }: Props) => {
   const styles = useStyles();
+
   return (
     <div className={styles.container}>
       <div className={styles.message}>{message.content}</div>

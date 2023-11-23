@@ -51,9 +51,10 @@ const EventDataProvider: React.FC<PropsWithChildren> = ({ children }) => {
   );
 
   useEffect(() => {
+    const abortController = new AbortController();
     const getEventData = async (eventCode: string) => {
       try {
-        const data = await eventInfo(eventCode);
+        const data = await eventInfo(eventCode, abortController);
         setEventData(() => ({
           name: data.event_name,
           url: data.event_url,
@@ -66,7 +67,10 @@ const EventDataProvider: React.FC<PropsWithChildren> = ({ children }) => {
         } else {
           setAuthStatus(AuthStatus.NotAuthorized);
         }
-      } catch (e) {
+      } catch (e: any) {
+        if (e.name === "AbortError") {
+          return;
+        }
         setAuthStatus(AuthStatus.NotAuthorized);
       }
     };
@@ -78,6 +82,8 @@ const EventDataProvider: React.FC<PropsWithChildren> = ({ children }) => {
     }
 
     getEventData(eventCode);
+
+    return () => abortController.abort();
   }, [eventCode]);
 
   return (
