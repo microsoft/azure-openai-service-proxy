@@ -247,12 +247,6 @@ class Authorize:
         # if there is a deployment_id then this is an azure sdk request
         # otherwise it is an openai sdk request
 
-        if deployment_id is None:
-            raise HTTPException(
-                status_code=401,
-                detail="Authentication failed.",
-            )
-
         if deployment_id:
             return await self.__authorize_azure_api_access(
                 headers=headers, request_class=request_class
