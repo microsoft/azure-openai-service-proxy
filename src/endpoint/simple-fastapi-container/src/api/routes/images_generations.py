@@ -76,7 +76,7 @@ class ImagesGenerations(RequestManager):
             (
                 completion_response,
                 status_code,
-            ) = await self.app.state.images_generations_mgr.call_openai_images_generations(
+            ) = await self.request_class_mgr.call_openai_images_generations(
                 image_generation_request, request, response
             )
             response.status_code = status_code
