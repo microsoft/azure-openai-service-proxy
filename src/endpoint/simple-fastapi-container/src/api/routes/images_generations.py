@@ -95,14 +95,10 @@ class ImagesGenerations(RequestManager):
             # No deployment_is passed for images generation so set to dall-e
             deployment_id = "dall-e"
 
-            await self.authorize.authorize_api_access(
-                headers=request.headers,
-                deployment_id=deployment_id,
-                request_class=__name__,
-            )
-
             if "api-version" in request.query_params:
                 api_version = request.query_params["api-version"]
+
+            await self.authorize_request(deployment_id=deployment_id, request=request)
 
             (
                 completion_response,
