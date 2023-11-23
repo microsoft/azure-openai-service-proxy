@@ -1,20 +1,37 @@
 """ OpenAI Embeddings API route """
 
-from fastapi import APIRouter, Request, Response, HTTPException, FastAPI
+from fastapi import Request, Response, FastAPI
 import openai.openai_object
 
 # pylint: disable=E0402
-from ..embeddings import EmbeddingsRequest
+from .request_manager import RequestManager
+from ..embeddings import EmbeddingsRequest, Embeddings as RequestMgr
+
+from ..authorize import Authorize
+from ..management import DeploymentClass
 
 
-class Embeddings:
+class Embeddings(RequestManager):
     """Embeddings route"""
 
-    def __init__(self, app: FastAPI, prefix: str, tags: list[str]):
-        self.app = app
-        self.router = APIRouter()
-        self.prefix = prefix
-        self.tags = tags
+    def __init__(
+        self,
+        app: FastAPI,
+        connection_string: str,
+        prefix: str,
+        tags: list[str],
+        authorize: Authorize,
+    ):
+        super().__init__(
+            app=app,
+            authorize=authorize,
+            connection_string=connection_string,
+            prefix=prefix,
+            tags=tags,
+            deployment_class=DeploymentClass.OPENAI_EMBEDDINGS.value,
+            request_class_mgr=RequestMgr,
+        )
+
         self.__include_router()
 
     def __include_router(self):
@@ -47,20 +64,12 @@ class Embeddings:
                 embeddings.api_version = request.query_params["api-version"]
 
             # exception thrown if not authorized
-            _, user_token = await self.app.state.authorize.authorize_api_access(
-                request.headers, deployment_id
-            )
-
-            if self.app.state.rate_limit_embeddings.is_call_rate_exceeded(user_token):
-                raise HTTPException(
-                    status_code=429,
-                    detail="Rate limit exceeded. Try again in 10 seconds",
-                )
+            await self.authorize_request(deployment_id=deployment_id, request=request)
 
             (
                 completion,
                 status_code,
-            ) = await self.app.state.embeddings_mgr.call_openai_embeddings(embeddings)
+            ) = await self.request_class_mgr.call_openai_embeddings(embeddings)
             response.status_code = status_code
             return completion
 

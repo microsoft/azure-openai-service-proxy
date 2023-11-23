@@ -155,7 +155,7 @@ class NewEventResponse(BaseModel):
     event_name: str
 
 
-class Management:
+class ManagementService:
     """Management class for the API"""
 
     def __init__(self, connection_string: str):

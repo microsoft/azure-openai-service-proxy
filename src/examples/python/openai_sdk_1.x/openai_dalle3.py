@@ -18,9 +18,9 @@ client = OpenAI(
 print("Generating images...")
 
 result = client.images.generate(
-    model="dalle3", # the name of your DALL-E 3 deployment
-    prompt="a close-up of a bear walking throughthe forest",
-    n=1
+    model="dalle3",  # the name of your DALL-E 3 deployment
+    prompt="a close-up of a bear walking through the forest",
+    n=1,
 )
 
 json_response = json.loads(result.model_dump_json())

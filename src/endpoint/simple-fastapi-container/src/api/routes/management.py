@@ -9,20 +9,30 @@ from ..management import (
     EventItemResponse,
     ModelDeploymentRequest,
     ModelDeploymentResponse,
+    ManagementService,
 )
+
+from ..authorize import Authorize
 
 
 class Management:
     """Management routes"""
 
-    def __init__(self, app: FastAPI, prefix: str, tags: list[str]):
+    def __init__(
+        self,
+        app: FastAPI,
+        authorize: Authorize,
+        management: ManagementService,
+        prefix: str,
+        tags: list[str],
+    ):
         self.app = app
+        self.authorize = authorize
+        self.management = management
         self.router = APIRouter()
-        self.prefix = prefix
-        self.tags = tags
-        self.__include_router()
+        self.__include_router(prefix=prefix, tags=tags)
 
-    def __include_router(self):
+    def __include_router(self, prefix: str, tags: list[str]):
         """include router"""
 
         @self.router.get("/management/events/list/{query}", status_code=200)
@@ -35,8 +45,8 @@ class Management:
             """get event info"""
 
             # raises expection if not authenticated
-            await self.app.state.authorize.authorize_management_access(request.headers)
-            return await self.app.state.management.list_events(query)
+            await self.authorize.authorize_management_access(request.headers)
+            return await self.management.list_events(query)
 
         @self.router.post("/management/events/add", status_code=200)
         @self.router.post("/management/addevent", status_code=200, deprecated=True)
@@ -46,8 +56,8 @@ class Management:
             """get event info"""
 
             # raises expection if not authenticated
-            await self.app.state.authorize.authorize_management_access(request.headers)
-            return await self.app.state.management.add_new_event(event)
+            await self.authorize.authorize_management_access(request.headers)
+            return await self.management.add_new_event(event)
 
         @self.router.patch(
             "/management/modeldeployment/upsert", status_code=200, response_model=None
@@ -58,8 +68,8 @@ class Management:
             """get event info"""
 
             # raises expection if not authenticated
-            await self.app.state.authorize.authorize_management_access(request.headers)
-            return await self.app.state.management.upsert_model_deployment(deployment)
+            await self.authorize.authorize_management_access(request.headers)
+            return await self.management.upsert_model_deployment(deployment)
 
         # list model deployments
         @self.router.get("/management/modeldeployment/list/{query}", status_code=200)
@@ -69,7 +79,7 @@ class Management:
             """get models deployed info"""
 
             # raises expection if not authenticated
-            await self.app.state.authorize.authorize_management_access(request.headers)
-            return await self.app.state.management.list_model_deployments(query)
+            await self.authorize.authorize_management_access(request.headers)
+            return await self.management.list_model_deployments(query)
 
-        self.app.include_router(self.router, prefix=self.prefix, tags=self.tags)
+        self.app.include_router(self.router, prefix=prefix, tags=tags)
