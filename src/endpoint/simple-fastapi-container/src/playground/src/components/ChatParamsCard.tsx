@@ -81,7 +81,10 @@ export const ChatParamsCard = ({
           <ParamInputLabel label="OpenAI Functions" id="functions" />
           <Select
             id="functions"
-            disabled={!isAuthorized || (functions !== undefined && functions.length === 0)}
+            disabled={
+              !isAuthorized ||
+              (functions !== undefined && functions.length === 0)
+            }
             onChange={(e) => {
               const newValue = e.currentTarget.value;
               if (newValue) {
@@ -89,12 +92,18 @@ export const ChatParamsCard = ({
               }
             }}
           >
-            <option value="auto">auto</option>
-            {functions && functions.map((f) => (
-              <option key={f.name} value={f.name}>
-                {f.name}
-              </option>
-            ))}
+            <optgroup label="Standard Operations">
+              <option value="auto">auto</option>
+              <option value="none">none</option>
+            </optgroup>
+            <optgroup label="Custom Functions">
+              {functions &&
+                functions.map((f) => (
+                  <option key={f.name} value={f.name}>
+                    {f.name}
+                  </option>
+                ))}
+            </optgroup>
           </Select>
         </>
       </DividerBlock>

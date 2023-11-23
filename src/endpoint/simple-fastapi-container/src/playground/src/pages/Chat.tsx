@@ -61,6 +61,18 @@ export const Chat = () => {
   const { setPromptError } = usePromptErrorContext();
   const { client } = useOpenAIClientContext();
 
+  const getFunctionCall = (value: any): typeof params.functionCall => {
+    if (!value) {
+      return undefined;
+    }
+
+    if (value === "auto" || value === "none") {
+      return value;
+    }
+
+    return { name: value } as FunctionName;
+  };
+
   const onPromptEntered = async (messages: ChatMessage[]) => {
     if (client) {
       const userMessage = messages[messages.length - 1];
@@ -81,10 +93,7 @@ export const Chat = () => {
           })),
           {
             ...params,
-            functionCall:
-              params.functionCall === "auto"
-                ? params.functionCall
-                : ({ name: params.functionCall } as FunctionName),
+            functionCall: getFunctionCall(params.functionCall),
           }
         );
         const end = Date.now();
