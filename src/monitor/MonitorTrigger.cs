@@ -12,6 +12,13 @@ using System.Collections.Generic;
 
 namespace Advocacy.Function
 {
+
+    public class EventData
+    {
+        public string event_code { get; set; }
+        // Add other properties as per your JSON structure
+    }
+
     // note, this function is a singleton, meaning only one instance will run at a time
     // this is to ensure that the table doesn't get updated by multiple instances at the same time
     // this is to maintain atomicity given there is no transaction support in Azure Table Storage
@@ -33,7 +40,7 @@ namespace Advocacy.Function
                 byte[] byteArray = msg.Payload.ToArray();
                 string myQueueItem = System.Text.Encoding.UTF8.GetString(byteArray);
 
-                dynamic data = JsonConvert.DeserializeObject(myQueueItem);
+                EventData data = JsonConvert.DeserializeObject<EventData>(myQueueItem);
                 string event_code = data?.event_code;
 
                 if (eventCodeCounts.ContainsKey(event_code))
