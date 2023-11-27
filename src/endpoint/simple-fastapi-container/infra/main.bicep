@@ -83,6 +83,40 @@ module logAnalyticsWorkspace 'core/monitor/loganalytics.bicep' = {
   }
 }
 
+// create an app service plan for the Monitor Azure Function
+module appServicePlan 'core/host/appserviceplan.bicep' = {
+  name: 'appServicePlan'
+  scope: resourceGroup
+  params: {
+    name: 'openai-proxy-${resourceToken}-app-service-plan'
+    location: location
+    tags: tags
+    sku: {
+      name: 'Y1'
+    }
+  }
+}
+
+
+module MonitorFunction 'core/host/functions.bicep' = {
+  name: 'azureFunctions'
+  scope: resourceGroup
+  params: {
+    name: 'openai-proxy-${resourceToken}-monitor-function'
+    location: location
+    tags: tags
+    runtimeVersion: '~4'
+    runtimeName: 'dotnet'
+    appServicePlanId: appServicePlan.outputs.id
+    storageAccountName: storageAccount.outputs.name
+    alwaysOn: false
+    appSettings: {
+      AzureProxyStorageAccount: storageAccount.outputs.connectionString
+    }
+  }
+}
+
+
 output AZURE_LOCATION string = location
 output AZURE_CONTAINER_ENVIRONMENT_NAME string = containerApps.outputs.environmentName
 output AZURE_CONTAINER_REGISTRY_NAME string = containerApps.outputs.registryName
