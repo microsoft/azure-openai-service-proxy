@@ -56,6 +56,12 @@ class ChatCompletions(RequestManager):
             status_code=200,
             response_model=None,
         )
+        # Support for .NET Azure OpenAI Extensions Chat Completions
+        @self.router.post(
+            "/openai/deployments/{deployment_id}/extensions/chat/completions",
+            status_code=200,
+            response_model=None,
+        )
         # Support for Python Azure OpenAI SDK 1.0+
         @self.router.post(
             "/deployments/{deployment_id}/chat/completions",

@@ -37,6 +37,7 @@ response = client.chat.completions.create(
         {"role": "user", "content": "What is the meaning of life!"},
     ],
     stream=True,
+    max_tokens=100,
 )
 
 
