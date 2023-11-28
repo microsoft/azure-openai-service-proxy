@@ -34,7 +34,6 @@ class ChatCompletionsRequest(BaseModel):
     functions: list[dict[str, Any]] | None = None
     function_call: str | dict[str, str] | None = None
     api_version: str | None = None
-    extensions: bool = False
 
 
 class ChatCompletions:
@@ -98,7 +97,7 @@ class ChatCompletions:
         deployment = await self.openai_config.get_deployment()
 
         # if dataSources are provided, use the extensions API
-        if chat.extensions:
+        if chat.dataSources:
             api_version = (
                 chat.api_version or OPENAI_CHAT_COMPLETIONS_EXTENSIONS_API_VERSION
             )
@@ -115,7 +114,6 @@ class ChatCompletions:
                 f"?api-version={api_version}"
             )
 
-        del chat.extensions
         del chat.api_version
 
         openai_request = {}
