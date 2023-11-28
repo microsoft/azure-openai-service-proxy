@@ -78,6 +78,10 @@ class ChatCompletions(RequestManager):
         ) -> openai.openai_object.OpenAIObject | str | StreamingResponse:
             """OpenAI chat completion response"""
 
+            # see if extensions is in the path
+            if "/extensions/" in request.url.path:
+                chat.extensions = True
+
             # get the api version from the query string
             if "api-version" in request.query_params:
                 chat.api_version = request.query_params["api-version"]

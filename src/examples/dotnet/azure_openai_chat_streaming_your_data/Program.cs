@@ -37,9 +37,6 @@ AzureCognitiveSearchChatExtensionConfiguration contosoExtensionConfig = new()
 
 contosoExtensionConfig.SetSearchKey(searchKey);
 
-
-
-
 var chatCompletionsOptions = new ChatCompletionsOptions()
 {
     DeploymentName = "gpt-3.5-turbo", // Use DeploymentName for "model" with non-Azure clients
