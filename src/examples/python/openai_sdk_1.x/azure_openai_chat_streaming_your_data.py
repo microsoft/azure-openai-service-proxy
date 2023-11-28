@@ -58,12 +58,15 @@ response = client.chat.completions.create(
     max_tokens=100,
 )
 
+# turn off print buffering
+# https://stackoverflow.com/questions/107705/disable-output-buffering
+
 
 for chunk in response:
     if chunk.choices and len(chunk.choices) > 0:
         content = chunk.choices[0].delta.content
         if content:
-            print(content, end="")
+            print(content, end="", flush=True)
         # delay to simulate real-time chat
         time.sleep(0.05)
 
