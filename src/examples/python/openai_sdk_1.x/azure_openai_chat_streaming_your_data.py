@@ -2,6 +2,8 @@
 
 # Create a new Azure Cognitive Search index and load an index with Azure content
 # https://microsoftlearning.github.io/mslearn-knowledge-mining/Instructions/Labs/10-vector-search-exercise.html
+# https://learn.microsoft.com/en-us/azure/ai-services/openai/use-your-data-quickstart?tabs=command-line%2Cpython-new&pivots=programming-language-python#create-the-python-app
+
 
 import os
 import time
@@ -21,7 +23,7 @@ MODEL_NAME = "gpt-35-turbo"
 
 
 client = AzureOpenAI(
-    base_url=ENDPOINT_URL,
+    base_url=f"{ENDPOINT_URL}/openai/deployments/deployment/extensions",
     api_key=API_KEY,
     api_version=API_VERSION,
 )
@@ -48,7 +50,6 @@ body = {
         }
     ]
 }
-
 
 response = client.chat.completions.create(
     model="gpt-3.5-turbo",
