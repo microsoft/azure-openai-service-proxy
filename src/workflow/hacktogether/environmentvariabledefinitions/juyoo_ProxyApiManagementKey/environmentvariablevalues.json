@@ -1,0 +1,9 @@
+{
+  "environmentvariablevalues": {
+    "environmentvariablevalue": {
+      "@environmentvariablevalueid": "9a78a48b-2a96-ee11-be37-6045bd055e7c",
+      "iscustomizable": "1",
+      "value": "aoai-proxy-api-management-key"
+    }
+  }
+}

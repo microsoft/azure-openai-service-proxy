@@ -1,0 +1,13 @@
+<environmentvariabledefinition schemaname="juyoo_ProxyApiManagementKey">
+  <description default="AOAI proxy API management key">
+    <label description="AOAI proxy API management key" languagecode="1033" />
+  </description>
+  <displayname default="Proxy API Management Key">
+    <label description="Proxy API Management Key" languagecode="1033" />
+  </displayname>
+  <introducedversion>1.0.0.0</introducedversion>
+  <iscustomizable>1</iscustomizable>
+  <isrequired>0</isrequired>
+  <secretstore>0</secretstore>
+  <type>100000000</type>
+</environmentvariabledefinition>

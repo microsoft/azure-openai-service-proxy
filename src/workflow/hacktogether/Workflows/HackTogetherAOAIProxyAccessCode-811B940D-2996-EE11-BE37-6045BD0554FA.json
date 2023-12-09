@@ -1,0 +1,376 @@
+{
+  "properties": {
+    "connectionReferences": {
+      "shared_microsoftforms": {
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "juyoo_sharedmicrosoftforms_ad4fa"
+        },
+        "api": {
+          "name": "shared_microsoftforms"
+        }
+      },
+      "shared_excelonlinebusiness": {
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "juyoo_sharedexcelonlinebusiness_a5afe"
+        },
+        "api": {
+          "name": "shared_excelonlinebusiness"
+        }
+      },
+      "shared_acsemail_1": {
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "juyoo_sharedacsemail_b1264"
+        },
+        "api": {
+          "name": "shared_acsemail"
+        }
+      }
+    },
+    "definition": {
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "$connections": {
+          "defaultValue": {},
+          "type": "Object"
+        },
+        "$authentication": {
+          "defaultValue": {},
+          "type": "SecureObject"
+        },
+        "Proxy API Management Key (juyoo_ProxyApiManagementKey)": {
+          "defaultValue": "aoai-proxy-api-management-key",
+          "type": "String",
+          "metadata": {
+            "schemaName": "juyoo_ProxyApiManagementKey",
+            "description": "AOAI proxy API management key"
+          }
+        }
+      },
+      "staticResults": {
+        "Generate_event_code0": {
+          "status": "Succeeded",
+          "outputs": {
+            "statusCode": "OK",
+            "body": {
+              "eventCode": "ee2e02d1-fd76-42a0-91a9-182b1e1d7803",
+              "expiryDate": "2023-11-20T00:00:00Z"
+            },
+            "headers": {}
+          }
+        }
+      },
+      "triggers": {
+        "When_a_new_response_is_submitted": {
+          "splitOn": "@triggerOutputs()?['body/value']",
+          "metadata": {
+            "operationMetadataId": "f9fae51e-ed49-4bf5-a0ce-54fe09222284"
+          },
+          "type": "OpenApiConnectionWebhook",
+          "inputs": {
+            "host": {
+              "connectionName": "shared_microsoftforms",
+              "operationId": "CreateFormWebhook",
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_microsoftforms"
+            },
+            "parameters": {
+              "form_id": "v4j5cvGGr0GRqy180BHbRxDfNmNUGzlIp-p8vKJu_opUREdYUkw5Njk5NjJaTDcwSUdETDMyMDZXNS4u"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        }
+      },
+      "actions": {
+        "Get_response_details": {
+          "runAfter": {},
+          "metadata": {
+            "operationMetadataId": "b1809134-1de7-4e1e-b953-a534c358d309"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "connectionName": "shared_microsoftforms",
+              "operationId": "GetFormResponseById",
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_microsoftforms"
+            },
+            "parameters": {
+              "form_id": "v4j5cvGGr0GRqy180BHbRxDfNmNUGzlIp-p8vKJu_opUREdYUkw5Njk5NjJaTDcwSUdETDMyMDZXNS4u",
+              "response_id": "@triggerOutputs()?['body/resourceData/responseId']"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        },
+        "Generate_event_code": {
+          "runAfter": {
+            "Parse_API_request_payload": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "927532d6-a29e-4915-9174-f0c362f68aae"
+          },
+          "type": "Http",
+          "inputs": {
+            "method": "POST",
+            "uri": "https://aoai.hacktogether.net/v1/api/management/events/add",
+            "headers": {
+              "Authorization": "Bearer @{variables('ApiKey')}",
+              "Content-Type": "application/json"
+            },
+            "body": {
+              "event_name": "@body('Parse_API_request_payload')?['event_name']",
+              "start_utc": "@body('Parse_API_request_payload')?['start_utc']",
+              "end_utc": "@body('Parse_API_request_payload')?['end_utc']",
+              "max_token_cap": "@body('Parse_API_request_payload')?['max_token_cap']",
+              "event_url": "@body('Parse_API_request_payload')?['event_url']",
+              "event_url_text": "@body('Parse_API_request_payload')?['event_url_text']",
+              "organizer_name": "@body('Parse_API_request_payload')?['organizer_name']",
+              "organizer_email": "@body('Parse_API_request_payload')?['organizer_email']"
+            }
+          },
+          "runtimeConfiguration": {
+            "staticResult": {
+              "staticResultOptions": "Disabled",
+              "name": "Generate_event_code0"
+            }
+          }
+        },
+        "Parse_response_details": {
+          "runAfter": {
+            "Trim_GitHub_handle": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "5fb4517d-4311-4794-9e32-a28e4d2dd18e"
+          },
+          "type": "ParseJson",
+          "inputs": {
+            "content": {
+              "firstName": "@trim(outputs('Get_response_details')?['body/rd07693c475ca49958bcf0ab0593830ee'])",
+              "lastName": "@trim(outputs('Get_response_details')?['body/r6246b1b3f6ab423f8538096ca3cc1c69'])",
+              "email": "@trim(outputs('Get_response_details')?['body/r6547387be4494ea397fa21c9e1d76079'])",
+              "gitHubHandle": "@outputs('Trim_GitHub_handle')"
+            },
+            "schema": {
+              "type": "object",
+              "properties": {
+                "firstName": {
+                  "type": "string"
+                },
+                "lastName": {
+                  "type": "string"
+                },
+                "email": {
+                  "type": "string"
+                },
+                "gitHubHandle": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "Trim_GitHub_handle": {
+          "runAfter": {
+            "Get_response_details": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "b0edd0d7-dea7-4966-8dfe-04bc0565ec70"
+          },
+          "type": "Compose",
+          "inputs": "@trim(replace(replace(last(split(outputs('Get_response_details')?['body/rc53463c56de24c7e9d69c76b382e19aa'], '/')), '@', ''), '/', ''))"
+        },
+        "Parse_API_response_payload": {
+          "runAfter": {
+            "Generate_event_code": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "1c3faa10-c496-4280-b10f-87369b59c9c3"
+          },
+          "type": "ParseJson",
+          "inputs": {
+            "content": "@body('Generate_event_code')",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "event_code": {
+                  "type": "string"
+                },
+                "organizer_name": {
+                  "type": "string"
+                },
+                "organizer_email": {
+                  "type": "string"
+                },
+                "start_utc": {
+                  "type": "string"
+                },
+                "end_utc": {
+                  "type": "string"
+                },
+                "event_url": {
+                  "type": "string"
+                },
+                "event_name": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "Save_access_details_to_Excel": {
+          "runAfter": {
+            "Parse_API_response_payload": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "01JDFZEAHQ7RTUGXLAJFAI7RWG655NFQAL": "/Access Codes TEST.xlsx",
+            "operationMetadataId": "65d9730f-8c99-41f0-ae1a-e410a670394e",
+            "tableId": "{8ED960C6-4FC5-4450-97B8-F869175162EA}",
+            "01JDFZEABAKUXZBDDH7VC3KGQGUT34MDW2": "/Access Codes.xlsx"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "connectionName": "shared_excelonlinebusiness",
+              "operationId": "AddRowV2",
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_excelonlinebusiness"
+            },
+            "parameters": {
+              "source": "https://microsoft.sharepoint.com/sites/36ff65e4-bbf9-4d2d-8391-64dcdbd025ba",
+              "drive": "b!VshSRR_EZUePyZp9UmGdS_NihK5kDJZOnv8S4kSETElzwr9H1n3FSpb4Li_JjOGf",
+              "file": "01JDFZEABAKUXZBDDH7VC3KGQGUT34MDW2",
+              "table": "{8ED960C6-4FC5-4450-97B8-F869175162EA}",
+              "dateTimeFormat": "ISO 8601",
+              "item/No": "@triggerOutputs()?['body/resourceData/responseId']",
+              "item/Event Code": "@body('Parse_API_response_payload')?['event_code']",
+              "item/Event Name": "@body('Parse_API_response_payload')?['event_name']",
+              "item/Event URL": "@body('Parse_API_response_payload')?['event_url']",
+              "item/Event URL Text": "@body('Parse_API_request_payload')?['event_url_text']",
+              "item/Organiser Name": "@body('Parse_API_response_payload')?['organizer_name']",
+              "item/Organiser Email": "@body('Parse_API_response_payload')?['organizer_email']",
+              "item/Start in UTC": "@body('Parse_API_response_payload')?['start_utc']",
+              "item/End in UTC": "@body('Parse_API_response_payload')?['end_utc']",
+              "item/Max Token Cap": "@body('Parse_API_request_payload')?['max_token_cap']"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        },
+        "Parse_API_request_payload": {
+          "runAfter": {
+            "Set_API_key": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "ba7b2baa-6206-4062-a4ea-754b516d69f4"
+          },
+          "type": "ParseJson",
+          "inputs": {
+            "content": {
+              "event_name": "Hack Together: The Great .NET 8 Hack",
+              "start_utc": "@formatDateTime(outputs('Get_response_details')?['body/submitDate'], 'yyyy-MM-ddTHH:mm:ssZ')",
+              "end_utc": "2023-12-05T08:00:00Z",
+              "max_token_cap": 2048,
+              "event_url": "https://aka.ms/hacktogether/dotnet",
+              "event_url_text": "@{body('Parse_response_details')?['firstName']} @{body('Parse_response_details')?['lastName']} (https://github.com/@{body('Parse_response_details')?['gitHubHandle']})",
+              "organizer_name": "@{body('Parse_response_details')?['firstName']} @{body('Parse_response_details')?['lastName']}",
+              "organizer_email": "@{body('Parse_response_details')?['email']}"
+            },
+            "schema": {
+              "type": "object",
+              "properties": {
+                "event_name": {
+                  "type": "string"
+                },
+                "start_utc": {
+                  "type": "string"
+                },
+                "end_utc": {
+                  "type": "string"
+                },
+                "max_token_cap": {
+                  "type": "integer"
+                },
+                "event_url": {
+                  "type": "string"
+                },
+                "event_url_text": {
+                  "type": "string"
+                },
+                "organizer_name": {
+                  "type": "string"
+                },
+                "organizer_email": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "Set_API_key": {
+          "runAfter": {
+            "Parse_response_details": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "94f3d1af-fcb2-4699-924d-b4fac7de23ba"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "ApiKey",
+                "type": "string",
+                "value": "@parameters('Proxy API Management Key (juyoo_ProxyApiManagementKey)')"
+              }
+            ]
+          }
+        },
+        "Send_email_with_access_details": {
+          "runAfter": {
+            "Save_access_details_to_Excel": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "5064c237-a527-4cbb-adc1-e2749b52ab34"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {
+              "connectionName": "shared_acsemail_1",
+              "operationId": "SendEmail",
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_acsemail"
+            },
+            "parameters": {
+              "emailMessage/sender": "DoNotReply@hacktogether.net",
+              "emailMessage/recipients/to": [
+                {
+                  "email": "@body('Parse_API_response_payload')?['organizer_email']"
+                }
+              ],
+              "emailMessage/content/subject": "Hack Together .NET - Limited Access to Azure OpenAI",
+              "emailMessage/content/html": "<p>Hi @{body('Parse_API_response_payload')?['organizer_name']},<br>\n<br>\nWe’re happy you’ve joined us for The Great .NET 8 Hack. We are providing you with limited access to Azure OpenAI Service for you to use to participate in the hack:<br>\n<br>\nKey: <strong></strong><strong>@{body('Parse_API_response_payload')?['event_code']}</strong><strong>/</strong><strong>@{body('Parse_response_details')?['gitHubHandle']}</strong><strong></strong><br>\nProxy URL: <strong>https://aoai.hacktogether.net<br>\n</strong><br>\nTo get up and running, please follow these instructions: <a href=\"https://aka.ms/hacktogether/dotnet/aoai/instructions\"><strong>https://aka.ms/hacktogether/dotnet/aoai/instructions</strong></a><br>\n<br>\n<em>By participating in this contest and gaining limited access to Azure OpenAI for the sole purpose of participating in the Hack Together - .NET: The Great .NET 8 Hack, users acknowledge and agree to use the provided service responsibly and in accordance with the outlined terms. This privilege of limited access to Azure OpenAI is extended with the expectation that participants will refrain from any form of abuse, including but not limited to, malicious activities, unauthorized access, or any other actions that may disrupt the functionality of the service or compromise the experience for others. We reserve the right to revoke access to the free service in the event of any misuse or violation of these terms. Users are encouraged to engage with the service in a manner that fosters a positive and collaborative community environment.&nbsp;</em></p>",
+              "emailMessage/importance": "normal"
+            },
+            "authentication": "@parameters('$authentication')"
+          }
+        }
+      },
+      "outputs": {}
+    },
+    "templateName": "78720f54e49444d0bd456477288a7ef7"
+  },
+  "schemaVersion": "1.0.0.0"
+}
