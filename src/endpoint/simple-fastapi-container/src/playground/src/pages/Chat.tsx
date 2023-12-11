@@ -1,7 +1,6 @@
 import { useReducer } from "react";
 import { ChatCard } from "../components/ChatCard";
 import { SystemCard } from "../components/SystemCard";
-import { usePromptErrorContext } from "../providers/PromptErrorProvider";
 import { ChatParamsCard } from "../components/ChatParamsCard";
 import { useOpenAIClientContext } from "../providers/OpenAIProvider";
 import type {
