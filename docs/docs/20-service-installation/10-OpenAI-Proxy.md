@@ -1,5 +1,7 @@
 # OpenAI proxy service
 
+
+
 The solution consists of two parts; the proxy service and a web client with a similar look and feel to the official Azure OpenAI Playground. The proxy service is a Python FastAPI app that proxies requests to the OpenAI API.
 
 ## Setup
