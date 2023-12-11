@@ -6,6 +6,36 @@ import {
 } from "@azure/openai";
 import { ChatState, INITIAL_STATE } from "./Chat.state";
 
+const createErrorMessage = (error: any): string => {
+  const innerError = error.innererror;
+
+  const findRAIError = (error: any): string => {
+    const keys = Object.keys(error);
+
+    for (const key of keys) {
+      if (error[key].filtered) {
+        return `${key.charAt(0).toUpperCase() + key.slice(1)} (${
+          error[key].severity
+        })`;
+      }
+    }
+
+    return "Unknown error";
+  };
+
+  switch (innerError.code) {
+    case "ResponsibleAIPolicyViolation":
+      return `The prompt was filtered due to triggering Azure OpenAI's content filtering system.
+
+**Reason**: This prompt contains content flagged as **${findRAIError(
+        innerError.content_filter_result
+      )}**.`;
+
+    default:
+      return `An error occurred: ${error.message}`;
+  }
+};
+
 type ChatAction =
   | {
       type: "chatStart";
@@ -23,6 +53,7 @@ type ChatAction =
     }
   | {
       type: "chatError";
+      payload: any;
     }
   | {
       type: "updateSystemMessage";
@@ -89,7 +120,16 @@ export function reducer(state: ChatState, action: ChatAction): ChatState {
       return newState;
 
     case "chatError":
-      return { ...state, isLoading: false };
+      const error = action.payload;
+      const errorMessage: ChatMessage = {
+        role: "assistant",
+        content: createErrorMessage(error),
+      };
+      return {
+        ...state,
+        isLoading: false,
+        messages: [...state.messages, errorMessage],
+      };
 
     case "updateSystemMessage":
       const messages = state.messages;

@@ -1,7 +1,6 @@
 import { useReducer } from "react";
 import { ChatCard } from "../components/ChatCard";
 import { SystemCard } from "../components/SystemCard";
-import { usePromptErrorContext } from "../providers/PromptErrorProvider";
 import { ChatParamsCard } from "../components/ChatParamsCard";
 import { useOpenAIClientContext } from "../providers/OpenAIProvider";
 import type {
@@ -25,7 +24,6 @@ const useStyles = makeStyles({
 export const Chat = () => {
   const [state, dispatch] = useReducer(reducer, INITIAL_STATE);
 
-  const { setPromptError } = usePromptErrorContext();
   const { client } = useOpenAIClientContext();
 
   const onPromptEntered = async (messages: ChatMessage[]) => {
@@ -55,8 +53,7 @@ export const Chat = () => {
           },
         });
       } catch (error) {
-        dispatch({ type: "chatError" });
-        setPromptError(error + "");
+        dispatch({ type: "chatError", payload: error as any });
       }
     }
   };

@@ -3,12 +3,11 @@
 import os
 from enum import Enum
 import logging
-from typing import Tuple
-import openai
+from typing import Any
 from pydantic import BaseModel
 from fastapi import HTTPException, Request, Response
 
-from .configuration import Deployment, OpenAIConfig
+from .configuration import OpenAIConfig
 from .openai_async import OpenAIAsyncManager
 
 OPENAI_IMAGES_GENERATIONS_API_VERSION = "2023-06-01-preview"
@@ -54,9 +53,7 @@ class ImagesGenerations:
         self.openai_config = openai_config
         self.logger = logging.getLogger(__name__)
 
-    def report_exception(
-        self, message: str, http_status_code: int
-    ) -> Tuple[openai.openai_object.OpenAIObject, int]:
+    def report_exception(self, message: str, http_status_code: int) -> Any:
         """report exception"""
 
         self.logger.warning(msg=f"{message}")
@@ -97,7 +94,7 @@ class ImagesGenerations:
 
     async def call_openai_images_generations(
         self, images: ImagesGenerationsRequst, request: Request, response: Response
-    ) -> Tuple[Deployment, openai.openai_object.OpenAIObject, int]:
+    ) -> Any:
         """call openai with retry"""
 
         self.validate_input(images)

@@ -89,9 +89,7 @@ class Completions:
                 "Oops, stop_sequence must be printable characters.", 400
             )
 
-    async def call_openai_completion(
-        self, cr: CompletionsRequest
-    ) -> Tuple[openai.openai_object.OpenAIObject, int]:
+    async def call_openai_completion(self, cr: CompletionsRequest) -> Any:
         """call openai with retry"""
 
         self.__validate_input(cr)
@@ -115,8 +113,8 @@ class Completions:
         )
 
         async_mgr = OpenAIAsyncManager(deployment)
-        response = await async_mgr.async_openai_post(openai_request, url)
+        (response, status_code) = await async_mgr.async_openai_post(openai_request, url)
 
         response["model"] = deployment.friendly_name
 
-        return response, 200
+        return response, status_code

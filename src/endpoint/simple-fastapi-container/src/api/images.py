@@ -2,8 +2,7 @@
 
 from enum import Enum
 import logging
-from typing import Tuple
-import openai
+from typing import Any
 from pydantic import BaseModel
 from fastapi import HTTPException
 
@@ -64,9 +63,7 @@ class Images:
         self.openai_config = openai_config
         self.logger = logging.getLogger(__name__)
 
-    def report_exception(
-        self, message: str, http_status_code: int
-    ) -> Tuple[openai.openai_object.OpenAIObject, int]:
+    def report_exception(self, message: str, http_status_code: int) -> Any:
         """report exception"""
 
         self.logger.warning(msg=f"{message}")
@@ -107,9 +104,7 @@ class Images:
                 "Oops, image_style must be vivid, natural.", 400
             )
 
-    async def call_openai_images_generations(
-        self, images: ImagesRequest
-    ) -> Tuple[openai.openai_object.OpenAIObject, int]:
+    async def call_openai_images_generations(self, images: ImagesRequest) -> Any:
         """call openai with retry"""
 
         self.validate_input(images)

@@ -1,7 +1,7 @@
 """ OpenAI Embeddings API route """
 
+from typing import Any
 from fastapi import Request, Response, FastAPI
-import openai.openai_object
 
 # pylint: disable=E0402
 from .request_manager import RequestManager
@@ -56,7 +56,7 @@ class Embeddings(RequestManager):
             request: Request,
             response: Response,
             deployment_id: str = None,
-        ) -> openai.openai_object.OpenAIObject:
+        ) -> Any:
             """OpenAI chat completion response"""
 
             # get the api version from the query string
