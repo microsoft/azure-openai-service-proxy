@@ -1,10 +1,7 @@
 """ OpenAI Embeddings Manager """
 
-from typing import Tuple
+from typing import Any
 import logging
-import openai
-import openai.error
-import openai.openai_object
 from pydantic import BaseModel
 
 from .openai_async import OpenAIAsyncManager
@@ -32,9 +29,7 @@ class Embeddings:
         self.openai_config = openai_config
         self.logger = logging.getLogger(__name__)
 
-    async def call_openai_embeddings(
-        self, embedding: EmbeddingsRequest
-    ) -> Tuple[openai.openai_object.OpenAIObject, int]:
+    async def call_openai_embeddings(self, embedding: EmbeddingsRequest) -> Any:
         """call openai with retry"""
 
         deployment = await self.openai_config.get_deployment()

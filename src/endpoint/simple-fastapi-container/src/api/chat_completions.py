@@ -1,13 +1,10 @@
 """ Chat Completions API """
 
 import logging
-from typing import Tuple, Any, AsyncGenerator
+from typing import Any
 
 from pydantic import BaseModel
 from fastapi import HTTPException
-import openai
-import openai.error
-import openai.openai_object
 
 from .configuration import OpenAIConfig
 from .openai_async import OpenAIAsyncManager
@@ -90,7 +87,7 @@ class ChatCompletions:
     async def call_openai_chat_completion(
         self,
         chat: ChatCompletionsRequest,
-    ) -> Tuple[openai.openai_object.OpenAIObject, int] | AsyncGenerator:
+    ) -> Any:
         """call openai with retry"""
 
         self.validate_input(chat)

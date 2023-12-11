@@ -1,7 +1,7 @@
 """ completion routes """
 
+from typing import Any
 from fastapi import Request, Response, FastAPI
-import openai.openai_object
 
 # pylint: disable=E0402
 from .request_manager import RequestManager
@@ -55,7 +55,7 @@ class Completions(RequestManager):
             request: Request,
             response: Response,
             deployment_id: str = None,
-        ) -> openai.openai_object.OpenAIObject | str:
+        ) -> Any:
             """OpenAI completion response"""
 
             # get the api version from the query string

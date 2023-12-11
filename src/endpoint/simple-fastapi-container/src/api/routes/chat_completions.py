@@ -1,9 +1,8 @@
 """ chat completion routes """
 
-from typing import AsyncGenerator
+from typing import AsyncGenerator, Any
 from fastapi import Request, Response, FastAPI
 from fastapi.responses import StreamingResponse
-import openai.openai_object
 
 
 # pylint: disable=E0402
@@ -75,7 +74,7 @@ class ChatCompletions(RequestManager):
             request: Request,
             response: Response,
             deployment_id: str = None,
-        ) -> openai.openai_object.OpenAIObject | str | StreamingResponse:
+        ) -> Any:
             """OpenAI chat completion response"""
 
             # see if extensions is in the path

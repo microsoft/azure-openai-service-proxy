@@ -2,7 +2,6 @@
 
 import json
 import logging
-import time
 from typing import Tuple, AsyncGenerator
 from fastapi import HTTPException
 
@@ -37,12 +36,6 @@ class OpenAIAsyncManager:
         """init in memory session manager"""
         self.deployment = deployment
 
-    # retry strategy is fail fast
-    # @retry(
-    #     wait=wait_random(min=0, max=2),
-    #     stop=stop_after_attempt(1),
-    #     retry=retry_if_exception_type((OpenAIRetryException)),
-    # )
     async def async_openai_post(
         self, openai_request: str, url: str
     ) -> Tuple[openai.openai_object.OpenAIObject, int]:
@@ -53,8 +46,6 @@ class OpenAIAsyncManager:
             "api-key": self.deployment.endpoint_key,
         }
 
-        start = time.time()
-
         try:
             async with httpx.AsyncClient() as client:
                 response = await client.post(
@@ -64,15 +55,7 @@ class OpenAIAsyncManager:
                     timeout=HTTPX_TIMEOUT_SECONDS,
                 )
 
-            response.raise_for_status()
-
-        except httpx.HTTPStatusError as http_status_error:
-            raise HTTPException(
-                status_code=http_status_error.response.status_code,
-                detail=json.loads(http_status_error.response.text)
-                .get("error")
-                .get("message", "OpenAI Error"),
-            ) from http_status_error
+            return (json.loads(response.text), response.status_code)
 
         except httpx.ConnectError as exc:
             raise HTTPException(
@@ -91,23 +74,6 @@ class OpenAIAsyncManager:
                 status_code=500,
                 detail="OpenAI API call failed",
             ) from exc
-
-        # calculate response time in milliseconds
-        end = time.time()
-        response_ms = int((end - start) * 1000)
-
-        try:
-            openai_response = openai.openai_object.OpenAIObject.construct_from(
-                json.loads(response.text), response_ms=response_ms
-            )
-
-        except Exception as exc:
-            raise HTTPException(
-                status_code=400,
-                detail="Invalid response body from API",
-            ) from exc
-
-        return (openai_response, response.status_code)
 
     async def async_post(self, openai_request: str, url: str):
         """async rest post"""
