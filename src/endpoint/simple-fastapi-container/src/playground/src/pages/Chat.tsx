@@ -25,7 +25,6 @@ const useStyles = makeStyles({
 export const Chat = () => {
   const [state, dispatch] = useReducer(reducer, INITIAL_STATE);
 
-  const { setPromptError } = usePromptErrorContext();
   const { client } = useOpenAIClientContext();
 
   const onPromptEntered = async (messages: ChatMessage[]) => {
@@ -55,8 +54,7 @@ export const Chat = () => {
           },
         });
       } catch (error) {
-        dispatch({ type: "chatError" });
-        setPromptError(error + "");
+        dispatch({ type: "chatError", payload: error as any });
       }
     }
   };
