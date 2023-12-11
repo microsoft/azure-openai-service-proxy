@@ -115,8 +115,8 @@ class Completions:
         )
 
         async_mgr = OpenAIAsyncManager(deployment)
-        response = await async_mgr.async_openai_post(openai_request, url)
+        [response, status_code] = await async_mgr.async_openai_post(openai_request, url)
 
         response["model"] = deployment.friendly_name
 
-        return response, 200
+        return response, status_code

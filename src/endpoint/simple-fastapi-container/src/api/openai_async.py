@@ -45,7 +45,7 @@ class OpenAIAsyncManager:
     # )
     async def async_openai_post(
         self, openai_request: str, url: str
-    ) -> Tuple[openai.openai_object.OpenAIObject, str]:
+    ) -> Tuple[openai.openai_object.OpenAIObject, int, str]:
         """async openai post"""
 
         headers = {
@@ -62,15 +62,6 @@ class OpenAIAsyncManager:
                     headers=headers,
                     json=openai_request,
                     timeout=HTTPX_TIMEOUT_SECONDS,
-                )
-
-            if not 200 <= response.status_code < 300:
-                # note, for future reference 409 and 429 were retryable with tenactiy
-                raise HTTPException(
-                    status_code=response.status_code,
-                    detail=json.loads(response.text)
-                    .get("error")
-                    .get("message", "OpenAI Error"),
                 )
 
         except HTTPException:
@@ -109,7 +100,7 @@ class OpenAIAsyncManager:
                 detail="Invalid response body from API",
             ) from exc
 
-        return openai_response
+        return [openai_response, response.status_code]
 
     async def async_post(self, openai_request: str, url: str):
         """async rest post"""
@@ -229,7 +220,7 @@ class OpenAIAsyncManager:
                     ) as response:
                         response.raise_for_status()
                         async for chunk in response.aiter_bytes():
-                            yield chunk
+                            yield [chunk, response.status_code]
 
                 except httpx.HTTPStatusError as http_status_error:
                     raise HTTPException(
