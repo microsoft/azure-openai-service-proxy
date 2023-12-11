@@ -193,7 +193,7 @@ class OpenAIAsyncManager:
                     ) as response:
                         response.raise_for_status()
                         async for chunk in response.aiter_bytes():
-                            yield (chunk, response.status_code)
+                            yield (chunk)
 
                 except httpx.HTTPStatusError as http_status_error:
                     raise HTTPException(
@@ -219,4 +219,6 @@ class OpenAIAsyncManager:
                         detail="OpenAI API call failed",
                     ) from exc
 
-        return streaming_post_request()
+        # note, the 200 is not used, as this is just setting up the generator
+        # but the calling function wants a status code
+        return streaming_post_request(), 200
