@@ -1,0 +1,5 @@
+openai>=0.28.1, <0.29
+python_dotenv>=1.0.0, <2.0.0
+langchain
+black
+ruff

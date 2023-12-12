@@ -1,0 +1,57 @@
+// For format details, see https://aka.ms/devcontainer.json.
+{
+  "name": "AOAI Proxy",
+  "image": "mcr.microsoft.com/devcontainers/python:3.11-bullseye",
+
+  // See https://containers.dev/implementors/features/
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {},
+    "ghcr.io/azure/azure-dev/azd:latest": {},
+    "ghcr.io/devcontainers/features/node": {}
+  },
+
+  // Configure tool-specific properties.
+  "customizations": {
+    // Configure properties specific to VS Code.
+    "vscode": {
+      // Add the IDs of extensions you want installed when the container is created.
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "charliermarsh.ruff",
+        "ms-azuretools.vscode-docker",
+        "ms-azuretools.vscode-bicep",
+        "esbenp.prettier-vscode",
+        "ms-python.black-formatter",
+        "ms-python.pylint"
+      ],
+      // Set *default* container specific settings.json values on container create.
+      "settings": {
+        "python.defaultInterpreterPath": "/usr/local/bin/python",
+        "python.linting.enabled": true,
+        "python.testing.unittestEnabled": false,
+        "python.testing.pytestEnabled": true,
+        "[python]": {
+          "editor.formatOnSave": true,
+          "editor.codeActionsOnSave": {
+            "source.fixAll": true
+          }
+        },
+        "python.formatting.provider": "black"
+      }
+    }
+  },
+
+  // Use 'forwardPorts' to make a list of ports inside the container available locally.
+  "forwardPorts": [3100],
+
+  // Use 'postCreateCommand' to run commands after the container is created.
+  "postCreateCommand": "python3 -m pip install -r requirements-dev.txt && pre-commit install && cd src/playground && . ${NVM_DIR}/nvm.sh && nvm install && npm i",
+
+  // Comment out to connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
+  "remoteUser": "vscode",
+
+  "remoteEnv": {
+    "ENVIRONMENT": "development"
+  }
+}
