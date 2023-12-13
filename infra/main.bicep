@@ -9,7 +9,7 @@ param name string
 @description('Primary location for all resources')
 param location string
 
-param apiAppExists bool = false
+param proxyAppExists bool = false
 
 var resourceToken = toLower(uniqueString(subscription().id, name, location))
 var tags = { 'azd-env-name': name }
@@ -57,18 +57,18 @@ module containerApps 'core/host/container-apps.bicep' = {
   }
 }
 
-// API app
-module api 'api.bicep' = {
-  name: 'api'
+// Proxy app
+module proxy 'proxy.bicep' = {
+  name: 'proxy'
   scope: resourceGroup
   params: {
     name: replace('${take(prefix, 19)}-ca', '--', '-')
     location: location
     tags: tags
-    identityName: '${prefix}-id-api'
+    identityName: '${prefix}-id-proxy'
     containerAppsEnvironmentName: containerApps.outputs.environmentName
     containerRegistryName: containerApps.outputs.registryName
-    exists: apiAppExists
+    exists: proxyAppExists
     azure_storage_connection_string: storageAccount.outputs.connectionString
   }
 }
@@ -97,7 +97,6 @@ module appServicePlan 'core/host/appserviceplan.bicep' = {
   }
 }
 
-
 module MonitorFunction 'core/host/functions.bicep' = {
   name: 'azureFunctions'
   scope: resourceGroup
@@ -116,14 +115,13 @@ module MonitorFunction 'core/host/functions.bicep' = {
   }
 }
 
-
 output AZURE_LOCATION string = location
 output AZURE_CONTAINER_ENVIRONMENT_NAME string = containerApps.outputs.environmentName
 output AZURE_CONTAINER_REGISTRY_NAME string = containerApps.outputs.registryName
 output AZURE_CONTAINER_REGISTRY_ENDPOINT string = containerApps.outputs.registryLoginServer
-output SERVICE_API_IDENTITY_PRINCIPAL_ID string = api.outputs.SERVICE_API_IDENTITY_PRINCIPAL_ID
-output SERVICE_API_NAME string = api.outputs.SERVICE_API_NAME
-output SERVICE_API_URI string = api.outputs.SERVICE_API_URI
-output SERVICE_API_IMAGE_NAME string = api.outputs.SERVICE_API_IMAGE_NAME
-output SERVICE_API_ENDPOINTS array = [ '${api.outputs.SERVICE_API_URI}/docs' ]
+output SERVICE_PROXY_IDENTITY_PRINCIPAL_ID string = proxy.outputs.SERVICE_PROXY_IDENTITY_PRINCIPAL_ID
+output SERVICE_PROXY_NAME string = proxy.outputs.SERVICE_PROXY_NAME
+output SERVICE_PROXY_URI string = proxy.outputs.SERVICE_PROXY_URI
+output SERVICE_PROXY_IMAGE_NAME string = proxy.outputs.SERVICE_PROXY_IMAGE_NAME
+output SERVICE_PROXY_ENDPOINTS array = [ '${proxy.outputs.SERVICE_PROXY_URI}/docs' ]
 output AZURE_STORAGE_ACCOUNT string = storageAccount.outputs.connectionString
