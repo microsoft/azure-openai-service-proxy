@@ -1,9 +1,0 @@
-{
-  "profiles": {
-    "logger": {
-      "commandName": "Project",
-      "commandLineArgs": "--port 7248",
-      "launchBrowser": false
-    }
-  }
-}
