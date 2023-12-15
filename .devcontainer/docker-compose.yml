@@ -1,0 +1,17 @@
+version: "3.8"
+services:
+  devcontainer:
+    image: mcr.microsoft.com/devcontainers/base:bullseye
+    volumes:
+      - ../..:/workspaces:cached
+    network_mode: service:db
+    command: sleep infinity
+    environment:
+      MSSQL_SA_PASSWORD: yourStrongPassword123
+
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    restart: unless-stopped
+    environment:
+      MSSQL_SA_PASSWORD: yourStrongPassword123
+      ACCEPT_EULA: 1
