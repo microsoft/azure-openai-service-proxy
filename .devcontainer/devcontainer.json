@@ -46,7 +46,7 @@
   "forwardPorts": [3100],
 
   // Use 'postCreateCommand' to run commands after the container is created.
-  "postCreateCommand": "python3 -m pip install -r requirements-dev.txt && pre-commit install && cd src/playground && . ${NVM_DIR}/nvm.sh && nvm install && npm i",
+  "postCreateCommand": "python3 -m pip install -r requirements-dev.txt && pre-commit install && cd src/playground && . ${NVM_DIR}/nvm.sh && nvm install && npm i && ./install_odbc.sh",
 
   // Comment out to connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
   "remoteUser": "vscode",

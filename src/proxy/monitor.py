@@ -3,10 +3,9 @@
 import base64
 import json
 import logging
+from uuid import UUID
 
-from azure.core.exceptions import (
-    AzureError,
-)
+from azure.core.exceptions import AzureError
 from azure.storage.queue import QueueServiceClient
 from fastapi import HTTPException
 from pydantic import BaseModel
@@ -22,26 +21,28 @@ class MonitorEntity(BaseModel):
     is_authorized: bool
     max_token_cap: int
     event_code: str
-    user_token: str
+    user_token: UUID
     event_name: str
     event_url: str
     event_url_text: str
     organizer_name: str
     organizer_email: str
     request_class: str
+    group_id: UUID
 
     def __init__(
         self,
         is_authorized: bool,
         max_token_cap: int,
         event_code: str,
-        user_token: str,
+        user_token: UUID,
         event_name: str,
         event_url: str,
         event_url_text: str,
         organizer_name: str,
         organizer_email: str,
         request_class: str,
+        group_id: UUID,
     ) -> None:
         super().__init__(
             is_authorized=is_authorized,
@@ -54,7 +55,19 @@ class MonitorEntity(BaseModel):
             organizer_name=organizer_name,
             organizer_email=organizer_email,
             request_class=request_class,
+            group_id=group_id,
         )
+
+
+class UUIDEncoder(json.JSONEncoder):
+    """UUID Encoder"""
+
+    def default(self, o):
+        """default"""
+        if isinstance(o, UUID):
+            # if the obj is uuid, we simply return the value of uuid
+            return o.hex
+        return json.JSONEncoder.default(self, o)
 
 
 class Monitor:
@@ -70,7 +83,7 @@ class Monitor:
 
         # add the class name to the entity
 
-        message = json.dumps(entity.__dict__)
+        message = json.dumps(entity.__dict__, cls=UUIDEncoder)
         # base64 encode the message to a string
         message = base64.b64encode(message.encode("ascii")).decode("ascii")
         try:

@@ -2,7 +2,7 @@
 
 import json
 import logging
-from typing import AsyncGenerator
+from collections.abc import AsyncGenerator
 
 import httpx
 import openai
@@ -10,7 +10,7 @@ import openai.error
 import openai.openai_object
 from fastapi import HTTPException
 
-from .configuration import Deployment
+from .config import Deployment
 
 HTTPX_TIMEOUT_SECONDS = 60
 HTTPX_STREAMING_TIMEOUT_SECONDS = 10
