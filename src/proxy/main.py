@@ -3,6 +3,7 @@
 import logging
 import os
 
+import pyodbc
 from fastapi import FastAPI, HTTPException
 from fastapi.exceptions import ResponseValidationError
 from fastapi.middleware.cors import CORSMiddleware
@@ -12,7 +13,6 @@ from fastapi.staticfiles import StaticFiles
 # pylint: disable=E0402
 from .authorize import Authorize
 from .config import Config
-from .management import ManagementService
 from .routes.chat_completions import ChatCompletions as chat_completions_router
 from .routes.chat_extensions import ChatExtensions as chat_extensions_router
 from .routes.completions import Completions as completions_router
@@ -30,6 +30,15 @@ except KeyError as key_error:
         detail="Please set the environment variable AZURE_STORAGE_CONNECTION_STRING",
     ) from key_error
 
+try:
+    sql_connection_string = os.environ["AZURE_SQL_CONNECTION_STRING"]
+except KeyError as key_error:
+    print("Please set the environment variable AZURE_SQL_CONNECTION_STRING")
+    raise HTTPException(
+        status_code=500,
+        detail="Please set the environment variable AZURE_SQL_CONNECTION_STRING",
+    ) from key_error
+
 
 logging.basicConfig(level=logging.WARNING)
 logger = logging.getLogger(__name__)
@@ -39,9 +48,15 @@ app = FastAPI(
     # redoc_url=None,  # Disable redoc
 )
 
-authorize = Authorize(connection_string=storage_connection_string)
-management_service = ManagementService(storage_connection_string)
-config = Config(connection_string=storage_connection_string)
+
+sql_connection_string = f"DRIVER={{ODBC Driver 18 for SQL Server}};{sql_connection_string}"
+
+sql_conn = pyodbc.connect(sql_connection_string)
+sql_conn.timeout = 10
+
+
+authorize = Authorize(connection_string=storage_connection_string, sql_conn=sql_conn)
+config = Config(sql_conn=sql_conn)
 
 
 completion_router = completions_router(authorize=authorize, config=config)

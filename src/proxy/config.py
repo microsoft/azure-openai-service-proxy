@@ -3,9 +3,7 @@
 import logging
 import random
 
-from azure.core.exceptions import AzureError
-from azure.data.tables.aio import TableClient
-from click import UUID
+import pyodbc
 from fastapi import HTTPException
 
 # pylint: disable=E0402
@@ -14,8 +12,6 @@ from .lru_cache_with_expiry import lru_cache_with_expiry
 
 # initiase the random number generator
 random.seed()
-
-CONFIGURATION_TABLE_NAME = "config"
 
 logging.basicConfig(level=logging.INFO)
 
@@ -43,56 +39,46 @@ class Deployment:
 class Config:
     """Config Manager"""
 
-    def __init__(self, connection_string: str):
-        self.connection_string = connection_string
+    def __init__(self, sql_conn: pyodbc.Connection):
+        self.sql_conn = sql_conn
         self.logging = logging.getLogger(__name__)
 
     @lru_cache_with_expiry(maxsize=128, ttl=300)
-    async def get_group_deployments(self, group_id: UUID, deployment_class: str) -> list[Deployment]:
+    async def get_event_deployments(self, event_id: str, deployment_class: str) -> list[Deployment]:
         """get config"""
-        # read from azure table storage named CONFIGURATION_TABLE_NAME
-        # where partition key is group_id and filter ModelClass is deployment_class
-        # return list of config
 
         config = []
 
         try:
-            async with TableClient.from_connection_string(
-                conn_str=self.connection_string, table_name=CONFIGURATION_TABLE_NAME
-            ) as table_client:
-                if deployment_class == "*":
-                    query_filter = f"PartitionKey eq '{group_id}'"
-                else:
-                    query_filter = f"ModelClass eq '{deployment_class}' " f"and PartitionKey eq '{group_id}'"
+            cursor = self.sql_conn.cursor()
 
-                # get all columns from the table
-                queried_entities = table_client.query_entities(
-                    query_filter=query_filter,
-                    select=[
-                        "*",
-                    ],
+            if deployment_class == "*":
+                # get all deployments for the event
+                cursor.execute("{CALL dbo.EventCatalogList(?)}", (event_id,))
+            else:
+                cursor.execute("{CALL dbo.EventCatalogGetByEvent(?, ?)}", (event_id, deployment_class))
+
+            result = cursor.fetchall()
+
+            for row in result:
+                deployment_item = Deployment(
+                    friendly_name=row.FriendlyName.strip(),
+                    endpoint_key=row.EndpointKey.strip(),
+                    deployment_name=row.DeploymentName.strip(),
+                    resource_name=row.ResourceName.strip(),
+                    model_class=row.ModelClass.strip(),
                 )
 
-                async for entity in queried_entities:
-                    deployment_item = Deployment(
-                        friendly_name=entity["RowKey"].strip(),
-                        endpoint_key=entity["EndpointKey"].strip(),
-                        deployment_name=entity["DeploymentName"].strip(),
-                        resource_name=entity["ResourceName"].strip(),
-                        model_class=entity["ModelClass"].strip(),
-                    )
-
-                    config.append(deployment_item)
+                config.append(deployment_item)
 
             return config
 
-        except AzureError as e:
-            self.logging.error("Error reading config from Azure Table Storage")
-            self.logging.error(e)
+        except pyodbc.Error as error:
+            self.logging.error("pyodbc error: %s", str(error))
             raise HTTPException(
-                detail="Error reading config from Azure Table Storage",
-                status_code=503,
-            ) from e
+                status_code=401,
+                detail="Deployment failed. pyodbc error.",
+            ) from error
 
         except Exception as e:
             self.logging.error("Error reading config from Azure Table Storage")
@@ -105,8 +91,8 @@ class Config:
     async def get_deployment(self, authorize_response: AuthorizeResponse) -> Deployment:
         """get config"""
 
-        deployments = await self.get_group_deployments(
-            authorize_response.group_id,
+        deployments = await self.get_event_deployments(
+            authorize_response.event_id,
             authorize_response.request_class,
         )
 
@@ -134,8 +120,8 @@ class Config:
     ) -> Deployment:
         """get config"""
 
-        deployments = await self.get_group_deployments(
-            authorise_response.group_id,
+        deployments = await self.get_event_deployments(
+            authorise_response.event_id,
             authorise_response.request_class,
         )
 
@@ -154,11 +140,11 @@ class Config:
             status_code=501,
         )
 
-    async def get_group_models(self, authorize_response: AuthorizeResponse) -> list[str]:
+    async def get_owner_models(self, authorize_response: AuthorizeResponse) -> list[str]:
         """get model class list from config deployment table"""
 
-        deployments = await self.get_group_deployments(
-            authorize_response.group_id,
+        deployments = await self.get_event_deployments(
+            authorize_response.event_id,
             "*",
         )
 

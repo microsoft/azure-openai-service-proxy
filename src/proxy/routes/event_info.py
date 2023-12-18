@@ -81,13 +81,13 @@ class EventInfo(RequestManager):
                 deployment_id=deployment_id,
             )
 
-            capabilities = await self.config.get_group_models(authorize_response=authorize_response)
+            capabilities = await self.config.get_owner_models(authorize_response=authorize_response)
 
             # fill in EventInfoResponse from authorize_response
             event_info_response = EventInfoResponse(
                 is_authorized=authorize_response.is_authorized,
                 max_token_cap=authorize_response.max_token_cap,
-                event_code=authorize_response.event_code,
+                event_code=authorize_response.event_id,
                 user_token=authorize_response.user_token,
                 event_name=authorize_response.event_name,
                 event_url=authorize_response.event_url,
