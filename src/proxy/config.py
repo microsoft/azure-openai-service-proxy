@@ -44,7 +44,7 @@ class Config:
         self.logging = logging.getLogger(__name__)
 
     @lru_cache_with_expiry(maxsize=128, ttl=300)
-    async def get_event_deployments(self, event_id: str, deployment_class: str) -> list[Deployment]:
+    async def get_event_catalog(self, event_id: str, deployment_class: str) -> list[Deployment]:
         """get config"""
 
         config = []
@@ -53,7 +53,6 @@ class Config:
             cursor = self.sql_conn.cursor()
 
             if deployment_class == "*":
-                # get all deployments for the event
                 cursor.execute("{CALL dbo.EventCatalogList(?)}", (event_id,))
             else:
                 cursor.execute("{CALL dbo.EventCatalogGetByEvent(?, ?)}", (event_id, deployment_class))
@@ -88,10 +87,10 @@ class Config:
                 status_code=503,
             ) from e
 
-    async def get_deployment(self, authorize_response: AuthorizeResponse) -> Deployment:
+    async def get_catalog_by_model_class(self, authorize_response: AuthorizeResponse) -> Deployment:
         """get config"""
 
-        deployments = await self.get_event_deployments(
+        deployments = await self.get_event_catalog(
             authorize_response.event_id,
             authorize_response.request_class,
         )
@@ -113,14 +112,14 @@ class Config:
 
         return deployments[index]
 
-    async def get_deployment_by_name(
+    async def get_catalog_by_friendly_name(
         self,
         friendly_name: str,
         authorise_response: AuthorizeResponse,
     ) -> Deployment:
         """get config"""
 
-        deployments = await self.get_event_deployments(
+        deployments = await self.get_event_catalog(
             authorise_response.event_id,
             authorise_response.request_class,
         )
@@ -140,10 +139,10 @@ class Config:
             status_code=501,
         )
 
-    async def get_owner_models(self, authorize_response: AuthorizeResponse) -> list[str]:
+    async def get_owner_catalog(self, authorize_response: AuthorizeResponse) -> list[str]:
         """get model class list from config deployment table"""
 
-        deployments = await self.get_event_deployments(
+        deployments = await self.get_event_catalog(
             authorize_response.event_id,
             "*",
         )

@@ -145,7 +145,7 @@ class ImagesGenerations(RequestManager):
 
         self.validate_input(images)
 
-        deployment = await self.config.get_deployment(authorize_response)
+        deployment = await self.config.get_catalog_by_model_class(authorize_response)
 
         # Note, the .NET SDK tried to use api-version 2023-09-01-preview
         # but it is not supported
@@ -196,7 +196,7 @@ class ImagesGenerations(RequestManager):
     ):
         """call openai with retry"""
 
-        deployment = await self.config.get_deployment_by_name(friendly_name, authorize_response)
+        deployment = await self.config.get_catalog_by_friendly_name(friendly_name, authorize_response)
 
         if deployment is None:
             return self.report_exception("Oops, failed to find service to generate image.", 404)

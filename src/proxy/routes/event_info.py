@@ -81,7 +81,7 @@ class EventInfo(RequestManager):
                 deployment_id=deployment_id,
             )
 
-            capabilities = await self.config.get_owner_models(authorize_response=authorize_response)
+            capabilities = await self.config.get_owner_catalog(authorize_response=authorize_response)
 
             # fill in EventInfoResponse from authorize_response
             event_info_response = EventInfoResponse(

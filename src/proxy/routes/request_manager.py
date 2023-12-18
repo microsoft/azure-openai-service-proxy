@@ -88,7 +88,7 @@ class RequestManager:
             if value is not None and key != "api_version":
                 openai_request[key] = value
 
-        deployment = await self.config.get_deployment(authorize_response)
+        deployment = await self.config.get_catalog_by_model_class(authorize_response)
 
         return await call_method(model, openai_request, deployment)
 
