@@ -16,7 +16,9 @@
     "ghcr.io/devcontainers/features/python:1": {
       "version": "3.11"
     },
-    "ghcr.io/jlaundry/devcontainer-features/mssql-odbc-driver:1": {}
+    "ghcr.io/jlaundry/devcontainer-features/mssql-odbc-driver:1": {
+      "version": "18"
+    }
   },
 
   // Configure tool-specific properties.
@@ -38,7 +40,7 @@
       ],
       // Set *default* container specific settings.json values on container create.
       "settings": {
-        "python.defaultInterpreterPath": "/usr/local/bin/python",
+        "python.defaultInterpreterPath": "/usr/local/python/current/bin/python",
         "python.linting.enabled": true,
         "python.testing.unittestEnabled": false,
         "python.testing.pytestEnabled": true,
