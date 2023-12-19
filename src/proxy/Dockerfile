@@ -15,4 +15,4 @@ COPY . .
 
 EXPOSE 3100
 
-CMD ["gunicorn", "api.main:app"]
+CMD ["gunicorn", "app.main:app"]

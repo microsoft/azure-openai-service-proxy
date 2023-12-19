@@ -9,10 +9,11 @@
       "type": "python",
       "request": "launch",
       "module": "uvicorn",
-      "args": ["src.proxy.main:app", "--reload"],
+      "args": ["app.main:app", "--reload"],
       "jinja": true,
       "justMyCode": true,
-      "envFile": "${workspaceFolder}/src/proxy/.env"
+      "envFile": "${workspaceFolder}/src/proxy/app/.env",
+      "cwd": "${workspaceFolder}/src/proxy"
     },
     {
       "name": "Playground",
@@ -21,10 +22,7 @@
       "cwd": "${workspaceFolder}/src/playground",
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev"],
-      "preLaunchTask": "npm: install",
-      "env": {
-        "API_URL": "http://localhost:8000"
-      }
+      "preLaunchTask": "npm: install"
     },
     {
       "type": "node-terminal",

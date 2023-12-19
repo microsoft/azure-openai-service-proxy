@@ -3,14 +3,11 @@
   "configurations": {
     "playground": {
       "appLocation": "src/playground",
-      "apiLocation": "src/proxy",
       "outputLocation": "dist",
       "appBuildCommand": "npm run build",
       "run": "npm run dev",
       "appDevserverUrl": "http://localhost:5173",
-      "apiDevserverUrl": "http://localhost:8000",
-      "appName": "swaplayground-izituffnhig4c",
-      "resourceGroup": "aarons-proxy-rg"
+      "apiDevserverUrl": "http://localhost:8000"
     }
   }
 }
