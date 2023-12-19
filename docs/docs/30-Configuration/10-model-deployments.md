@@ -14,11 +14,11 @@ There a Management API for adding Azure OpenAI model deployments to the system. 
 
 The following is a list of the valid deployment classes supported by the Azure OpenAI proxy service.
 
-| Model deployment class | Models | Description |
-| ---------------------- | ------ | ----------- |
-| `openai-chat` | gpt-35-turbo, gpt-35-turbo-16k, or newer | This is the model deployment class for the Azure OpenAI Chat Completions API. |
-| `openai-completions` | davinci-002 or newer | This is the model deployment class for the Azure OpenAI Completions API. |
-| `openai-embeddings` | text-embedding-ada-002 or newer | This is the model deployment class for the Azure OpenAI Embeddings API. |
+| Model deployment class      | Models                                                                                                   | Description                                                                     |
+| --------------------------- | -------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| `openai-chat`               | gpt-35-turbo, gpt-35-turbo-16k, or newer                                                                 | This is the model deployment class for the Azure OpenAI Chat Completions API.   |
+| `openai-completions`        | davinci-002 or newer                                                                                     | This is the model deployment class for the Azure OpenAI Completions API.        |
+| `openai-embeddings`         | text-embedding-ada-002 or newer                                                                          | This is the model deployment class for the Azure OpenAI Embeddings API.         |
 | `openai-images-generations` | No model is deploy, just an Azure OpenAI resource in a location that supports the Images Generations API | This is the model deployment class for the Azure OpenAI Images Generations API. |
 
 ### Load balancing
@@ -35,7 +35,7 @@ curl -X PATCH -H "Content-Type: application/json" -H "Authorization: Bearer YOUR
     "endpoint_key": "YOUR_AZURE_OPENAI_ENDPOINT_KEY",
     "resource_name": "YOUR_AZURE_OPENAI_RESOURCE_NAME",
     "active": true
-}' https://YOUR_OPENAI_PROXY_ENDPOINT/v1/api/management/modeldeployment/upsert
+}' https://YOUR_OPENAI_PROXY_ENDPOINT/api/v1/management/modeldeployment/upsert
 ```
 
 ## Listing Azure OpenAI Model Deployments
@@ -47,8 +47,8 @@ You can list all Azure OpenAI model deployments or all active Azure OpenAI model
 The following is an example of a `cURL` command to list all Azure OpenAI model deployments in the system.
 
 ```shell
-https://YOUR_OPENAI_PROXY_ENDPOINT/v1/api/management/modeldeployment/list/all
-curl -X GET -H "Authorization: Bearer YOUR_MANAGEMENT_ID_TOKEN" https://YOUR_OPENAI_PROXY_ENDPOINT/v1/api/management/listevents/all | jq
+https://YOUR_OPENAI_PROXY_ENDPOINT/api/v1/management/modeldeployment/list/all
+curl -X GET -H "Authorization: Bearer YOUR_MANAGEMENT_ID_TOKEN" https://YOUR_OPENAI_PROXY_ENDPOINT/api/v1/management/listevents/all | jq
 ```
 
 ### List active Azure OpenAI model deployments
@@ -56,5 +56,5 @@ curl -X GET -H "Authorization: Bearer YOUR_MANAGEMENT_ID_TOKEN" https://YOUR_OPE
 An active Azure OpenAI model deployment is an Azure OpenAI model deployment where the `active` property is set to `true`.
 
 ```shell
-curl -X GET -H "Authorization: Bearer YOUR_MANAGEMENT_ID_TOKEN" https://YOUR_OPENAI_PROXY_ENDPOINT/v1/api/management/listevents/active | jq
+curl -X GET -H "Authorization: Bearer YOUR_MANAGEMENT_ID_TOKEN" https://YOUR_OPENAI_PROXY_ENDPOINT/api/v1/management/listevents/active | jq
 ```

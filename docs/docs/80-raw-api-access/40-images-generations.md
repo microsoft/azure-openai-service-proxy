@@ -54,5 +54,5 @@ curl -X POST -H "Content-Type: application/json" -H "api-key: API_KEY" -d '{
   "prompt": "cute picture of a cat",
   "size": "1024x1024",
   "n": 2
-}' https://PROXY_ENDPOINT_URL/v1/api/images/generations | jq
+}' https://PROXY_ENDPOINT_URL/api/v1/images/generations | jq
 ```

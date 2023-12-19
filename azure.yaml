@@ -6,3 +6,8 @@ services:
     project: ./src/proxy
     language: py
     host: containerapp
+  playground:
+    project: ./src/playground
+    language: ts
+    host: staticwebapp
+    dist: dist

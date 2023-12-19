@@ -14,7 +14,7 @@ if (key == null || endpoint == null)
     return;
 }
 
-endpoint += "/v1/api";
+endpoint += "/api/v1";
 
 await GenerateWithDalle2(key, endpoint);
 await GenerateWithDalle3(key, endpoint);

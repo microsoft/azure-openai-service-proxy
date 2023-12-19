@@ -47,5 +47,5 @@ curl -X POST \
     "temperature": 1,
     "prompt": "Write a poem about indian elephants"
 }' \
-https://ENDPOINT_URL/v1/api/completions | jq
+https://ENDPOINT_URL/api/v1/completions | jq
 ```

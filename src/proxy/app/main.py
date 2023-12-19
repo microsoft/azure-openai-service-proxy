@@ -7,7 +7,6 @@ from fastapi import FastAPI, HTTPException
 from fastapi.exceptions import ResponseValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from fastapi.staticfiles import StaticFiles
 
 from .authorize import Authorize
 from .management import (
@@ -47,43 +46,43 @@ management_router(
     app=app,
     authorize=authorize,
     management=management_service,
-    prefix="/v1/api",
+    prefix="/api/v1",
     tags=["management"],
 )
 completions_router(
     app=app,
     authorize=authorize,
     connection_string=storage_connection_string,
-    prefix="/v1/api",
+    prefix="/api/v1",
     tags=["completions"],
 )
 chat_completions_router(
     app=app,
     authorize=authorize,
     connection_string=storage_connection_string,
-    prefix="/v1/api",
+    prefix="/api/v1",
     tags=["chat_completions"],
 )
 embeddings_router(
     app=app,
     authorize=authorize,
     connection_string=storage_connection_string,
-    prefix="/v1/api",
+    prefix="/api/v1",
     tags=["embeddings"],
 )
-eventinfo_router(app=app, authorize=authorize, prefix="/v1/api", tags=["eventinfo"])
+eventinfo_router(app=app, authorize=authorize, prefix="/api/v1", tags=["eventinfo"])
 images_generations_router(
     app=app,
     authorize=authorize,
     connection_string=storage_connection_string,
-    prefix="/v1/api",
+    prefix="/api/v1",
     tags=["images_generations"],
 )
 images_router(
     app=app,
     authorize=authorize,
     connection_string=storage_connection_string,
-    prefix="/v1/api",
+    prefix="/api/v1",
     tags=["images"],
 )
 
@@ -101,12 +100,12 @@ async def validation_exception_handler(request, exc):
 async def startup_event():
     """startup event"""
 
-    # embeddings_router(app, "/v1/api", ["embeddings"], authorize)
-    # completions_router(app, "/v1/api", ["completions"], authorize)
-    # chat_completions_router(app, "/v1/api", ["chat_completions"], authorize)
-    # images_router(app, "/v1/api", ["images"], authorize)
+    # embeddings_router(app, "/api/v1", ["embeddings"], authorize)
+    # completions_router(app, "/api/v1", ["completions"], authorize)
+    # chat_completions_router(app, "/api/v1", ["chat_completions"], authorize)
+    # images_router(app, "/api/v1", ["images"], authorize)
 
-    # eventinfo_router(app, "/v1/api", ["eventinfo"], authorize)
+    # eventinfo_router(app, "/api/v1", ["eventinfo"], authorize)
 
     # openai_config_chat_completions = OpenAIConfig(
     #     connection_string=storage_connection_string,
@@ -152,8 +151,6 @@ async def startup_event():
     # app.state.rate_limit_images_generations = RateLimit()
 
 
-STATIC_FILES_DIR = "playground/dist"
-
 if os.environ.get("ENVIRONMENT") == "development":
     app.add_middleware(
         CORSMiddleware,
@@ -162,10 +159,6 @@ if os.environ.get("ENVIRONMENT") == "development":
         allow_methods=["*"],
         allow_headers=["*"],
     )
-
-    STATIC_FILES_DIR = "src/playground"
-
-app.mount("/", StaticFiles(directory=STATIC_FILES_DIR, html=True), name="static")
 
 if __name__ == "__main__":
     import uvicorn
