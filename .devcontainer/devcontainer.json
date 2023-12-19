@@ -1,13 +1,24 @@
 // For format details, see https://aka.ms/devcontainer.json.
 {
   "name": "AOAI Proxy",
-  "image": "mcr.microsoft.com/devcontainers/python:3.11-bullseye",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "devcontainer",
+  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
 
   // See https://containers.dev/implementors/features/
   "features": {
     "ghcr.io/devcontainers/features/docker-in-docker:2": {},
     "ghcr.io/azure/azure-dev/azd:latest": {},
-    "ghcr.io/devcontainers/features/node": {}
+    "ghcr.io/devcontainers/features/node": {},
+    "ghcr.io/devcontainers/features/dotnet:2": {
+      "version": "latest"
+    },
+    "ghcr.io/devcontainers/features/python:1": {
+      "version": "3.11"
+    },
+    "ghcr.io/jlaundry/devcontainer-features/mssql-odbc-driver:1": {
+      "version": "18"
+    }
   },
 
   // Configure tool-specific properties.
@@ -23,11 +34,13 @@
         "ms-azuretools.vscode-bicep",
         "esbenp.prettier-vscode",
         "ms-python.black-formatter",
-        "ms-python.pylint"
+        "ms-python.pylint",
+        "ms-dotnettools.csdevkit",
+        "ms-mssql.mssql"
       ],
       // Set *default* container specific settings.json values on container create.
       "settings": {
-        "python.defaultInterpreterPath": "/usr/local/bin/python",
+        "python.defaultInterpreterPath": "/usr/local/python/current/bin/python",
         "python.linting.enabled": true,
         "python.testing.unittestEnabled": false,
         "python.testing.pytestEnabled": true,
@@ -46,7 +59,7 @@
   "forwardPorts": [3100],
 
   // Use 'postCreateCommand' to run commands after the container is created.
-  "postCreateCommand": "python3 -m pip install -r requirements-dev.txt && pre-commit install && cd src/playground && . ${NVM_DIR}/nvm.sh && nvm install && npm i",
+  "postCreateCommand": "bash ./.devcontainer/post-create.sh",
 
   // Comment out to connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
   "remoteUser": "vscode",

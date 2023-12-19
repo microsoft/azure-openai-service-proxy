@@ -1,16 +1,50 @@
-""" dalle-3 and beyond """
+""" dalle-2 """
 
-from fastapi import FastAPI, Request, Response
+from enum import Enum
+from os import environ
 
-from ..authorize import Authorize
-from ..image_generation import ImagesGenerations as RequestMgr
-from ..image_generation import (
-    ImagesGenerationsRequst,
-)
-from ..management import DeploymentClass
+import openai.openai_object
+from fastapi import Request, Response
+from pydantic import BaseModel
 
 # pylint: disable=E0402
+from ..authorize import Authorize, AuthorizeResponse
+from ..config import Config, Deployment
+from ..deployment_class import DeploymentClass
+from ..openai_async import OpenAIAsyncManager
 from .request_manager import RequestManager
+
+OPENAI_IMAGES_GENERATIONS_API_VERSION = "2023-06-01-preview"
+
+
+class ResponseFormat(Enum):
+    """Response Format"""
+
+    URL = "url"
+    BASE64 = "b64_json"
+
+
+class ImageSize(Enum):
+    """Image Size"""
+
+    IS_256X256 = "256x256"
+    IS_512X512 = "512x512"
+    IS_1024X1024 = "1024x1024"
+
+
+class DalleTimeoutError(Exception):
+    """Raised when the Dalle request times out"""
+
+
+class ImagesGenerationsRequst(BaseModel):
+    """OpenAI Images Generations Request"""
+
+    prompt: str
+    response_format: ResponseFormat = ResponseFormat.URL
+    n: int = 1
+    size: ImageSize = ImageSize.IS_1024X1024
+    user: str = None
+    api_version: str = OPENAI_IMAGES_GENERATIONS_API_VERSION
 
 
 class ImagesGenerations(RequestManager):
@@ -18,25 +52,16 @@ class ImagesGenerations(RequestManager):
 
     def __init__(
         self,
-        app: FastAPI,
         authorize: Authorize,
-        connection_string: str,
-        prefix: str,
-        tags: list[str],
+        config: Config,
     ):
         super().__init__(
-            app=app,
             authorize=authorize,
-            connection_string=connection_string,
-            prefix=prefix,
-            tags=tags,
+            config=config,
             deployment_class=DeploymentClass.OPENAI_IMAGES_GENERATIONS.value,
-            request_class_mgr=RequestMgr,
         )
 
-        self.__include_router()
-
-    def __include_router(self):
+    def include_router(self):
         """include router"""
 
         # Support for Dall-e-2
@@ -53,7 +78,7 @@ class ImagesGenerations(RequestManager):
             response_model=None,
         )
         async def oai_images_generations(
-            image_generation_request: ImagesGenerationsRequst,
+            model: ImagesGenerationsRequst,
             request: Request,
             response: Response,
         ):
@@ -62,20 +87,19 @@ class ImagesGenerations(RequestManager):
             # No deployment_is passed for images generation so set to dall-e
             deployment_id = "dall-e"
 
-            # get the api version from the query string
-            if "api-version" in request.query_params:
-                image_generation_request.api_version = request.query_params["api-version"]
+            authorize_response = await self.authorize.authorize_api_access(
+                headers=request.headers,
+                deployment_id=deployment_id,
+                request_class=self.deployment_class,
+            )
 
-            # exception thrown if not authorized
-            await self.authorize_request(deployment_id=deployment_id, request=request)
+            completion, status_code = await self.call_openai_images_generations(
+                model, request, response, authorize_response
+            )
 
-            (
-                completion_response,
-                status_code,
-            ) = await self.request_class_mgr.call_openai_images_generations(image_generation_request, request, response)
             response.status_code = status_code
 
-            return completion_response
+            return completion
 
         @self.router.get("/{friendly_name}/openai/operations/images/{image_id}")
         async def oai_images_get(
@@ -89,16 +113,122 @@ class ImagesGenerations(RequestManager):
             # No deployment_is passed for images generation so set to dall-e
             deployment_id = "dall-e"
 
-            if "api-version" in request.query_params:
-                api_version = request.query_params["api-version"]
+            # if "api-version" in request.query_params:
+            #     api_version = request.query_params["api-version"]
 
-            await self.authorize_request(deployment_id=deployment_id, request=request)
+            # Note, the .NET SDK tried to use api-version 2023-09-01-preview
+            # but it is not supported
+            api_version = OPENAI_IMAGES_GENERATIONS_API_VERSION
 
-            (
-                completion_response,
-                status_code,
-            ) = await self.request_class_mgr.call_openai_images_get(friendly_name, image_id, api_version)
+            authorize_response = await self.authorize_request(deployment_id=deployment_id, request=request)
+
+            (completion_response, status_code,) = await self.call_openai_images_get(
+                friendly_name,
+                image_id,
+                authorize_response,
+                api_version,
+            )
+
             response.status_code = status_code
             return completion_response
 
-        self.app.include_router(self.router, prefix=self.prefix, tags=self.tags)
+        return self.router
+
+    async def call_openai_images_generations(
+        self,
+        images: ImagesGenerationsRequst,
+        request: Request,
+        response: Response,
+        authorize_response: AuthorizeResponse,
+    ) -> tuple[Deployment, openai.openai_object.OpenAIObject, int]:
+        """call openai with retry"""
+
+        self.validate_input(images)
+
+        deployment = await self.config.get_catalog_by_model_class(authorize_response)
+
+        # Note, the .NET SDK tried to use api-version 2023-09-01-preview
+        # but it is not supported
+        api_version = OPENAI_IMAGES_GENERATIONS_API_VERSION
+
+        openai_request = {
+            "prompt": images.prompt,
+            "n": images.n,
+            "size": images.size.value,
+            "response_format": images.response_format.value,
+        }
+
+        url = (
+            f"https://{deployment.resource_name}.openai.azure.com"
+            "/openai/images/generations:submit"
+            f"?api-version={api_version}"
+        )
+
+        async_mgr = OpenAIAsyncManager(deployment)
+        dalle_response = await async_mgr.async_post(openai_request, url)
+
+        if "operation-location" in dalle_response.headers:
+            original_location = dalle_response.headers["operation-location"]
+            port = f":{request.url.port}" if request.url.port else ""
+            original_location_suffix = original_location.split("/openai", 1)[1]
+
+            if environ.get("ENVIRONMENT") == "development":
+                proxy_location = (
+                    f"http://{request.url.hostname}{port}"
+                    f"/api/v1/{deployment.friendly_name}/openai{original_location_suffix}"
+                )
+            else:
+                proxy_location = (
+                    f"https://{request.url.hostname}{port}"
+                    f"/api/v1/{deployment.friendly_name}/openai{original_location_suffix}"
+                )
+
+            response.headers.append("operation-location", proxy_location)
+
+        return dalle_response.json(), dalle_response.status_code
+
+    async def call_openai_images_get(
+        self,
+        friendly_name: str,
+        image_id: str,
+        authorize_response: AuthorizeResponse,
+        api_version: str = OPENAI_IMAGES_GENERATIONS_API_VERSION,
+    ):
+        """call openai with retry"""
+
+        deployment = await self.config.get_catalog_by_friendly_name(friendly_name, authorize_response)
+
+        if deployment is None:
+            return self.report_exception("Oops, failed to find service to generate image.", 404)
+
+        url = (
+            f"https://{deployment.resource_name}.openai.azure.com"
+            f"/openai/operations/images/{image_id}"
+            f"?api-version={api_version}"
+        )
+
+        async_mgr = OpenAIAsyncManager(deployment)
+        dalle_response = await async_mgr.async_get(url)
+
+        return dalle_response.json(), dalle_response.status_code
+
+    def validate_input(self, images: ImagesGenerationsRequst):
+        """validate input"""
+        # do some basic input validation
+        if not images.prompt:
+            self.report_exception("Oops, no prompt.", 400)
+
+        if len(images.prompt) > 1000:
+            self.report_exception("Oops, prompt is too long. The maximum length is 1000 characters.", 400)
+
+        # check the image_count is between 1 and 5
+        if images.n and not 1 <= images.n <= 5:
+            self.report_exception("Oops, image_count must be between 1 and 5 inclusive.", 400)
+
+        # check the image_size is between 256x256, 512x512, 1024x1024
+        if images.size and images.size not in ImageSize:
+            self.report_exception("Oops, image_size must be 256x256, 512x512, 1024x1024.", 400)
+
+        # check the response_format is url or base64
+        if images.response_format and images.response_format not in ResponseFormat:
+            self.report_exception("Oops, response_format must be url or b64_json.", 400)

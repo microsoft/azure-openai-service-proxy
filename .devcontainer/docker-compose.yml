@@ -1,0 +1,18 @@
+version: "3.8"
+services:
+  devcontainer:
+    image: mcr.microsoft.com/devcontainers/base:bullseye
+    volumes:
+      - ../..:/workspaces:cached
+    network_mode: service:db
+    command: sleep infinity
+    environment:
+      MSSQL_SA_PASSWORD: yourStrongPassword123
+      AZURE_SQL_CONNECTION_STRING: Server=db,1433;Database=aoai-proxy;UID=sa;PWD=yourStrongPassword123;TrustServerCertificate=yes;
+
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    restart: unless-stopped
+    environment:
+      MSSQL_SA_PASSWORD: yourStrongPassword123
+      ACCEPT_EULA: 1

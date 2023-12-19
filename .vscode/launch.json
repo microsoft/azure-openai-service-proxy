@@ -12,7 +12,7 @@
       "args": ["app.main:app", "--reload"],
       "jinja": true,
       "justMyCode": true,
-      "envFile": "${workspaceFolder}/src/proxy/app/.env",
+      "envFile": "${workspaceFolder}/src/proxy/.env",
       "cwd": "${workspaceFolder}/src/proxy"
     },
     {

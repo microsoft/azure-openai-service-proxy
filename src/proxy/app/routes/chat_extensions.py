@@ -15,10 +15,10 @@ from ..deployment_class import DeploymentClass
 from ..openai_async import OpenAIAsyncManager
 from .request_manager import RequestManager
 
-OPENAI_CHAT_COMPLETIONS_API_VERSION = "2023-09-01-preview"
+OPENAI_CHAT_COMPLETIONS_EXTENSIONS_API_VERSION = "2023-08-01-preview"
 
 
-class ChatCompletionsRequest(BaseModel):
+class ChatExtensionsRequest(BaseModel):
     """OpenAI Chat Request"""
 
     messages: list[dict[str, str]]
@@ -33,10 +33,10 @@ class ChatCompletionsRequest(BaseModel):
     presence_penalty: float | None = None
     functions: list[dict[str, Any]] | None = None
     function_call: str | dict[str, str] | None = None
-    api_version: str = OPENAI_CHAT_COMPLETIONS_API_VERSION
+    api_version: str = OPENAI_CHAT_COMPLETIONS_EXTENSIONS_API_VERSION
 
 
-class ChatCompletions(RequestManager):
+class ChatExtensions(RequestManager):
     """Completion route"""
 
     def __init__(
@@ -54,28 +54,14 @@ class ChatCompletions(RequestManager):
     def include_router(self):
         """include router"""
 
-        # Support for OpenAI SDK 0.28
+        # Support for .NET Azure OpenAI Extensions Chat Completions
         @self.router.post(
-            "/engines/{engine_id}/chat/completions",
+            "/openai/deployments/{deployment_id}/extensions/chat/completions",
             status_code=200,
             response_model=None,
         )
-        # Support for .NET Azure OpenAI Service SDK
-        @self.router.post(
-            "/openai/deployments/{deployment_id}/chat/completions",
-            status_code=200,
-            response_model=None,
-        )
-        # Support for Python Azure OpenAI SDK 1.0+
-        @self.router.post(
-            "/deployments/{deployment_id}/chat/completions",
-            status_code=200,
-            response_model=None,
-        )
-        # Support for OpenAI SDK 1.0+
-        @self.router.post("/chat/completions", status_code=200, response_model=None)
         async def oai_chat_completion(
-            model: ChatCompletionsRequest,
+            model: ChatExtensionsRequest,
             request: Request,
             response: Response,
             deployment_id: str = None,
@@ -83,14 +69,14 @@ class ChatCompletions(RequestManager):
             """OpenAI chat completion response"""
 
             if model.api_version is None:
-                model.api_version = OPENAI_CHAT_COMPLETIONS_API_VERSION
+                model.api_version = OPENAI_CHAT_COMPLETIONS_EXTENSIONS_API_VERSION
 
             completion, status_code = await self.process_request(
                 deployment_id=deployment_id,
                 request=request,
                 model=model,
                 call_method=self.call_openai,
-                validate_method=self.__validate_chat_completion_request,
+                validate_method=self.__validate_chat_extensions_request,
             )
 
             if isinstance(completion, AsyncGenerator):
@@ -103,7 +89,7 @@ class ChatCompletions(RequestManager):
 
     async def call_openai(
         self,
-        model: ChatCompletionsRequest,
+        model: ChatExtensionsRequest,
         openai_request: dict[str, Any],
         deployment: Deployment,
     ) -> tuple[openai.openai_object.OpenAIObject, int] | AsyncGenerator:
@@ -111,21 +97,21 @@ class ChatCompletions(RequestManager):
 
         url = (
             f"https://{deployment.resource_name}.openai.azure.com/openai/deployments/"
-            f"{deployment.deployment_name}/chat/completions"
+            f"{deployment.deployment_name}/extensions/chat/completions"
             f"?api-version={model.api_version}"
         )
 
         async_mgr = OpenAIAsyncManager(deployment)
 
         if model.stream:
-            response, http_status_code = await async_mgr.async_post_streaming(openai_request, url)
+            response = await async_mgr.async_post_streaming(openai_request, url)
         else:
             response, http_status_code = await async_mgr.async_openai_post(openai_request, url)
             response["model"] = deployment.friendly_name
 
         return response, http_status_code
 
-    def __validate_chat_completion_request(self, model: ChatCompletionsRequest):
+    def __validate_chat_extensions_request(self, model: ChatExtensionsRequest):
         """validate input"""
 
         # check the max_tokens is between 1 and 4000

@@ -3,10 +3,9 @@
 import base64
 import json
 import logging
+from uuid import UUID
 
-from azure.core.exceptions import (
-    AzureError,
-)
+from azure.core.exceptions import AzureError
 from azure.storage.queue import QueueServiceClient
 from fastapi import HTTPException
 from pydantic import BaseModel
@@ -21,8 +20,10 @@ class MonitorEntity(BaseModel):
 
     is_authorized: bool
     max_token_cap: int
+    daily_request_cap: int
+    entra_id: str
+    event_id: str
     event_code: str
-    user_token: str
     event_name: str
     event_url: str
     event_url_text: str
@@ -34,8 +35,11 @@ class MonitorEntity(BaseModel):
         self,
         is_authorized: bool,
         max_token_cap: int,
+        daily_request_cap: int,
+        entra_id: str,
+        event_id: str,
         event_code: str,
-        user_token: str,
+        user_token: UUID,
         event_name: str,
         event_url: str,
         event_url_text: str,
@@ -46,6 +50,9 @@ class MonitorEntity(BaseModel):
         super().__init__(
             is_authorized=is_authorized,
             max_token_cap=max_token_cap,
+            daily_request_cap=daily_request_cap,
+            entra_id=entra_id,
+            event_id=event_id,
             event_code=event_code,
             user_token=user_token,
             event_name=event_name,
@@ -55,6 +62,17 @@ class MonitorEntity(BaseModel):
             organizer_email=organizer_email,
             request_class=request_class,
         )
+
+
+class UUIDEncoder(json.JSONEncoder):
+    """UUID Encoder"""
+
+    def default(self, o):
+        """default"""
+        if isinstance(o, UUID):
+            # if the obj is uuid, we simply return the value of uuid
+            return o.hex
+        return json.JSONEncoder.default(self, o)
 
 
 class Monitor:
@@ -70,7 +88,7 @@ class Monitor:
 
         # add the class name to the entity
 
-        message = json.dumps(entity.__dict__)
+        message = json.dumps(entity.__dict__, cls=UUIDEncoder)
         # base64 encode the message to a string
         message = base64.b64encode(message.encode("ascii")).decode("ascii")
         try:
