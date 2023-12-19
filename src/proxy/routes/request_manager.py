@@ -90,7 +90,13 @@ class RequestManager:
 
         deployment = await self.config.get_catalog_by_model_class(authorize_response)
 
-        return await call_method(model, openai_request, deployment)
+        response, http_status_code = await call_method(model, openai_request, deployment)
+
+        # log the request usage
+        if "usage" in response:
+            print(f"usage: {response.get('usage')}")
+
+        return response, http_status_code
 
     def throw_validation_error(self, message: str, status_code: int):
         """throw validation error"""
