@@ -1,8 +1,11 @@
 import { API_VERSION } from "../constants";
 
-export async function eventInfo(eventCode: string, abortController: AbortController): Promise<EventInfo> {
+export async function eventInfo(
+  eventCode: string,
+  abortController: AbortController
+): Promise<EventInfo> {
   try {
-    const response = await fetch(`${API_VERSION}/api/eventinfo`, {
+    const response = await fetch(`/api/${API_VERSION}/eventinfo`, {
       method: "POST",
       headers: {
         accept: "application/json",

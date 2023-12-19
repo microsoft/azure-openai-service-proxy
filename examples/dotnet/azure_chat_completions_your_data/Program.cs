@@ -23,7 +23,7 @@ if (key == null || endpoint == null || searchEndpoint == null || indexName == nu
     return;
 }
 
-endpoint += "/v1/api";
+endpoint += "/api/v1";
 
 var client = new OpenAIClient(new Uri(endpoint), new Azure.AzureKeyCredential(key));
 

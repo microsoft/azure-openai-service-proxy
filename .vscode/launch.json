@@ -25,13 +25,20 @@
       "env": {
         "API_URL": "http://localhost:8000"
       }
+    },
+    {
+      "type": "node-terminal",
+      "name": "SWA Playground",
+      "request": "launch",
+      "command": "swa start playground",
+      "cwd": "${workspaceFolder}"
     }
   ],
 
   "compounds": [
     {
       "name": "Run all",
-      "configurations": ["AOAI Proxy", "Playground"],
+      "configurations": ["AOAI Proxy", "Playground", "SWA Playground"],
       "presentation": {
         "hidden": false,
         "group": "Frontend",

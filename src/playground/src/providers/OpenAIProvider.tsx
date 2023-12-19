@@ -25,7 +25,7 @@ const OpenAIClientProvider: React.FC<PropsWithChildren> = ({ children }) => {
     if (eventCode) {
       setClient(
         new OpenAIClient(
-          `${window.location.origin}/${API_VERSION}/api`,
+          `${window.location.origin}/api/${API_VERSION}`,
           new AzureKeyCredential(`${eventCode}`),
           {
             allowInsecureConnection: process.env.ENVIRONMENT === "development",

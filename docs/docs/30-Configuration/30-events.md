@@ -22,7 +22,7 @@ curl -X POST -H "Content-Type: application/json" -H "Authorization: Bearer YOUR_
     "event_url_text": "Join the .NET OpenAI Hack",
     "organizer_name": "Ant Blogs",
     "organizer_email": "ablogs@example.com"
-}' https://YOUR_OPENAI_PROXY_ENDPOINT/v1/api/management/addevent | jq
+}' https://YOUR_OPENAI_PROXY_ENDPOINT/api/v1/management/addevent | jq
 ```
 
 ## Listing events
@@ -34,7 +34,7 @@ For now, you can list all events or all active events.
 The following is an example of a `cURL` command to list all events in the system.
 
 ```shell
-curl -X GET -H "Authorization: Bearer YOUR_MANAGEMENT_ID_TOKEN" https://YOUR_OPENAI_PROXY_ENDPOINT/v1/api/management/listevents/all | jq
+curl -X GET -H "Authorization: Bearer YOUR_MANAGEMENT_ID_TOKEN" https://YOUR_OPENAI_PROXY_ENDPOINT/api/v1/management/listevents/all | jq
 ```
 
 ### List active events
@@ -44,10 +44,9 @@ An active event is an event where the current UTC time is is between the event `
 The following is an example of a `cURL` command to list all active events in the system.
 
 ```shell
-curl -X GET -H "Authorization: Bearer YOUR_MANAGEMENT_ID_TOKEN" YOUR_OPENAI_PROXY_ENDPOINT/v1/api/management/listevents/active | jq
+curl -X GET -H "Authorization: Bearer YOUR_MANAGEMENT_ID_TOKEN" YOUR_OPENAI_PROXY_ENDPOINT/api/v1/management/listevents/active | jq
 ```
 
 ## Event Code Cache
 
 Event data, namely the `EventCode`, `StartUTC`, `EndUTC`, and `MaxTokenCap` are cached by the proxy service. The cache is refreshed every 10 minutes. Caching is implemented to improve performance by reducing the number of calls to the Azure Storage Account table. Because of caching, it may take up to 10 minutes for the changes to be reflected in the proxy service.
-
