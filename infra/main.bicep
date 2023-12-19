@@ -11,6 +11,16 @@ param location string
 
 param proxyAppExists bool = false
 
+param playgroundServiceName string = ''
+@description('Location for the Playground app resource group')
+@allowed([ 'centralus', 'eastus2', 'eastasia', 'westeurope', 'westus2' ])
+@metadata({
+  azd: {
+    type: 'location'
+  }
+})
+param swaLocation string
+
 var resourceToken = toLower(uniqueString(subscription().id, name, location))
 var tags = { 'azd-env-name': name }
 
@@ -73,6 +83,26 @@ module proxy 'proxy.bicep' = {
   }
 }
 
+// The Playground frontend
+module playground 'playground.bicep' = {
+  name: 'playground'
+  scope: resourceGroup
+  params: {
+    name: !empty(playgroundServiceName) ? playgroundServiceName : 'swaplayground-${resourceToken}'
+    location: swaLocation
+    tags: tags
+  }
+}
+// link Playground to Proxy backend
+module swaLinkDotnet './linkSwaResource.bicep' = {
+  name: 'frontend-link-dotnet'
+  scope: resourceGroup
+  params: {
+    swaAppName: playground.outputs.SERVICE_WEB_NAME
+    backendAppName: proxy.outputs.SERVICE_PROXY_NAME
+  }
+}
+
 module logAnalyticsWorkspace 'core/monitor/loganalytics.bicep' = {
   name: 'loganalytics'
   scope: resourceGroup
@@ -124,4 +154,4 @@ output SERVICE_PROXY_NAME string = proxy.outputs.SERVICE_PROXY_NAME
 output SERVICE_PROXY_URI string = proxy.outputs.SERVICE_PROXY_URI
 output SERVICE_PROXY_IMAGE_NAME string = proxy.outputs.SERVICE_PROXY_IMAGE_NAME
 output SERVICE_PROXY_ENDPOINTS array = [ '${proxy.outputs.SERVICE_PROXY_URI}/docs' ]
-output AZURE_STORAGE_ACCOUNT string = storageAccount.outputs.connectionString
+output SERVICE_PLAYGROUND_URI string = playground.outputs.SERVICE_WEB_URI

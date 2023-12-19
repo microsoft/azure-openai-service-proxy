@@ -9,10 +9,5 @@ export default defineConfig(({ mode }) => {
     define: {
       "process.env.ENVIRONMENT": JSON.stringify(mode),
     },
-    server: {
-      proxy: {
-        "/v1": env.API_URL,
-      },
-    },
   };
 });

@@ -8,7 +8,6 @@ from fastapi import FastAPI, HTTPException
 from fastapi.exceptions import ResponseValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from fastapi.staticfiles import StaticFiles
 
 # pylint: disable=E0402
 from .authorize import Authorize
@@ -60,34 +59,34 @@ config = Config(sql_conn=sql_conn)
 
 
 completion_router = completions_router(authorize=authorize, config=config)
-app.include_router(completion_router.include_router(), prefix="/v1/api", tags=["completions"])
+app.include_router(completion_router.include_router(), prefix="/api/v1", tags=["completions"])
 
 chat_route = chat_completions_router(authorize=authorize, config=config)
-app.include_router(chat_route.include_router(), prefix="/v1/api", tags=["chat-completions"])
+app.include_router(chat_route.include_router(), prefix="/api/v1", tags=["chat-completions"])
 
 chat_extensions_route = chat_extensions_router(authorize=authorize, config=config)
 app.include_router(
     chat_extensions_route.include_router(),
-    prefix="/v1/api",
+    prefix="/api/v1",
     tags=["chat-completions-extensions"],
 )
 
 embeddings_route = embeddings_router(authorize=authorize, config=config)
-app.include_router(embeddings_route.include_router(), prefix="/v1/api", tags=["embeddings"])
+app.include_router(embeddings_route.include_router(), prefix="/api/v1", tags=["embeddings"])
 
 event_info_route = eventinfo_router(authorize=authorize, config=config)
-app.include_router(event_info_route.include_router(), prefix="/v1/api", tags=["eventinfo"])
+app.include_router(event_info_route.include_router(), prefix="/api/v1", tags=["eventinfo"])
 
 
 images_generations_route = images_generations_router(authorize=authorize, config=config)
 app.include_router(
     images_generations_route.include_router(),
-    prefix="/v1/api",
+    prefix="/api/v1",
     tags=["images-generations"],
 )
 
 images_route = images_router(authorize=authorize, config=config)
-app.include_router(images_route.include_router(), prefix="/v1/api", tags=["images"])
+app.include_router(images_route.include_router(), prefix="/api/v1", tags=["images"])
 
 
 @app.exception_handler(ResponseValidationError)
@@ -105,8 +104,6 @@ async def startup_event():
     pass
 
 
-STATIC_FILES_DIR = "playground/dist"
-
 if os.environ.get("ENVIRONMENT") == "development":
     app.add_middleware(
         CORSMiddleware,
@@ -115,10 +112,6 @@ if os.environ.get("ENVIRONMENT") == "development":
         allow_methods=["*"],
         allow_headers=["*"],
     )
-
-    STATIC_FILES_DIR = "src/playground"
-
-app.mount("/", StaticFiles(directory=STATIC_FILES_DIR, html=True), name="static")
 
 if __name__ == "__main__":
     import uvicorn

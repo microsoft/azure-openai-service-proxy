@@ -15,7 +15,7 @@ if (key == null || endpoint == null)
     return;
 }
 
-var client = new OpenAIClient(new Uri(endpoint + "/v1/api"), new Azure.AzureKeyCredential(key));
+var client = new OpenAIClient(new Uri(endpoint + "/api/v1"), new Azure.AzureKeyCredential(key));
 
 var chatCompletionsOptions = new ChatCompletionsOptions()
 {

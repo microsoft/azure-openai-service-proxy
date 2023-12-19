@@ -9,6 +9,7 @@ cd src/playground
 . ${NVM_DIR}/nvm.sh
 nvm install
 npm i
+npm install -g @azure/static-web-apps-cli
 
 echo Setting up .NET environment...
 cd ../

@@ -175,12 +175,12 @@ class ImagesGenerations(RequestManager):
             if environ.get("ENVIRONMENT") == "development":
                 proxy_location = (
                     f"http://{request.url.hostname}{port}"
-                    f"/v1/api/{deployment.friendly_name}/openai{original_location_suffix}"
+                    f"/api/v1/{deployment.friendly_name}/openai{original_location_suffix}"
                 )
             else:
                 proxy_location = (
                     f"https://{request.url.hostname}{port}"
-                    f"/v1/api/{deployment.friendly_name}/openai{original_location_suffix}"
+                    f"/api/v1/{deployment.friendly_name}/openai{original_location_suffix}"
                 )
 
             response.headers.append("operation-location", proxy_location)
