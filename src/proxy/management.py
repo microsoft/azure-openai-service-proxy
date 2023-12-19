@@ -2,7 +2,6 @@
 import logging
 import uuid
 from datetime import datetime
-from enum import Enum
 
 from azure.core.exceptions import AzureError
 from azure.data.tables import TableClient
@@ -10,23 +9,15 @@ from azure.data.tables.aio import TableClient as AsyncTableClient
 from fastapi import HTTPException
 from pydantic import BaseModel
 
+# pylint: disable=E0402
+from .deployment_class import DeploymentClass
+
 logging.basicConfig(level=logging.WARNING)
 
 MANAGEMENT_TABLE_NAME = "management"
 EVENT_AUTHORIZATION_TABLE_NAME = "authorization"
 EVENT_AUTHORISATION_PARTITION_KEY = "event"
 CONFIGURATION_TABLE_NAME = "configuration"
-
-
-# create a model type enum
-class DeploymentClass(Enum):
-    """Deployment Class."""
-
-    OPENAI_CHAT = "openai-chat"
-    OPENAI_COMPLETIONS = "openai-completions"
-    OPENAI_EMBEDDINGS = "openai-embeddings"
-    OPENAI_IMAGES_GENERATIONS = "openai-images-generations"
-    OPENAI_IMAGES = "openai-images"
 
 
 class ModelDeploymentRequest(BaseModel):

@@ -2,15 +2,31 @@
 
 from typing import Any
 
-from fastapi import FastAPI, Request, Response
-
-from ..authorize import Authorize
-from ..completions import Completions as RequestMgr
-from ..completions import CompletionsRequest
-from ..management import DeploymentClass
+import openai.openai_object
+from fastapi import Request, Response
+from pydantic import BaseModel
 
 # pylint: disable=E0402
+from ..authorize import Authorize
+from ..config import Config, Deployment
+from ..deployment_class import DeploymentClass
+from ..openai_async import OpenAIAsyncManager
 from .request_manager import RequestManager
+
+OPENAI_COMPLETIONS_API_VERSION = "2023-09-01-preview"
+
+
+class CompletionsRequest(BaseModel):
+    """OpenAI Compeletion Request"""
+
+    prompt: str | list[str]
+    max_tokens: int = None
+    temperature: float = None
+    top_p: float | None = None
+    stop: Any | None = None
+    frequency_penalty: float = 0
+    presence_penalty: float = 0
+    api_version: str = OPENAI_COMPLETIONS_API_VERSION
 
 
 class Completions(RequestManager):
@@ -18,25 +34,17 @@ class Completions(RequestManager):
 
     def __init__(
         self,
-        app: FastAPI,
         authorize: Authorize,
-        connection_string: str,
-        prefix: str,
-        tags: list[str],
+        config: Config,
     ):
         super().__init__(
-            app=app,
             authorize=authorize,
-            connection_string=connection_string,
-            prefix=prefix,
-            tags=tags,
+            config=config,
             deployment_class=DeploymentClass.OPENAI_COMPLETIONS.value,
-            request_class_mgr=RequestMgr,
+            # request_class_mgr=None,
         )
 
-        self.__include_router()
-
-    def __include_router(self):
+    def include_router(self):
         """include router"""
 
         # Support for OpenAI SDK 0.28
@@ -54,29 +62,47 @@ class Completions(RequestManager):
         # Support for OpenAI SDK 1.0+
         @self.router.post("/completions", status_code=200, response_model=None)
         async def oai_completion(
-            completion_request: CompletionsRequest,
+            model: CompletionsRequest,
             request: Request,
             response: Response,
             deployment_id: str = None,
-        ) -> Any:
+        ) -> openai.openai_object.OpenAIObject | str:
             """OpenAI completion response"""
 
-            # get the api version from the query string
-            if "api-version" in request.query_params:
-                completion_request.api_version = request.query_params["api-version"]
-
-            # exception thrown if not authorized
-            authorize_response = await self.authorize_request(deployment_id=deployment_id, request=request)
-
-            if completion_request.max_tokens and completion_request.max_tokens > authorize_response.max_token_cap:
-                completion_request.max_tokens = authorize_response.max_token_cap
-
-            (
-                completion_response,
-                status_code,
-            ) = await self.request_class_mgr.call_openai_completion(completion_request)
+            completion, status_code = await self.process_request(
+                deployment_id=deployment_id,
+                request=request,
+                model=model,
+                call_method=self.call_openai,
+                validate_method=self.__validate_completion_request,
+            )
 
             response.status_code = status_code
-            return completion_response
+            return completion
 
-        self.app.include_router(self.router, prefix=self.prefix, tags=self.tags)
+        return self.router
+
+    async def call_openai(
+        self,
+        model: CompletionsRequest,
+        openai_request: dict[str, Any],
+        deployment: Deployment,
+    ) -> tuple[openai.openai_object.OpenAIObject, int]:
+        """call openai with retry"""
+
+        url = (
+            f"https://{deployment.resource_name}.openai.azure.com/openai/deployments/"
+            f"{deployment.deployment_name}/completions"
+            f"?api-version={model.api_version}"
+        )
+
+        async_mgr = OpenAIAsyncManager(deployment)
+        response, http_status_code = await async_mgr.async_openai_post(openai_request, url)
+
+        response["model"] = deployment.friendly_name
+
+        return response, http_status_code
+
+    def __validate_completion_request(self, model: CompletionsRequest):
+        if not model.prompt:
+            self.report_exception("Oops, no prompt.", 400)
