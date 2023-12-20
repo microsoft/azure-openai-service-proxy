@@ -71,6 +71,4 @@ class Embeddings(RequestManager):
         async_mgr = OpenAIAsyncManager(deployment)
         response, http_status_code = await async_mgr.async_openai_post(openai_request, url)
 
-        response["model"] = deployment.friendly_name
-
         return response, http_status_code

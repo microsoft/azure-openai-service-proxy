@@ -66,7 +66,7 @@ class ImagesGenerations(RequestManager):
             """OpenAI image generation response"""
 
             # No deployment_is passed for images generation so set to dall-e
-            deployment_id = "dall-e"
+            deployment_id = "dalle-2"
 
             authorize_response = await self.authorize.authorize_api_access(
                 headers=request.headers, deployment_id=deployment_id
@@ -157,7 +157,7 @@ class ImagesGenerations(RequestManager):
             if environ.get("ENVIRONMENT") == "development":
                 proxy_location = (
                     f"http://{request.url.hostname}{port}"
-                    f"/api/v1/{deployment.friendly_name}/openai{original_location_suffix}"
+                    f"/api/v1/{deployment.deployment_name}/openai{original_location_suffix}"
                 )
             else:
                 proxy_location = (

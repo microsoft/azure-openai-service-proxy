@@ -93,7 +93,6 @@ class ChatExtensions(RequestManager):
             response = await async_mgr.async_post_streaming(openai_request, url)
         else:
             response, http_status_code = await async_mgr.async_openai_post(openai_request, url)
-            response["model"] = deployment.friendly_name
 
         return response, http_status_code
 

@@ -114,7 +114,7 @@ class Config:
         )
 
         for deployment in deployments:
-            if deployment.friendly_name == friendly_name:
+            if deployment.deployment_name == friendly_name:
                 return deployment
 
         self.logging.warning("No active OpenAI model deployments found.")
