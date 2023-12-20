@@ -8,9 +8,7 @@ from fastapi import Request, Response
 from pydantic import BaseModel
 
 # pylint: disable=E0402
-from ..authorize import Authorize
-from ..config import Config, Deployment
-from ..deployment_class import DeploymentClass
+from ..config import Deployment
 from ..openai_async import OpenAIAsyncManager
 from .request_manager import RequestManager
 
@@ -61,29 +59,12 @@ class ImagesRequest(BaseModel):
 class Images(RequestManager):
     """Completion route"""
 
-    def __init__(
-        self,
-        authorize: Authorize,
-        config: Config,
-    ):
-        super().__init__(
-            authorize=authorize,
-            config=config,
-            deployment_class=DeploymentClass.OPENAI_IMAGES.value,
-        )
-
     def include_router(self):
         """include router"""
 
         # Azure OpenAI Images
         @self.router.post(
             "/openai/deployments/{deployment_id}/images/generations",
-            status_code=200,
-            response_model=None,
-        )
-        # OpenAI Images
-        @self.router.post(
-            "/images/generations",
             status_code=200,
             response_model=None,
         )

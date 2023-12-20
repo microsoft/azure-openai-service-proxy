@@ -8,9 +8,8 @@ from fastapi import Request, Response
 from pydantic import BaseModel
 
 # pylint: disable=E0402
-from ..authorize import Authorize, AuthorizeResponse
-from ..config import Config, Deployment
-from ..deployment_class import DeploymentClass
+from ..authorize import AuthorizeResponse
+from ..config import Deployment
 from ..openai_async import OpenAIAsyncManager
 from .request_manager import RequestManager
 
@@ -50,27 +49,9 @@ class ImagesGenerationsRequst(BaseModel):
 class ImagesGenerations(RequestManager):
     """Completion route"""
 
-    def __init__(
-        self,
-        authorize: Authorize,
-        config: Config,
-    ):
-        super().__init__(
-            authorize=authorize,
-            config=config,
-            deployment_class=DeploymentClass.OPENAI_IMAGES_GENERATIONS.value,
-        )
-
     def include_router(self):
         """include router"""
 
-        # Support for Dall-e-2
-        # Support for OpenAI SDK 0.28
-        @self.router.post(
-            "/engines/{engine_id}/images/generations",
-            status_code=200,
-            response_model=None,
-        )
         # Support for Azure OpenAI Service SDK 1.0+
         @self.router.post(
             "/openai/images/generations:submit",
@@ -88,9 +69,7 @@ class ImagesGenerations(RequestManager):
             deployment_id = "dall-e"
 
             authorize_response = await self.authorize.authorize_api_access(
-                headers=request.headers,
-                deployment_id=deployment_id,
-                request_class=self.deployment_class,
+                headers=request.headers, deployment_id=deployment_id
             )
 
             completion, status_code = await self.call_openai_images_generations(
@@ -122,7 +101,10 @@ class ImagesGenerations(RequestManager):
 
             authorize_response = await self.authorize_request(deployment_id=deployment_id, request=request)
 
-            (completion_response, status_code,) = await self.call_openai_images_get(
+            (
+                completion_response,
+                status_code,
+            ) = await self.call_openai_images_get(
                 friendly_name,
                 image_id,
                 authorize_response,
@@ -145,7 +127,7 @@ class ImagesGenerations(RequestManager):
 
         self.validate_input(images)
 
-        deployment = await self.config.get_catalog_by_model_class(authorize_response)
+        deployment = await self.config.get_catalog_by_deployment_id(authorize_response)
 
         # Note, the .NET SDK tried to use api-version 2023-09-01-preview
         # but it is not supported

@@ -7,7 +7,6 @@ from fastapi import APIRouter, HTTPException, Request
 # pylint: disable=E0402
 from ..authorize import Authorize, AuthorizeResponse
 from ..config import Config
-from ..deployment_class import DeploymentClass
 from ..rate_limit import RateLimit
 
 logging.basicConfig(level=logging.INFO)
@@ -16,15 +15,8 @@ logging.basicConfig(level=logging.INFO)
 class RequestManager:
     """Request Manager base class"""
 
-    def __init__(
-        self,
-        *,
-        authorize: Authorize,
-        config: Config,
-        deployment_class: DeploymentClass,
-    ):
+    def __init__(self, *, authorize: Authorize, config: Config):
         self.authorize = authorize
-        self.deployment_class = deployment_class
         self.config = config
 
         self.router = APIRouter()
@@ -35,9 +27,7 @@ class RequestManager:
         """authorize request"""
 
         authorize_response = await self.authorize.authorize_api_access(
-            headers=request.headers,
-            deployment_id=deployment_id,
-            request_class=self.deployment_class,
+            headers=request.headers, deployment_id=deployment_id
         )
 
         if self.rate_limit.is_call_rate_exceeded(authorize_response.user_token):
@@ -67,9 +57,7 @@ class RequestManager:
                 model.api_version = request.query_params["api-version"]
 
         authorize_response = await self.authorize.authorize_api_access(
-            headers=request.headers,
-            deployment_id=deployment_id,
-            request_class=self.deployment_class,
+            headers=request.headers, deployment_id=deployment_id
         )
 
         if hasattr(model, "max_tokens"):
@@ -88,7 +76,7 @@ class RequestManager:
             if value is not None and key != "api_version":
                 openai_request[key] = value
 
-        deployment = await self.config.get_catalog_by_model_class(authorize_response)
+        deployment = await self.config.get_catalog_by_deployment_id(authorize_response)
 
         response, http_status_code = await call_method(model, openai_request, deployment)
 

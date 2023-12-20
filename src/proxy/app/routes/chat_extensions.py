@@ -9,9 +9,7 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
 # pylint: disable=E0402
-from ..authorize import Authorize
-from ..config import Config, Deployment
-from ..deployment_class import DeploymentClass
+from ..config import Deployment
 from ..openai_async import OpenAIAsyncManager
 from .request_manager import RequestManager
 
@@ -38,18 +36,6 @@ class ChatExtensionsRequest(BaseModel):
 
 class ChatExtensions(RequestManager):
     """Completion route"""
-
-    def __init__(
-        self,
-        *,
-        authorize: Authorize,
-        config: Config,
-    ):
-        super().__init__(
-            authorize=authorize,
-            config=config,
-            deployment_class=DeploymentClass.OPENAI_CHAT.value,
-        )
 
     def include_router(self):
         """include router"""

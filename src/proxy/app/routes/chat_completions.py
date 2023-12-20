@@ -9,9 +9,7 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
 # pylint: disable=E0402
-from ..authorize import Authorize
-from ..config import Config, Deployment
-from ..deployment_class import DeploymentClass
+from ..config import Deployment
 from ..openai_async import OpenAIAsyncManager
 from .request_manager import RequestManager
 
@@ -39,27 +37,9 @@ class ChatCompletionsRequest(BaseModel):
 class ChatCompletions(RequestManager):
     """Completion route"""
 
-    def __init__(
-        self,
-        *,
-        authorize: Authorize,
-        config: Config,
-    ):
-        super().__init__(
-            authorize=authorize,
-            config=config,
-            deployment_class=DeploymentClass.OPENAI_CHAT.value,
-        )
-
     def include_router(self):
         """include router"""
 
-        # Support for OpenAI SDK 0.28
-        @self.router.post(
-            "/engines/{engine_id}/chat/completions",
-            status_code=200,
-            response_model=None,
-        )
         # Support for .NET Azure OpenAI Service SDK
         @self.router.post(
             "/openai/deployments/{deployment_id}/chat/completions",
@@ -72,8 +52,6 @@ class ChatCompletions(RequestManager):
             status_code=200,
             response_model=None,
         )
-        # Support for OpenAI SDK 1.0+
-        @self.router.post("/chat/completions", status_code=200, response_model=None)
         async def oai_chat_completion(
             model: ChatCompletionsRequest,
             request: Request,
@@ -121,7 +99,7 @@ class ChatCompletions(RequestManager):
             response, http_status_code = await async_mgr.async_post_streaming(openai_request, url)
         else:
             response, http_status_code = await async_mgr.async_openai_post(openai_request, url)
-            response["model"] = deployment.friendly_name
+            # response["model"] = deployment.friendly_name
 
         return response, http_status_code
 
