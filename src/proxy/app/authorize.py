@@ -51,7 +51,7 @@ class Authorize:
                 is_authorized=True,
                 max_token_cap=result.get("max_token_cap"),
                 daily_request_cap=result.get("daily_request_cap"),
-                entra_id=result.get("user_id"),
+                user_id=result.get("user_id"),
                 event_id=result.get("event_id"),
                 event_code=result.get("event_code"),
                 user_token=api_key,

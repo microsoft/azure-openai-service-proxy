@@ -30,7 +30,7 @@ class RequestManager:
             headers=request.headers, deployment_id=deployment_id
         )
 
-        if self.rate_limit.is_call_rate_exceeded(authorize_response.user_token):
+        if self.rate_limit.is_call_rate_exceeded(authorize_response.user_id):
             raise HTTPException(
                 status_code=429,
                 detail="Rate limit exceeded. Try again in 10 seconds",
@@ -64,7 +64,7 @@ class RequestManager:
             if model.max_tokens is not None and model.max_tokens > authorize_response.max_token_cap:
                 model.max_tokens = authorize_response.max_token_cap
 
-        if self.rate_limit.is_call_rate_exceeded(authorize_response.entra_id):
+        if self.rate_limit.is_call_rate_exceeded(authorize_response.user_id):
             raise HTTPException(
                 status_code=429,
                 detail="Rate limit exceeded. Try again in 10 seconds",

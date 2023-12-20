@@ -90,7 +90,7 @@ class ImagesGenerations(RequestManager):
             """OpenAI image generation response"""
 
             # No deployment_is passed for images generation so set to dall-e
-            deployment_id = "dall-e"
+            deployment_id = "dalle-2"
 
             # if "api-version" in request.query_params:
             #     api_version = request.query_params["api-version"]
@@ -101,10 +101,7 @@ class ImagesGenerations(RequestManager):
 
             authorize_response = await self.authorize_request(deployment_id=deployment_id, request=request)
 
-            (
-                completion_response,
-                status_code,
-            ) = await self.call_openai_images_get(
+            (completion_response, status_code,) = await self.call_openai_images_get(
                 friendly_name,
                 image_id,
                 authorize_response,
@@ -178,7 +175,9 @@ class ImagesGenerations(RequestManager):
     ):
         """call openai with retry"""
 
-        deployment = await self.config.get_catalog_by_friendly_name(friendly_name, authorize_response)
+        authorize_response.deployment_id = friendly_name
+
+        deployment = await self.config.get_catalog_by_deployment_id(authorize_response)
 
         if deployment is None:
             return self.report_exception("Oops, failed to find service to generate image.", 404)

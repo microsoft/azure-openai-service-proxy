@@ -21,7 +21,7 @@ class MonitorEntity(BaseModel):
     is_authorized: bool
     max_token_cap: int
     daily_request_cap: int
-    entra_id: str
+    user_id: str
     event_id: str
     event_code: str
     event_name: str
@@ -36,7 +36,7 @@ class MonitorEntity(BaseModel):
         is_authorized: bool,
         max_token_cap: int,
         daily_request_cap: int,
-        entra_id: str,
+        user_id: str,
         event_id: str,
         event_code: str,
         user_token: UUID,
@@ -51,7 +51,7 @@ class MonitorEntity(BaseModel):
             is_authorized=is_authorized,
             max_token_cap=max_token_cap,
             daily_request_cap=daily_request_cap,
-            entra_id=entra_id,
+            user_id=user_id,
             event_id=event_id,
             event_code=event_code,
             user_token=user_token,

@@ -31,7 +31,7 @@ except KeyError as key_error:
     ) from key_error
 
 try:
-    sql_connection_string = os.environ["POSTGRESQL_CONNECTION_STRING"]
+    sql_connection_string = os.environ["POSTGRES_CONNECTION_STRING"]
 except KeyError as key_error:
     print("Please set the environment variable POSTGRESQL_CONNECTION_STRING")
     raise HTTPException(
