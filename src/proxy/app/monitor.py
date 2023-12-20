@@ -29,7 +29,7 @@ class MonitorEntity(BaseModel):
     event_url_text: str
     organizer_name: str
     organizer_email: str
-    request_class: str
+    deployment_id: str
 
     def __init__(
         self,
@@ -45,7 +45,7 @@ class MonitorEntity(BaseModel):
         event_url_text: str,
         organizer_name: str,
         organizer_email: str,
-        request_class: str,
+        deployment_id: str,
     ) -> None:
         super().__init__(
             is_authorized=is_authorized,
@@ -60,7 +60,7 @@ class MonitorEntity(BaseModel):
             event_url_text=event_url_text,
             organizer_name=organizer_name,
             organizer_email=organizer_email,
-            request_class=request_class,
+            deployment_id=deployment_id,
         )
 
 

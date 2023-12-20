@@ -8,7 +8,6 @@ from pydantic import BaseModel
 # pylint: disable=E0402
 from ..authorize import Authorize
 from ..config import Config
-from ..deployment_class import DeploymentClass
 from .request_manager import RequestManager
 
 
@@ -57,11 +56,7 @@ class EventInfo(RequestManager):
     """Completion route"""
 
     def __init__(self, authorize: Authorize, config: Config):
-        super().__init__(
-            authorize=authorize,
-            config=config,
-            deployment_class=DeploymentClass.EVENT_INFO.value,
-        )
+        super().__init__(authorize=authorize, config=config)
 
     def include_router(self):
         """include router"""
