@@ -10,7 +10,7 @@ services:
       POSTGRES_CONNECTION_STRING: postgresql://admin:mypassword123@db:5432/aoai-proxy
 
   db:
-    image: postgres:14.1-alpine
+    image: postgres:15.5-alpine
     restart: always
     ports:
       - 5436:5432

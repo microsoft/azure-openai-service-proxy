@@ -3,7 +3,7 @@
 --
 
 -- Dumped from database version 14.10 (Ubuntu 14.10-0ubuntu0.22.04.1)
--- Dumped by pg_dump version 14.10 (Ubuntu 14.10-0ubuntu0.22.04.1)
+-- Dumped by pg_dump version 16.1 (Debian 16.1-1.pgdg110+1)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -164,7 +164,7 @@ ALTER FUNCTION aoai.get_attendee_authorized(p_event_code character varying, p_ap
 -- Name: get_models_by_deployment_name(character varying, character varying); Type: FUNCTION; Schema: aoai; Owner: admin
 --
 
-CREATE FUNCTION aoai.get_models_by_deployment_name(p_event_id character varying, p_deployment_id character varying) RETURNS TABLE(deployment_name character varying, resource_name character varying, endpoint_key character varying)
+CREATE FUNCTION aoai.get_models_by_deployment_name(p_event_id character varying, p_deployment_id character varying) RETURNS TABLE(deployment_name character varying, resource_name character varying, endpoint_key character varying, model_type aoai.model_type)
     LANGUAGE plpgsql
     AS $$
 BEGIN
@@ -172,7 +172,8 @@ BEGIN
     SELECT
         OC.deployment_name,
         OC.resource_name,
-        OC.endpoint_key
+        OC.endpoint_key,
+        OC.model_type
     FROM
         aoai.event_catalog_map EC
     INNER JOIN
@@ -191,16 +192,16 @@ ALTER FUNCTION aoai.get_models_by_deployment_name(p_event_id character varying, 
 -- Name: get_models_by_event(character varying); Type: FUNCTION; Schema: aoai; Owner: admin
 --
 
-CREATE FUNCTION aoai.get_models_by_event(p_event_id character varying) RETURNS TABLE(deployment_name character varying, model_name character varying, resource_name character varying, endpoint_key character varying)
+CREATE FUNCTION aoai.get_models_by_event(p_event_id character varying) RETURNS TABLE(deployment_name character varying, resource_name character varying, endpoint_key character varying, model_type aoai.model_type)
     LANGUAGE plpgsql
     AS $$
 BEGIN
     RETURN QUERY
     SELECT
         OC.deployment_name,
-		OC.model_name,
         OC.resource_name,
-        OC.endpoint_key
+        OC.endpoint_key,
+        OC.model_type
     FROM
         aoai.event_catalog_map EC
     INNER JOIN
@@ -208,7 +209,7 @@ BEGIN
     WHERE
         EC.event_id = p_event_id AND
         OC.active = true
-	ORDER BY OC.model_name;
+	ORDER BY OC.deployment_name;
 
 END;
 $$;
