@@ -26,32 +26,20 @@ CREATE SCHEMA aoai;
 ALTER SCHEMA aoai OWNER TO admin;
 
 --
--- Name: pgcrypto; Type: EXTENSION; Schema: -; Owner: -
+-- Name: model_type; Type: TYPE; Schema: aoai; Owner: admin
 --
 
-CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA public;
+CREATE TYPE aoai.model_type AS ENUM (
+    'openai-chat',
+    'openai-embedding',
+    'openai-dalle2',
+    'openai-dalle3',
+    'openai-whisper',
+    'openai-completion'
+);
 
 
---
--- Name: EXTENSION pgcrypto; Type: COMMENT; Schema: -; Owner:
---
-
-COMMENT ON EXTENSION pgcrypto IS 'cryptographic functions';
-
-
---
--- Name: uuid-ossp; Type: EXTENSION; Schema: -; Owner: -
---
-
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA public;
-
-
---
--- Name: EXTENSION "uuid-ossp"; Type: COMMENT; Schema: -; Owner:
---
-
-COMMENT ON EXTENSION "uuid-ossp" IS 'generate universally unique identifiers (UUIDs)';
-
+ALTER TYPE aoai.model_type OWNER TO admin;
 
 --
 -- Name: add_event(uuid, character varying, character varying, timestamp without time zone, timestamp without time zone, character varying, character varying, character varying, character varying, integer, boolean, integer, boolean); Type: FUNCTION; Schema: aoai; Owner: admin
@@ -176,14 +164,13 @@ ALTER FUNCTION aoai.get_attendee_authorized(p_event_code character varying, p_ap
 -- Name: get_models_by_deployment_name(character varying, character varying); Type: FUNCTION; Schema: aoai; Owner: admin
 --
 
-CREATE FUNCTION aoai.get_models_by_deployment_name(p_event_id character varying, p_deployment_id character varying) RETURNS TABLE(deployment_name character varying, model_name character varying, resource_name character varying, endpoint_key character varying)
+CREATE FUNCTION aoai.get_models_by_deployment_name(p_event_id character varying, p_deployment_id character varying) RETURNS TABLE(deployment_name character varying, resource_name character varying, endpoint_key character varying)
     LANGUAGE plpgsql
     AS $$
 BEGIN
     RETURN QUERY
     SELECT
         OC.deployment_name,
-		OC.model_name,
         OC.resource_name,
         OC.endpoint_key
     FROM
@@ -254,7 +241,6 @@ $$;
 
 
 ALTER FUNCTION aoai.get_owner_id(p_entra_id character varying) OWNER TO admin;
-
 
 SET default_tablespace = '';
 
@@ -335,7 +321,7 @@ CREATE TABLE aoai.owner_catalog (
     resource_name character varying(64) NOT NULL,
     endpoint_key character varying(128) NOT NULL,
     active boolean NOT NULL,
-    model_name character varying(64) NOT NULL
+    model_type aoai.model_type NOT NULL
 );
 
 
@@ -353,101 +339,6 @@ CREATE TABLE aoai.owner_event_map (
 
 
 ALTER TABLE aoai.owner_event_map OWNER TO admin;
-
---
--- Name: event; Type: TABLE; Schema: public; Owner: admin
---
-
-CREATE TABLE public.event (
-    eventid character varying(50) DEFAULT gen_random_uuid() NOT NULL,
-    ownerid uuid DEFAULT gen_random_uuid() NOT NULL,
-    eventcode character varying(64) NOT NULL,
-    eventmarkdown character varying(4000) NOT NULL,
-    startutc timestamp(6) without time zone NOT NULL,
-    endutc timestamp(6) without time zone NOT NULL,
-    organizername character varying(128) NOT NULL,
-    organizeremail character varying(128) NOT NULL,
-    eventurl character varying(256) NOT NULL,
-    eventurltext character varying(256) NOT NULL,
-    maxtokencap integer NOT NULL,
-    singlecode boolean NOT NULL,
-    dailyrequestcap integer NOT NULL,
-    active boolean NOT NULL
-);
-
-
-ALTER TABLE public.event OWNER TO admin;
-
---
--- Name: event_attendee; Type: TABLE; Schema: public; Owner: admin
---
-
-CREATE TABLE public.event_attendee (
-    user_id character varying(128) NOT NULL,
-    event_id character varying(50) NOT NULL,
-    active boolean NOT NULL,
-    total_requests integer NOT NULL,
-    apikey uuid NOT NULL,
-    total_tokens integer
-);
-
-
-ALTER TABLE public.event_attendee OWNER TO admin;
-
---
--- Name: event_catalog_map; Type: TABLE; Schema: public; Owner: admin
---
-
-CREATE TABLE public.event_catalog_map (
-    eventid character varying(50) NOT NULL,
-    catalogid uuid NOT NULL
-);
-
-
-ALTER TABLE public.event_catalog_map OWNER TO admin;
-
---
--- Name: owner; Type: TABLE; Schema: public; Owner: admin
---
-
-CREATE TABLE public.owner (
-    entraid character varying(128) NOT NULL,
-    ownerid uuid DEFAULT gen_random_uuid() NOT NULL
-);
-
-
-ALTER TABLE public.owner OWNER TO admin;
-
---
--- Name: owner_catalog; Type: TABLE; Schema: public; Owner: admin
---
-
-CREATE TABLE public.owner_catalog (
-    ownerid uuid NOT NULL,
-    catalogid uuid DEFAULT gen_random_uuid() NOT NULL,
-    friendlyname character varying(64) NOT NULL,
-    deploymentname character varying(64) NOT NULL,
-    resourcename character varying(64) NOT NULL,
-    endpointkey character varying(128) NOT NULL,
-    modelclass character varying(64) NOT NULL,
-    active boolean NOT NULL
-);
-
-
-ALTER TABLE public.owner_catalog OWNER TO admin;
-
---
--- Name: owner_event_map; Type: TABLE; Schema: public; Owner: admin
---
-
-CREATE TABLE public.owner_event_map (
-    ownerid uuid NOT NULL,
-    eventid character varying(50) NOT NULL,
-    creator boolean NOT NULL
-);
-
-
-ALTER TABLE public.owner_event_map OWNER TO admin;
 
 --
 -- Name: event event_pkey; Type: CONSTRAINT; Schema: aoai; Owner: admin
@@ -498,54 +389,6 @@ ALTER TABLE ONLY aoai.owner_event_map
 
 
 --
--- Name: event event_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
---
-
-ALTER TABLE ONLY public.event
-    ADD CONSTRAINT event_pkey PRIMARY KEY (eventid);
-
-
---
--- Name: event_attendee eventattendee_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
---
-
-ALTER TABLE ONLY public.event_attendee
-    ADD CONSTRAINT eventattendee_pkey PRIMARY KEY (user_id, event_id);
-
-
---
--- Name: event_catalog_map eventcatalogmap_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
---
-
-ALTER TABLE ONLY public.event_catalog_map
-    ADD CONSTRAINT eventcatalogmap_pkey PRIMARY KEY (eventid, catalogid);
-
-
---
--- Name: owner owner_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
---
-
-ALTER TABLE ONLY public.owner
-    ADD CONSTRAINT owner_pkey PRIMARY KEY (ownerid);
-
-
---
--- Name: owner_catalog ownercatalog_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
---
-
-ALTER TABLE ONLY public.owner_catalog
-    ADD CONSTRAINT ownercatalog_pkey PRIMARY KEY (catalogid);
-
-
---
--- Name: owner_event_map ownereventmap_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
---
-
-ALTER TABLE ONLY public.owner_event_map
-    ADD CONSTRAINT ownereventmap_pkey PRIMARY KEY (ownerid, eventid);
-
-
---
 -- Name: event_attendee fk_eventattendee_event; Type: FK CONSTRAINT; Schema: aoai; Owner: admin
 --
 
@@ -591,54 +434,6 @@ ALTER TABLE ONLY aoai.owner_event_map
 
 ALTER TABLE ONLY aoai.owner_event_map
     ADD CONSTRAINT fk_ownereventmap_owner FOREIGN KEY (owner_id) REFERENCES aoai.owner(owner_id) ON DELETE CASCADE;
-
-
---
--- Name: event_attendee fk_eventattendee_event; Type: FK CONSTRAINT; Schema: public; Owner: admin
---
-
-ALTER TABLE ONLY public.event_attendee
-    ADD CONSTRAINT fk_eventattendee_event FOREIGN KEY (event_id) REFERENCES public.event(eventid) ON DELETE CASCADE;
-
-
---
--- Name: event_catalog_map fk_eventcatalogmap_event; Type: FK CONSTRAINT; Schema: public; Owner: admin
---
-
-ALTER TABLE ONLY public.event_catalog_map
-    ADD CONSTRAINT fk_eventcatalogmap_event FOREIGN KEY (eventid) REFERENCES public.event(eventid) ON DELETE CASCADE;
-
-
---
--- Name: event_catalog_map fk_eventcatalogmap_ownercatalog; Type: FK CONSTRAINT; Schema: public; Owner: admin
---
-
-ALTER TABLE ONLY public.event_catalog_map
-    ADD CONSTRAINT fk_eventcatalogmap_ownercatalog FOREIGN KEY (catalogid) REFERENCES public.owner_catalog(catalogid) ON DELETE CASCADE;
-
-
---
--- Name: owner_catalog fk_groupmodels_group; Type: FK CONSTRAINT; Schema: public; Owner: admin
---
-
-ALTER TABLE ONLY public.owner_catalog
-    ADD CONSTRAINT fk_groupmodels_group FOREIGN KEY (ownerid) REFERENCES public.owner(ownerid) ON DELETE CASCADE;
-
-
---
--- Name: owner_event_map fk_ownereventmap_event; Type: FK CONSTRAINT; Schema: public; Owner: admin
---
-
-ALTER TABLE ONLY public.owner_event_map
-    ADD CONSTRAINT fk_ownereventmap_event FOREIGN KEY (eventid) REFERENCES public.event(eventid) ON DELETE CASCADE;
-
-
---
--- Name: owner_event_map fk_ownereventmap_owner; Type: FK CONSTRAINT; Schema: public; Owner: admin
---
-
-ALTER TABLE ONLY public.owner_event_map
-    ADD CONSTRAINT fk_ownereventmap_owner FOREIGN KEY (ownerid) REFERENCES public.owner(ownerid) ON DELETE CASCADE;
 
 
 --
