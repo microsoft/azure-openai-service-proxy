@@ -3,15 +3,16 @@
 import logging
 import os
 
-import pyodbc
 from fastapi import FastAPI, HTTPException
 from fastapi.exceptions import ResponseValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-# pylint: disable=E0402
 from .authorize import Authorize
 from .config import Config
+
+# pylint: disable=E0402
+from .db_manager import DBManager
 from .routes.chat_completions import ChatCompletions as chat_completions_router
 from .routes.chat_extensions import ChatExtensions as chat_extensions_router
 from .routes.completions import Completions as completions_router
@@ -30,12 +31,12 @@ except KeyError as key_error:
     ) from key_error
 
 try:
-    sql_connection_string = os.environ["AZURE_SQL_CONNECTION_STRING"]
+    sql_connection_string = os.environ["POSTGRES_CONNECTION_STRING"]
 except KeyError as key_error:
-    print("Please set the environment variable AZURE_SQL_CONNECTION_STRING")
+    print("Please set the environment variable POSTGRES_CONNECTION_STRING")
     raise HTTPException(
         status_code=500,
-        detail="Please set the environment variable AZURE_SQL_CONNECTION_STRING",
+        detail="Please set the environment variable POSTGRES_CONNECTION_STRING",
     ) from key_error
 
 
@@ -48,14 +49,9 @@ app = FastAPI(
 )
 
 
-sql_connection_string = f"DRIVER={{ODBC Driver 18 for SQL Server}};{sql_connection_string}"
-
-sql_conn = pyodbc.connect(sql_connection_string)
-sql_conn.timeout = 10
-
-
-authorize = Authorize(connection_string=storage_connection_string, sql_conn=sql_conn)
-config = Config(sql_conn=sql_conn)
+db_manager = DBManager(connection_string=sql_connection_string)
+authorize = Authorize(connection_string=storage_connection_string, db_manager=db_manager)
+config = Config(db_manager)
 
 
 completion_router = completions_router(authorize=authorize, config=config)
@@ -101,7 +97,6 @@ async def validation_exception_handler(request, exc):
 @app.on_event("startup")
 async def startup_event():
     """startup event"""
-    pass
 
 
 if os.environ.get("ENVIRONMENT") == "development":

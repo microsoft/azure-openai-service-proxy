@@ -7,9 +7,7 @@ from fastapi import Request, Response
 from pydantic import BaseModel
 
 # pylint: disable=E0402
-from ..authorize import Authorize
-from ..config import Config, Deployment
-from ..deployment_class import DeploymentClass
+from ..config import Deployment
 from ..openai_async import OpenAIAsyncManager
 from .request_manager import RequestManager
 
@@ -27,44 +25,25 @@ class EmbeddingsRequest(BaseModel):
 class Embeddings(RequestManager):
     """Embeddings route"""
 
-    def __init__(
-        self,
-        authorize: Authorize,
-        config: Config,
-    ):
-        super().__init__(
-            authorize=authorize,
-            config=config,
-            deployment_class=DeploymentClass.OPENAI_EMBEDDINGS.value,
-        )
-
     def include_router(self):
         """include router"""
 
-        # Support for OpenAI SDK 0.28
-        @self.router.post(
-            "/engines/{engine_id}/embeddings",
-            status_code=200,
-            response_model=None,
-        )
         # Support for Azure OpenAI Service SDK 1.0+
         @self.router.post(
-            "/openai/deployments/{deployment_id}/embeddings",
+            "/openai/deployments/{deployment_name}/embeddings",
             status_code=200,
             response_model=None,
         )
-        # Support for OpenAI SDK 1.0+
-        @self.router.post("/embeddings", status_code=200, response_model=None)
         async def oai_embeddings(
             model: EmbeddingsRequest,
             request: Request,
             response: Response,
-            deployment_id: str = None,
+            deployment_name: str = None,
         ) -> openai.openai_object.OpenAIObject:
             """OpenAI chat completion response"""
 
             completion, status_code = await self.process_request(
-                deployment_id=deployment_id,
+                deployment_name=deployment_name,
                 request=request,
                 model=model,
                 call_method=self.call_openai,
@@ -91,7 +70,5 @@ class Embeddings(RequestManager):
 
         async_mgr = OpenAIAsyncManager(deployment)
         response, http_status_code = await async_mgr.async_openai_post(openai_request, url)
-
-        response["model"] = deployment.friendly_name
 
         return response, http_status_code

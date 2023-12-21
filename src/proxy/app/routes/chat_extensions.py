@@ -9,9 +9,7 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
 # pylint: disable=E0402
-from ..authorize import Authorize
-from ..config import Config, Deployment
-from ..deployment_class import DeploymentClass
+from ..config import Deployment
 from ..openai_async import OpenAIAsyncManager
 from .request_manager import RequestManager
 
@@ -39,24 +37,12 @@ class ChatExtensionsRequest(BaseModel):
 class ChatExtensions(RequestManager):
     """Completion route"""
 
-    def __init__(
-        self,
-        *,
-        authorize: Authorize,
-        config: Config,
-    ):
-        super().__init__(
-            authorize=authorize,
-            config=config,
-            deployment_class=DeploymentClass.OPENAI_CHAT.value,
-        )
-
     def include_router(self):
         """include router"""
 
         # Support for .NET Azure OpenAI Extensions Chat Completions
         @self.router.post(
-            "/openai/deployments/{deployment_id}/extensions/chat/completions",
+            "/openai/deployments/{deployment_name}/extensions/chat/completions",
             status_code=200,
             response_model=None,
         )
@@ -64,7 +50,7 @@ class ChatExtensions(RequestManager):
             model: ChatExtensionsRequest,
             request: Request,
             response: Response,
-            deployment_id: str = None,
+            deployment_name: str = None,
         ) -> openai.openai_object.OpenAIObject | str | StreamingResponse:
             """OpenAI chat completion response"""
 
@@ -72,7 +58,7 @@ class ChatExtensions(RequestManager):
                 model.api_version = OPENAI_CHAT_COMPLETIONS_EXTENSIONS_API_VERSION
 
             completion, status_code = await self.process_request(
-                deployment_id=deployment_id,
+                deployment_name=deployment_name,
                 request=request,
                 model=model,
                 call_method=self.call_openai,
@@ -107,7 +93,6 @@ class ChatExtensions(RequestManager):
             response = await async_mgr.async_post_streaming(openai_request, url)
         else:
             response, http_status_code = await async_mgr.async_openai_post(openai_request, url)
-            response["model"] = deployment.friendly_name
 
         return response, http_status_code
 

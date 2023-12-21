@@ -4,7 +4,7 @@ import logging
 import string
 from uuid import UUID
 
-import pyodbc
+import asyncpg
 from fastapi import HTTPException
 
 # pylint: disable=E0402
@@ -27,21 +27,21 @@ class AuthorizeResponse(MonitorEntity):
 class Authorize:
     """Authorizes a user to access a specific time bound event."""
 
-    def __init__(self, *, connection_string: str, sql_conn: pyodbc.Connection) -> None:
+    def __init__(self, *, connection_string: str, db_manager) -> None:
         self.connection_string = connection_string
-        self.sql_conn = sql_conn
+        self.db_manager = db_manager
         self.monitor = Monitor(connection_string=connection_string)
         self.logging = logging.getLogger(__name__)
 
-    async def __is_user_authorized(self, event_id: str, api_key: UUID, request_class: str) -> AuthorizeResponse:
+    async def __is_user_authorized(self, event_id: str, api_key: UUID, deployment_name: str) -> AuthorizeResponse:
         """Check if user is authorized"""
 
         try:
-            cursor = self.sql_conn.cursor()
-            cursor.execute("{CALL dbo.EventAttendeeAuthorized(?, ?)}", (event_id, api_key))
-            result = cursor.fetchone()
+            conn = await self.db_manager.get_connection()
 
-            if len(result) == 0:
+            result = await conn.fetchrow("SELECT * from aoai.get_attendee_authorized($1, $2)", event_id, api_key)
+
+            if result is None or len(result) == 0:
                 raise HTTPException(
                     status_code=401,
                     detail="Authentication failed.",
@@ -49,27 +49,30 @@ class Authorize:
 
             authorize_response = AuthorizeResponse(
                 is_authorized=True,
-                max_token_cap=result.MaxTokenCap,
-                daily_request_cap=result.DailyRequestCap,
-                entra_id=result.EntraID,
-                event_id=result.EventID,
-                event_code=result.EventCode,
+                max_token_cap=result.get("max_token_cap"),
+                daily_request_cap=result.get("daily_request_cap"),
+                user_id=result.get("user_id"),
+                event_id=result.get("event_id"),
+                event_code=result.get("event_code"),
                 user_token=api_key,
-                event_name=result.EventCode,
-                event_url=result.EventUrl,
-                event_url_text=result.EventUrlText,
-                organizer_name=result.OrganizerName,
-                organizer_email=result.OrganizerEmail,
-                request_class=request_class,
+                event_name=result.get("event_code"),
+                event_url=result.get("event_url"),
+                event_url_text=result.get("event_url_text"),
+                organizer_name=result.get("organizer_name"),
+                organizer_email=result.get("organizer_email"),
+                deployment_name=deployment_name,
             )
 
             return authorize_response
 
-        except pyodbc.Error as error:
-            self.logging.error("pyodbc error: %s", str(error))
+        except HTTPException:
+            raise
+
+        except asyncpg.exceptions.PostgresError as error:
+            self.logging.error("Postgres error: %s", str(error))
             raise HTTPException(
-                status_code=401,
-                detail="Authentication failed. pyodbc error.",
+                status_code=503,
+                detail="Error reading model catalog.",
             ) from error
 
         except Exception as exception:
@@ -80,7 +83,7 @@ class Authorize:
             ) from exception
 
     @lru_cache_with_expiry(maxsize=128, ttl=300)
-    async def __authorize(self, *, access_token: str, request_class: str) -> AuthorizeResponse:
+    async def __authorize(self, *, access_token: str, deployment_name: str) -> AuthorizeResponse:
         """Authorizes a user to access a specific time bound event."""
 
         id_parts = access_token.split("/")
@@ -127,12 +130,12 @@ class Authorize:
             )
 
         authorize_response = await self.__is_user_authorized(
-            event_id=event_id, api_key=user_id, request_class=request_class
+            event_id=event_id, api_key=user_id, deployment_name=deployment_name
         )
 
         return authorize_response
 
-    async def __authorize_azure_api_access(self, *, headers, request_class) -> AuthorizeResponse:
+    async def __authorize_azure_api_access(self, *, headers, deployment_name: str) -> AuthorizeResponse:
         """validate azure sdk formatted API request"""
 
         if "api-key" not in headers:
@@ -143,38 +146,9 @@ class Authorize:
 
         access_token = headers.get("api-key")
 
-        return await self.__authorize(access_token=access_token, request_class=request_class)
+        return await self.__authorize(access_token=access_token, deployment_name=deployment_name)
 
-    async def __authorize_openai_api_access(self, *, headers, request_class) -> AuthorizeResponse:
-        """validate openai sdk formatted API request"""
-
-        if "Authorization" not in headers:
-            raise HTTPException(
-                status_code=401,
-                detail="Authentication failed.",
-            )
-
-        auth_header = headers.get("Authorization")
-        auth_parts = auth_header.split(" ")
-
-        # check auth header is valid and has two parts and the first part is Bearer
-        if len(auth_parts) != 2 or auth_parts[0] != "Bearer":
-            raise HTTPException(
-                status_code=401,
-                detail="Authentication failed.",
-            )
-
-        # the second part is the access token
-        access_token = auth_parts[1]
-
-        return await self.__authorize(access_token=access_token, request_class=request_class)
-
-    async def authorize_api_access(self, *, headers: str, deployment_id: str, request_class: str) -> AuthorizeResponse:
+    async def authorize_api_access(self, *, headers: str, deployment_name: str) -> AuthorizeResponse:
         """authorize api access"""
-        # if there is a deployment_id then this is an azure sdk request
-        # otherwise it is an openai sdk request
 
-        if deployment_id:
-            return await self.__authorize_azure_api_access(headers=headers, request_class=request_class)
-
-        return await self.__authorize_openai_api_access(headers=headers, request_class=request_class)
+        return await self.__authorize_azure_api_access(headers=headers, deployment_name=deployment_name)
