@@ -19,10 +19,10 @@ logging.basicConfig(level=logging.INFO)
 class Deployment:
     """Deployment"""
 
-    def __init__(self, *, endpoint_key: str, deployment_name: str, model_name: str, resource_name: str):
+    def __init__(self, *, endpoint_key: str, deployment_name: str, model_type: str, resource_name: str):
         """init deployment"""
         self.endpoint_key = endpoint_key
-        self.model_name = model_name
+        self.model_type = model_type
         self.deployment_name = deployment_name
         self.resource_name = resource_name
 
@@ -55,7 +55,7 @@ class Config:
                 deployment_item = Deployment(
                     endpoint_key=row.get("endpoint_key").strip(),
                     deployment_name=row.get("deployment_name").strip(),
-                    model_name=row.get("model_name").strip(),
+                    model_type=row.get("model_type").strip(),
                     resource_name=row.get("resource_name").strip(),
                 )
 
