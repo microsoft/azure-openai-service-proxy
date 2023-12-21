@@ -13,7 +13,7 @@ services:
     image: postgres:14.1-alpine
     restart: always
     ports:
-      - 5432:5432
+      - 5436:5432
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: mypassword123
