@@ -33,15 +33,15 @@ class Authorize:
         self.monitor = Monitor(connection_string=connection_string)
         self.logging = logging.getLogger(__name__)
 
-    async def __is_user_authorized(self, event_id: str, api_key: UUID, deployment_id: str) -> AuthorizeResponse:
+    async def __is_user_authorized(self, event_id: str, api_key: UUID, deployment_name: str) -> AuthorizeResponse:
         """Check if user is authorized"""
 
         try:
             conn = await self.db_manager.get_connection()
 
-            result = await conn.fetchrow("SELECT * from aoai.event_attendee_authorized($1, $2)", event_id, api_key)
+            result = await conn.fetchrow("SELECT * from aoai.get_attendee_authorized($1, $2)", event_id, api_key)
 
-            if len(result) == 0:
+            if result is None or len(result) == 0:
                 raise HTTPException(
                     status_code=401,
                     detail="Authentication failed.",
@@ -57,10 +57,10 @@ class Authorize:
                 user_token=api_key,
                 event_name=result.get("event_code"),
                 event_url=result.get("event_url"),
-                event_url_text=result.get("event_urltext"),
+                event_url_text=result.get("event_url_text"),
                 organizer_name=result.get("organizer_name"),
                 organizer_email=result.get("organizer_email"),
-                deployment_id=deployment_id,
+                deployment_name=deployment_name,
             )
 
             return authorize_response
@@ -83,7 +83,7 @@ class Authorize:
             ) from exception
 
     @lru_cache_with_expiry(maxsize=128, ttl=300)
-    async def __authorize(self, *, access_token: str, deployment_id: str) -> AuthorizeResponse:
+    async def __authorize(self, *, access_token: str, deployment_name: str) -> AuthorizeResponse:
         """Authorizes a user to access a specific time bound event."""
 
         id_parts = access_token.split("/")
@@ -130,12 +130,12 @@ class Authorize:
             )
 
         authorize_response = await self.__is_user_authorized(
-            event_id=event_id, api_key=user_id, deployment_id=deployment_id
+            event_id=event_id, api_key=user_id, deployment_name=deployment_name
         )
 
         return authorize_response
 
-    async def __authorize_azure_api_access(self, *, headers, deployment_id: str) -> AuthorizeResponse:
+    async def __authorize_azure_api_access(self, *, headers, deployment_name: str) -> AuthorizeResponse:
         """validate azure sdk formatted API request"""
 
         if "api-key" not in headers:
@@ -146,9 +146,9 @@ class Authorize:
 
         access_token = headers.get("api-key")
 
-        return await self.__authorize(access_token=access_token, deployment_id=deployment_id)
+        return await self.__authorize(access_token=access_token, deployment_name=deployment_name)
 
-    async def authorize_api_access(self, *, headers: str, deployment_id: str) -> AuthorizeResponse:
+    async def authorize_api_access(self, *, headers: str, deployment_name: str) -> AuthorizeResponse:
         """authorize api access"""
 
-        return await self.__authorize_azure_api_access(headers=headers, deployment_id=deployment_id)
+        return await self.__authorize_azure_api_access(headers=headers, deployment_name=deployment_name)

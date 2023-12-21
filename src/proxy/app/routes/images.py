@@ -64,7 +64,7 @@ class Images(RequestManager):
 
         # Azure OpenAI Images
         @self.router.post(
-            "/openai/deployments/{deployment_id}/images/generations",
+            "/openai/deployments/{deployment_name}/images/generations",
             status_code=200,
             response_model=None,
         )
@@ -72,12 +72,12 @@ class Images(RequestManager):
             model: ImagesRequest,
             request: Request,
             response: Response,
-            deployment_id: str = None,
+            deployment_name: str = None,
         ):
             """OpenAI image generation response"""
 
             completion, status_code = await self.process_request(
-                deployment_id=deployment_id,
+                deployment_name=deployment_name,
                 request=request,
                 model=model,
                 call_method=self.call_openai_images_generations,

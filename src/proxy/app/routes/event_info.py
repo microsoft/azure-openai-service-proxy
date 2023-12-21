@@ -68,12 +68,12 @@ class EventInfo(RequestManager):
         ) -> EventInfoResponse:
             """get event info"""
 
-            deployment_id = "event_info"
+            deployment_name = "event_info"
 
             # exception thrown if not authorized
             authorize_response = await self.authorize_request(
                 request=request,
-                deployment_id=deployment_id,
+                deployment_name=deployment_name,
             )
 
             capabilities = await self.config.get_owner_catalog(authorize_response=authorize_response)

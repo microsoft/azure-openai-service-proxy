@@ -66,10 +66,10 @@ class ImagesGenerations(RequestManager):
             """OpenAI image generation response"""
 
             # No deployment_is passed for images generation so set to dall-e
-            deployment_id = "dalle-2"
+            deployment_name = "dalle-2"
 
             authorize_response = await self.authorize.authorize_api_access(
-                headers=request.headers, deployment_id=deployment_id
+                headers=request.headers, deployment_name=deployment_name
             )
 
             completion, status_code = await self.call_openai_images_generations(
@@ -80,9 +80,9 @@ class ImagesGenerations(RequestManager):
 
             return completion
 
-        @self.router.get("/{friendly_name}/openai/operations/images/{image_id}")
+        @self.router.get("/{deployment_name}/openai/operations/images/{image_id}")
         async def oai_images_get(
-            friendly_name: str,
+            deployment_name: str,
             image_id: str,
             request: Request,
             response: Response,
@@ -90,7 +90,7 @@ class ImagesGenerations(RequestManager):
             """OpenAI image generation response"""
 
             # No deployment_is passed for images generation so set to dall-e
-            deployment_id = "dalle-2"
+            deployment_name = "dalle-2"
 
             # if "api-version" in request.query_params:
             #     api_version = request.query_params["api-version"]
@@ -99,10 +99,10 @@ class ImagesGenerations(RequestManager):
             # but it is not supported
             api_version = OPENAI_IMAGES_GENERATIONS_API_VERSION
 
-            authorize_response = await self.authorize_request(deployment_id=deployment_id, request=request)
+            authorize_response = await self.authorize_request(deployment_name=deployment_name, request=request)
 
             (completion_response, status_code,) = await self.call_openai_images_get(
-                friendly_name,
+                deployment_name,
                 image_id,
                 authorize_response,
                 api_version,
@@ -124,7 +124,7 @@ class ImagesGenerations(RequestManager):
 
         self.validate_input(images)
 
-        deployment = await self.config.get_catalog_by_deployment_id(authorize_response)
+        deployment = await self.config.get_catalog_by_deployment_name(authorize_response)
 
         # Note, the .NET SDK tried to use api-version 2023-09-01-preview
         # but it is not supported
@@ -159,7 +159,7 @@ class ImagesGenerations(RequestManager):
             else:
                 proxy_location = (
                     f"https://{request.url.hostname}{port}"
-                    f"/api/v1/{deployment.friendly_name}/openai{original_location_suffix}"
+                    f"/api/v1/{deployment.deployment_name}/openai{original_location_suffix}"
                 )
 
             response.headers.append("operation-location", proxy_location)
@@ -168,16 +168,16 @@ class ImagesGenerations(RequestManager):
 
     async def call_openai_images_get(
         self,
-        friendly_name: str,
+        deployment_name: str,
         image_id: str,
         authorize_response: AuthorizeResponse,
         api_version: str = OPENAI_IMAGES_GENERATIONS_API_VERSION,
     ):
         """call openai with retry"""
 
-        authorize_response.deployment_id = friendly_name
+        authorize_response.deployment_name = deployment_name
 
-        deployment = await self.config.get_catalog_by_deployment_id(authorize_response)
+        deployment = await self.config.get_catalog_by_deployment_name(authorize_response)
 
         if deployment is None:
             return self.report_exception("Oops, failed to find service to generate image.", 404)

@@ -42,13 +42,13 @@ class ChatCompletions(RequestManager):
 
         # Support for .NET Azure OpenAI Service SDK
         @self.router.post(
-            "/openai/deployments/{deployment_id}/chat/completions",
+            "/openai/deployments/{deployment_name}/chat/completions",
             status_code=200,
             response_model=None,
         )
         # Support for Python Azure OpenAI SDK 1.0+
         @self.router.post(
-            "/deployments/{deployment_id}/chat/completions",
+            "/deployments/{deployment_name}/chat/completions",
             status_code=200,
             response_model=None,
         )
@@ -56,7 +56,7 @@ class ChatCompletions(RequestManager):
             model: ChatCompletionsRequest,
             request: Request,
             response: Response,
-            deployment_id: str = None,
+            deployment_name: str = None,
         ) -> openai.openai_object.OpenAIObject | str | StreamingResponse:
             """OpenAI chat completion response"""
 
@@ -64,7 +64,7 @@ class ChatCompletions(RequestManager):
                 model.api_version = OPENAI_CHAT_COMPLETIONS_API_VERSION
 
             completion, status_code = await self.process_request(
-                deployment_id=deployment_id,
+                deployment_name=deployment_name,
                 request=request,
                 model=model,
                 call_method=self.call_openai,

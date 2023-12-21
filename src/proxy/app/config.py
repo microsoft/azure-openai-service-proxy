@@ -19,9 +19,10 @@ logging.basicConfig(level=logging.INFO)
 class Deployment:
     """Deployment"""
 
-    def __init__(self, *, endpoint_key: str, deployment_name: str, resource_name: str):
+    def __init__(self, *, endpoint_key: str, deployment_name: str, model_name: str, resource_name: str):
         """init deployment"""
         self.endpoint_key = endpoint_key
+        self.model_name = model_name
         self.deployment_name = deployment_name
         self.resource_name = resource_name
 
@@ -35,7 +36,7 @@ class Config:
         self.logging = logging.getLogger(__name__)
 
     @lru_cache_with_expiry(maxsize=128, ttl=300)
-    async def get_event_catalog(self, event_id: str, deployment_id: str) -> list[Deployment]:
+    async def get_event_catalog(self, event_id: str, deployment_name: str | None) -> list[Deployment]:
         """get config"""
 
         config = []
@@ -43,17 +44,18 @@ class Config:
         try:
             conn = await self.db_manager.get_connection()
 
-            if deployment_id == "*":
-                result = await conn.fetchrow("SELECT * FROM EventCatalogList($1)", event_id)
+            if deployment_name is None:
+                result = await conn.fetch("SELECT * FROM aoai.get_models_by_event($1)", event_id)
             else:
                 result = await conn.fetch(
-                    "SELECT * FROM aoai.get_model_by_deployment_id($1, $2)", event_id, deployment_id
+                    "SELECT * FROM aoai.get_models_by_deployment_name($1, $2)", event_id, deployment_name
                 )
 
             for row in result:
                 deployment_item = Deployment(
                     endpoint_key=row.get("endpoint_key").strip(),
                     deployment_name=row.get("deployment_name").strip(),
+                    model_name=row.get("model_name").strip(),
                     resource_name=row.get("resource_name").strip(),
                 )
 
@@ -76,13 +78,10 @@ class Config:
                 status_code=503,
             ) from exp
 
-    async def get_catalog_by_deployment_id(self, authorize_response: AuthorizeResponse) -> Deployment:
+    async def get_catalog_by_deployment_name(self, authorize_response: AuthorizeResponse) -> Deployment:
         """get config"""
 
-        deployments = await self.get_event_catalog(
-            authorize_response.event_id,
-            authorize_response.deployment_id,
-        )
+        deployments = await self.get_event_catalog(authorize_response.event_id, authorize_response.deployment_name)
 
         deployment_count = len(deployments)
 
@@ -101,43 +100,14 @@ class Config:
 
         return deployments[index]
 
-    async def get_catalog_by_friendly_name(
-        self,
-        friendly_name: str,
-        authorise_response: AuthorizeResponse,
-    ) -> Deployment:
-        """get config"""
-
-        deployments = await self.get_event_catalog(
-            authorise_response.event_id,
-            authorise_response.request_class,
-        )
-
-        for deployment in deployments:
-            if deployment.deployment_name == friendly_name:
-                return deployment
-
-        self.logging.warning("No active OpenAI model deployments found.")
-        # 501 The server either does not recognize the request method,
-        # or it lacks the ability to fulfil the request.
-        # Usually this implies future availability (e.g., a new feature of a web-service API).
-        # https://en.wikipedia.org/wiki/List_of_HTTP_status_codes
-        # https://en.wikipedia.org/wiki/List_of_HTTP_status_codes
-        raise HTTPException(
-            detail="No active OpenAI model deployments found.",
-            status_code=501,
-        )
-
     async def get_owner_catalog(self, authorize_response: AuthorizeResponse) -> list[str]:
         """get model class list from config deployment table"""
 
-        deployments = await self.get_event_catalog(
-            authorize_response.event_id,
-            "*",
-        )
+        deployments = await self.get_event_catalog(authorize_response.event_id, None)
 
         # get unique model classes from the deployment list
         model_classes = set()
+
         for deployment in deployments:
             model_classes.add(deployment.model_class)
 

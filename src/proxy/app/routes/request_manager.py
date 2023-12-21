@@ -23,11 +23,11 @@ class RequestManager:
         self.rate_limit = RateLimit()
         self.logger = logging.getLogger(__name__)
 
-    async def authorize_request(self, deployment_id: str, request: Request) -> AuthorizeResponse:
+    async def authorize_request(self, deployment_name: str, request: Request) -> AuthorizeResponse:
         """authorize request"""
 
         authorize_response = await self.authorize.authorize_api_access(
-            headers=request.headers, deployment_id=deployment_id
+            headers=request.headers, deployment_name=deployment_name
         )
 
         if self.rate_limit.is_call_rate_exceeded(authorize_response.user_id):
@@ -41,7 +41,7 @@ class RequestManager:
     async def process_request(
         self,
         *,
-        deployment_id: str,
+        deployment_name: str,
         request: Request,
         model: object,
         call_method: classmethod,
@@ -57,7 +57,7 @@ class RequestManager:
                 model.api_version = request.query_params["api-version"]
 
         authorize_response = await self.authorize.authorize_api_access(
-            headers=request.headers, deployment_id=deployment_id
+            headers=request.headers, deployment_name=deployment_name
         )
 
         if hasattr(model, "max_tokens"):
@@ -76,7 +76,7 @@ class RequestManager:
             if value is not None and key != "api_version":
                 openai_request[key] = value
 
-        deployment = await self.config.get_catalog_by_deployment_id(authorize_response)
+        deployment = await self.config.get_catalog_by_deployment_name(authorize_response)
 
         response, http_status_code = await call_method(model, openai_request, deployment)
 

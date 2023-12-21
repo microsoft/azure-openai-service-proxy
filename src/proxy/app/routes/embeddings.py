@@ -30,7 +30,7 @@ class Embeddings(RequestManager):
 
         # Support for Azure OpenAI Service SDK 1.0+
         @self.router.post(
-            "/openai/deployments/{deployment_id}/embeddings",
+            "/openai/deployments/{deployment_name}/embeddings",
             status_code=200,
             response_model=None,
         )
@@ -38,12 +38,12 @@ class Embeddings(RequestManager):
             model: EmbeddingsRequest,
             request: Request,
             response: Response,
-            deployment_id: str = None,
+            deployment_name: str = None,
         ) -> openai.openai_object.OpenAIObject:
             """OpenAI chat completion response"""
 
             completion, status_code = await self.process_request(
-                deployment_id=deployment_id,
+                deployment_name=deployment_name,
                 request=request,
                 model=model,
                 call_method=self.call_openai,

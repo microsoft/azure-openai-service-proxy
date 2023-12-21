@@ -33,10 +33,10 @@ except KeyError as key_error:
 try:
     sql_connection_string = os.environ["POSTGRES_CONNECTION_STRING"]
 except KeyError as key_error:
-    print("Please set the environment variable POSTGRESQL_CONNECTION_STRING")
+    print("Please set the environment variable POSTGRES_CONNECTION_STRING")
     raise HTTPException(
         status_code=500,
-        detail="Please set the environment variable POSTGRESQL_CONNECTION_STRING",
+        detail="Please set the environment variable POSTGRES_CONNECTION_STRING",
     ) from key_error
 
 
@@ -97,7 +97,6 @@ async def validation_exception_handler(request, exc):
 @app.on_event("startup")
 async def startup_event():
     """startup event"""
-    pass
 
 
 if os.environ.get("ENVIRONMENT") == "development":

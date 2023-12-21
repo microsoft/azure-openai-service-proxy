@@ -35,7 +35,7 @@ class Completions(RequestManager):
 
         # Support for Azure OpenAI Service SDK 1.0+
         @self.router.post(
-            "/openai/deployments/{deployment_id}/completions",
+            "/openai/deployments/{deployment_name}/completions",
             status_code=200,
             response_model=None,
         )
@@ -43,12 +43,12 @@ class Completions(RequestManager):
             model: CompletionsRequest,
             request: Request,
             response: Response,
-            deployment_id: str = None,
+            deployment_name: str = None,
         ) -> openai.openai_object.OpenAIObject | str:
             """OpenAI completion response"""
 
             completion, status_code = await self.process_request(
-                deployment_id=deployment_id,
+                deployment_name=deployment_name,
                 request=request,
                 model=model,
                 call_method=self.call_openai,
