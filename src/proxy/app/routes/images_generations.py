@@ -89,12 +89,6 @@ class ImagesGenerations(RequestManager):
         ):
             """OpenAI image generation response"""
 
-            # No deployment_is passed for images generation so set to dall-e
-            deployment_name = "dalle-2"
-
-            # if "api-version" in request.query_params:
-            #     api_version = request.query_params["api-version"]
-
             # Note, the .NET SDK tried to use api-version 2023-09-01-preview
             # but it is not supported
             api_version = OPENAI_IMAGES_GENERATIONS_API_VERSION

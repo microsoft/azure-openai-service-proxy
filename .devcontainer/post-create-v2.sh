@@ -2,6 +2,9 @@
 echo setting up postgresql...
 
 # install postgresql client
+sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/postgresql.gpg >/dev/null
+
 sudo apt-get update
 sudo apt install postgresql-client -y
 
@@ -23,6 +26,3 @@ npm install -g @azure/static-web-apps-cli
 
 
 # sqlcmd -S localhost -U sa -P $MSSQL_SA_PASSWORD -i ../database/schema.sql
-
-
-
