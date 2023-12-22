@@ -24,7 +24,6 @@ class MonitorEntity(BaseModel):
     user_id: str
     event_id: str
     event_code: str
-    event_name: str
     event_url: str
     event_url_text: str
     organizer_name: str
@@ -39,8 +38,6 @@ class MonitorEntity(BaseModel):
         user_id: str,
         event_id: str,
         event_code: str,
-        user_token: UUID,
-        event_name: str,
         event_url: str,
         event_url_text: str,
         organizer_name: str,
@@ -54,8 +51,6 @@ class MonitorEntity(BaseModel):
             user_id=user_id,
             event_id=event_id,
             event_code=event_code,
-            user_token=user_token,
-            event_name=event_name,
             event_url=event_url,
             event_url_text=event_url_text,
             organizer_name=organizer_name,
