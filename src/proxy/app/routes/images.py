@@ -1,7 +1,6 @@
 """ dalle-3 and beyond """
 
 from enum import Enum
-from typing import Any
 
 import openai.openai_object
 from fastapi import Request, Response
@@ -11,8 +10,6 @@ from pydantic import BaseModel
 from ..config import Deployment
 from ..openai_async import OpenAIAsyncManager
 from .request_manager import RequestManager
-
-OPENAI_IMAGES_GENERATIONS_API_VERSION = "2023-12-01-preview"
 
 
 class ResponseFormat(Enum):
@@ -53,7 +50,6 @@ class ImagesRequest(BaseModel):
     size: ImageSize = ImageSize.IS_1024X1024
     quality: ImageQuality = ImageQuality.HD
     style: ImageStyle = ImageStyle.VIVID
-    api_version: str = OPENAI_IMAGES_GENERATIONS_API_VERSION
 
 
 class Images(RequestManager):
@@ -91,24 +87,23 @@ class Images(RequestManager):
 
     async def call_openai_images_generations(
         self,
-        images: ImagesRequest,
-        openai_request: dict[str, Any],
+        model: object,
         deployment: Deployment,
     ) -> tuple[openai.openai_object.OpenAIObject, int]:
         """call openai with retry"""
 
         openai_request = {
-            "prompt": images.prompt,
-            "size": images.size.value,
-            "n": images.n,
-            "quality": images.quality.value,
-            "style": images.style.value,
+            "prompt": model.prompt,
+            "size": model.size.value,
+            "n": model.n,
+            "quality": model.quality.value,
+            "style": model.style.value,
         }
 
         url = (
             f"https://{deployment.resource_name}.openai.azure.com/openai/deployments/"
             f"{deployment.deployment_name}/images/generations"
-            f"?api-version={images.api_version}"
+            f"?api-version={self.api_version}"
         )
 
         async_mgr = OpenAIAsyncManager(deployment)

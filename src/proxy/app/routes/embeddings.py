@@ -1,6 +1,5 @@
 """ OpenAI Embeddings API route """
 
-from typing import Any
 
 import openai.openai_object
 from fastapi import Request, Response
@@ -11,15 +10,12 @@ from ..config import Deployment
 from ..openai_async import OpenAIAsyncManager
 from .request_manager import RequestManager
 
-OPENAI_EMBEDDINGS_API_VERSION = "2023-08-01-preview"
-
 
 class EmbeddingsRequest(BaseModel):
     """OpenAI Chat Request"""
 
     input: str | list[str]
     model: str = ""
-    api_version: str = OPENAI_EMBEDDINGS_API_VERSION
 
 
 class Embeddings(RequestManager):
@@ -56,8 +52,7 @@ class Embeddings(RequestManager):
 
     async def call_openai(
         self,
-        model: EmbeddingsRequest,
-        openai_request: dict[str, Any],
+        model: object,
         deployment: Deployment,
     ) -> tuple[openai.openai_object.OpenAIObject, int]:
         """call openai with retry"""
@@ -65,9 +60,10 @@ class Embeddings(RequestManager):
         url = (
             f"https://{deployment.resource_name}.openai.azure.com/openai/deployments/"
             f"{deployment.deployment_name}/embeddings"
-            f"?api-version={model.api_version}"
+            f"?api-version={self.api_version}"
         )
 
+        openai_request = self.model_to_dict(model)
         async_mgr = OpenAIAsyncManager(deployment)
         response, http_status_code = await async_mgr.async_openai_post(openai_request, url)
 

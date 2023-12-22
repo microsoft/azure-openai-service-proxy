@@ -13,8 +13,6 @@ from ..config import Deployment
 from ..openai_async import OpenAIAsyncManager
 from .request_manager import RequestManager
 
-OPENAI_CHAT_COMPLETIONS_API_VERSION = "2023-09-01-preview"
-
 
 class ChatCompletionsRequest(BaseModel):
     """OpenAI Chat Request"""
@@ -31,7 +29,6 @@ class ChatCompletionsRequest(BaseModel):
     presence_penalty: float | None = None
     functions: list[dict[str, Any]] | None = None
     function_call: str | dict[str, str] | None = None
-    api_version: str = OPENAI_CHAT_COMPLETIONS_API_VERSION
 
 
 class ChatCompletions(RequestManager):
@@ -60,14 +57,11 @@ class ChatCompletions(RequestManager):
         ) -> openai.openai_object.OpenAIObject | str | StreamingResponse:
             """OpenAI chat completion response"""
 
-            if model.api_version is None:
-                model.api_version = OPENAI_CHAT_COMPLETIONS_API_VERSION
-
             completion, status_code = await self.process_request(
                 deployment_name=deployment_name,
                 request=request,
                 model=model,
-                call_method=self.call_openai,
+                call_method=self.call_openai_chat,
                 validate_method=self.__validate_chat_completion_request,
             )
 
@@ -79,10 +73,9 @@ class ChatCompletions(RequestManager):
 
         return self.router
 
-    async def call_openai(
+    async def call_openai_chat(
         self,
-        model: ChatCompletionsRequest,
-        openai_request: dict[str, Any],
+        model: object,
         deployment: Deployment,
     ) -> tuple[openai.openai_object.OpenAIObject, int] | AsyncGenerator:
         """call openai with retry"""
@@ -90,9 +83,10 @@ class ChatCompletions(RequestManager):
         url = (
             f"https://{deployment.resource_name}.openai.azure.com/openai/deployments/"
             f"{deployment.deployment_name}/chat/completions"
-            f"?api-version={model.api_version}"
+            f"?api-version={self.api_version}"
         )
 
+        openai_request = self.model_to_dict(model)
         async_mgr = OpenAIAsyncManager(deployment)
 
         if model.stream:
