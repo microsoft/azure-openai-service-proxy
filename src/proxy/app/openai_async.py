@@ -162,7 +162,7 @@ class OpenAIAsyncManager:
 
     async def async_post_streaming(
         self,
-        openai_request: str,
+        openai_request: dict,
         url: str,
     ) -> AsyncGenerator:
         """async rest post"""
