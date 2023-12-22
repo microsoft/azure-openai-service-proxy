@@ -12,7 +12,7 @@ load_dotenv()
 ENDPOINT_URL = os.environ.get("ENDPOINT_URL")
 API_KEY = os.environ.get("API_KEY")
 API_VERSION = "2023-09-01-preview"
-MODEL_NAME = "text-davinci-002"
+MODEL_NAME = "gpt-35-turbo"
 
 
 client = AzureOpenAI(
