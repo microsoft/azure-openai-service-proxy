@@ -105,10 +105,14 @@ images_route = images_router(
 
 app.include_router(completion_router.include_router(), prefix="/api/v1", tags=["completions"])
 app.include_router(chat_route.include_router(), prefix="/api/v1", tags=["chat-completions"])
-app.include_router(chat_extensions_route.include_router(), prefix="/api/v1", tags=["chat-completions-extensions"])
+app.include_router(
+    chat_extensions_route.include_router(), prefix="/api/v1", tags=["chat-completions-extensions"]
+)
 app.include_router(embeddings_route.include_router(), prefix="/api/v1", tags=["embeddings"])
 app.include_router(event_info_route.include_router(), prefix="/api/v1", tags=["eventinfo"])
-app.include_router(images_generations_route.include_router(), prefix="/api/v1", tags=["images-generations"])
+app.include_router(
+    images_generations_route.include_router(), prefix="/api/v1", tags=["images-generations"]
+)
 app.include_router(images_route.include_router(), prefix="/api/v1", tags=["images"])
 
 

@@ -29,13 +29,17 @@ class Authorize:
         self.monitor = Monitor(connection_string=connection_string)
         self.logging = logging.getLogger(__name__)
 
-    async def __is_user_authorized(self, event_code: str, api_key: UUID, deployment_name: str) -> AuthorizeResponse:
+    async def __is_user_authorized(
+        self, event_code: str, api_key: UUID, deployment_name: str
+    ) -> AuthorizeResponse:
         """Check if user is authorized"""
 
         try:
             conn = await self.db_manager.get_connection()
 
-            result = await conn.fetchrow("SELECT * from aoai.get_attendee_authorized($1, $2)", event_code, api_key)
+            result = await conn.fetchrow(
+                "SELECT * from aoai.get_attendee_authorized($1, $2)", event_code, api_key
+            )
 
             if result is None or len(result) == 0:
                 raise HTTPException(
@@ -109,7 +113,9 @@ class Authorize:
 
         return authorize_response
 
-    async def authorize_azure_api_access(self, *, headers: str, deployment_name: str) -> AuthorizeResponse:
+    async def authorize_azure_api_access(
+        self, *, headers: str, deployment_name: str
+    ) -> AuthorizeResponse:
         """authorize api access"""
 
         if "api-key" not in headers:

@@ -18,7 +18,9 @@ logging.basicConfig(level=logging.INFO)
 class Deployment:
     """Deployment"""
 
-    def __init__(self, *, endpoint_key: str, deployment_name: str, model_type: str, resource_name: str):
+    def __init__(
+        self, *, endpoint_key: str, deployment_name: str, model_type: str, resource_name: str
+    ):
         """init deployment"""
         self.endpoint_key = endpoint_key
         self.model_type = model_type
@@ -34,7 +36,9 @@ class Config:
         self.logging = logging.getLogger(__name__)
 
     @lru_cache_with_expiry(maxsize=128, ttl=300)
-    async def get_event_catalog(self, event_id: str, deployment_name: str | None) -> list[Deployment]:
+    async def get_event_catalog(
+        self, event_id: str, deployment_name: str | None
+    ) -> list[Deployment]:
         """get config"""
 
         config = []
@@ -46,7 +50,9 @@ class Config:
                 result = await conn.fetch("SELECT * FROM aoai.get_models_by_event($1)", event_id)
             else:
                 result = await conn.fetch(
-                    "SELECT * FROM aoai.get_models_by_deployment_name($1, $2)", event_id, deployment_name
+                    "SELECT * FROM aoai.get_models_by_deployment_name($1, $2)",
+                    event_id,
+                    deployment_name,
                 )
 
             for row in result:
@@ -70,26 +76,34 @@ class Config:
                 status_code=503,
             ) from exp
 
-    async def get_catalog_by_deployment_name(self, authorize_response: AuthorizeResponse) -> Deployment:
+    async def get_catalog_by_deployment_name(
+        self, authorize_response: AuthorizeResponse
+    ) -> Deployment:
         """get config"""
 
-        deployments = await self.get_event_catalog(authorize_response.event_id, authorize_response.deployment_name)
+        deployments = await self.get_event_catalog(
+            authorize_response.event_id, authorize_response.deployment_name
+        )
         deployment_count = len(deployments)
 
         if deployment_count == 0:
             self.logging.warning(
-                "The request model '%s' is not available for this event.", authorize_response.deployment_name
+                "The request model '%s' is not available for this event.",
+                authorize_response.deployment_name,
             )
 
             event_deploymemts = await self.get_event_deployments(authorize_response)
             # convert the deployment names to a set to deduplicate
-            event_deployment_names = {name for deployments in event_deploymemts.values() for name in deployments}
+            event_deployment_names = {
+                name for deployments in event_deploymemts.values() for name in deployments
+            }
             # convert the set to a comma separated string
             event_deployment_names_str = ", ".join(event_deployment_names)
 
             raise HTTPException(
                 detail=(
-                    f"The request model '{authorize_response.deployment_name}' is not available for this event. "
+                    f"The request model '{authorize_response.deployment_name}' "
+                    "is not available for this event. "
                     f"Available models are: {event_deployment_names_str}"
                 ),
                 status_code=400,

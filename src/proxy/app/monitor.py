@@ -81,8 +81,6 @@ class Monitor:
     def log_api_call(self, *, entity: MonitorEntity):
         """write event to Azure Storage account Queue called USAGE_LOGGING_NAME"""
 
-        # add the class name to the entity
-
         message = json.dumps(entity.__dict__, cls=UUIDEncoder)
         # base64 encode the message to a string
         message = base64.b64encode(message.encode("ascii")).decode("ascii")

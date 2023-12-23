@@ -63,7 +63,9 @@ class EventInfo(RequestManager):
                 deployment_name=deployment_name,
             )
 
-            capabilities = await self.config.get_event_deployments(authorize_response=authorize_response)
+            capabilities = await self.config.get_event_deployments(
+                authorize_response=authorize_response
+            )
 
             event_info_dict = dict(authorize_response)
             event_info_dict["capabilities"] = capabilities

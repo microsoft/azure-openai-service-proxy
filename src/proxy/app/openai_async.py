@@ -35,7 +35,9 @@ class OpenAIAsyncManager:
         """init in memory session manager"""
         self.deployment = deployment
 
-    async def async_openai_post(self, openai_request: str, url: str) -> tuple[openai.openai_object.OpenAIObject, int]:
+    async def async_openai_post(
+        self, openai_request: str, url: str
+    ) -> tuple[openai.openai_object.OpenAIObject, int]:
         """async openai post"""
 
         headers = {
@@ -95,7 +97,9 @@ class OpenAIAsyncManager:
         except httpx.HTTPStatusError as http_status_error:
             raise HTTPException(
                 status_code=http_status_error.response.status_code,
-                detail=json.loads(http_status_error.response.text).get("error").get("message", "OpenAI Error"),
+                detail=json.loads(http_status_error.response.text)
+                .get("error")
+                .get("message", "OpenAI Error"),
             ) from http_status_error
 
         except httpx.ConnectError as exc:
@@ -136,7 +140,11 @@ class OpenAIAsyncManager:
             return response
 
         except httpx.HTTPStatusError as http_status_error:
-            detail = json.loads(http_status_error.response.text).get("error").get("message", "OpenAI Error")
+            detail = (
+                json.loads(http_status_error.response.text)
+                .get("error")
+                .get("message", "OpenAI Error")
+            )
 
             raise HTTPException(
                 status_code=http_status_error.response.status_code, detail=detail
@@ -184,7 +192,7 @@ class OpenAIAsyncManager:
                     ) as response:
                         response.raise_for_status()
                         async for chunk in response.aiter_bytes():
-                            yield (chunk)
+                            yield chunk
 
                 except httpx.HTTPStatusError as http_status_error:
                     raise HTTPException(

@@ -86,7 +86,9 @@ class ImagesGenerations(RequestManager):
         ):
             """OpenAI image generation response"""
 
-            authorize_response = await self.authorize_request(deployment_name=deployment_name, request=request)
+            authorize_response = await self.authorize_request(
+                deployment_name=deployment_name, request=request
+            )
 
             (
                 completion_response,
@@ -147,7 +149,9 @@ class ImagesGenerations(RequestManager):
 
         return dalle_response.json(), dalle_response.status_code
 
-    async def call_openai_images_get(self, deployment_name: str, image_id: str, authorize_response: AuthorizeResponse):
+    async def call_openai_images_get(
+        self, deployment_name: str, image_id: str, authorize_response: AuthorizeResponse
+    ):
         """call openai with retry"""
 
         authorize_response.deployment_name = deployment_name
@@ -175,7 +179,9 @@ class ImagesGenerations(RequestManager):
             self.report_exception("Oops, no prompt.", 400)
 
         if len(images.prompt) > 1000:
-            self.report_exception("Oops, prompt is too long. The maximum length is 1000 characters.", 400)
+            self.report_exception(
+                "Oops, prompt is too long. The maximum length is 1000 characters.", 400
+            )
 
         # check the image_count is between 1 and 5
         if images.n and not 1 <= images.n <= 5:
