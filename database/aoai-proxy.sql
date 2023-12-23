@@ -131,10 +131,14 @@ CREATE FUNCTION aoai.add_event_attendee(p_user_id character varying, p_event_id 
 DECLARE
     v_api_key UUID;
 BEGIN
-    v_api_key := uuid_generate_v4();
+	SELECT api_key INTO v_api_key FROM aoai.event_attendee WHERE user_id = p_user_id;
 
-    INSERT INTO aoai.event_attendee(user_id, event_id, active, total_requests, api_key, total_tokens)
-    VALUES (p_user_id, p_event_id, true, 0, v_api_key, 0);
+    IF v_api_key IS NULL THEN
+		v_api_key := uuid_generate_v4();
+
+		INSERT INTO aoai.event_attendee(user_id, event_id, active, total_requests, api_key, total_tokens)
+		VALUES (p_user_id, p_event_id, true, 0, v_api_key, 0);
+	END IF;
 
     RETURN v_api_key;
 END;
