@@ -9,7 +9,7 @@ sudo apt-get update
 sudo apt install postgresql-client -y
 
 psql -U admin -d aoai-proxy -h localhost -w -f ./database/aoai-proxy.sql
-psql -U admin -d aoai-proxy -h localhost -w -c "CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";"
+psql -U admin -d aoai-proxy -h localhost -w -c "CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\" SCHEMA aoai;"
 
 echo Setting up Python environment...
 
