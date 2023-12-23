@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 14.10 (Ubuntu 14.10-0ubuntu0.22.04.1)
+-- Dumped from database version 16.1
 -- Dumped by pg_dump version 16.1 (Debian 16.1-1.pgdg110+1)
 
 SET statement_timeout = 0;
@@ -24,6 +24,20 @@ CREATE SCHEMA aoai;
 
 
 ALTER SCHEMA aoai OWNER TO admin;
+
+--
+-- Name: uuid-ossp; Type: EXTENSION; Schema: -; Owner: -
+--
+
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA public;
+
+
+--
+-- Name: EXTENSION "uuid-ossp"; Type: COMMENT; Schema: -; Owner:
+--
+
+COMMENT ON EXTENSION "uuid-ossp" IS 'generate universally unique identifiers (UUIDs)';
+
 
 --
 -- Name: model_type; Type: TYPE; Schema: aoai; Owner: admin
@@ -120,6 +134,28 @@ $$;
 
 
 ALTER FUNCTION aoai.add_event(p_owner_id uuid, p_event_code character varying, p_event_markdown character varying, p_start_utc timestamp without time zone, p_end_utc timestamp without time zone, p_organizer_name character varying, p_organizer_email character varying, p_event_url character varying, p_event_url_text character varying, p_max_token_cap integer, p_single_code boolean, p_daily_request_cap integer, p_active boolean) OWNER TO admin;
+
+--
+-- Name: add_event_attendee(character varying, character varying); Type: FUNCTION; Schema: aoai; Owner: admin
+--
+
+CREATE FUNCTION aoai.add_event_attendee(p_user_id character varying, p_event_id character varying) RETURNS uuid
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+    v_api_key UUID;
+BEGIN
+    v_api_key := uuid_generate_v4();
+
+    INSERT INTO aoai.event_attendee(user_id, event_id, active, total_requests, api_key, total_tokens)
+    VALUES (p_user_id, p_event_id, true, 0, v_api_key, 0);
+
+    RETURN v_api_key;
+END;
+$$;
+
+
+ALTER FUNCTION aoai.add_event_attendee(p_user_id character varying, p_event_id character varying) OWNER TO admin;
 
 --
 -- Name: get_attendee_authorized(character varying, uuid); Type: FUNCTION; Schema: aoai; Owner: admin
@@ -387,6 +423,13 @@ ALTER TABLE ONLY aoai.owner_catalog
 
 ALTER TABLE ONLY aoai.owner_event_map
     ADD CONSTRAINT ownereventmap_pkey PRIMARY KEY (owner_id, event_id);
+
+
+--
+-- Name: api_key_unique_index; Type: INDEX; Schema: aoai; Owner: admin
+--
+
+CREATE UNIQUE INDEX api_key_unique_index ON aoai.event_attendee USING btree (api_key);
 
 
 --
