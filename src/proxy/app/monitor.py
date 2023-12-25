@@ -15,6 +15,35 @@ logging.basicConfig(level=logging.WARNING)
 USAGE_LOGGING_NAME = "monitor"
 
 
+class Usage:
+    """Usage"""
+
+    def __init__(self):
+        self.count = 0
+
+    def reset(self):
+        """reset"""
+
+        self.count = 0
+
+    def count_tokens(self, chunk: bytes):
+        """increment"""
+
+        chunk = chunk.decode("ascii")
+        data_segments = chunk.split("data: ")
+
+        for data in data_segments:
+            if data:
+                if "[DONE]\n\n" == data:
+                    self.count -= 1
+                    break
+
+                if '"finish_reason":null' in data:
+                    self.count += 1
+
+        print(f"Usage count: {self.count}")
+
+
 class MonitorEntity(BaseModel):
     """Response object for Authorize class."""
 

@@ -11,6 +11,7 @@ import openai.openai_object
 from fastapi import HTTPException
 
 from .config import Deployment
+from .monitor import Usage
 
 HTTPX_TIMEOUT_SECONDS = 60
 HTTPX_STREAMING_TIMEOUT_SECONDS = 10
@@ -172,6 +173,7 @@ class OpenAIAsyncManager:
         self,
         openai_request: dict,
         url: str,
+        usage: Usage,
     ) -> AsyncGenerator:
         """async rest post"""
 
@@ -192,6 +194,7 @@ class OpenAIAsyncManager:
                     ) as response:
                         response.raise_for_status()
                         async for chunk in response.aiter_bytes():
+                            usage.count_tokens(chunk)
                             yield chunk
 
                 except httpx.HTTPStatusError as http_status_error:

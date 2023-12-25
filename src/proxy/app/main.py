@@ -14,7 +14,6 @@ from .config import Config
 # pylint: disable=E0402
 from .db_manager import DBManager
 from .routes.chat_completions import ChatCompletions as chat_completions_router
-from .routes.chat_extensions import ChatExtensions as chat_extensions_router
 from .routes.completions import Completions as completions_router
 from .routes.embeddings import Embeddings as embeddings_router
 from .routes.event_info import EventInfo as eventinfo_router
@@ -73,11 +72,6 @@ chat_route = chat_completions_router(
     api_version=DEFAULT_CHAT_COMPLETIONS_API_VERSION,
 )
 
-chat_extensions_route = chat_extensions_router(
-    authorize=authorize,
-    config=config,
-    api_version=DEFAULT_CHAT_COMPLETIONS_EXTENSIONS_API_VERSION,
-)
 
 embeddings_route = embeddings_router(
     authorize=authorize,
@@ -105,9 +99,6 @@ images_route = images_router(
 
 app.include_router(completion_router.include_router(), prefix="/api/v1", tags=["completions"])
 app.include_router(chat_route.include_router(), prefix="/api/v1", tags=["chat-completions"])
-app.include_router(
-    chat_extensions_route.include_router(), prefix="/api/v1", tags=["chat-completions-extensions"]
-)
 app.include_router(embeddings_route.include_router(), prefix="/api/v1", tags=["embeddings"])
 app.include_router(event_info_route.include_router(), prefix="/api/v1", tags=["eventinfo"])
 app.include_router(

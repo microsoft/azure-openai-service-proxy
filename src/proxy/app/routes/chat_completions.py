@@ -37,15 +37,21 @@ class ChatCompletions(RequestManager):
     def include_router(self):
         """include router"""
 
+        # Support for Python Azure OpenAI SDK 1.0+
+        @self.router.post(
+            "/deployments/{deployment_name}/chat/completions",
+            status_code=200,
+            response_model=None,
+        )
         # Support for .NET Azure OpenAI Service SDK
         @self.router.post(
             "/openai/deployments/{deployment_name}/chat/completions",
             status_code=200,
             response_model=None,
         )
-        # Support for Python Azure OpenAI SDK 1.0+
+        # Support for .NET Azure OpenAI Extensions Chat Completions
         @self.router.post(
-            "/deployments/{deployment_name}/chat/completions",
+            "/openai/deployments/{deployment_name}/extensions/chat/completions",
             status_code=200,
             response_model=None,
         )
@@ -56,6 +62,9 @@ class ChatCompletions(RequestManager):
             deployment_name: str = None,
         ) -> openai.openai_object.OpenAIObject | str | StreamingResponse:
             """OpenAI chat completion response"""
+
+            if "extension" in request.url.path:
+                self.is_extension = True
 
             completion, status_code = await self.process_request(
                 deployment_name=deployment_name,
@@ -74,23 +83,30 @@ class ChatCompletions(RequestManager):
         return self.router
 
     async def call_openai_chat(
-        self,
-        model: object,
-        deployment: Deployment,
+        self, model: object, deployment: Deployment
     ) -> tuple[openai.openai_object.OpenAIObject, int] | AsyncGenerator:
         """call openai with retry"""
 
-        url = (
-            f"https://{deployment.resource_name}.openai.azure.com/openai/deployments/"
-            f"{deployment.deployment_name}/chat/completions"
-            f"?api-version={self.api_version}"
-        )
+        if self.is_extension:
+            url = (
+                f"https://{deployment.resource_name}.openai.azure.com/openai/deployments/"
+                f"{deployment.deployment_name}/extensions/chat/completions"
+                f"?api-version={self.api_version}"
+            )
+        else:
+            url = (
+                f"https://{deployment.resource_name}.openai.azure.com/openai/deployments/"
+                f"{deployment.deployment_name}/chat/completions"
+                f"?api-version={self.api_version}"
+            )
 
         openai_request = self.model_to_dict(model)
         async_mgr = OpenAIAsyncManager(deployment)
 
         if model.stream:
-            response, http_status_code = await async_mgr.async_post_streaming(openai_request, url)
+            response, http_status_code = await async_mgr.async_post_streaming(
+                openai_request, url, self.usage
+            )
         else:
             response, http_status_code = await async_mgr.async_openai_post(openai_request, url)
 
