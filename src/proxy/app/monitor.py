@@ -15,7 +15,7 @@ logging.basicConfig(level=logging.WARNING)
 USAGE_LOGGING_NAME = "monitor"
 
 
-class Usage:
+class StreamingUsage:
     """Usage"""
 
     def __init__(self):
