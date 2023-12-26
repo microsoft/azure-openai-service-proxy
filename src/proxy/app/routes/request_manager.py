@@ -7,7 +7,7 @@ from fastapi import APIRouter, HTTPException, Request
 # pylint: disable=E0402
 from ..authorize import Authorize, AuthorizeResponse
 from ..config import Config
-from ..monitor import StreamingUsage
+from ..monitor import StreamingUsageEstimator
 from ..rate_limit import RateLimit
 
 logging.basicConfig(level=logging.INFO)
@@ -24,7 +24,7 @@ class RequestManager:
         self.router = APIRouter()
         self.rate_limit = RateLimit()
         self.logger = logging.getLogger(__name__)
-        self.usage = StreamingUsage()
+        self.usage = StreamingUsageEstimator()
         self._is_extension = False
 
     @property

@@ -11,7 +11,7 @@ import openai.openai_object
 from fastapi import HTTPException
 
 from .config import Deployment
-from .monitor import StreamingUsage
+from .monitor import StreamingUsageEstimator
 
 HTTPX_TIMEOUT_SECONDS = 60
 HTTPX_STREAMING_TIMEOUT_SECONDS = 10
@@ -173,7 +173,7 @@ class OpenAIAsyncManager:
         self,
         openai_request: dict,
         url: str,
-        usage: StreamingUsage,
+        usage: StreamingUsageEstimator,
     ) -> AsyncGenerator:
         """async rest post"""
 

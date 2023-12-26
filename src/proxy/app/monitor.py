@@ -15,8 +15,8 @@ logging.basicConfig(level=logging.WARNING)
 USAGE_LOGGING_NAME = "monitor"
 
 
-class StreamingUsage:
-    """Usage"""
+class StreamingUsageEstimator:
+    """Usage estimator for chat streaming API - note, no visibility of BYOD tokens"""
 
     def __init__(self):
         self.count = 0
