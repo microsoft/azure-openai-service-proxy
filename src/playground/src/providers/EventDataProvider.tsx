@@ -67,6 +67,7 @@ const EventDataProvider: React.FC<PropsWithChildren> = ({ children }) => {
         } else {
           setAuthStatus(AuthStatus.NotAuthorized);
         }
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (e: any) {
         if (e.name === "AbortError") {
           return;
