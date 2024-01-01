@@ -12,6 +12,7 @@ load_dotenv()
 ENDPOINT_URL = os.environ.get("ENDPOINT_URL")
 API_KEY = os.environ.get("API_KEY")
 API_VERSION = "2023-09-01-preview"
+DEPLOYMENT_NAME = "gpt-35-turbo"
 
 messages = [
     {
@@ -77,7 +78,7 @@ client = AzureOpenAI(
 )
 
 completion = client.chat.completions.create(
-    model="deployment-name",
+    model=DEPLOYMENT_NAME,
     messages=messages,
     functions=functions,
 )

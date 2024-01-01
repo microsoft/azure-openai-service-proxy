@@ -12,14 +12,15 @@ from .lru_cache_with_expiry import lru_cache_with_expiry
 
 # initiase the random number generator
 random.seed()
-
 logging.basicConfig(level=logging.INFO)
 
 
 class Deployment:
     """Deployment"""
 
-    def __init__(self, *, endpoint_key: str, deployment_name: str, model_type: str, resource_name: str):
+    def __init__(
+        self, *, endpoint_key: str, deployment_name: str, model_type: str, resource_name: str
+    ):
         """init deployment"""
         self.endpoint_key = endpoint_key
         self.model_type = model_type
@@ -32,11 +33,12 @@ class Config:
 
     def __init__(self, db_manager):
         self.db_manager = db_manager
-        print(type(self.db_manager))
         self.logging = logging.getLogger(__name__)
 
     @lru_cache_with_expiry(maxsize=128, ttl=300)
-    async def get_event_catalog(self, event_id: str, deployment_name: str | None) -> list[Deployment]:
+    async def get_event_catalog(
+        self, event_id: str, deployment_name: str | None
+    ) -> list[Deployment]:
         """get config"""
 
         config = []
@@ -48,17 +50,13 @@ class Config:
                 result = await conn.fetch("SELECT * FROM aoai.get_models_by_event($1)", event_id)
             else:
                 result = await conn.fetch(
-                    "SELECT * FROM aoai.get_models_by_deployment_name($1, $2)", event_id, deployment_name
+                    "SELECT * FROM aoai.get_models_by_deployment_name($1, $2)",
+                    event_id,
+                    deployment_name,
                 )
 
             for row in result:
-                deployment_item = Deployment(
-                    endpoint_key=row.get("endpoint_key").strip(),
-                    deployment_name=row.get("deployment_name").strip(),
-                    model_type=row.get("model_type").strip(),
-                    resource_name=row.get("resource_name").strip(),
-                )
-
+                deployment_item = Deployment(**row)
                 config.append(deployment_item)
 
             return config
@@ -78,37 +76,54 @@ class Config:
                 status_code=503,
             ) from exp
 
-    async def get_catalog_by_deployment_name(self, authorize_response: AuthorizeResponse) -> Deployment:
+    async def get_catalog_by_deployment_name(
+        self, authorize_response: AuthorizeResponse
+    ) -> Deployment:
         """get config"""
 
-        deployments = await self.get_event_catalog(authorize_response.event_id, authorize_response.deployment_name)
-
+        deployments = await self.get_event_catalog(
+            authorize_response.event_id, authorize_response.deployment_name
+        )
         deployment_count = len(deployments)
 
         if deployment_count == 0:
-            self.logging.warning("No active OpenAI model deployments found.")
-            # 501 The server either does not recognize the request method,
-            # or it lacks the ability to fulfil the request.
-            # Usually this implies future availability (e.g., a new feature of a web-service API).
-            # https://en.wikipedia.org/wiki/List_of_HTTP_status_codes
-            raise HTTPException(
-                detail="No active OpenAI model deployments found.",
-                status_code=501,
+            self.logging.warning(
+                "The request model '%s' is not available for this event.",
+                authorize_response.deployment_name,
             )
+
+            event_deploymemts = await self.get_event_deployments(authorize_response)
+            # convert the deployment names to a set to deduplicate
+            event_deployment_names = {
+                name for deployments in event_deploymemts.values() for name in deployments
+            }
+            # convert the set to a comma separated string
+            event_deployment_names_str = ", ".join(event_deployment_names)
+
+            raise HTTPException(
+                detail=(
+                    f"The request model '{authorize_response.deployment_name}' "
+                    "is not available for this event. "
+                    f"Available models are: {event_deployment_names_str}"
+                ),
+                status_code=400,
+            )
+
         # get a random deployment to balance load
         index = random.randint(0, deployment_count - 1)
 
         return deployments[index]
 
-    async def get_owner_catalog(self, authorize_response: AuthorizeResponse) -> list[str]:
+    async def get_event_deployments(self, authorize_response: AuthorizeResponse) -> list[str]:
         """get model class list from config deployment table"""
 
         deployments = await self.get_event_catalog(authorize_response.event_id, None)
+        event_model_types = {}
 
-        # get unique model classes from the deployment list
-        model_classes = set()
-
+        # create a dictionary with a key of deployment.model_type with a list of deployment names
         for deployment in deployments:
-            model_classes.add(deployment.model_class)
+            if deployment.model_type not in event_model_types:
+                event_model_types[deployment.model_type] = []
+            event_model_types[deployment.model_type].append(deployment.deployment_name)
 
-        return list(model_classes)
+        return event_model_types

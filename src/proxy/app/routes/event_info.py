@@ -1,13 +1,9 @@
 """ event_info route """
 
-from uuid import UUID
-
 from fastapi import Request
 from pydantic import BaseModel
 
 # pylint: disable=E0402
-from ..authorize import Authorize
-from ..config import Config
 from .request_manager import RequestManager
 
 
@@ -17,33 +13,27 @@ class EventInfoResponse(BaseModel):
     is_authorized: bool
     max_token_cap: int
     event_code: str
-    user_token: UUID
-    event_name: str
     event_url: str
     event_url_text: str
     organizer_name: str
     organizer_email: str
-    capabilities: list[str]
+    capabilities: dict
 
     def __init__(
         self,
         is_authorized: bool,
         max_token_cap: int,
         event_code: str,
-        user_token: UUID,
-        event_name: str,
         event_url: str,
         event_url_text: str,
         organizer_name: str,
         organizer_email: str,
-        capabilities: list[str],
+        capabilities: dict,
     ) -> None:
         super().__init__(
             is_authorized=is_authorized,
             max_token_cap=max_token_cap,
             event_code=event_code,
-            user_token=user_token,
-            event_name=event_name,
             event_url=event_url,
             event_url_text=event_url_text,
             organizer_name=organizer_name,
@@ -54,9 +44,6 @@ class EventInfoResponse(BaseModel):
 
 class EventInfo(RequestManager):
     """Completion route"""
-
-    def __init__(self, authorize: Authorize, config: Config):
-        super().__init__(authorize=authorize, config=config)
 
     def include_router(self):
         """include router"""
@@ -76,22 +63,17 @@ class EventInfo(RequestManager):
                 deployment_name=deployment_name,
             )
 
-            capabilities = await self.config.get_owner_catalog(authorize_response=authorize_response)
-
-            # fill in EventInfoResponse from authorize_response
-            event_info_response = EventInfoResponse(
-                is_authorized=authorize_response.is_authorized,
-                max_token_cap=authorize_response.max_token_cap,
-                event_code=authorize_response.event_id,
-                user_token=authorize_response.user_token,
-                event_name=authorize_response.event_name,
-                event_url=authorize_response.event_url,
-                event_url_text=authorize_response.event_url_text,
-                organizer_name=authorize_response.organizer_name,
-                organizer_email=authorize_response.organizer_email,
-                capabilities=capabilities,
+            capabilities = await self.config.get_event_deployments(
+                authorize_response=authorize_response
             )
 
-            return event_info_response
+            event_info_dict = dict(authorize_response)
+            event_info_dict["capabilities"] = capabilities
+            del event_info_dict["user_id"]
+            del event_info_dict["event_id"]
+            del event_info_dict["deployment_name"]
+            del event_info_dict["daily_request_cap"]
+
+            return EventInfoResponse(**event_info_dict)
 
         return self.router

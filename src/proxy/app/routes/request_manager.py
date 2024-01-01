@@ -7,6 +7,7 @@ from fastapi import APIRouter, HTTPException, Request
 # pylint: disable=E0402
 from ..authorize import Authorize, AuthorizeResponse
 from ..config import Config
+from ..monitor import StreamingUsageEstimator
 from ..rate_limit import RateLimit
 
 logging.basicConfig(level=logging.INFO)
@@ -15,18 +16,34 @@ logging.basicConfig(level=logging.INFO)
 class RequestManager:
     """Request Manager base class"""
 
-    def __init__(self, *, authorize: Authorize, config: Config):
+    def __init__(self, *, authorize: Authorize, config: Config, api_version: str):
         self.authorize = authorize
         self.config = config
+        self.api_version = api_version
 
         self.router = APIRouter()
         self.rate_limit = RateLimit()
         self.logger = logging.getLogger(__name__)
+        self.usage = StreamingUsageEstimator()
+        self._is_extension = False
+
+    @property
+    def is_extension(self):
+        """Getter for is_extension"""
+        return self._is_extension
+
+    @is_extension.setter
+    def is_extension(self, value):
+        """Setter for is_extension"""
+        if isinstance(value, bool):
+            self._is_extension = value
+        else:
+            raise ValueError("is_extension must be a boolean")
 
     async def authorize_request(self, deployment_name: str, request: Request) -> AuthorizeResponse:
         """authorize request"""
 
-        authorize_response = await self.authorize.authorize_api_access(
+        authorize_response = await self.authorize.authorize_azure_api_access(
             headers=request.headers, deployment_name=deployment_name
         )
 
@@ -51,12 +68,10 @@ class RequestManager:
         if validate_method:
             validate_method(model)
 
-        # get the api version from the query string
-        if hasattr(model, "api_version"):
-            if "api-version" in request.query_params:
-                model.api_version = request.query_params["api-version"]
+        if "api-version" in request.query_params:
+            self.api_version = request.query_params["api-version"]
 
-        authorize_response = await self.authorize.authorize_api_access(
+        authorize_response = await self.authorize.authorize_azure_api_access(
             headers=request.headers, deployment_name=deployment_name
         )
 
@@ -70,19 +85,14 @@ class RequestManager:
                 detail="Rate limit exceeded. Try again in 10 seconds",
             )
 
-        openai_request = {}
-
-        for key, value in model.__dict__.items():
-            if value is not None and key != "api_version":
-                openai_request[key] = value
+        self.usage.reset()
 
         deployment = await self.config.get_catalog_by_deployment_name(authorize_response)
-
-        response, http_status_code = await call_method(model, openai_request, deployment)
+        response, http_status_code = await call_method(model, deployment)
 
         # log the request usage
-        if "usage" in response:
-            print(f"usage: {response.get('usage')}")
+        # if "usage" in response:
+        #     print(f"usage: {response.get('usage')}")
 
         return response, http_status_code
 
@@ -102,3 +112,7 @@ class RequestManager:
             status_code=http_status_code,
             detail=message,
         )
+
+    def model_to_dict(self, model: object) -> dict:
+        """model to dict and remove keys that have None values"""
+        return {k: v for k, v in dict(model).items() if v is not None}

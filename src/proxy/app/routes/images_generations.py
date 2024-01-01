@@ -13,8 +13,6 @@ from ..config import Deployment
 from ..openai_async import OpenAIAsyncManager
 from .request_manager import RequestManager
 
-OPENAI_IMAGES_GENERATIONS_API_VERSION = "2023-06-01-preview"
-
 
 class ResponseFormat(Enum):
     """Response Format"""
@@ -43,7 +41,6 @@ class ImagesGenerationsRequst(BaseModel):
     n: int = 1
     size: ImageSize = ImageSize.IS_1024X1024
     user: str = None
-    api_version: str = OPENAI_IMAGES_GENERATIONS_API_VERSION
 
 
 class ImagesGenerations(RequestManager):
@@ -68,7 +65,7 @@ class ImagesGenerations(RequestManager):
             # No deployment_is passed for images generation so set to dall-e
             deployment_name = "dalle-2"
 
-            authorize_response = await self.authorize.authorize_api_access(
+            authorize_response = await self.authorize.authorize_azure_api_access(
                 headers=request.headers, deployment_name=deployment_name
             )
 
@@ -89,18 +86,14 @@ class ImagesGenerations(RequestManager):
         ):
             """OpenAI image generation response"""
 
-            # Note, the .NET SDK tried to use api-version 2023-09-01-preview
-            # but it is not supported
-            api_version = OPENAI_IMAGES_GENERATIONS_API_VERSION
-
-            authorize_response = await self.authorize_request(deployment_name=deployment_name, request=request)
-
-            (completion_response, status_code,) = await self.call_openai_images_get(
-                deployment_name,
-                image_id,
-                authorize_response,
-                api_version,
+            authorize_response = await self.authorize_request(
+                deployment_name=deployment_name, request=request
             )
+
+            (
+                completion_response,
+                status_code,
+            ) = await self.call_openai_images_get(deployment_name, image_id, authorize_response)
 
             response.status_code = status_code
             return completion_response
@@ -120,10 +113,6 @@ class ImagesGenerations(RequestManager):
 
         deployment = await self.config.get_catalog_by_deployment_name(authorize_response)
 
-        # Note, the .NET SDK tried to use api-version 2023-09-01-preview
-        # but it is not supported
-        api_version = OPENAI_IMAGES_GENERATIONS_API_VERSION
-
         openai_request = {
             "prompt": images.prompt,
             "n": images.n,
@@ -134,7 +123,7 @@ class ImagesGenerations(RequestManager):
         url = (
             f"https://{deployment.resource_name}.openai.azure.com"
             "/openai/images/generations:submit"
-            f"?api-version={api_version}"
+            f"?api-version={self.api_version}"
         )
 
         async_mgr = OpenAIAsyncManager(deployment)
@@ -161,11 +150,7 @@ class ImagesGenerations(RequestManager):
         return dalle_response.json(), dalle_response.status_code
 
     async def call_openai_images_get(
-        self,
-        deployment_name: str,
-        image_id: str,
-        authorize_response: AuthorizeResponse,
-        api_version: str = OPENAI_IMAGES_GENERATIONS_API_VERSION,
+        self, deployment_name: str, image_id: str, authorize_response: AuthorizeResponse
     ):
         """call openai with retry"""
 
@@ -179,7 +164,7 @@ class ImagesGenerations(RequestManager):
         url = (
             f"https://{deployment.resource_name}.openai.azure.com"
             f"/openai/operations/images/{image_id}"
-            f"?api-version={api_version}"
+            f"?api-version={self.api_version}"
         )
 
         async_mgr = OpenAIAsyncManager(deployment)
@@ -194,7 +179,9 @@ class ImagesGenerations(RequestManager):
             self.report_exception("Oops, no prompt.", 400)
 
         if len(images.prompt) > 1000:
-            self.report_exception("Oops, prompt is too long. The maximum length is 1000 characters.", 400)
+            self.report_exception(
+                "Oops, prompt is too long. The maximum length is 1000 characters.", 400
+            )
 
         # check the image_count is between 1 and 5
         if images.n and not 1 <= images.n <= 5:

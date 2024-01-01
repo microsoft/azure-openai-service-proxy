@@ -9,6 +9,7 @@ load_dotenv()
 
 ENDPOINT_URL = os.environ.get("ENDPOINT_URL")
 API_KEY = os.environ.get("API_KEY")
+DEPLOYMENT_NAME = "dall-e-3"
 
 client = AzureOpenAI(
     azure_endpoint=ENDPOINT_URL,
@@ -19,7 +20,7 @@ client = AzureOpenAI(
 print("Generating images...")
 
 result = client.images.generate(
-    model="dalle3",  # the name of your DALL-E 3 deployment
+    model=DEPLOYMENT_NAME,  # the name of your DALL-E 3 deployment
     prompt="a close-up of a bear walking through the forest",
     n=1,
 )

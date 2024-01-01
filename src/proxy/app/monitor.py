@@ -15,6 +15,35 @@ logging.basicConfig(level=logging.WARNING)
 USAGE_LOGGING_NAME = "monitor"
 
 
+class StreamingUsageEstimator:
+    """Usage estimator for chat streaming API - note, no visibility of BYOD tokens"""
+
+    def __init__(self):
+        self.count = 0
+
+    def reset(self):
+        """reset"""
+
+        self.count = 0
+
+    def count_tokens(self, chunk: bytes):
+        """increment"""
+
+        chunk = chunk.decode("ascii")
+        data_segments = chunk.split("data: ")
+
+        for data in data_segments:
+            if data:
+                if "[DONE]\n\n" == data:
+                    self.count -= 1
+                    break
+
+                if '"finish_reason":null' in data:
+                    self.count += 1
+
+        print(f"Usage count: {self.count}")
+
+
 class MonitorEntity(BaseModel):
     """Response object for Authorize class."""
 
@@ -24,7 +53,6 @@ class MonitorEntity(BaseModel):
     user_id: str
     event_id: str
     event_code: str
-    event_name: str
     event_url: str
     event_url_text: str
     organizer_name: str
@@ -39,8 +67,6 @@ class MonitorEntity(BaseModel):
         user_id: str,
         event_id: str,
         event_code: str,
-        user_token: UUID,
-        event_name: str,
         event_url: str,
         event_url_text: str,
         organizer_name: str,
@@ -54,8 +80,6 @@ class MonitorEntity(BaseModel):
             user_id=user_id,
             event_id=event_id,
             event_code=event_code,
-            user_token=user_token,
-            event_name=event_name,
             event_url=event_url,
             event_url_text=event_url_text,
             organizer_name=organizer_name,
@@ -85,8 +109,6 @@ class Monitor:
 
     def log_api_call(self, *, entity: MonitorEntity):
         """write event to Azure Storage account Queue called USAGE_LOGGING_NAME"""
-
-        # add the class name to the entity
 
         message = json.dumps(entity.__dict__, cls=UUIDEncoder)
         # base64 encode the message to a string

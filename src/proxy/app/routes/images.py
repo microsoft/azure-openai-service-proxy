@@ -1,7 +1,6 @@
 """ dalle-3 and beyond """
 
 from enum import Enum
-from typing import Any
 
 import openai.openai_object
 from fastapi import Request, Response
@@ -11,8 +10,6 @@ from pydantic import BaseModel
 from ..config import Deployment
 from ..openai_async import OpenAIAsyncManager
 from .request_manager import RequestManager
-
-OPENAI_IMAGES_GENERATIONS_API_VERSION = "2023-12-01-preview"
 
 
 class ResponseFormat(Enum):
@@ -53,7 +50,6 @@ class ImagesRequest(BaseModel):
     size: ImageSize = ImageSize.IS_1024X1024
     quality: ImageQuality = ImageQuality.HD
     style: ImageStyle = ImageStyle.VIVID
-    api_version: str = OPENAI_IMAGES_GENERATIONS_API_VERSION
 
 
 class Images(RequestManager):
@@ -91,24 +87,23 @@ class Images(RequestManager):
 
     async def call_openai_images_generations(
         self,
-        images: ImagesRequest,
-        openai_request: dict[str, Any],
+        model: object,
         deployment: Deployment,
     ) -> tuple[openai.openai_object.OpenAIObject, int]:
         """call openai with retry"""
 
         openai_request = {
-            "prompt": images.prompt,
-            "size": images.size.value,
-            "n": images.n,
-            "quality": images.quality.value,
-            "style": images.style.value,
+            "prompt": model.prompt,
+            "size": model.size.value,
+            "n": model.n,
+            "quality": model.quality.value,
+            "style": model.style.value,
         }
 
         url = (
             f"https://{deployment.resource_name}.openai.azure.com/openai/deployments/"
             f"{deployment.deployment_name}/images/generations"
-            f"?api-version={images.api_version}"
+            f"?api-version={self.api_version}"
         )
 
         async_mgr = OpenAIAsyncManager(deployment)
@@ -125,7 +120,9 @@ class Images(RequestManager):
             return self.report_exception("Oops, no prompt.", 400)
 
         if len(images.prompt) > 1000:
-            return self.report_exception("Oops, prompt is too long. The maximum length is 1000 characters.", 400)
+            return self.report_exception(
+                "Oops, prompt is too long. The maximum length is 1000 characters.", 400
+            )
 
         # check the image_count is 1
         if images.n and images.n != 1:
@@ -133,7 +130,9 @@ class Images(RequestManager):
 
         # check the image_size is between 256x256, 512x512, 1024x1024
         if images.size and images.size not in ImageSize:
-            return self.report_exception("Oops, image_size must be 1792x1024, 1024x1792, 1024x1024.", 400)
+            return self.report_exception(
+                "Oops, image_size must be 1792x1024, 1024x1792, 1024x1024.", 400
+            )
 
         if images.quality and images.quality not in ImageQuality:
             return self.report_exception("Oops, image_quality must be hd, standard.", 400)

@@ -11,8 +11,6 @@ from ..config import Deployment
 from ..openai_async import OpenAIAsyncManager
 from .request_manager import RequestManager
 
-OPENAI_COMPLETIONS_API_VERSION = "2023-09-01-preview"
-
 
 class CompletionsRequest(BaseModel):
     """OpenAI Compeletion Request"""
@@ -24,7 +22,6 @@ class CompletionsRequest(BaseModel):
     stop: Any | None = None
     frequency_penalty: float = 0
     presence_penalty: float = 0
-    api_version: str = OPENAI_COMPLETIONS_API_VERSION
 
 
 class Completions(RequestManager):
@@ -62,8 +59,7 @@ class Completions(RequestManager):
 
     async def call_openai(
         self,
-        model: CompletionsRequest,
-        openai_request: dict[str, Any],
+        model: object,
         deployment: Deployment,
     ) -> tuple[openai.openai_object.OpenAIObject, int]:
         """call openai with retry"""
@@ -71,9 +67,10 @@ class Completions(RequestManager):
         url = (
             f"https://{deployment.resource_name}.openai.azure.com/openai/deployments/"
             f"{deployment.deployment_name}/completions"
-            f"?api-version={model.api_version}"
+            f"?api-version={self.api_version}"
         )
 
+        openai_request = self.model_to_dict(model)
         async_mgr = OpenAIAsyncManager(deployment)
         response, http_status_code = await async_mgr.async_openai_post(openai_request, url)
 

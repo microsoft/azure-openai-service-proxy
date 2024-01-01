@@ -14,12 +14,18 @@ from .config import Config
 # pylint: disable=E0402
 from .db_manager import DBManager
 from .routes.chat_completions import ChatCompletions as chat_completions_router
-from .routes.chat_extensions import ChatExtensions as chat_extensions_router
 from .routes.completions import Completions as completions_router
 from .routes.embeddings import Embeddings as embeddings_router
 from .routes.event_info import EventInfo as eventinfo_router
 from .routes.images import Images as images_router
 from .routes.images_generations import ImagesGenerations as images_generations_router
+
+DEFAULT_COMPLETIONS_API_VERSION = "2023-09-01-preview"
+DEFAULT_CHAT_COMPLETIONS_API_VERSION = "2023-09-01-preview"
+DEFAULT_EMBEDDINGS_API_VERSION = "2023-08-01-preview"
+DEFAULT_CHAT_COMPLETIONS_EXTENSIONS_API_VERSION = "2023-08-01-preview"
+DEFAULT_IMAGES_GENERATIONS_API_VERSION = "2023-06-01-preview"
+OPENAI_IMAGES_API_VERSION = "2023-12-01-preview"
 
 try:
     storage_connection_string = os.environ["AZURE_STORAGE_CONNECTION_STRING"]
@@ -54,34 +60,50 @@ authorize = Authorize(connection_string=storage_connection_string, db_manager=db
 config = Config(db_manager)
 
 
-completion_router = completions_router(authorize=authorize, config=config)
+completion_router = completions_router(
+    authorize=authorize,
+    config=config,
+    api_version=DEFAULT_COMPLETIONS_API_VERSION,
+)
+
+chat_route = chat_completions_router(
+    authorize=authorize,
+    config=config,
+    api_version=DEFAULT_CHAT_COMPLETIONS_API_VERSION,
+)
+
+
+embeddings_route = embeddings_router(
+    authorize=authorize,
+    config=config,
+    api_version=DEFAULT_EMBEDDINGS_API_VERSION,
+)
+
+event_info_route = eventinfo_router(
+    authorize=authorize,
+    config=config,
+    api_version=None,
+)
+
+images_generations_route = images_generations_router(
+    authorize=authorize,
+    config=config,
+    api_version=DEFAULT_IMAGES_GENERATIONS_API_VERSION,
+)
+
+images_route = images_router(
+    authorize=authorize,
+    config=config,
+    api_version=OPENAI_IMAGES_API_VERSION,
+)
+
 app.include_router(completion_router.include_router(), prefix="/api/v1", tags=["completions"])
-
-chat_route = chat_completions_router(authorize=authorize, config=config)
 app.include_router(chat_route.include_router(), prefix="/api/v1", tags=["chat-completions"])
-
-chat_extensions_route = chat_extensions_router(authorize=authorize, config=config)
-app.include_router(
-    chat_extensions_route.include_router(),
-    prefix="/api/v1",
-    tags=["chat-completions-extensions"],
-)
-
-embeddings_route = embeddings_router(authorize=authorize, config=config)
 app.include_router(embeddings_route.include_router(), prefix="/api/v1", tags=["embeddings"])
-
-event_info_route = eventinfo_router(authorize=authorize, config=config)
 app.include_router(event_info_route.include_router(), prefix="/api/v1", tags=["eventinfo"])
-
-
-images_generations_route = images_generations_router(authorize=authorize, config=config)
 app.include_router(
-    images_generations_route.include_router(),
-    prefix="/api/v1",
-    tags=["images-generations"],
+    images_generations_route.include_router(), prefix="/api/v1", tags=["images-generations"]
 )
-
-images_route = images_router(authorize=authorize, config=config)
 app.include_router(images_route.include_router(), prefix="/api/v1", tags=["images"])
 
 

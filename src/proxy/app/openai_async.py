@@ -11,6 +11,7 @@ import openai.openai_object
 from fastapi import HTTPException
 
 from .config import Deployment
+from .monitor import StreamingUsageEstimator
 
 HTTPX_TIMEOUT_SECONDS = 60
 HTTPX_STREAMING_TIMEOUT_SECONDS = 10
@@ -35,7 +36,9 @@ class OpenAIAsyncManager:
         """init in memory session manager"""
         self.deployment = deployment
 
-    async def async_openai_post(self, openai_request: str, url: str) -> tuple[openai.openai_object.OpenAIObject, int]:
+    async def async_openai_post(
+        self, openai_request: str, url: str
+    ) -> tuple[openai.openai_object.OpenAIObject, int]:
         """async openai post"""
 
         headers = {
@@ -95,7 +98,9 @@ class OpenAIAsyncManager:
         except httpx.HTTPStatusError as http_status_error:
             raise HTTPException(
                 status_code=http_status_error.response.status_code,
-                detail=json.loads(http_status_error.response.text).get("error").get("message", "OpenAI Error"),
+                detail=json.loads(http_status_error.response.text)
+                .get("error")
+                .get("message", "OpenAI Error"),
             ) from http_status_error
 
         except httpx.ConnectError as exc:
@@ -136,7 +141,11 @@ class OpenAIAsyncManager:
             return response
 
         except httpx.HTTPStatusError as http_status_error:
-            detail = json.loads(http_status_error.response.text).get("error").get("message", "OpenAI Error")
+            detail = (
+                json.loads(http_status_error.response.text)
+                .get("error")
+                .get("message", "OpenAI Error")
+            )
 
             raise HTTPException(
                 status_code=http_status_error.response.status_code, detail=detail
@@ -162,8 +171,9 @@ class OpenAIAsyncManager:
 
     async def async_post_streaming(
         self,
-        openai_request: str,
+        openai_request: dict,
         url: str,
+        usage: StreamingUsageEstimator,
     ) -> AsyncGenerator:
         """async rest post"""
 
@@ -184,7 +194,8 @@ class OpenAIAsyncManager:
                     ) as response:
                         response.raise_for_status()
                         async for chunk in response.aiter_bytes():
-                            yield (chunk)
+                            usage.count_tokens(chunk)
+                            yield chunk
 
                 except httpx.HTTPStatusError as http_status_error:
                     raise HTTPException(
