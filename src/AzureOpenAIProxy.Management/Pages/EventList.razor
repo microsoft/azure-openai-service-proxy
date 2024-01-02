@@ -1,0 +1,29 @@
+@page "/events"
+@namespace AzureOpenAIProxy.Management.Pages
+
+<h3>Events</h3>
+
+@if (Events is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+    <thead>
+        <tr>
+            <th>Event</th>
+            <th>Organiser</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var evt in Events)
+            {
+                <tr>
+                    <td>@evt.EventCode</td>
+                    <td>@evt.OrganizerName (@evt.OrganizerEmail)</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
