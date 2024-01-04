@@ -14,7 +14,7 @@ public partial class OwnerCatalog
 
     public bool Active { get; set; }
 
-    public ModelType ModelType { get; set; }
+    public ModelType? ModelType { get; set; }
 
     public virtual Owner Owner { get; set; } = null!;
 
