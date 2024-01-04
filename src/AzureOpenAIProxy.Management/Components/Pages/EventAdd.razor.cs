@@ -1,7 +1,7 @@
 using AzureOpenAIProxy.Management.Database;
 using Microsoft.AspNetCore.Components;
 
-namespace AzureOpenAIProxy.Management.Pages;
+namespace AzureOpenAIProxy.Management.Components.Pages;
 
 public partial class EventAdd : ComponentBase
 {

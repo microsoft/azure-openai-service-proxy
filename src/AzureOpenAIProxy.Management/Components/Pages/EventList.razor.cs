@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore;
 
-namespace AzureOpenAIProxy.Management.Pages;
+namespace AzureOpenAIProxy.Management.Components.Pages;
 
 public partial class EventList : ComponentBase
 {
