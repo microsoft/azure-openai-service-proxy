@@ -1,4 +1,3 @@
-using System.Security.Claims;
 using AzureOpenAIProxy.Management;
 using AzureOpenAIProxy.Management.Components;
 using AzureOpenAIProxy.Management.Database;
@@ -6,6 +5,7 @@ using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.UI;
+using MudBlazor.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -67,6 +67,8 @@ builder.Services.Configure<OpenIdConnectOptions>(OpenIdConnectDefaults.Authentic
 
 builder.Services.AddControllersWithViews()
     .AddMicrosoftIdentityUI();
+
+builder.Services.AddMudServices();
 
 var app = builder.Build();
 
