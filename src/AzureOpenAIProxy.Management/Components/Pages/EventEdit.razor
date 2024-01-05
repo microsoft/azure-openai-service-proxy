@@ -1,0 +1,10 @@
+@page "/event/{id}"
+
+@namespace AzureOpenAIProxy.Management.Components.Pages
+@using AzureOpenAIProxy.Management.Components.EventManagement
+
+<MudStack>
+    <h1>Edit Event</h1>
+
+    <EventEditor OnValidSubmit="@OnValidSubmit" @bind-Model="Model" />
+</MudStack>

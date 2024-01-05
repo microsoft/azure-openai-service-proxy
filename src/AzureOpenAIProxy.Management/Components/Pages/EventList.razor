@@ -1,0 +1,34 @@
+@page "/events"
+@namespace AzureOpenAIProxy.Management.Components.Pages
+
+<MudStack>
+    <h3>Events</h3>
+
+    <MudTable Items="@Events" Loading="@(Events is null)" LoadingProgressColor="Color.Info" Hover="true"
+        Breakpoint="Breakpoint.Sm">
+        <HeaderContent>
+            <MudTh>Event</MudTh>
+            <MudTh>Organiser Name</MudTh>
+            <MudTh>Organiser Email</MudTh>
+            <MudTh>Duration</MudTh>
+            <MudTh>Active</MudTh>
+            <MudTh></MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Event">@context.EventCode</MudTd>
+            <MudTd DataLabel="OrganiserName">@context.OrganizerName</MudTd>
+            <MudTd DataLabel="OrganiserEmail"><a href="mailto:@context.OrganizerEmail">@context.OrganizerEmail</a>
+            </MudTd>
+            <MudTd DataLabel="Duration">@context.StartUtc.ToString("dd/MM/yyyy HH:mm") -
+                @context.EndUtc.ToString("dd/MM/yyyy HH:mm")</MudTd>
+            <MudTd DataLabel="Active">@(context.Active ? "Yes" : "No")</MudTd>
+            <MudTd>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="@($"/event/{context.EventId}")">Edit
+                </MudButton>
+            </MudTd>
+        </RowTemplate>
+    </MudTable>
+
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/events/new">New Event</MudButton>
+
+</MudStack>
