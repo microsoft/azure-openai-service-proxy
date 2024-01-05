@@ -23,7 +23,8 @@
                 @context.EndUtc.ToString("dd/MM/yyyy HH:mm")</MudTd>
             <MudTd DataLabel="Active">@(context.Active ? "Yes" : "No")</MudTd>
             <MudTd>
-                <MudButton Variant="Variant.Filled" Color="Color.Primary">Edit</MudButton>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="@($"/event/{context.EventId}")">Edit
+                </MudButton>
             </MudTd>
         </RowTemplate>
     </MudTable>

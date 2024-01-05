@@ -10,7 +10,10 @@ public partial class EventEditor : ComponentBase
     public EventEditorModel Model { get; set; } = null!;
 
     [Parameter]
-    public Func<EventEditorModel, Task> OnValidSubmit { get; set; } = null!;
+    public EventCallback<EventEditorModel> ModelChanged { get; set; }
+
+    [Parameter]
+    public EventCallback<EventEditorModel> OnValidSubmit { get; set; }
 
     private EditContext? editContext;
 
@@ -18,12 +21,13 @@ public partial class EventEditor : ComponentBase
 
     private bool isSubmitting = false;
 
-    protected override void OnInitialized()
+    protected override Task OnInitializedAsync()
     {
         Model ??= new();
         editContext = new(Model);
         editContext.OnValidationRequested += EditContext_OnValidationRequested;
         messageStore = new(editContext);
+        return Task.CompletedTask;
     }
 
     private void EditContext_OnValidationRequested(object? sender, ValidationRequestedEventArgs e)
@@ -46,7 +50,7 @@ public partial class EventEditor : ComponentBase
         }
 
         isSubmitting = true;
-        await OnValidSubmit(Model);
+        await OnValidSubmit.InvokeAsync(Model);
         isSubmitting = false;
     }
 
