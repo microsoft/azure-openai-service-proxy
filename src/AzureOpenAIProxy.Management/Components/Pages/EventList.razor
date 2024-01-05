@@ -10,7 +10,6 @@
             <MudTh>Event</MudTh>
             <MudTh>Organiser Name</MudTh>
             <MudTh>Organiser Email</MudTh>
-            <MudTh>Owner</MudTh>
             <MudTh>Duration</MudTh>
             <MudTh>Active</MudTh>
             <MudTh></MudTh>
@@ -20,7 +19,6 @@
             <MudTd DataLabel="OrganiserName">@context.OrganizerName</MudTd>
             <MudTd DataLabel="OrganiserEmail"><a href="mailto:@context.OrganizerEmail">@context.OrganizerEmail</a>
             </MudTd>
-            <MudTd DataLabel="Owner">TBC</MudTd>
             <MudTd DataLabel="Duration">@context.StartUtc.ToString("dd/MM/yyyy HH:mm") -
                 @context.EndUtc.ToString("dd/MM/yyyy HH:mm")</MudTd>
             <MudTd DataLabel="Active">@(context.Active ? "Yes" : "No")</MudTd>
