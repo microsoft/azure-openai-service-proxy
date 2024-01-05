@@ -1,3 +1,31 @@
 @page "/models"
 
 @namespace AzureOpenAIProxy.Management.Components.Pages
+
+<MudStack>
+    <h3>Available AOAI Models</h3>
+
+    <MudTable Items="@Models" Loading="@(Models is null)" LoadingProgressColor="Color.Info" Hover="true"
+        Breakpoint="Breakpoint.Sm">
+        <HeaderContent>
+            <MudTh>Deployment Name</MudTh>
+            <MudTh>Resource Name</MudTh>
+            <MudTh>Model Type</MudTh>
+            <MudTh>Active</MudTh>
+            <MudTh></MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="DeploymentName">@context.DeploymentName</MudTd>
+            <MudTd DataLabel="ResourceName">@context.ResourceName</MudTd>
+            <MudTd DataLabel="ModelType">@((context.ModelType).ToString().Replace("_", " "))</MudTd>
+            <MudTd DataLabel="Active">@(context.Active ? "Yes" : "No")</MudTd>
+            <MudTd>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="@($"/models/{context.CatalogId}")">Edit
+                </MudButton>
+            </MudTd>
+        </RowTemplate>
+    </MudTable>
+
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/models/new">New Model</MudButton>
+
+</MudStack>

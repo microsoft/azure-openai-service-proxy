@@ -14,7 +14,7 @@
                 InputType="@InputType.Password" />
             <div class="d-flex">
                 <MudSelect Label="Model Type" @bind-Value="Model.ModelType" Placeholder="Please Select"
-                    HelperText="Enum" For="@(() => Model.ModelType)">
+                    For="@(() => Model.ModelType)">
                     <MudSelectItem Value="@ModelType.OpenAI_Chat">OpenAI Chat</MudSelectItem>
                     <MudSelectItem Value="@ModelType.OpenAI_Embedding">OpenAI Embedding</MudSelectItem>
                     <MudSelectItem Value="@ModelType.OpenAI_Dalle2">OpenAI Dalle2</MudSelectItem>
