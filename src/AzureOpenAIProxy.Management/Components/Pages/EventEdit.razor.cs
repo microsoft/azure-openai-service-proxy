@@ -15,7 +15,7 @@ public partial class EventEdit : ComponentBase
     [Inject]
     public NavigationManager NavigationManager { get; set; } = null!;
 
-    public EventEditor.EventEditorModel Model { get; set; } = null!;
+    public EventEditorModel Model { get; set; } = null!;
 
     protected override async Task OnInitializedAsync()
     {
@@ -49,7 +49,7 @@ public partial class EventEdit : ComponentBase
         };
     }
 
-    private async Task OnValidSubmit(EventEditor.EventEditorModel model)
+    private async Task OnValidSubmit(EventEditorModel model)
     {
         Event? evt = await DbContext.Events.FindAsync(Id);
 
