@@ -8,16 +8,15 @@ namespace AzureOpenAIProxy.Management;
 
 public partial class AoaiProxyContext
 {
-    public async Task<Event> CreateEventAsync(Event newEvent, Guid ownerId)
+    public async Task<Event> CreateEventAsync(Event newEvent, string ownerEntraId)
     {
         using DbConnection conn = Database.GetDbConnection();
         await conn.OpenAsync();
         using DbCommand cmd = conn.CreateCommand();
-        cmd.CommandType = CommandType.StoredProcedure;
 
-        cmd.CommandText = $"aoai.add_event p_owner_id=@OwnerId p_event_code=@EventCode p_event_markdown=@EventMarkdown p_start_utc=@StartUtc p_end_utc=@EndUtc p_organizer_name=@OrganiserName p_organizer_email=@OrganiserEmail p_event_url=@EventUrl p_event_url_text=@EventUrlText p_max_token_cap=@MaxTokenCap p_single_code=@SingleCode p_daily_request_cap=@DailyRequestCap p_active=@Active";
+        cmd.CommandText = $"SELECT * FROM aoai.add_event(@EntraId, @EventCode, @EventMarkdown, @StartUtc, @EndUtc, @OrganiserName, @OrganiserEmail, @EventUrl, @EventUrlText, @MaxTokenCap, @SingleCode, @DailyRequestCap, @Active)";
 
-        cmd.Parameters.Add(new NpgsqlParameter("OwnerId", ownerId));
+        cmd.Parameters.Add(new NpgsqlParameter("EntraId", ownerEntraId));
         cmd.Parameters.Add(new NpgsqlParameter("EventCode", newEvent.EventCode));
         cmd.Parameters.Add(new NpgsqlParameter("EventMarkdown", newEvent.EventMarkdown));
         cmd.Parameters.Add(new NpgsqlParameter("StartUtc", newEvent.StartUtc));

@@ -127,6 +127,14 @@ public partial class AoaiProxyContext : DbContext
             entity.Property(e => e.EntraId)
                 .HasMaxLength(128)
                 .HasColumnName("entra_id");
+
+            entity.Property(e => e.Email)
+                .HasMaxLength(128)
+                .HasColumnName("email");
+
+            entity.Property(e => e.Name)
+                .HasMaxLength(128)
+                .HasColumnName("name");
         });
 
         modelBuilder.Entity<OwnerCatalog>(entity =>

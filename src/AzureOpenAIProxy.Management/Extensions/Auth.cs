@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using AzureOpenAIProxy.Management.Database;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.EntityFrameworkCore;
@@ -38,13 +39,14 @@ public static class AuthExtensions
 
     private static async Task TokenValidated(TokenValidatedContext ctx)
     {
-        if (ctx.Principal is null)
+        ClaimsPrincipal? principal = ctx.Principal;
+        if (principal is null)
             throw new ApplicationException("Principal is null");
 
         AoaiProxyContext db = ctx.HttpContext.RequestServices.GetRequiredService<AoaiProxyContext>();
         ILogger<Program> logger = ctx.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
 
-        string id = (ctx.Principal.Claims.FirstOrDefault(c => c.Type == "http://schemas.microsoft.com/identity/claims/objectidentifier")?.Value) ?? throw new ApplicationException("id is null");
+        string id = principal.GetEntraId();
 
         if (await db.Owners.AnyAsync(o => o.EntraId == id))
         {
@@ -55,7 +57,9 @@ public static class AuthExtensions
         Owner owner = new()
         {
             EntraId = id,
-            OwnerId = Guid.NewGuid()
+            OwnerId = Guid.NewGuid(),
+            Email = principal.Identity?.Name ?? "TBC",
+            Name = principal.Claims.FirstOrDefault(c => c.Type == "name")?.Value ?? "TBC"
         };
 
         db.Owners.Add(owner);
@@ -63,5 +67,10 @@ public static class AuthExtensions
         await db.SaveChangesAsync();
 
         logger.LogInformation("User {id} registered", id);
+    }
+
+    public static string GetEntraId(this ClaimsPrincipal principal)
+    {
+        return principal.Claims.FirstOrDefault(c => c.Type == "http://schemas.microsoft.com/identity/claims/objectidentifier")?.Value ?? throw new ApplicationException("id is null");
     }
 }

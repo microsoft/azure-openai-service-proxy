@@ -1,17 +1,17 @@
 @page "/events/new"
 @using System.ComponentModel.DataAnnotations
-@using Microsoft.AspNetCore.Antiforgery;
 @namespace AzureOpenAIProxy.Management.Components.Pages
-@attribute [RequireAntiforgeryToken]
 
 <MudStack>
     <h1>Create a new event</h1>
 
-    <EditForm Model="@Model" OnValidSubmit="@HandleValidSubmit" FormName="NewEvent">
+    <EditForm OnValidSubmit="@HandleValidSubmit" EditContext="@editContext" @bind-Disabled="isSubmitting">
+        <ValidationSummary />
         <DataAnnotationsValidator />
 
         <MudCard>
             <MudCardContent>
+                <MudTextField Label="Event Name" @bind-Value="Model.Name" For="@(() => Model.Name)" />
                 <MudTextField Label="Event URL text" @bind-Value="Model.UrlText" For="@(() => Model.UrlText)" />
                 <MudTextField Label="Event URL" @bind-Value="Model.Url" InputType="InputType.Url"
                     For="@(() => Model.Url)" />
@@ -21,9 +21,9 @@
                     For="@(() => Model.OrganizerEmail)" />
                 <div class="d-flex">
                     <MudTextField Label="Start Date" @bind-Value="Model.Start" InputType="InputType.DateTimeLocal"
-                        For="@(() => Model.Start)" />
+                        For="@(() => Model.Start)" Format="s" />
                     <MudTextField Label="End Date" @bind-Value="Model.End" InputType="InputType.DateTimeLocal"
-                        For="@(() => Model.End)" />
+                        For="@(() => Model.End)" Format="s" />
                 </div>
                 <MudTextField Label="Description" @bind-Value="Model.Description" Lines="10"
                     For="@(() => Model.Description)" />
@@ -39,8 +39,8 @@
                 </div>
             </MudCardContent>
             <MudCardActions>
-                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto"
-                    StartIcon="@Icons.Material.Filled.Save">Save</MudButton>
+                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="@(isSubmitting ? Color.Info : Color.Primary)" Class="ml-auto"
+                    StartIcon="@Icons.Material.Filled.Save" Disabled="@isSubmitting">@(isSubmitting ? "Saving" : "Save")</MudButton>
             </MudCardActions>
         </MudCard>
     </EditForm>
