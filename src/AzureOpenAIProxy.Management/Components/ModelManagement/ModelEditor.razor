@@ -1,1 +1,35 @@
+@using AzureOpenAIProxy.Management.Database
 @namespace AzureOpenAIProxy.Management.Components.ModelManagement
+
+<EditForm OnValidSubmit="@HandleValidSubmit" Model="@Model" @bind-Disabled="isSubmitting">
+    <ValidationSummary />
+    <DataAnnotationsValidator />
+
+    <MudCard>
+        <MudCardContent>
+            <MudTextField Label="Deployment Name" @bind-Value="Model.DeploymentName"
+                For="@(() => Model.DeploymentName)" />
+            <MudTextField Label="Resource Name" @bind-Value="Model.ResourceName" For="@(() => Model.ResourceName)" />
+            <MudTextField Label="Endpoint Key" @bind-Value="Model.EndpointKey" For="@(() => Model.EndpointKey)"
+                InputType="@InputType.Password" />
+            <div class="d-flex">
+                <MudSelect Label="Model Type" @bind-Value="Model.ModelType" Placeholder="Please Select"
+                    HelperText="Enum" For="@(() => Model.ModelType)">
+                    <MudSelectItem Value="@ModelType.OpenAI_Chat">OpenAI Chat</MudSelectItem>
+                    <MudSelectItem Value="@ModelType.OpenAI_Embedding">OpenAI Embedding</MudSelectItem>
+                    <MudSelectItem Value="@ModelType.OpenAI_Dalle2">OpenAI Dalle2</MudSelectItem>
+                    <MudSelectItem Value="@ModelType.OpenAI_Dalle3">OpenAI Dalle3</MudSelectItem>
+                    <MudSelectItem Value="@ModelType.OpenAI_Whisper">OpenAI Whisper</MudSelectItem>
+                    <MudSelectItem Value="@ModelType.OpenAI_Completion">OpenAI Completion</MudSelectItem>
+                </MudSelect>
+                <MudSwitch @bind-Value="Model.Active" Label="Active" Color="Color.Primary" />
+            </div>
+        </MudCardContent>
+        <MudCardActions>
+            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled"
+                Color="@(isSubmitting ? Color.Info : Color.Primary)" Class="ml-auto"
+                StartIcon="@Icons.Material.Filled.Save" Disabled="@isSubmitting">@(isSubmitting ? "Saving" : "Save")
+            </MudButton>
+        </MudCardActions>
+    </MudCard>
+</EditForm>
