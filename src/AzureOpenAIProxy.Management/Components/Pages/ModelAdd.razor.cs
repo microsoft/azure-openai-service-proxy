@@ -30,7 +30,7 @@ public partial class ModelAdd : ComponentBase
             Active = model.Active,
             DeploymentName = model.DeploymentName!,
             EndpointKey = model.EndpointKey!,
-            ModelType = model.ModelType,
+            ModelType = model.ModelType!.Value,
             ResourceName = model.ResourceName!
         };
 

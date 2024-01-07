@@ -18,5 +18,5 @@ public class ModelEditorModel
     public bool Active { get; set; }
 
     [Required]
-    public ModelType ModelType { get; set; }
+    public ModelType? ModelType { get; set; } = null;
 }

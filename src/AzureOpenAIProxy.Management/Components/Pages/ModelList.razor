@@ -17,7 +17,7 @@
         <RowTemplate>
             <MudTd DataLabel="DeploymentName">@context.DeploymentName</MudTd>
             <MudTd DataLabel="ResourceName">@context.ResourceName</MudTd>
-            <MudTd DataLabel="ModelType">@((context.ModelType).ToString().Replace("_", " "))</MudTd>
+            <MudTd DataLabel="ModelType">@(context.ModelType!.Value.ToString().Replace("_", " "))</MudTd>
             <MudTd DataLabel="Active">@(context.Active ? "Yes" : "No")</MudTd>
             <MudTd>
                 <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="@($"/models/{context.CatalogId}")">Edit

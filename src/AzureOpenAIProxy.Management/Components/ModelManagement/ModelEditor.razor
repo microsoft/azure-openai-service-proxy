@@ -15,12 +15,11 @@
             <div class="d-flex">
                 <MudSelect Label="Model Type" @bind-Value="Model.ModelType" Placeholder="Please Select"
                     For="@(() => Model.ModelType)">
-                    <MudSelectItem Value="@ModelType.OpenAI_Chat">OpenAI Chat</MudSelectItem>
-                    <MudSelectItem Value="@ModelType.OpenAI_Embedding">OpenAI Embedding</MudSelectItem>
-                    <MudSelectItem Value="@ModelType.OpenAI_Dalle2">OpenAI Dalle2</MudSelectItem>
-                    <MudSelectItem Value="@ModelType.OpenAI_Dalle3">OpenAI Dalle3</MudSelectItem>
-                    <MudSelectItem Value="@ModelType.OpenAI_Whisper">OpenAI Whisper</MudSelectItem>
-                    <MudSelectItem Value="@ModelType.OpenAI_Completion">OpenAI Completion</MudSelectItem>
+                    @foreach (ModelType modelType in Enum.GetValues(typeof(ModelType)))
+                    {
+                        <MudSelectItem Value="@((ModelType?)modelType)">@modelType.ToString().Replace("_", " ")
+                        </MudSelectItem>
+                    }
                 </MudSelect>
                 <MudSwitch @bind-Value="Model.Active" Label="Active" Color="Color.Primary" />
             </div>
