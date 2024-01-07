@@ -1,5 +1,6 @@
 using AzureOpenAIProxy.Management.Components.EventManagement;
 using AzureOpenAIProxy.Management.Database;
+using AzureOpenAIProxy.Management.Services;
 using Microsoft.AspNetCore.Components;
 
 namespace AzureOpenAIProxy.Management.Components.Pages;
@@ -10,12 +11,23 @@ public partial class EventEdit : ComponentBase
     public string Id { get; set; } = string.Empty;
 
     [Inject]
-    public AoaiProxyContext DbContext { get; set; } = null!;
+    public IEventService EventService { get; set; } = null!;
+
+    [Inject]
+    public IModelService ModelService { get; set; } = null!;
 
     [Inject]
     public NavigationManager NavigationManager { get; set; } = null!;
 
     public EventEditorModel Model { get; set; } = null!;
+
+    public IEnumerable<OwnerCatalog> CurrentModels { get; set; } = null!;
+
+    public IEnumerable<string> SelectedModels { get; set; } = [];
+
+    public IEnumerable<OwnerCatalog> AvailableModels { get; set; } = [];
+
+    private bool modelsUpdating = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -24,13 +36,18 @@ public partial class EventEdit : ComponentBase
             NavigationManager.NavigateTo("/events");
             return;
         }
-        Event? evt = await DbContext.Events.FindAsync(Id);
+
+        Event? evt = await EventService.GetEventAsync(Id);
 
         if (evt is null)
         {
             NavigationManager.NavigateTo("/events");
             return;
         }
+
+        AvailableModels = await ModelService.GetOwnerCatalogsAsync();
+        CurrentModels = evt.Catalogs;
+        SelectedModels = CurrentModels.Select(oc => oc.CatalogId.ToString());
 
         Model = new()
         {
@@ -51,29 +68,23 @@ public partial class EventEdit : ComponentBase
 
     private async Task OnValidSubmit(EventEditorModel model)
     {
-        Event? evt = await DbContext.Events.FindAsync(Id);
+        Event? evt = await EventService.UpdateEventAsync(Id, model);
 
         if (evt is null)
         {
-            NavigationManager.NavigateTo("/events");
-            return;
+            // todo - logging
         }
 
-        evt.EventCode = model.Name!;
-        evt.EventMarkdown = model.Description!;
-        evt.StartUtc = model.Start!.Value;
-        evt.EndUtc = model.End!.Value;
-        evt.EventUrl = model.Url!;
-        evt.EventUrlText = model.UrlText!;
-        evt.OrganizerEmail = model.OrganizerEmail!;
-        evt.OrganizerName = model.OrganizerName!;
-        evt.Active = model.Active;
-        evt.MaxTokenCap = model.MaxTokenCap;
-        evt.DailyRequestCap = model.DailyRequestCap;
-        evt.SingleCode = model.SingleCode;
-
-        await DbContext.SaveChangesAsync();
-
         NavigationManager.NavigateTo("/events");
+    }
+
+    private string SelectedModelsDisplay(List<string> ids) =>
+        ids.Count == 0 ? "Select one or more models" : string.Join(", ", AvailableModels.Where(oc => ids.Contains(oc.CatalogId.ToString())).Select(oc => oc.DeploymentName));
+
+    private async Task UpdateModels()
+    {
+        modelsUpdating = true;
+        await EventService.UpdateModelsForEventAsync(Id, SelectedModels.Select(Guid.Parse));
+        modelsUpdating = false;
     }
 }
