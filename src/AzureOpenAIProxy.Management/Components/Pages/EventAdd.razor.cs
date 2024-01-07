@@ -16,7 +16,7 @@ public partial class EventAdd : ComponentBase
     [Inject]
     public required AuthenticationStateProvider AuthenticationStateProvider { get; set; }
 
-    public async Task HandleValidSubmit(EventEditor.EventEditorModel model)
+    public async Task HandleValidSubmit(EventEditorModel model)
     {
         Event evt = new()
         {
