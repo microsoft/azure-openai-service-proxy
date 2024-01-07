@@ -4,7 +4,43 @@
 @using AzureOpenAIProxy.Management.Components.EventManagement
 
 <MudStack>
-    <h1>Edit Event</h1>
 
-    <EventEditor OnValidSubmit="@OnValidSubmit" @bind-Model="Model" />
+
+    <MudGrid>
+        <MudItem xs="12" sm="7">
+            <h1>Edit Event</h1>
+            <EventEditor OnValidSubmit="@OnValidSubmit" @bind-Model="Model" />
+
+        </MudItem>
+        <MudItem xs="12" sm="5">
+            <h1>Models</h1>
+
+            <MudCard>
+                <MudCardContent>
+                    <MudSelect Label="Models" MultiSelection="true" @bind-SelectedValues="SelectedModels"
+                        MultiSelectionTextFunc="@(new Func<List<string>, string>(SelectedModelsDisplay))"
+                        Disabled="@modelsUpdating">
+                        @foreach (var model in AvailableModels)
+                        {
+                            <MudSelectItem Value="@model.CatalogId.ToString()">@model.DeploymentName</MudSelectItem>
+                        }
+                    </MudSelect>
+
+                </MudCardContent>
+                <MudCardActions>
+                    @if (!modelsUpdating)
+                    {
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@UpdateModels" Class="ml-auto"
+                            StartIcon="@Icons.Material.Filled.Save">Update Models
+                        </MudButton>
+                    }
+                    else
+                    {
+                        <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-7" />
+                    }
+
+                </MudCardActions>
+            </MudCard>
+        </MudItem>
+    </MudGrid>
 </MudStack>
