@@ -45,7 +45,7 @@ ALTER TYPE aoai.model_type OWNER TO admin;
 -- Name: add_event(uuid, character varying, character varying, timestamp without time zone, timestamp without time zone, character varying, character varying, character varying, character varying, integer, boolean, integer, boolean); Type: FUNCTION; Schema: aoai; Owner: admin
 --
 
-CREATE FUNCTION aoai.add_event(p_entra_id character varying, p_event_code character varying, p_event_markdown character varying, p_start_utc timestamp without time zone, p_end_utc timestamp without time zone, p_organizer_name character varying, p_organizer_email character varying, p_event_url character varying, p_event_url_text character varying, p_daily_request_cap integer, p_active boolean) RETURNS TABLE(event_id character varying, owner_id uuid, event_code character varying, event_markdown character varying, start_utc timestamp without time zone, end_utc timestamp without time zone, organizer_name character varying, organizer_email character varying, event_url character varying, event_url_text character varying, daily_request_cap integer, active boolean)
+CREATE FUNCTION aoai.add_event(p_entra_id character varying, p_event_code character varying, p_event_markdown character varying, p_start_utc timestamp without time zone, p_end_utc timestamp without time zone, p_organizer_name character varying, p_organizer_email character varying, p_event_url character varying, p_event_url_text character varying, p_max_token_cap integer, p_single_code boolean, p_daily_request_cap integer, p_active boolean) RETURNS TABLE(event_id character varying, owner_id uuid, event_code character varying, event_markdown character varying, start_utc timestamp without time zone, end_utc timestamp without time zone, organizer_name character varying, organizer_email character varying, event_url character varying, event_url_text character varying, max_token_cap integer, single_code boolean, daily_request_cap integer, active boolean)
     LANGUAGE plpgsql
     AS $$
 DECLARE
@@ -79,6 +79,8 @@ BEGIN
         organizer_email,
         event_url,
         event_url_text,
+        max_token_cap,
+        single_code,
         daily_request_cap,
         active
     )
@@ -93,6 +95,8 @@ BEGIN
 		p_organizer_email,
 		p_event_url,
 		p_event_url_text,
+		p_max_token_cap,
+		p_single_code,
 		p_daily_request_cap,
 		p_active
 		);
@@ -109,14 +113,14 @@ BEGIN
     );
 
 	RETURN QUERY
-	SELECT e.event_id, e.owner_id, e.event_code, e.event_markdown, e.start_utc, e.end_utc, e.organizer_name, e.organizer_email, e.event_url, e.event_url_text, e.daily_request_cap, e.active
+	SELECT e.event_id, e.owner_id, e.event_code, e.event_markdown, e.start_utc, e.end_utc, e.organizer_name, e.organizer_email, e.event_url, e.event_url_text, e.max_token_cap, e.single_code, e.daily_request_cap, e.active
 	FROM aoai.event as e WHERE e.event_id = v_final_hash;
 
 END;
 $$;
 
 
-ALTER FUNCTION aoai.add_event(p_entra_id character varying, p_event_code character varying, p_event_markdown character varying, p_start_utc timestamp without time zone, p_end_utc timestamp without time zone, p_organizer_name character varying, p_organizer_email character varying, p_event_url character varying, p_event_url_text character varying, p_daily_request_cap integer, p_active boolean) OWNER TO admin;
+ALTER FUNCTION aoai.add_event(p_entra_id character varying, p_event_code character varying, p_event_markdown character varying, p_start_utc timestamp without time zone, p_end_utc timestamp without time zone, p_organizer_name character varying, p_organizer_email character varying, p_event_url character varying, p_event_url_text character varying, p_max_token_cap integer, p_single_code boolean, p_daily_request_cap integer, p_active boolean) OWNER TO admin;
 
 --
 -- Name: add_event_attendee(character varying, character varying); Type: FUNCTION; Schema: aoai; Owner: admin
@@ -148,7 +152,7 @@ ALTER FUNCTION aoai.add_event_attendee(p_user_id character varying, p_event_id c
 -- Name: get_attendee_authorized(character varying, uuid); Type: FUNCTION; Schema: aoai; Owner: admin
 --
 
-CREATE FUNCTION aoai.get_attendee_authorized(p_event_code character varying, p_api_key uuid) RETURNS TABLE(user_id character varying, event_id character varying, event_code character varying, organizer_name character varying, organizer_email character varying, event_url character varying, event_url_text character varying, daily_request_cap integer)
+CREATE FUNCTION aoai.get_attendee_authorized(p_event_code character varying, p_api_key uuid) RETURNS TABLE(user_id character varying, event_id character varying, event_code character varying, organizer_name character varying, organizer_email character varying, event_url character varying, event_url_text character varying, max_token_cap integer, daily_request_cap integer)
     LANGUAGE plpgsql
     AS $$
 DECLARE
@@ -165,6 +169,7 @@ BEGIN
         E.organizer_email,
         E.event_url,
         E.event_url_text,
+        E.max_token_cap,
         E.daily_request_cap
     FROM
         aoai.event E
@@ -284,6 +289,8 @@ CREATE TABLE aoai.event (
     organizer_email character varying(128) NOT NULL,
     event_url character varying(256) NOT NULL,
     event_url_text character varying(256) NOT NULL,
+    max_token_cap integer NOT NULL,
+    single_code boolean NOT NULL,
     daily_request_cap integer NOT NULL,
     active boolean NOT NULL
 );
