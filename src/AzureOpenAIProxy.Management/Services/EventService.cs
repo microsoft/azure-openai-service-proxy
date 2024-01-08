@@ -20,6 +20,7 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
             EndUtc = model.End!.Value,
             OrganizerName = model.OrganizerName!,
             OrganizerEmail = model.OrganizerEmail!,
+            MaxTokenCap = model.MaxTokenCap,
             DailyRequestCap = model.DailyRequestCap,
             Active = model.Active
         };
@@ -30,7 +31,7 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
         await conn.OpenAsync();
         using DbCommand cmd = conn.CreateCommand();
 
-        cmd.CommandText = $"SELECT * FROM aoai.add_event(@EntraId, @EventCode, @EventMarkdown, @StartUtc, @EndUtc, @OrganiserName, @OrganiserEmail, @EventUrl, @EventUrlText, @DailyRequestCap, @Active)";
+        cmd.CommandText = $"SELECT * FROM aoai.add_event(@EntraId, @EventCode, @EventMarkdown, @StartUtc, @EndUtc, @OrganiserName, @OrganiserEmail, @EventUrl, @EventUrlText, @MaxTokenCap, @DailyRequestCap, @Active)";
 
         cmd.Parameters.Add(new NpgsqlParameter("EntraId", entraId));
         cmd.Parameters.Add(new NpgsqlParameter("EventCode", newEvent.EventCode));
@@ -41,6 +42,7 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
         cmd.Parameters.Add(new NpgsqlParameter("OrganiserEmail", newEvent.OrganizerEmail));
         cmd.Parameters.Add(new NpgsqlParameter("EventUrl", newEvent.EventUrl));
         cmd.Parameters.Add(new NpgsqlParameter("EventUrlText", newEvent.EventUrlText));
+        cmd.Parameters.Add(new NpgsqlParameter("MaxTokenCap", newEvent.MaxTokenCap));
         cmd.Parameters.Add(new NpgsqlParameter("DailyRequestCap", newEvent.DailyRequestCap));
         cmd.Parameters.Add(new NpgsqlParameter("Active", newEvent.Active));
 
@@ -83,6 +85,7 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
         evt.OrganizerEmail = model.OrganizerEmail!;
         evt.OrganizerName = model.OrganizerName!;
         evt.Active = model.Active;
+        evt.MaxTokenCap = model.MaxTokenCap;
         evt.DailyRequestCap = model.DailyRequestCap;
 
         await db.SaveChangesAsync();

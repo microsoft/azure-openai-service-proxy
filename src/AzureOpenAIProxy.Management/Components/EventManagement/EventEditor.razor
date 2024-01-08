@@ -24,6 +24,8 @@
             <MudTextField Label="Description" @bind-Value="Model.Description" Lines="10"
                 For="@(() => Model.Description)" />
             <div class="d-flex">
+                <MudNumericField Label="Max Tokens" @bind-Value="Model.MaxTokenCap" Min="0"
+                    For="@(() => Model.MaxTokenCap)" />
                 <MudNumericField Label="Daily Request Cap" @bind-Value="Model.DailyRequestCap" Min="0"
                     For="@(() => Model.DailyRequestCap)" />
                 <MudSwitch @bind-Value="Model.Active" Label="Active" Color="Color.Primary" />

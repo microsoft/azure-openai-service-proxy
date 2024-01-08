@@ -58,6 +58,7 @@ public partial class AoaiProxyContext : DbContext
             entity.Property(e => e.EventUrlText)
                 .HasMaxLength(256)
                 .HasColumnName("event_url_text");
+            entity.Property(e => e.MaxTokenCap).HasColumnName("max_token_cap");
             entity.Property(e => e.OrganizerEmail)
                 .HasMaxLength(128)
                 .HasColumnName("organizer_email");
