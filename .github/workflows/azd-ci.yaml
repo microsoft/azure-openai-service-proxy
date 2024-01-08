@@ -6,9 +6,6 @@ on:
   pull_request:
     branches: ["main", "feature/*"]
 
-env:
-  DOTNET_VERSION: 8.0.x
-
 jobs:
   package:
     runs-on: ubuntu-latest
@@ -19,6 +16,9 @@ jobs:
 
       - name: Install azd
         uses: Azure/setup-azd@v0.1.0
+
+      - name: Setup an azd env
+        run: azd env new ci
 
       - name: Package with azd
         run: azd package
