@@ -42,17 +42,6 @@ module storageAccount 'storage.bicep' = {
   }
 }
 
-// Create Azure OpenAI Service
-
-module AzureOpenAI 'core/ai/cognitiveservices.bicep' = {
-  name: 'azure-openai'
-  scope: resourceGroup
-  params: {
-    name: '${prefix}-openai'
-    location: location
-  }
-}
-
 // Container apps host (including container registry)
 module containerApps 'core/host/container-apps.bicep' = {
   name: 'container-apps'
