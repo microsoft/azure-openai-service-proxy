@@ -83,7 +83,7 @@ module containerApps 'core/host/container-apps.bicep' = {
     tags: tags
     containerAppsEnvironmentName: '${prefix}-containerapps-env'
     containerRegistryName: '${replace(prefix, '-', '')}registry'
-    logAnalyticsWorkspaceName: logAnalyticsWorkspace.outputs.name
+    logAnalyticsWorkspaceName: monitoring.outputs.logAnalyticsWorkspaceName
   }
 }
 
@@ -123,13 +123,16 @@ module swaLinkDotnet './linkSwaResource.bicep' = {
   }
 }
 
-module logAnalyticsWorkspace 'core/monitor/loganalytics.bicep' = {
-  name: 'loganalytics'
+// Monitor application with Azure Monitor
+module monitoring 'core/monitor/monitoring.bicep' = {
+  name: 'monitoring'
   scope: resourceGroup
   params: {
-    name: '${prefix}-loganalytics'
     location: location
     tags: tags
+    applicationInsightsDashboardName: '${prefix}-appinsights-dashboard'
+    applicationInsightsName: '${prefix}-appinsights'
+    logAnalyticsName: '${take(prefix, 50)}-loganalytics' // Max 63 chars
   }
 }
 
