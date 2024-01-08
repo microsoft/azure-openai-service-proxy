@@ -14,11 +14,11 @@ if (key == null || endpoint == null)
     return;
 }
 
-var client = new OpenAIClient(new Uri(endpoint + "/api/v1"), new Azure.AzureKeyCredential(key));
+var client = new OpenAIClient(new Uri(endpoint), new Azure.AzureKeyCredential(key));
 
 CompletionsOptions completionsOptions = new()
 {
-    DeploymentName = "text-davinci-003",
+    DeploymentName = "davinci-002",
     Prompts =
     {
         "How are you today?",

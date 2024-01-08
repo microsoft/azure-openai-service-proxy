@@ -14,8 +14,6 @@ if (key == null || endpoint == null)
     return;
 }
 
-endpoint += "/api/v1";
-
 await GenerateWithDalle2(key, endpoint);
 await GenerateWithDalle3(key, endpoint);
 
@@ -38,7 +36,7 @@ static async Task GenerateWithDalle2(string key, string endpoint)
 
 static async Task GenerateWithDalle3(string key, string endpoint)
 {
-    endpoint += "/openai/deployments/dalle3/images/generations";
+    endpoint += "/openai/deployments/dall-e-3/images/generations";
 
     Console.WriteLine("Generating with DALL-E v3");
     var client = new HttpClient();
