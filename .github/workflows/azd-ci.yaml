@@ -1,0 +1,24 @@
+name: azd package
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main", "feature/*"]
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install azd
+        uses: Azure/setup-azd@v0.1.0
+
+      - name: Setup an azd env
+        run: azd env new ci
+
+      - name: Package with azd
+        run: azd package
