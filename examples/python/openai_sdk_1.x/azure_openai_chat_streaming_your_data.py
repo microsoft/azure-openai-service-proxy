@@ -24,7 +24,7 @@ MODEL_NAME = "gpt-35-turbo"
 
 
 client = AzureOpenAI(
-    base_url=f"{ENDPOINT_URL}/openai/deployments/deployment/extensions",
+    base_url=f"{ENDPOINT_URL}/openai/deployments/gpt-35-turbo/extensions",
     api_key=API_KEY,
     api_version=API_VERSION,
 )
@@ -32,7 +32,9 @@ client = AzureOpenAI(
 messages = [
     {
         "role": "user",
-        "content": ("What are the differences between Azure Machine Learning " "and Azure AI services?"),
+        "content": (
+            "What are the differences between Azure Machine Learning " "and Azure AI services?"
+        ),
     },
 ]
 
@@ -50,11 +52,12 @@ body = {
 }
 
 response = client.chat.completions.create(
-    model="gpt-3.5-turbo",
+    model=MODEL_NAME,
     messages=messages,
     extra_body=body,
     stream=True,
-    max_tokens=100,
+    max_tokens=250,
+    temperature=0.0,
 )
 
 # turn off print buffering

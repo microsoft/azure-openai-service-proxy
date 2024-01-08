@@ -16,11 +16,11 @@ if (key == null || endpoint == null)
     return;
 }
 
-var client = new OpenAIClient(new Uri(endpoint + "/api/v1"), new Azure.AzureKeyCredential(key));
+var client = new OpenAIClient(new Uri(endpoint), new Azure.AzureKeyCredential(key));
 
 var chatCompletionsOptions = new ChatCompletionsOptions()
 {
-    DeploymentName = "gpt-3.5-turbo", // Use DeploymentName for "model" with non-Azure clients
+    DeploymentName = "gpt-35-turbo", // Use DeploymentName for "model" with non-Azure clients
     Messages =
     {
         new ChatMessage(ChatRole.System, "You are a helpful assistant. You will talk like a pirate."),
@@ -40,5 +40,5 @@ await foreach (StreamingChatCompletionsUpdate chatUpdate in client.GetChatComple
     {
         Console.Write(chatUpdate.ContentUpdate);
     }
-    await Task.Delay(100);
+    await Task.Delay(10);
 }
