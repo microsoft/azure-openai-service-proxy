@@ -22,4 +22,5 @@ const PromptErrorProvider: React.FC<PropsWithChildren> = ({ children }) => {
 
 const usePromptErrorContext = () => useContext(PromptErrorContext);
 
+// eslint-disable-next-line react-refresh/only-export-components
 export { PromptErrorProvider, usePromptErrorContext };

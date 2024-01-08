@@ -1,0 +1,11 @@
+@page "/events/new"
+@using System.ComponentModel.DataAnnotations
+@using AzureOpenAIProxy.Management.Components.EventManagement
+
+@namespace AzureOpenAIProxy.Management.Components.Pages
+
+<MudStack>
+    <h1>Create a new event</h1>
+
+    <EventEditor OnValidSubmit="@HandleValidSubmit" />
+</MudStack>

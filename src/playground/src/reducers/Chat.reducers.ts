@@ -6,10 +6,13 @@ import {
 } from "@azure/openai";
 import { ChatState, INITIAL_STATE } from "./Chat.state";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const createErrorMessage = (error: any): string => {
   const innerError = error.innererror;
 
-  const findRAIError = (error: any): string => {
+  const findRAIError = (
+    error: Record<string, { filtered: boolean; severity: number }>
+  ): string => {
     const keys = Object.keys(error);
 
     for (const key of keys) {
@@ -53,7 +56,7 @@ type ChatAction =
     }
   | {
       type: "chatError";
-      payload: any;
+      payload: unknown;
     }
   | {
       type: "updateSystemMessage";
@@ -87,7 +90,7 @@ export function reducer(state: ChatState, action: ChatAction): ChatState {
         messages: [...state.messages, action.payload],
       };
 
-    case "chatComplete":
+    case "chatComplete": {
       const {
         choices,
         completionTokens,
@@ -118,8 +121,9 @@ export function reducer(state: ChatState, action: ChatAction): ChatState {
         };
       }
       return newState;
+    }
 
-    case "chatError":
+    case "chatError": {
       const error = action.payload;
       const errorMessage: ChatMessage = {
         role: "assistant",
@@ -130,18 +134,21 @@ export function reducer(state: ChatState, action: ChatAction): ChatState {
         isLoading: false,
         messages: [...state.messages, errorMessage],
       };
+    }
 
-    case "updateSystemMessage":
+    case "updateSystemMessage": {
       const messages = state.messages;
       messages[0] = action.payload;
       return { ...state, messages: [...messages] };
+    }
 
-    case "clearMessages":
+    case "clearMessages": {
       return {
         ...state,
         messages: [state.messages[0]],
         usageData: INITIAL_STATE.usageData,
       };
+    }
 
     case "updateFunctions":
       return {
@@ -152,7 +159,7 @@ export function reducer(state: ChatState, action: ChatAction): ChatState {
         },
       };
 
-    case "updateParameters":
+    case "updateParameters": {
       const { name, value } = action.payload;
       return {
         ...state,
@@ -161,6 +168,7 @@ export function reducer(state: ChatState, action: ChatAction): ChatState {
           [name]: value,
         },
       };
+    }
 
     case "updateFunctionCall":
       return {
