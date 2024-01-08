@@ -33,6 +33,7 @@ public partial class EventEditor : ComponentBase
     {
         if (Model is not null && editContext is not null && messageStore is not null)
         {
+            messageStore.Clear();
             if (Model.Start > Model.End)
             {
                 messageStore.Add(editContext.Field(nameof(Model.Start)), "Start date must be before end date");
