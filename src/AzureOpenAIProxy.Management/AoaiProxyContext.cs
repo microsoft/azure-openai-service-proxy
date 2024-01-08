@@ -68,7 +68,6 @@ public partial class AoaiProxyContext : DbContext
             entity.Property(e => e.OwnerId)
                 .HasDefaultValueSql("gen_random_uuid()")
                 .HasColumnName("owner_id");
-            entity.Property(e => e.SingleCode).HasColumnName("single_code");
             entity.Property(e => e.StartUtc)
                 .HasColumnType("timestamp(6) without time zone")
                 .HasColumnName("start_utc");

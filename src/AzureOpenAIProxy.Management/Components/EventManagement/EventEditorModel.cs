@@ -29,8 +29,6 @@ public class EventEditorModel
     public string? OrganizerEmail { get; set; }
     [Required(ErrorMessage = "Specify the maximum number of tokens allowed per request")]
     public int MaxTokenCap { get; set; } = 4096;
-    [Required]
-    public bool SingleCode { get; set; }
     [Required(ErrorMessage = "Specify the maximum number of requests allowed per day per token")]
     public int DailyRequestCap { get; set; } = 10000;
     public bool Active { get; set; }

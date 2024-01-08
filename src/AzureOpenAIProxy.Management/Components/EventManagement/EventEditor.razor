@@ -28,10 +28,7 @@
                     For="@(() => Model.MaxTokenCap)" />
                 <MudNumericField Label="Daily Request Cap" @bind-Value="Model.DailyRequestCap" Min="0"
                     For="@(() => Model.DailyRequestCap)" />
-            </div>
-            <div class="d-flex">
                 <MudSwitch @bind-Value="Model.Active" Label="Active" Color="Color.Primary" />
-                <MudSwitch @bind-Value="Model.SingleCode" Label="Single Code" />
             </div>
         </MudCardContent>
         <MudCardActions>

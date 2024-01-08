@@ -24,8 +24,6 @@ public partial class Event
 
     public int MaxTokenCap { get; set; }
 
-    public bool SingleCode { get; set; }
-
     public int DailyRequestCap { get; set; }
 
     public bool Active { get; set; }

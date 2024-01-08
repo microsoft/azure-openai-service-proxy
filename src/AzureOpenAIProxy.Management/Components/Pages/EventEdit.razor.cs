@@ -62,7 +62,6 @@ public partial class EventEdit : ComponentBase
             Active = evt.Active,
             MaxTokenCap = evt.MaxTokenCap,
             DailyRequestCap = evt.DailyRequestCap,
-            SingleCode = evt.SingleCode,
         };
     }
 
