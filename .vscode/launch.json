@@ -1,7 +1,4 @@
 {
-  // Use IntelliSense to learn about possible attributes.
-  // Hover to view descriptions of existing attributes.
-  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
   "version": "0.2.0",
   "configurations": [
     {
@@ -30,12 +27,40 @@
       "request": "launch",
       "command": "swa start playground",
       "cwd": "${workspaceFolder}"
+    },
+    {
+      "name": "Management UI",
+      "type": "dotnet",
+      "request": "launch",
+      "projectPath": "${workspaceFolder}/src/AzureOpenAIProxy.Management/AzureOpenAIProxy.Management.csproj"
     }
   ],
-
   "compounds": [
     {
       "name": "Run all",
+      "configurations": [
+        "AOAI Proxy",
+        "Playground",
+        "SWA Playground",
+        "Management UI"
+      ],
+      "presentation": {
+        "hidden": false,
+        "group": "Frontend",
+        "order": 1
+      }
+    },
+    {
+      "name": "Admin",
+      "configurations": ["AOAI Proxy", "Management UI"],
+      "presentation": {
+        "hidden": false,
+        "group": "Frontend",
+        "order": 1
+      }
+    },
+    {
+      "name": "End user",
       "configurations": ["AOAI Proxy", "Playground", "SWA Playground"],
       "presentation": {
         "hidden": false,

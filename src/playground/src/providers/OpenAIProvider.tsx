@@ -46,4 +46,5 @@ const OpenAIClientProvider: React.FC<PropsWithChildren> = ({ children }) => {
 
 const useOpenAIClientContext = () => useContext(OpenAIClientContext);
 
+// eslint-disable-next-line react-refresh/only-export-components
 export { OpenAIClientProvider, useOpenAIClientContext };

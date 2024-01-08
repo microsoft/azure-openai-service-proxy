@@ -1,0 +1,9 @@
+<AuthorizeView>
+    <Authorized>
+        @context.User.Claims.FirstOrDefault(c => c.Type == "name")?.Value
+        <a href="MicrosoftIdentity/Account/SignOut">Log out</a>
+    </Authorized>
+    <NotAuthorized>
+        <a href="MicrosoftIdentity/Account/SignIn">Log in</a>
+    </NotAuthorized>
+</AuthorizeView>

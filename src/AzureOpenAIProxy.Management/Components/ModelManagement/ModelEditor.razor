@@ -1,0 +1,34 @@
+@using AzureOpenAIProxy.Management.Database
+@namespace AzureOpenAIProxy.Management.Components.ModelManagement
+
+<EditForm OnValidSubmit="@HandleValidSubmit" Model="@Model" @bind-Disabled="isSubmitting">
+    <ValidationSummary />
+    <DataAnnotationsValidator />
+
+    <MudCard>
+        <MudCardContent>
+            <MudTextField Label="Deployment Name" @bind-Value="Model.DeploymentName"
+                For="@(() => Model.DeploymentName)" />
+            <MudTextField Label="Resource Name" @bind-Value="Model.ResourceName" For="@(() => Model.ResourceName)" />
+            <MudTextField Label="Endpoint Key" @bind-Value="Model.EndpointKey" For="@(() => Model.EndpointKey)"
+                InputType="@InputType.Password" />
+            <div class="d-flex">
+                <MudSelect Label="Model Type" @bind-Value="Model.ModelType" Placeholder="Please Select"
+                    For="@(() => Model.ModelType)">
+                    @foreach (ModelType modelType in Enum.GetValues(typeof(ModelType)))
+                    {
+                        <MudSelectItem Value="@((ModelType?)modelType)">@modelType.ToString().Replace("_", " ")
+                        </MudSelectItem>
+                    }
+                </MudSelect>
+                <MudSwitch @bind-Value="Model.Active" Label="Active" Color="Color.Primary" />
+            </div>
+        </MudCardContent>
+        <MudCardActions>
+            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled"
+                Color="@(isSubmitting ? Color.Info : Color.Primary)" Class="ml-auto"
+                StartIcon="@Icons.Material.Filled.Save" Disabled="@isSubmitting">@(isSubmitting ? "Saving" : "Save")
+            </MudButton>
+        </MudCardActions>
+    </MudCard>
+</EditForm>

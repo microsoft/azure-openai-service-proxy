@@ -45,21 +45,22 @@ ALTER TYPE aoai.model_type OWNER TO admin;
 -- Name: add_event(uuid, character varying, character varying, timestamp without time zone, timestamp without time zone, character varying, character varying, character varying, character varying, integer, boolean, integer, boolean); Type: FUNCTION; Schema: aoai; Owner: admin
 --
 
-CREATE FUNCTION aoai.add_event(p_owner_id uuid, p_event_code character varying, p_event_markdown character varying, p_start_utc timestamp without time zone, p_end_utc timestamp without time zone, p_organizer_name character varying, p_organizer_email character varying, p_event_url character varying, p_event_url_text character varying, p_max_token_cap integer, p_single_code boolean, p_daily_request_cap integer, p_active boolean) RETURNS TABLE(event_id character varying, owner_id uuid, event_code character varying, event_markdown character varying, start_utc timestamp without time zone, end_utc timestamp without time zone, organizer_name character varying, organizer_email character varying, event_url character varying, event_url_text character varying, max_token_cap integer, single_code boolean, daily_request_cap integer, active boolean)
+CREATE FUNCTION aoai.add_event(p_entra_id character varying, p_event_code character varying, p_event_markdown character varying, p_start_utc timestamp without time zone, p_end_utc timestamp without time zone, p_organizer_name character varying, p_organizer_email character varying, p_event_url character varying, p_event_url_text character varying, p_max_token_cap integer, p_daily_request_cap integer, p_active boolean) RETURNS TABLE(event_id character varying, owner_id uuid, event_code character varying, event_markdown character varying, start_utc timestamp without time zone, end_utc timestamp without time zone, organizer_name character varying, organizer_email character varying, event_url character varying, event_url_text character varying, max_token_cap integer, daily_request_cap integer, active boolean)
     LANGUAGE plpgsql
     AS $$
 DECLARE
     v_hash BYTEA;
-    v_guid1 uuid := uuid_generate_v4();
-    v_guid2 uuid := uuid_generate_v4();
+    v_guid1 uuid := aoai.uuid_generate_v4();
+    v_guid2 uuid := aoai.uuid_generate_v4();
     v_guid_string VARCHAR(128);
     v_hash_string VARCHAR(64);
     v_half1 VARCHAR(4);
     v_half2 VARCHAR(4);
     v_final_hash VARCHAR(11);
+    v_owner_id uuid := aoai.get_owner_id(p_entra_id);
 BEGIN
     v_guid_string := v_guid1::VARCHAR(36) || v_guid2::VARCHAR(36);
-    v_hash := digest(v_guid_string, 'sha256');
+    v_hash := aoai.digest(v_guid_string, 'sha256');
     v_hash_string := encode(v_hash, 'hex');
 
     v_half1 := substring(v_hash_string, 1, 4);
@@ -77,15 +78,14 @@ BEGIN
         organizer_name,
         organizer_email,
         event_url,
-        event_urltext,
+        event_url_text,
         max_token_cap,
-        single_code,
         daily_request_cap,
         active
     )
     VALUES (
         v_final_hash,
-		p_owner_id,
+		v_owner_id,
 		p_event_code,
 		p_event_markdown,
 		p_start_utc,
@@ -95,7 +95,6 @@ BEGIN
 		p_event_url,
 		p_event_url_text,
 		p_max_token_cap,
-		p_single_code,
 		p_daily_request_cap,
 		p_active
 		);
@@ -106,20 +105,20 @@ BEGIN
         creator
     )
     VALUES (
-        p_owner_id,
+        v_owner_id,
         v_final_hash,
         true
     );
 
 	RETURN QUERY
-	SELECT e.event_id, e.owner_id, e.event_code, e.event_markdown, e.start_utc, e.end_utc, e.organizer_name, e.organizer_email, e.event_url, e.event_urltext, e.max_token_cap, e.single_code, e.daily_request_cap, e.active
+	SELECT e.event_id, e.owner_id, e.event_code, e.event_markdown, e.start_utc, e.end_utc, e.organizer_name, e.organizer_email, e.event_url, e.event_url_text, e.max_token_cap, e.daily_request_cap, e.active
 	FROM aoai.event as e WHERE e.event_id = v_final_hash;
 
 END;
 $$;
 
 
-ALTER FUNCTION aoai.add_event(p_owner_id uuid, p_event_code character varying, p_event_markdown character varying, p_start_utc timestamp without time zone, p_end_utc timestamp without time zone, p_organizer_name character varying, p_organizer_email character varying, p_event_url character varying, p_event_url_text character varying, p_max_token_cap integer, p_single_code boolean, p_daily_request_cap integer, p_active boolean) OWNER TO admin;
+ALTER FUNCTION aoai.add_event(p_entra_id character varying, p_event_code character varying, p_event_markdown character varying, p_start_utc timestamp without time zone, p_end_utc timestamp without time zone, p_organizer_name character varying, p_organizer_email character varying, p_event_url character varying, p_event_url_text character varying, p_max_token_cap integer, p_daily_request_cap integer, p_active boolean) OWNER TO admin;
 
 --
 -- Name: add_event_attendee(character varying, character varying); Type: FUNCTION; Schema: aoai; Owner: admin
@@ -289,7 +288,6 @@ CREATE TABLE aoai.event (
     event_url character varying(256) NOT NULL,
     event_url_text character varying(256) NOT NULL,
     max_token_cap integer NOT NULL,
-    single_code boolean NOT NULL,
     daily_request_cap integer NOT NULL,
     active boolean NOT NULL
 );
@@ -331,7 +329,9 @@ ALTER TABLE aoai.event_catalog_map OWNER TO admin;
 
 CREATE TABLE aoai.owner (
     entra_id character varying(128) NOT NULL,
-    owner_id uuid DEFAULT gen_random_uuid() NOT NULL
+    owner_id uuid DEFAULT gen_random_uuid() NOT NULL,
+    name character varying(128) NOT NULL,
+    email character varying(128) NOT NULL
 );
 
 
@@ -470,6 +470,5 @@ ALTER TABLE ONLY aoai.owner_event_map
     ADD CONSTRAINT fk_ownereventmap_owner FOREIGN KEY (owner_id) REFERENCES aoai.owner(owner_id) ON DELETE CASCADE;
 
 
---
--- PostgreSQL database dump complete
---
+CREATE EXTENSION IF NOT EXISTS pgcrypto SCHEMA aoai;
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp" SCHEMA aoai;

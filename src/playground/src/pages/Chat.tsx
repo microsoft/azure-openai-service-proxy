@@ -53,7 +53,7 @@ export const Chat = () => {
           },
         });
       } catch (error) {
-        dispatch({ type: "chatError", payload: error as any });
+        dispatch({ type: "chatError", payload: error as unknown });
       }
     }
   };
