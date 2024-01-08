@@ -60,9 +60,7 @@ public partial class EventEdit : ComponentBase
             OrganizerEmail = evt.OrganizerEmail,
             OrganizerName = evt.OrganizerName,
             Active = evt.Active,
-            MaxTokenCap = evt.MaxTokenCap,
             DailyRequestCap = evt.DailyRequestCap,
-            SingleCode = evt.SingleCode,
         };
     }
 

@@ -22,10 +22,6 @@ public partial class Event
 
     public string EventUrlText { get; set; } = null!;
 
-    public int MaxTokenCap { get; set; }
-
-    public bool SingleCode { get; set; }
-
     public int DailyRequestCap { get; set; }
 
     public bool Active { get; set; }
