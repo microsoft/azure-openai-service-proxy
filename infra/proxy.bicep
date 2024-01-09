@@ -8,6 +8,11 @@ param containerRegistryName string
 param serviceName string = 'proxy'
 param exists bool
 param azure_storage_connection_string string
+param postgresUser string
+@secure()
+param postgresPassword string
+param postgresDatabase string
+param postgresServer string
 
 resource proxyIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
   name: identityName
@@ -29,6 +34,10 @@ module app 'core/host/container-app-upsert.bicep' = {
       {
         name: 'AZURE_STORAGE_CONNECTION_STRING'
         value: azure_storage_connection_string
+      }
+      {
+        name: 'POSTGRES_CONNECTION_STRING'
+        value: 'postgresql://${postgresUser}:${postgresPassword}@${postgresServer}/${postgresDatabase}'
       }
     ]
   }

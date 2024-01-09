@@ -21,6 +21,10 @@ param playgroundServiceName string = ''
 })
 param swaLocation string
 
+@secure()
+@description('PostGreSQL Server administrator password')
+param postgresAdminPassword string
+
 var resourceToken = toLower(uniqueString(subscription().id, name, location))
 var tags = { 'azd-env-name': name }
 
@@ -32,6 +36,10 @@ resource resourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' = {
 
 var prefix = '${name}-${resourceToken}'
 
+var postgresServerName = '${prefix}-postgresql'
+var postgresAdminUser = 'admin${uniqueString(resourceGroup.id)}'
+var postgresDatabaseName = 'aoai-proxy'
+
 // Create storage account for the service
 module storageAccount 'storage.bicep' = {
   name: 'storage'
@@ -39,6 +47,29 @@ module storageAccount 'storage.bicep' = {
   params: {
     name: 'storage${resourceToken}'
     location: location
+  }
+}
+
+// Create PostgreSQL database
+module postgresServer 'core/database/postgresql/flexibleserver.bicep' = {
+  name: 'postgresql'
+  scope: resourceGroup
+  params: {
+    name: postgresServerName
+    location: location
+    tags: tags
+    sku: {
+      name: 'Standard_B1ms'
+      tier: 'Burstable'
+    }
+    storage: {
+      storageSizeGB: 32
+    }
+    version: '16'
+    administratorLogin: postgresAdminUser
+    administratorLoginPassword: postgresAdminPassword
+    databaseNames: [ postgresDatabaseName ]
+    allowAzureIPsFirewall: true
   }
 }
 
@@ -52,7 +83,7 @@ module containerApps 'core/host/container-apps.bicep' = {
     tags: tags
     containerAppsEnvironmentName: '${prefix}-containerapps-env'
     containerRegistryName: '${replace(prefix, '-', '')}registry'
-    logAnalyticsWorkspaceName: logAnalyticsWorkspace.outputs.name
+    logAnalyticsWorkspaceName: monitoring.outputs.logAnalyticsWorkspaceName
   }
 }
 
@@ -69,6 +100,10 @@ module proxy 'proxy.bicep' = {
     containerRegistryName: containerApps.outputs.registryName
     exists: proxyAppExists
     azure_storage_connection_string: storageAccount.outputs.connectionString
+    postgresServer: postgresServer.outputs.POSTGRES_DOMAIN_NAME
+    postgresDatabase: postgresDatabaseName
+    postgresUser: postgresAdminUser
+    postgresPassword: postgresAdminPassword
   }
 }
 
@@ -92,13 +127,16 @@ module swaLinkDotnet './linkSwaResource.bicep' = {
   }
 }
 
-module logAnalyticsWorkspace 'core/monitor/loganalytics.bicep' = {
-  name: 'loganalytics'
+// Monitor application with Azure Monitor
+module monitoring 'core/monitor/monitoring.bicep' = {
+  name: 'monitoring'
   scope: resourceGroup
   params: {
-    name: '${prefix}-loganalytics'
     location: location
     tags: tags
+    applicationInsightsDashboardName: '${prefix}-appinsights-dashboard'
+    applicationInsightsName: '${prefix}-appinsights'
+    logAnalyticsName: '${take(prefix, 50)}-loganalytics' // Max 63 chars
   }
 }
 
