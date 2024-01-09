@@ -45,7 +45,7 @@ module storageAccount 'storage.bicep' = {
   name: 'storage'
   scope: resourceGroup
   params: {
-    name: 'storage${resourceToken}'
+    name: '${take(replace(prefix, '-', ''), 16)}storage'
     location: location
   }
 }
