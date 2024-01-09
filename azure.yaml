@@ -11,3 +11,7 @@ services:
     language: ts
     host: staticwebapp
     dist: dist
+  management-ui:
+    project: ./src/AzureOpenAIProxy.Management
+    language: csharp
+    host: containerapp
