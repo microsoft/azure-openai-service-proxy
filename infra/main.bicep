@@ -10,6 +10,7 @@ param name string
 param location string
 
 param proxyAppExists bool = false
+param managementUIAppExists bool = false
 
 param playgroundServiceName string = ''
 @description('Location for the Playground app resource group')
@@ -172,6 +173,21 @@ module MonitorFunction 'core/host/functions.bicep' = {
   }
 }
 
+// ManagementUI app
+module managementUI 'management-ui.bicep' = {
+  name: 'management-ui'
+  scope: resourceGroup
+  params: {
+    name: replace('${take(prefix, 19)}-ca', '--', '-')
+    location: location
+    tags: tags
+    identityName: '${prefix}-id-management-ui'
+    containerAppsEnvironmentName: containerApps.outputs.environmentName
+    containerRegistryName: containerApps.outputs.registryName
+    exists: managementUIAppExists
+  }
+}
+
 output AZURE_LOCATION string = location
 output AZURE_CONTAINER_ENVIRONMENT_NAME string = containerApps.outputs.environmentName
 output AZURE_CONTAINER_REGISTRY_NAME string = containerApps.outputs.registryName
@@ -182,3 +198,7 @@ output SERVICE_PROXY_URI string = proxy.outputs.SERVICE_PROXY_URI
 output SERVICE_PROXY_IMAGE_NAME string = proxy.outputs.SERVICE_PROXY_IMAGE_NAME
 output SERVICE_PROXY_ENDPOINTS array = [ '${proxy.outputs.SERVICE_PROXY_URI}/docs' ]
 output SERVICE_PLAYGROUND_URI string = playground.outputs.SERVICE_WEB_URI
+output SERVICE_MANAGEMENT_UI_IDENTITY_PRINCIPAL_ID string = managementUI.outputs.IDENTITY_PRINCIPAL_ID
+output SERVICE_MANAGEMENT_UI_NAME string = managementUI.outputs.NAME
+output SERVICE_MANAGEMENT_UI_URI string = managementUI.outputs.URI
+output SERVICE_MANAGEMENT_UI_IMAGE_NAME string = managementUI.outputs.IMAGE_NAME
