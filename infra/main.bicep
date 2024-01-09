@@ -184,6 +184,10 @@ module admin 'admin.bicep' = {
     containerAppsEnvironmentName: containerApps.outputs.environmentName
     containerRegistryName: containerApps.outputs.registryName
     exists: adminAppExists
+    postgresServer: postgresServer.outputs.POSTGRES_DOMAIN_NAME
+    postgresDatabase: postgresDatabaseName
+    postgresUser: postgresAdminUser
+    postgresPassword: postgresAdminPassword
   }
 }
 

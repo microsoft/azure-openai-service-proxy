@@ -7,6 +7,11 @@ param containerAppsEnvironmentName string
 param containerRegistryName string
 param serviceName string = 'admin'
 param exists bool
+param postgresUser string
+@secure()
+param postgresPassword string
+param postgresDatabase string
+param postgresServer string
 
 resource adminIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
   name: identityName
@@ -24,7 +29,12 @@ module app 'core/host/container-app-upsert.bicep' = {
     containerAppsEnvironmentName: containerAppsEnvironmentName
     containerRegistryName: containerRegistryName
     targetPort: 8081
-    env: []
+    env: [
+      {
+        name: 'ConnectionStrings__AoaiProxyContext'
+        value: 'Server=${postgresServer};Port=5432;User Id=${postgresUser};Password=${postgresPassword};Database=${postgresDatabase};Ssl Mode=Require;'
+      }
+    ]
   }
 }
 
