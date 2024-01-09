@@ -100,6 +100,10 @@ module proxy 'proxy.bicep' = {
     containerRegistryName: containerApps.outputs.registryName
     exists: proxyAppExists
     azure_storage_connection_string: storageAccount.outputs.connectionString
+    postgresServer: postgresServer.outputs.POSTGRES_DOMAIN_NAME
+    postgresDatabase: postgresDatabaseName
+    postgresUser: postgresAdminUser
+    postgresPassword: postgresAdminPassword
   }
 }
 
