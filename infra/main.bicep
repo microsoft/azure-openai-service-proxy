@@ -10,9 +10,8 @@ param name string
 param location string
 
 param proxyAppExists bool = false
-param managementUIAppExists bool = false
+param adminAppExists bool = false
 
-param playgroundServiceName string = ''
 @description('Location for the Playground app resource group')
 @allowed([ 'centralus', 'eastus2', 'eastasia', 'westeurope', 'westus2' ])
 @metadata({
@@ -79,10 +78,10 @@ module containerApps 'core/host/container-apps.bicep' = {
   name: 'container-apps'
   scope: resourceGroup
   params: {
-    name: 'app'
+    name: '${prefix}-app'
     location: location
     tags: tags
-    containerAppsEnvironmentName: '${prefix}-containerapps-env'
+    containerAppsEnvironmentName: '${prefix}-cae'
     containerRegistryName: '${replace(prefix, '-', '')}registry'
     logAnalyticsWorkspaceName: monitoring.outputs.logAnalyticsWorkspaceName
   }
@@ -93,7 +92,7 @@ module proxy 'proxy.bicep' = {
   name: 'proxy'
   scope: resourceGroup
   params: {
-    name: replace('${take(prefix, 19)}-ca', '--', '-')
+    name: '${prefix}-proxy'
     location: location
     tags: tags
     identityName: '${prefix}-id-proxy'
@@ -113,7 +112,7 @@ module playground 'playground.bicep' = {
   name: 'playground'
   scope: resourceGroup
   params: {
-    name: !empty(playgroundServiceName) ? playgroundServiceName : 'swaplayground-${resourceToken}'
+    name: '${prefix}-playground'
     location: swaLocation
     tags: tags
   }
@@ -146,7 +145,7 @@ module appServicePlan 'core/host/appserviceplan.bicep' = {
   name: 'appServicePlan'
   scope: resourceGroup
   params: {
-    name: 'openai-proxy-${resourceToken}-app-service-plan'
+    name: '${prefix}-app-service-plan'
     location: location
     tags: tags
     sku: {
@@ -159,7 +158,7 @@ module MonitorFunction 'core/host/functions.bicep' = {
   name: 'azureFunctions'
   scope: resourceGroup
   params: {
-    name: 'openai-proxy-${resourceToken}-monitor-function'
+    name: '${prefix}-monitor-function'
     location: location
     tags: tags
     runtimeVersion: '~4'
@@ -173,18 +172,18 @@ module MonitorFunction 'core/host/functions.bicep' = {
   }
 }
 
-// ManagementUI app
-module managementUI 'management-ui.bicep' = {
-  name: 'management-ui'
+// Admin app
+module admin 'admin.bicep' = {
+  name: 'admin'
   scope: resourceGroup
   params: {
-    name: replace('${take(prefix, 19)}-ca', '--', '-')
+    name: '${prefix}-admin'
     location: location
     tags: tags
-    identityName: '${prefix}-id-management-ui'
+    identityName: '${prefix}-id-admin'
     containerAppsEnvironmentName: containerApps.outputs.environmentName
     containerRegistryName: containerApps.outputs.registryName
-    exists: managementUIAppExists
+    exists: adminAppExists
   }
 }
 
@@ -198,7 +197,7 @@ output SERVICE_PROXY_URI string = proxy.outputs.SERVICE_PROXY_URI
 output SERVICE_PROXY_IMAGE_NAME string = proxy.outputs.SERVICE_PROXY_IMAGE_NAME
 output SERVICE_PROXY_ENDPOINTS array = [ '${proxy.outputs.SERVICE_PROXY_URI}/docs' ]
 output SERVICE_PLAYGROUND_URI string = playground.outputs.SERVICE_WEB_URI
-output SERVICE_MANAGEMENT_UI_IDENTITY_PRINCIPAL_ID string = managementUI.outputs.IDENTITY_PRINCIPAL_ID
-output SERVICE_MANAGEMENT_UI_NAME string = managementUI.outputs.NAME
-output SERVICE_MANAGEMENT_UI_URI string = managementUI.outputs.URI
-output SERVICE_MANAGEMENT_UI_IMAGE_NAME string = managementUI.outputs.IMAGE_NAME
+output SERVICE_ADMIN_IDENTITY_PRINCIPAL_ID string = admin.outputs.principalId
+output SERVICE_ADMIN_NAME string = admin.outputs.name
+output SERVICE_ADMIN_URI string = admin.outputs.uri
+output SERVICE_ADMIN_IMAGE_NAME string = admin.outputs.imageName

@@ -5,10 +5,10 @@ param tags object = {}
 param identityName string
 param containerAppsEnvironmentName string
 param containerRegistryName string
-param serviceName string = 'management-ui'
+param serviceName string = 'admin'
 param exists bool
 
-resource managementUIIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
+resource adminIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
   name: identityName
   location: location
 }
@@ -19,7 +19,7 @@ module app 'core/host/container-app-upsert.bicep' = {
     name: name
     location: location
     tags: union(tags, { 'azd-service-name': serviceName })
-    identityName: managementUIIdentity.name
+    identityName: adminIdentity.name
     exists: exists
     containerAppsEnvironmentName: containerAppsEnvironmentName
     containerRegistryName: containerRegistryName
@@ -28,7 +28,7 @@ module app 'core/host/container-app-upsert.bicep' = {
   }
 }
 
-output IDENTITY_PRINCIPAL_ID string = managementUIIdentity.properties.principalId
-output NAME string = app.outputs.name
-output URI string = app.outputs.uri
-output IMAGE_NAME string = app.outputs.imageName
+output principalId string = adminIdentity.properties.principalId
+output name string = app.outputs.name
+output uri string = app.outputs.uri
+output imageName string = app.outputs.imageName
