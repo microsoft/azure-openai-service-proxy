@@ -228,7 +228,7 @@ BEGIN
         OC.resource_name,
         OC.endpoint_key,
         OC.model_type,
-		OC.catalog_id
+        OC.catalog_id
     FROM
         aoai.event_catalog_map EC
     INNER JOIN
@@ -257,7 +257,7 @@ BEGIN
         OC.resource_name,
         OC.endpoint_key,
         OC.model_type,
-		OC.catalog_id
+        OC.catalog_id
     FROM
         aoai.event_catalog_map EC
     INNER JOIN
