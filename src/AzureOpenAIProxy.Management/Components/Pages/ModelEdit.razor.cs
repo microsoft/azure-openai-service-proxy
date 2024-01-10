@@ -24,7 +24,7 @@ public partial class ModelEdit : ComponentBase
             NavigationManager.NavigateTo("/models");
             return;
         }
-        OwnerCatalog? m = await DbContext.OwnerCatalogs.FindAsync(Id);
+        OwnerCatalog? m = await DbContext.OwnerCatalogs.FindAsync(Guid.Parse(Id));
 
         if (m is null)
         {
@@ -44,7 +44,7 @@ public partial class ModelEdit : ComponentBase
 
     private async Task OnValidSubmit(ModelEditorModel model)
     {
-        OwnerCatalog? m = await DbContext.OwnerCatalogs.FindAsync(Id);
+        OwnerCatalog? m = await DbContext.OwnerCatalogs.FindAsync(Guid.Parse(Id));
 
         if (m is null)
         {
