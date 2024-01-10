@@ -73,7 +73,7 @@ ALTER TYPE aoai.model_type OWNER TO admin;
 -- Name: add_event(character varying, character varying, character varying, timestamp without time zone, timestamp without time zone, character varying, character varying, character varying, character varying, integer, integer, boolean); Type: FUNCTION; Schema: aoai; Owner: admin
 --
 
-CREATE FUNCTION aoai.add_event(p_owner_id character varying, p_event_code character varying, p_event_markdown character varying, p_start_utc timestamp without time zone, p_end_utc timestamp without time zone, p_organizer_name character varying, p_organizer_email character varying, p_event_url character varying, p_event_url_text character varying, p_max_token_cap integer, p_daily_request_cap integer, p_active boolean) RETURNS TABLE(event_id character varying, owner_id uuid, event_code character varying, event_markdown character varying, start_utc timestamp without time zone, end_utc timestamp without time zone, organizer_name character varying, organizer_email character varying, event_url character varying, event_url_text character varying, max_token_cap integer, daily_request_cap integer, active boolean)
+CREATE FUNCTION aoai.add_event(p_owner_id character varying, p_event_code character varying, p_event_markdown character varying, p_start_utc timestamp without time zone, p_end_utc timestamp without time zone, p_organizer_name character varying, p_organizer_email character varying, p_event_url character varying, p_event_url_text character varying, p_max_token_cap integer, p_daily_request_cap integer, p_active boolean) RETURNS TABLE(event_id character varying, owner_id character varying(128), event_code character varying, event_markdown character varying, start_utc timestamp without time zone, end_utc timestamp without time zone, organizer_name character varying, organizer_email character varying, event_url character varying, event_url_text character varying, max_token_cap integer, daily_request_cap integer, active boolean)
     LANGUAGE plpgsql
     AS $$
 DECLARE
@@ -286,7 +286,7 @@ SET default_table_access_method = heap;
 
 CREATE TABLE aoai.event (
     event_id character varying(50) DEFAULT gen_random_uuid() NOT NULL,
-    owner_id uuid DEFAULT gen_random_uuid() NOT NULL,
+    owner_id character varying(128),
     event_code character varying(64) NOT NULL,
     event_markdown character varying(8192) NOT NULL,
     start_utc timestamp(6) without time zone NOT NULL,
@@ -364,7 +364,7 @@ ALTER TABLE aoai.owner OWNER TO admin;
 --
 
 CREATE TABLE aoai.owner_catalog (
-    owner_id uuid NOT NULL,
+    owner_id character varying(128) NOT NULL,
     catalog_id uuid DEFAULT gen_random_uuid() NOT NULL,
     deployment_name character varying(64) NOT NULL,
     resource_name character varying(64) NOT NULL,
@@ -381,7 +381,7 @@ ALTER TABLE aoai.owner_catalog OWNER TO admin;
 --
 
 CREATE TABLE aoai.owner_event_map (
-    owner_id uuid NOT NULL,
+    owner_id character varying(128) NOT NULL,
     event_id character varying(50) NOT NULL,
     creator boolean NOT NULL
 );
