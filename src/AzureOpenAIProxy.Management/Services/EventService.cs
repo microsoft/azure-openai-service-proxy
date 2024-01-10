@@ -31,9 +31,9 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
         await conn.OpenAsync();
         using DbCommand cmd = conn.CreateCommand();
 
-        cmd.CommandText = $"SELECT * FROM aoai.add_event(@EntraId, @EventCode, @EventMarkdown, @StartUtc, @EndUtc, @OrganiserName, @OrganiserEmail, @EventUrl, @EventUrlText, @MaxTokenCap, @DailyRequestCap, @Active)";
+        cmd.CommandText = $"SELECT * FROM aoai.add_event(@OwnerId, @EventCode, @EventMarkdown, @StartUtc, @EndUtc, @OrganiserName, @OrganiserEmail, @EventUrl, @EventUrlText, @MaxTokenCap, @DailyRequestCap, @Active)";
 
-        cmd.Parameters.Add(new NpgsqlParameter("EntraId", entraId));
+        cmd.Parameters.Add(new NpgsqlParameter("OwnerId", entraId));
         cmd.Parameters.Add(new NpgsqlParameter("EventCode", newEvent.EventCode));
         cmd.Parameters.Add(new NpgsqlParameter("EventMarkdown", newEvent.EventMarkdown));
         cmd.Parameters.Add(new NpgsqlParameter("StartUtc", newEvent.StartUtc));
@@ -64,7 +64,7 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
     public async Task<IEnumerable<Event>> GetOwnerEventsAsync()
     {
         string entraId = await authService.GetCurrentUserEntraIdAsync();
-        return await db.Events.Where(e => e.OwnerEventMaps.Any(o => o.Owner.EntraId == entraId)).ToListAsync();
+        return await db.Events.Where(e => e.OwnerEventMaps.Any(o => o.Owner.OwnerId == entraId)).ToListAsync();
     }
 
     public async Task<Event?> UpdateEventAsync(string id, EventEditorModel model)

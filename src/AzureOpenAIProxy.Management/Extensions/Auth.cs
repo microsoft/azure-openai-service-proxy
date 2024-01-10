@@ -48,7 +48,7 @@ public static class AuthExtensions
 
         string id = principal.GetEntraId();
 
-        if (await db.Owners.AnyAsync(o => o.EntraId == id))
+        if (await db.Owners.AnyAsync(o => o.OwnerId == id))
         {
             logger.LogInformation("User {id} already registered", id);
             return;
@@ -56,10 +56,9 @@ public static class AuthExtensions
 
         Owner owner = new()
         {
-            EntraId = id,
-            OwnerId = Guid.NewGuid(),
-            Email = principal.Identity?.Name ?? "TBC",
-            Name = principal.Claims.FirstOrDefault(c => c.Type == "name")?.Value ?? "TBC"
+            OwnerId = id,
+            Email = principal.Identity?.Name ?? "Unknown",
+            Name = principal.Claims.FirstOrDefault(c => c.Type == "name")?.Value ?? "Unknown"
         };
 
         db.Owners.Add(owner);
