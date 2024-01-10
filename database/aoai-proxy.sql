@@ -161,10 +161,10 @@ BEGIN
 	SELECT api_key INTO v_api_key FROM aoai.event_attendee WHERE user_id = p_user_id;
 
     IF v_api_key IS NULL THEN
-		v_api_key := uuid_generate_v4();
+		v_api_key := aoai.uuid_generate_v4();
 
-		INSERT INTO aoai.event_attendee(user_id, event_id, active, total_requests, api_key, total_tokens)
-		VALUES (p_user_id, p_event_id, true, 0, v_api_key, 0);
+		INSERT INTO aoai.event_attendee(user_id, event_id, active, total_requests, api_key)
+		VALUES (p_user_id, p_event_id, true, 0, v_api_key);
 	END IF;
 
     RETURN v_api_key;
@@ -218,7 +218,7 @@ ALTER FUNCTION aoai.get_attendee_authorized(p_event_code character varying, p_ap
 -- Name: get_models_by_deployment_name(character varying, character varying); Type: FUNCTION; Schema: aoai; Owner: admin
 --
 
-CREATE FUNCTION aoai.get_models_by_deployment_name(p_event_id character varying, p_deployment_id character varying) RETURNS TABLE(deployment_name character varying, resource_name character varying, endpoint_key character varying, model_type aoai.model_type)
+CREATE FUNCTION aoai.get_models_by_deployment_name(p_event_id character varying, p_deployment_id character varying) RETURNS TABLE(deployment_name character varying, resource_name character varying, endpoint_key character varying, model_type aoai.model_type, catalog_id uuid)
     LANGUAGE plpgsql
     AS $$
 BEGIN
@@ -227,7 +227,8 @@ BEGIN
         OC.deployment_name,
         OC.resource_name,
         OC.endpoint_key,
-        OC.model_type
+        OC.model_type,
+		OC.catalog_id
     FROM
         aoai.event_catalog_map EC
     INNER JOIN
@@ -246,7 +247,7 @@ ALTER FUNCTION aoai.get_models_by_deployment_name(p_event_id character varying, 
 -- Name: get_models_by_event(character varying); Type: FUNCTION; Schema: aoai; Owner: admin
 --
 
-CREATE FUNCTION aoai.get_models_by_event(p_event_id character varying) RETURNS TABLE(deployment_name character varying, resource_name character varying, endpoint_key character varying, model_type aoai.model_type)
+CREATE FUNCTION aoai.get_models_by_event(p_event_id character varying) RETURNS TABLE(deployment_name character varying, resource_name character varying, endpoint_key character varying, model_type aoai.model_type, catalog_id uuid)
     LANGUAGE plpgsql
     AS $$
 BEGIN
@@ -255,7 +256,8 @@ BEGIN
         OC.deployment_name,
         OC.resource_name,
         OC.endpoint_key,
-        OC.model_type
+        OC.model_type,
+		OC.catalog_id
     FROM
         aoai.event_catalog_map EC
     INNER JOIN
@@ -332,9 +334,7 @@ CREATE TABLE aoai.event_attendee (
     user_id character varying(128) NOT NULL,
     event_id character varying(50) NOT NULL,
     active boolean NOT NULL,
-    total_requests integer NOT NULL,
     api_key uuid NOT NULL,
-    daily_requests integer NOT NULL,
     daily_locked boolean DEFAULT false NOT NULL
 );
 
@@ -358,12 +358,11 @@ ALTER TABLE aoai.event_catalog_map OWNER TO admin;
 --
 
 CREATE TABLE aoai.metric (
-    metric_id uuid DEFAULT gen_random_uuid() NOT NULL,
-    user_id character varying(128) NOT NULL,
     event_id character varying(50) NOT NULL,
-    deployment_name character varying(64) NOT NULL,
-    model_type aoai.model_type NOT NULL,
-    metric_timestamp timestamp(6) without time zone NOT NULL
+    metric_timestamp date NOT NULL,
+    api_key uuid NOT NULL,
+    request_id integer NOT NULL,
+    catalog_id uuid NOT NULL
 );
 
 
@@ -414,6 +413,34 @@ CREATE TABLE aoai.owner_event_map (
 ALTER TABLE aoai.owner_event_map OWNER TO admin;
 
 --
+-- Name: request_id_seq; Type: SEQUENCE; Schema: aoai; Owner: admin
+--
+
+CREATE SEQUENCE aoai.request_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE aoai.request_id_seq OWNER TO admin;
+
+--
+-- Name: request_id_seq; Type: SEQUENCE OWNED BY; Schema: aoai; Owner: admin
+--
+
+ALTER SEQUENCE aoai.request_id_seq OWNED BY aoai.metric.request_id;
+
+
+--
+-- Name: metric request_id; Type: DEFAULT; Schema: aoai; Owner: admin
+--
+
+ALTER TABLE ONLY aoai.metric ALTER COLUMN request_id SET DEFAULT nextval('aoai.request_id_seq'::regclass);
+
+
+--
 -- Name: event event_pkey; Type: CONSTRAINT; Schema: aoai; Owner: admin
 --
 
@@ -442,7 +469,7 @@ ALTER TABLE ONLY aoai.event_catalog_map
 --
 
 ALTER TABLE ONLY aoai.metric
-    ADD CONSTRAINT metric_pkey PRIMARY KEY (user_id, event_id);
+    ADD CONSTRAINT metric_pkey PRIMARY KEY (api_key, request_id);
 
 
 --
