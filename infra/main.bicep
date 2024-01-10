@@ -10,8 +10,8 @@ param name string
 param location string
 
 param proxyAppExists bool = false
+param adminAppExists bool = false
 
-param playgroundServiceName string = ''
 @description('Location for the Playground app resource group')
 @allowed([ 'centralus', 'eastus2', 'eastasia', 'westeurope', 'westus2' ])
 @metadata({
@@ -45,7 +45,7 @@ module storageAccount 'storage.bicep' = {
   name: 'storage'
   scope: resourceGroup
   params: {
-    name: 'storage${resourceToken}'
+    name: '${take(replace(prefix, '-', ''), 16)}storage'
     location: location
   }
 }
@@ -78,10 +78,10 @@ module containerApps 'core/host/container-apps.bicep' = {
   name: 'container-apps'
   scope: resourceGroup
   params: {
-    name: 'app'
+    name: '${prefix}-app'
     location: location
     tags: tags
-    containerAppsEnvironmentName: '${prefix}-containerapps-env'
+    containerAppsEnvironmentName: '${prefix}-cae'
     containerRegistryName: '${replace(prefix, '-', '')}registry'
     logAnalyticsWorkspaceName: monitoring.outputs.logAnalyticsWorkspaceName
   }
@@ -92,7 +92,7 @@ module proxy 'proxy.bicep' = {
   name: 'proxy'
   scope: resourceGroup
   params: {
-    name: replace('${take(prefix, 19)}-ca', '--', '-')
+    name: '${prefix}-proxy'
     location: location
     tags: tags
     identityName: '${prefix}-id-proxy'
@@ -112,7 +112,7 @@ module playground 'playground.bicep' = {
   name: 'playground'
   scope: resourceGroup
   params: {
-    name: !empty(playgroundServiceName) ? playgroundServiceName : 'swaplayground-${resourceToken}'
+    name: '${prefix}-playground'
     location: swaLocation
     tags: tags
   }
@@ -145,7 +145,7 @@ module appServicePlan 'core/host/appserviceplan.bicep' = {
   name: 'appServicePlan'
   scope: resourceGroup
   params: {
-    name: 'openai-proxy-${resourceToken}-app-service-plan'
+    name: '${prefix}-app-service-plan'
     location: location
     tags: tags
     sku: {
@@ -158,7 +158,7 @@ module MonitorFunction 'core/host/functions.bicep' = {
   name: 'azureFunctions'
   scope: resourceGroup
   params: {
-    name: 'openai-proxy-${resourceToken}-monitor-function'
+    name: '${prefix}-monitor-function'
     location: location
     tags: tags
     runtimeVersion: '~4'
@@ -172,6 +172,25 @@ module MonitorFunction 'core/host/functions.bicep' = {
   }
 }
 
+// Admin app
+module admin 'admin.bicep' = {
+  name: 'admin'
+  scope: resourceGroup
+  params: {
+    name: '${prefix}-admin'
+    location: location
+    tags: tags
+    identityName: '${prefix}-id-admin'
+    containerAppsEnvironmentName: containerApps.outputs.environmentName
+    containerRegistryName: containerApps.outputs.registryName
+    exists: adminAppExists
+    postgresServer: postgresServer.outputs.POSTGRES_DOMAIN_NAME
+    postgresDatabase: postgresDatabaseName
+    postgresUser: postgresAdminUser
+    postgresPassword: postgresAdminPassword
+  }
+}
+
 output AZURE_LOCATION string = location
 output AZURE_CONTAINER_ENVIRONMENT_NAME string = containerApps.outputs.environmentName
 output AZURE_CONTAINER_REGISTRY_NAME string = containerApps.outputs.registryName
@@ -182,3 +201,7 @@ output SERVICE_PROXY_URI string = proxy.outputs.SERVICE_PROXY_URI
 output SERVICE_PROXY_IMAGE_NAME string = proxy.outputs.SERVICE_PROXY_IMAGE_NAME
 output SERVICE_PROXY_ENDPOINTS array = [ '${proxy.outputs.SERVICE_PROXY_URI}/docs' ]
 output SERVICE_PLAYGROUND_URI string = playground.outputs.SERVICE_WEB_URI
+output SERVICE_ADMIN_IDENTITY_PRINCIPAL_ID string = admin.outputs.principalId
+output SERVICE_ADMIN_NAME string = admin.outputs.name
+output SERVICE_ADMIN_URI string = admin.outputs.uri
+output SERVICE_ADMIN_IMAGE_NAME string = admin.outputs.imageName
