@@ -2,7 +2,7 @@
 
 public partial class OwnerCatalog
 {
-    public Guid OwnerId { get; set; }
+    public string OwnerId { get; set; } = null!;
 
     public Guid CatalogId { get; set; }
 

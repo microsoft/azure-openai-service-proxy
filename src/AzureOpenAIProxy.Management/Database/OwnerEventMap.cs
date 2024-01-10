@@ -2,7 +2,7 @@
 
 public partial class OwnerEventMap
 {
-    public Guid OwnerId { get; set; }
+    public string OwnerId { get; set; } = null!;
 
     public string EventId { get; set; } = null!;
 

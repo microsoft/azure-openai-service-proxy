@@ -4,7 +4,7 @@ public partial class Event
 {
     public string EventId { get; set; } = null!;
 
-    public Guid OwnerId { get; set; }
+    public string OwnerId { get; set; } = null!;
 
     public string EventCode { get; set; } = null!;
 

@@ -132,7 +132,7 @@ BEGIN
         creator
     )
     VALUES (
-        v_owner_id,
+        p_owner_id,
         v_final_hash,
         true
     );
