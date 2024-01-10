@@ -73,7 +73,7 @@ ALTER TYPE aoai.model_type OWNER TO admin;
 -- Name: add_event(character varying, character varying, character varying, timestamp without time zone, timestamp without time zone, character varying, character varying, character varying, character varying, integer, integer, boolean); Type: FUNCTION; Schema: aoai; Owner: admin
 --
 
-CREATE FUNCTION aoai.add_event(p_entra_id character varying, p_event_code character varying, p_event_markdown character varying, p_start_utc timestamp without time zone, p_end_utc timestamp without time zone, p_organizer_name character varying, p_organizer_email character varying, p_event_url character varying, p_event_url_text character varying, p_max_token_cap integer, p_daily_request_cap integer, p_active boolean) RETURNS TABLE(event_id character varying, owner_id uuid, event_code character varying, event_markdown character varying, start_utc timestamp without time zone, end_utc timestamp without time zone, organizer_name character varying, organizer_email character varying, event_url character varying, event_url_text character varying, max_token_cap integer, daily_request_cap integer, active boolean)
+CREATE FUNCTION aoai.add_event(p_owner_id character varying, p_event_code character varying, p_event_markdown character varying, p_start_utc timestamp without time zone, p_end_utc timestamp without time zone, p_organizer_name character varying, p_organizer_email character varying, p_event_url character varying, p_event_url_text character varying, p_max_token_cap integer, p_daily_request_cap integer, p_active boolean) RETURNS TABLE(event_id character varying, owner_id uuid, event_code character varying, event_markdown character varying, start_utc timestamp without time zone, end_utc timestamp without time zone, organizer_name character varying, organizer_email character varying, event_url character varying, event_url_text character varying, max_token_cap integer, daily_request_cap integer, active boolean)
     LANGUAGE plpgsql
     AS $$
 DECLARE
@@ -85,7 +85,6 @@ DECLARE
     v_half1 VARCHAR(4);
     v_half2 VARCHAR(4);
     v_final_hash VARCHAR(11);
-    v_owner_id uuid := aoai.get_owner_id(p_entra_id);
 BEGIN
     v_guid_string := v_guid1::VARCHAR(36) || v_guid2::VARCHAR(36);
     v_hash := aoai.digest(v_guid_string, 'sha256');
@@ -113,7 +112,7 @@ BEGIN
     )
     VALUES (
         v_final_hash,
-		v_owner_id,
+		p_owner_id,
 		p_event_code,
 		p_event_markdown,
 		p_start_utc,
@@ -146,7 +145,7 @@ END;
 $$;
 
 
-ALTER FUNCTION aoai.add_event(p_entra_id character varying, p_event_code character varying, p_event_markdown character varying, p_start_utc timestamp without time zone, p_end_utc timestamp without time zone, p_organizer_name character varying, p_organizer_email character varying, p_event_url character varying, p_event_url_text character varying, p_max_token_cap integer, p_daily_request_cap integer, p_active boolean) OWNER TO admin;
+ALTER FUNCTION aoai.add_event(p_owner_id character varying, p_event_code character varying, p_event_markdown character varying, p_start_utc timestamp without time zone, p_end_utc timestamp without time zone, p_organizer_name character varying, p_organizer_email character varying, p_event_url character varying, p_event_url_text character varying, p_max_token_cap integer, p_daily_request_cap integer, p_active boolean) OWNER TO admin;
 
 --
 -- Name: add_event_attendee(character varying, character varying); Type: FUNCTION; Schema: aoai; Owner: admin
@@ -277,28 +276,6 @@ ALTER FUNCTION aoai.get_models_by_event(p_event_id character varying) OWNER TO a
 -- Name: get_owner_id(character varying); Type: FUNCTION; Schema: aoai; Owner: admin
 --
 
-CREATE FUNCTION aoai.get_owner_id(p_entra_id character varying) RETURNS uuid
-    LANGUAGE plpgsql
-    AS $$
-DECLARE
-    v_owner_id UUID;
-BEGIN
-    SELECT owner_id INTO v_owner_id FROM aoai.owner WHERE entra_id = p_entra_id;
-
-    IF v_owner_id IS NULL THEN
-        v_owner_id := uuid_generate_v4();
-
-        INSERT INTO aoai.owner(entra_id, owner_id)
-        VALUES (p_entra_id, v_owner_id);
-    END IF;
-
-    RETURN v_owner_id;
-END;
-$$;
-
-
-ALTER FUNCTION aoai.get_owner_id(p_entra_id character varying) OWNER TO admin;
-
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
@@ -374,8 +351,7 @@ ALTER TABLE aoai.metric OWNER TO admin;
 --
 
 CREATE TABLE aoai.owner (
-    entra_id character varying(128) NOT NULL,
-    owner_id uuid DEFAULT gen_random_uuid() NOT NULL,
+    owner_id character varying(128) NOT NULL,
     name character varying(128) NOT NULL,
     email character varying(128) NOT NULL
 );
