@@ -15,6 +15,10 @@ public partial class ModelEditor : ComponentBase
 
     private bool isSubmitting = false;
 
+    private bool maskKey = true;
+
+    private void ToggleMaskKey() => maskKey = !maskKey;
+
     protected override Task OnInitializedAsync()
     {
         Model ??= new();
