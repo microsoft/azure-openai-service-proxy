@@ -228,7 +228,7 @@ BEGIN
         OC.resource_name,
         OC.endpoint_key,
         OC.model_type,
-        OC.catalog_id
+		OC.catalog_id
     FROM
         aoai.event_catalog_map EC
     INNER JOIN
@@ -257,7 +257,7 @@ BEGIN
         OC.resource_name,
         OC.endpoint_key,
         OC.model_type,
-        OC.catalog_id
+		OC.catalog_id
     FROM
         aoai.event_catalog_map EC
     INNER JOIN
@@ -359,9 +359,10 @@ ALTER TABLE aoai.event_catalog_map OWNER TO admin;
 
 CREATE TABLE aoai.metric (
     event_id character varying(50) NOT NULL,
-    metric_timestamp date NOT NULL,
     api_key uuid NOT NULL,
+    date_stamp date DEFAULT CURRENT_DATE NOT NULL,
     request_id integer NOT NULL,
+    time_stamp time without time zone DEFAULT CURRENT_TIME NOT NULL,
     catalog_id uuid NOT NULL
 );
 
@@ -469,7 +470,7 @@ ALTER TABLE ONLY aoai.event_catalog_map
 --
 
 ALTER TABLE ONLY aoai.metric
-    ADD CONSTRAINT metric_pkey PRIMARY KEY (api_key, request_id);
+    ADD CONSTRAINT metric_pkey PRIMARY KEY (api_key, date_stamp, request_id);
 
 
 --
