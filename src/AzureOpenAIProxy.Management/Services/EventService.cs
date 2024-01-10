@@ -64,7 +64,7 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
     public async Task<IEnumerable<Event>> GetOwnerEventsAsync()
     {
         string entraId = await authService.GetCurrentUserEntraIdAsync();
-        return await db.Events.Where(e => e.OwnerEventMaps.Any(o => o.Owner.EntraId == entraId)).ToListAsync();
+        return await db.Events.Where(e => e.OwnerEventMaps.Any(o => o.Owner.OwnerId == entraId)).ToListAsync();
     }
 
     public async Task<Event?> UpdateEventAsync(string id, EventEditorModel model)

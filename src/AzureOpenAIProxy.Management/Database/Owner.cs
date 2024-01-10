@@ -2,9 +2,7 @@
 
 public partial class Owner
 {
-    public string EntraId { get; set; } = null!;
-
-    public Guid OwnerId { get; set; }
+    public string OwnerId { get; set; } = null!;
 
     public string Email { get; set; } = null!;
 

@@ -121,9 +121,6 @@ public partial class AoaiProxyContext : DbContext
             entity.ToTable("owner", "aoai");
 
             entity.Property(e => e.OwnerId)
-                .HasDefaultValueSql("gen_random_uuid()")
-                .HasColumnName("owner_id");
-            entity.Property(e => e.EntraId)
                 .HasMaxLength(128)
                 .HasColumnName("entra_id");
 
