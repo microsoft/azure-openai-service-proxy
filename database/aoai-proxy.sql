@@ -26,6 +26,34 @@ CREATE SCHEMA aoai;
 ALTER SCHEMA aoai OWNER TO admin;
 
 --
+-- Name: pgcrypto; Type: EXTENSION; Schema: -; Owner: -
+--
+
+CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA aoai;
+
+
+--
+-- Name: EXTENSION pgcrypto; Type: COMMENT; Schema: -; Owner:
+--
+
+COMMENT ON EXTENSION pgcrypto IS 'cryptographic functions';
+
+
+--
+-- Name: uuid-ossp; Type: EXTENSION; Schema: -; Owner: -
+--
+
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA aoai;
+
+
+--
+-- Name: EXTENSION "uuid-ossp"; Type: COMMENT; Schema: -; Owner:
+--
+
+COMMENT ON EXTENSION "uuid-ossp" IS 'generate universally unique identifiers (UUIDs)';
+
+
+--
 -- Name: model_type; Type: TYPE; Schema: aoai; Owner: admin
 --
 
@@ -42,7 +70,7 @@ CREATE TYPE aoai.model_type AS ENUM (
 ALTER TYPE aoai.model_type OWNER TO admin;
 
 --
--- Name: add_event(uuid, character varying, character varying, timestamp without time zone, timestamp without time zone, character varying, character varying, character varying, character varying, integer, boolean, integer, boolean); Type: FUNCTION; Schema: aoai; Owner: admin
+-- Name: add_event(character varying, character varying, character varying, timestamp without time zone, timestamp without time zone, character varying, character varying, character varying, character varying, integer, integer, boolean); Type: FUNCTION; Schema: aoai; Owner: admin
 --
 
 CREATE FUNCTION aoai.add_event(p_entra_id character varying, p_event_code character varying, p_event_markdown character varying, p_start_utc timestamp without time zone, p_end_utc timestamp without time zone, p_organizer_name character varying, p_organizer_email character varying, p_event_url character varying, p_event_url_text character varying, p_max_token_cap integer, p_daily_request_cap integer, p_active boolean) RETURNS TABLE(event_id character varying, owner_id uuid, event_code character varying, event_markdown character varying, start_utc timestamp without time zone, end_utc timestamp without time zone, organizer_name character varying, organizer_email character varying, event_url character varying, event_url_text character varying, max_token_cap integer, daily_request_cap integer, active boolean)
@@ -133,10 +161,10 @@ BEGIN
 	SELECT api_key INTO v_api_key FROM aoai.event_attendee WHERE user_id = p_user_id;
 
     IF v_api_key IS NULL THEN
-		v_api_key := uuid_generate_v4();
+		v_api_key := aoai.uuid_generate_v4();
 
-		INSERT INTO aoai.event_attendee(user_id, event_id, active, total_requests, api_key, total_tokens)
-		VALUES (p_user_id, p_event_id, true, 0, v_api_key, 0);
+		INSERT INTO aoai.event_attendee(user_id, event_id, active, total_requests, api_key)
+		VALUES (p_user_id, p_event_id, true, 0, v_api_key);
 	END IF;
 
     RETURN v_api_key;
@@ -176,7 +204,8 @@ BEGIN
     WHERE
         EA.api_key = p_api_key AND
         EA.active = true AND
-		E.event_code = p_event_code AND
+        EA.daily_locked = false AND
+        E.event_code = p_event_code AND
         E.active = true AND
         current_utc BETWEEN E.start_utc AND E.end_utc;
 END;
@@ -189,7 +218,7 @@ ALTER FUNCTION aoai.get_attendee_authorized(p_event_code character varying, p_ap
 -- Name: get_models_by_deployment_name(character varying, character varying); Type: FUNCTION; Schema: aoai; Owner: admin
 --
 
-CREATE FUNCTION aoai.get_models_by_deployment_name(p_event_id character varying, p_deployment_id character varying) RETURNS TABLE(deployment_name character varying, resource_name character varying, endpoint_key character varying, model_type aoai.model_type)
+CREATE FUNCTION aoai.get_models_by_deployment_name(p_event_id character varying, p_deployment_id character varying) RETURNS TABLE(deployment_name character varying, resource_name character varying, endpoint_key character varying, model_type aoai.model_type, catalog_id uuid)
     LANGUAGE plpgsql
     AS $$
 BEGIN
@@ -198,7 +227,8 @@ BEGIN
         OC.deployment_name,
         OC.resource_name,
         OC.endpoint_key,
-        OC.model_type
+        OC.model_type,
+        OC.catalog_id
     FROM
         aoai.event_catalog_map EC
     INNER JOIN
@@ -217,7 +247,7 @@ ALTER FUNCTION aoai.get_models_by_deployment_name(p_event_id character varying, 
 -- Name: get_models_by_event(character varying); Type: FUNCTION; Schema: aoai; Owner: admin
 --
 
-CREATE FUNCTION aoai.get_models_by_event(p_event_id character varying) RETURNS TABLE(deployment_name character varying, resource_name character varying, endpoint_key character varying, model_type aoai.model_type)
+CREATE FUNCTION aoai.get_models_by_event(p_event_id character varying) RETURNS TABLE(deployment_name character varying, resource_name character varying, endpoint_key character varying, model_type aoai.model_type, catalog_id uuid)
     LANGUAGE plpgsql
     AS $$
 BEGIN
@@ -226,7 +256,8 @@ BEGIN
         OC.deployment_name,
         OC.resource_name,
         OC.endpoint_key,
-        OC.model_type
+        OC.model_type,
+        OC.catalog_id
     FROM
         aoai.event_catalog_map EC
     INNER JOIN
@@ -303,9 +334,8 @@ CREATE TABLE aoai.event_attendee (
     user_id character varying(128) NOT NULL,
     event_id character varying(50) NOT NULL,
     active boolean NOT NULL,
-    total_requests integer NOT NULL,
     api_key uuid NOT NULL,
-    total_tokens integer
+    daily_locked boolean DEFAULT false NOT NULL
 );
 
 
@@ -322,6 +352,22 @@ CREATE TABLE aoai.event_catalog_map (
 
 
 ALTER TABLE aoai.event_catalog_map OWNER TO admin;
+
+--
+-- Name: metric; Type: TABLE; Schema: aoai; Owner: admin
+--
+
+CREATE TABLE aoai.metric (
+    event_id character varying(50) NOT NULL,
+    api_key uuid NOT NULL,
+    date_stamp date DEFAULT CURRENT_DATE NOT NULL,
+    request_id integer NOT NULL,
+    time_stamp time without time zone DEFAULT CURRENT_TIME NOT NULL,
+    catalog_id uuid NOT NULL
+);
+
+
+ALTER TABLE aoai.metric OWNER TO admin;
 
 --
 -- Name: owner; Type: TABLE; Schema: aoai; Owner: admin
@@ -368,6 +414,34 @@ CREATE TABLE aoai.owner_event_map (
 ALTER TABLE aoai.owner_event_map OWNER TO admin;
 
 --
+-- Name: request_id_seq; Type: SEQUENCE; Schema: aoai; Owner: admin
+--
+
+CREATE SEQUENCE aoai.request_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE aoai.request_id_seq OWNER TO admin;
+
+--
+-- Name: request_id_seq; Type: SEQUENCE OWNED BY; Schema: aoai; Owner: admin
+--
+
+ALTER SEQUENCE aoai.request_id_seq OWNED BY aoai.metric.request_id;
+
+
+--
+-- Name: metric request_id; Type: DEFAULT; Schema: aoai; Owner: admin
+--
+
+ALTER TABLE ONLY aoai.metric ALTER COLUMN request_id SET DEFAULT nextval('aoai.request_id_seq'::regclass);
+
+
+--
 -- Name: event event_pkey; Type: CONSTRAINT; Schema: aoai; Owner: admin
 --
 
@@ -389,6 +463,14 @@ ALTER TABLE ONLY aoai.event_attendee
 
 ALTER TABLE ONLY aoai.event_catalog_map
     ADD CONSTRAINT eventcatalogmap_pkey PRIMARY KEY (event_id, catalog_id);
+
+
+--
+-- Name: metric metric_pkey; Type: CONSTRAINT; Schema: aoai; Owner: admin
+--
+
+ALTER TABLE ONLY aoai.metric
+    ADD CONSTRAINT metric_pkey PRIMARY KEY (api_key, date_stamp, request_id);
 
 
 --
@@ -420,6 +502,13 @@ ALTER TABLE ONLY aoai.owner_event_map
 --
 
 CREATE UNIQUE INDEX api_key_unique_index ON aoai.event_attendee USING btree (api_key);
+
+
+--
+-- Name: event_id_index; Type: INDEX; Schema: aoai; Owner: admin
+--
+
+CREATE INDEX event_id_index ON aoai.metric USING btree (event_id);
 
 
 --
@@ -455,6 +544,14 @@ ALTER TABLE ONLY aoai.owner_catalog
 
 
 --
+-- Name: metric fk_metric; Type: FK CONSTRAINT; Schema: aoai; Owner: admin
+--
+
+ALTER TABLE ONLY aoai.metric
+    ADD CONSTRAINT fk_metric FOREIGN KEY (event_id) REFERENCES aoai.event(event_id) ON DELETE CASCADE;
+
+
+--
 -- Name: owner_event_map fk_ownereventmap_event; Type: FK CONSTRAINT; Schema: aoai; Owner: admin
 --
 
@@ -470,5 +567,10 @@ ALTER TABLE ONLY aoai.owner_event_map
     ADD CONSTRAINT fk_ownereventmap_owner FOREIGN KEY (owner_id) REFERENCES aoai.owner(owner_id) ON DELETE CASCADE;
 
 
-CREATE EXTENSION IF NOT EXISTS pgcrypto SCHEMA aoai;
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp" SCHEMA aoai;
+--
+-- PostgreSQL database dump complete
+--
+
+
+DROP SCHEMA IF EXISTS PUBLIC CASCADE ;
+DROP DATABASE IF EXISTS postgres WITH (FORCE);

@@ -2,13 +2,16 @@
 
 import logging
 import random
+import uuid
 
 import asyncpg
 from fastapi import HTTPException
 
 # pylint: disable=E0402
 from .authorize import AuthorizeResponse
+from .db_manager import DBManager
 from .lru_cache_with_expiry import lru_cache_with_expiry
+from .monitor import Monitor
 
 # initiase the random number generator
 random.seed()
@@ -19,20 +22,28 @@ class Deployment:
     """Deployment"""
 
     def __init__(
-        self, *, endpoint_key: str, deployment_name: str, model_type: str, resource_name: str
+        self,
+        *,
+        endpoint_key: str,
+        deployment_name: str,
+        model_type: str,
+        resource_name: str,
+        catalog_id: uuid,
     ):
         """init deployment"""
         self.endpoint_key = endpoint_key
         self.model_type = model_type
         self.deployment_name = deployment_name
         self.resource_name = resource_name
+        self.catalog_id = catalog_id
 
 
 class Config:
     """Config Manager"""
 
-    def __init__(self, db_manager):
+    def __init__(self, db_manager: DBManager, monitor: Monitor):
         self.db_manager = db_manager
+        self.monitor = monitor
         self.logging = logging.getLogger(__name__)
 
     @lru_cache_with_expiry(maxsize=128, ttl=300)
@@ -111,6 +122,10 @@ class Config:
 
         # get a random deployment to balance load
         index = random.randint(0, deployment_count - 1)
+
+        authorize_response.catalog_id = deployments[index].catalog_id
+
+        self.monitor.log_api_call(entity=authorize_response)
 
         return deployments[index]
 

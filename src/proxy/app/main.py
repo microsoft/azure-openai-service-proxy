@@ -13,6 +13,7 @@ from .config import Config
 
 # pylint: disable=E0402
 from .db_manager import DBManager
+from .monitor import Monitor
 from .routes.chat_completions import ChatCompletions as chat_completions_router
 from .routes.completions import Completions as completions_router
 from .routes.embeddings import Embeddings as embeddings_router
@@ -54,10 +55,10 @@ app = FastAPI(
     # redoc_url=None,  # Disable redoc
 )
 
-
+monitor = Monitor(connection_string=storage_connection_string)
 db_manager = DBManager(connection_string=sql_connection_string)
 authorize = Authorize(connection_string=storage_connection_string, db_manager=db_manager)
-config = Config(db_manager)
+config = Config(db_manager=db_manager, monitor=monitor)
 
 
 completion_router = completions_router(

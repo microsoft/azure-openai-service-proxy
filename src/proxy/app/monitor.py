@@ -58,6 +58,8 @@ class MonitorEntity(BaseModel):
     organizer_name: str
     organizer_email: str
     deployment_name: str
+    api_key: UUID
+    catalog_id: UUID | None = None
 
     def __init__(
         self,
@@ -72,6 +74,8 @@ class MonitorEntity(BaseModel):
         organizer_name: str,
         organizer_email: str,
         deployment_name: str,
+        api_key: UUID,
+        catalog_id: UUID | None = None,
     ) -> None:
         super().__init__(
             is_authorized=is_authorized,
@@ -85,6 +89,8 @@ class MonitorEntity(BaseModel):
             organizer_name=organizer_name,
             organizer_email=organizer_email,
             deployment_name=deployment_name,
+            api_key=api_key,
+            catalog_id=catalog_id,
         )
 
 
