@@ -1,10 +1,10 @@
 import { makeStyles } from "@fluentui/react-components";
-import { ImageParamsCard } from "../components/ImageParamsCard";
+import { ImageParamsCard } from "../../components/playground/ImageParamsCard";
 import { ImageGenerationOptions } from "@azure/openai";
 import { useState } from "react";
-import { useEventDataContext } from "../providers/EventDataProvider";
-import { ImageCard, ImageDetails } from "../components/ImageCard";
-import { useOpenAIClientContext } from "../providers/OpenAIProvider";
+import { useEventDataContext } from "../../providers/EventDataProvider";
+import { ImageCard, ImageDetails } from "../../components/playground/ImageCard";
+import { useOpenAIClientContext } from "../../providers/OpenAIProvider";
 
 const useStyles = makeStyles({
   container: {

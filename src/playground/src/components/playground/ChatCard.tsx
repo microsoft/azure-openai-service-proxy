@@ -11,7 +11,7 @@ import { useEffect, useRef, useState } from "react";
 import { Delete24Regular, SendRegular } from "@fluentui/react-icons";
 import { Message } from "./Message";
 import { Response } from "./Response";
-import { useEventDataContext } from "../providers/EventDataProvider";
+import { useEventDataContext } from "../../providers/EventDataProvider";
 import type { ChatMessage } from "@azure/openai";
 import { Card } from "./Card";
 

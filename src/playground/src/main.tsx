@@ -3,20 +3,17 @@ import { FluentProvider, webLightTheme } from "@fluentui/react-components";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
-import App from "./App";
+import PlaygroundLayout from "./pages/playground/_Layout";
 import "./index.css";
-import { Chat } from "./pages/Chat";
-import { Image } from "./pages/Image";
+import { Chat } from "./pages/playground/Chat";
+import { Image } from "./pages/playground/Image";
 import { Registration } from "./pages/event/Registration";
-import { EventDataProvider } from "./providers/EventDataProvider";
-import { OpenAIClientProvider } from "./providers/OpenAIProvider";
-import { PromptErrorProvider } from "./providers/PromptErrorProvider";
 import reportWebVitals from "./reportWebVitals";
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <App />,
+    element: <PlaygroundLayout />,
     children: [
       {
         path: "/",
@@ -40,15 +37,9 @@ const root = ReactDOM.createRoot(
 root.render(
   <React.StrictMode>
     <FluentProvider theme={webLightTheme}>
-      <EventDataProvider>
-        <OpenAIClientProvider>
-          <PromptErrorProvider>
-            <ClientPrincipalContextProvider>
-              <RouterProvider router={router} />
-            </ClientPrincipalContextProvider>
-          </PromptErrorProvider>
-        </OpenAIClientProvider>
-      </EventDataProvider>
+      <ClientPrincipalContextProvider>
+        <RouterProvider router={router} />
+      </ClientPrincipalContextProvider>
     </FluentProvider>
   </React.StrictMode>
 );

@@ -8,7 +8,7 @@ import {
   shorthands,
   useId,
 } from "@fluentui/react-components";
-import { useEventDataContext } from "../providers/EventDataProvider";
+import { useEventDataContext } from "../../providers/EventDataProvider";
 import { Card } from "./Card";
 import { Dispatch, useState } from "react";
 import { ImageGenerations, ImageLocation } from "@azure/openai";

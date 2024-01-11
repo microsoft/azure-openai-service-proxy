@@ -11,7 +11,7 @@ import {
 import {
   AuthStatus,
   useEventDataContext,
-} from "../providers/EventDataProvider";
+} from "../../providers/EventDataProvider";
 
 export const Unauthorised = () => {
   const { authStatus, setEventCode: setEventConnection } =
