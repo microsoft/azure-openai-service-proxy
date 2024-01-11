@@ -70,6 +70,33 @@ CREATE TYPE aoai.model_type AS ENUM (
 ALTER TYPE aoai.model_type OWNER TO admin;
 
 --
+-- Name: add_attendee_metric(uuid, uuid, uuid, integer); Type: FUNCTION; Schema: aoai; Owner: admin
+--
+
+CREATE FUNCTION aoai.add_attendee_metric(p_api_key uuid, p_event_id uuid, p_catalog_id uuid, p_daily_request_cap integer) RETURNS bigint
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+    estimated_count BIGINT;
+BEGIN
+    INSERT INTO aoai.metric(api_key, event_id, catalog_id)
+    VALUES (p_api_key, p_event_id, p_catalog_id);
+
+    SELECT COUNT(*) INTO estimated_count FROM aoai.metric WHERE api_key = p_api_key and date_stamp = CURRENT_DATE;
+
+    IF estimated_count > p_daily_request_cap THEN
+        UPDATE aoai.event_attendee SET daily_locked = true WHERE api_key = p_api_key;
+		INSERT INTO aoai.event_attendee_locked(api_key) VALUES (p_api_key);
+    END IF;
+
+    RETURN estimated_count;
+END;
+$$;
+
+
+ALTER FUNCTION aoai.add_attendee_metric(p_api_key uuid, p_event_id uuid, p_catalog_id uuid, p_daily_request_cap integer) OWNER TO admin;
+
+--
 -- Name: add_event(character varying, character varying, character varying, timestamp without time zone, timestamp without time zone, character varying, character varying, character varying, character varying, integer, integer, boolean); Type: FUNCTION; Schema: aoai; Owner: admin
 --
 
@@ -174,37 +201,10 @@ $$;
 ALTER FUNCTION aoai.add_event_attendee(p_user_id character varying, p_event_id character varying) OWNER TO admin;
 
 --
--- Name: add_metric(uuid, uuid, uuid, integer); Type: FUNCTION; Schema: aoai; Owner: admin
+-- Name: clear_daily_locked_attendee(); Type: FUNCTION; Schema: aoai; Owner: admin
 --
 
-CREATE FUNCTION aoai.add_metric(p_api_key uuid, p_event_id uuid, p_catalog_id uuid, p_daily_request_cap integer) RETURNS bigint
-    LANGUAGE plpgsql
-    AS $$
-DECLARE
-    estimated_count BIGINT;
-BEGIN
-    INSERT INTO aoai.metric(api_key, event_id, catalog_id)
-    VALUES (p_api_key, p_event_id, p_catalog_id);
-
-    SELECT COUNT(*) INTO estimated_count FROM aoai.metric WHERE api_key = p_api_key and date_stamp = CURRENT_DATE;
-
-    IF estimated_count > p_daily_request_cap THEN
-        UPDATE aoai.event_attendee SET daily_locked = true WHERE api_key = p_api_key;
-		INSERT INTO aoai.event_attendee_locked(api_key) VALUES (p_api_key);
-    END IF;
-
-    RETURN estimated_count;
-END;
-$$;
-
-
-ALTER FUNCTION aoai.add_metric(p_api_key uuid, p_event_id uuid, p_catalog_id uuid, p_daily_request_cap integer) OWNER TO admin;
-
---
--- Name: clear_daily_locked_attendees(); Type: FUNCTION; Schema: aoai; Owner: admin
---
-
-CREATE FUNCTION aoai.clear_daily_locked_attendees() RETURNS void
+CREATE FUNCTION aoai.clear_daily_locked_attendee() RETURNS void
     LANGUAGE plpgsql
     AS $$
 DECLARE
@@ -220,7 +220,7 @@ END;
 $$;
 
 
-ALTER FUNCTION aoai.clear_daily_locked_attendees() OWNER TO admin;
+ALTER FUNCTION aoai.clear_daily_locked_attendee() OWNER TO admin;
 
 --
 -- Name: get_attendee_authorized(character varying, uuid); Type: FUNCTION; Schema: aoai; Owner: admin
