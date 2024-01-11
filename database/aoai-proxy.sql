@@ -189,8 +189,8 @@ BEGIN
     IF v_api_key IS NULL THEN
 		v_api_key := aoai.uuid_generate_v4();
 
-		INSERT INTO aoai.event_attendee(user_id, event_id, active, total_requests, api_key)
-		VALUES (p_user_id, p_event_id, true, 0, v_api_key);
+		INSERT INTO aoai.event_attendee(user_id, event_id, active, api_key)
+		VALUES (p_user_id, p_event_id, true, v_api_key);
 	END IF;
 
     RETURN v_api_key;
