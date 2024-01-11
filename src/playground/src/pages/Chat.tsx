@@ -9,8 +9,8 @@ import type {
   GetChatCompletionsOptions,
 } from "@azure/openai";
 import { makeStyles } from "@fluentui/react-components";
-import { reducer } from "../reducers/Chat.reducers";
-import { INITIAL_STATE } from "../reducers/Chat.state";
+import { reducer } from "./Chat.reducers";
+import { INITIAL_STATE } from "./Chat.state";
 
 const useStyles = makeStyles({
   container: {
