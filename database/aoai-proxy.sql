@@ -73,7 +73,7 @@ ALTER TYPE aoai.model_type OWNER TO admin;
 -- Name: add_event(character varying, character varying, character varying, timestamp without time zone, timestamp without time zone, character varying, character varying, character varying, character varying, integer, integer, boolean); Type: FUNCTION; Schema: aoai; Owner: admin
 --
 
-CREATE FUNCTION aoai.add_event(p_owner_id character varying, p_event_code character varying, p_event_markdown character varying, p_start_utc timestamp without time zone, p_end_utc timestamp without time zone, p_organizer_name character varying, p_organizer_email character varying, p_event_url character varying, p_event_url_text character varying, p_max_token_cap integer, p_daily_request_cap integer, p_active boolean) RETURNS TABLE(event_id character varying, owner_id character varying(128), event_code character varying, event_markdown character varying, start_utc timestamp without time zone, end_utc timestamp without time zone, organizer_name character varying, organizer_email character varying, event_url character varying, event_url_text character varying, max_token_cap integer, daily_request_cap integer, active boolean)
+CREATE FUNCTION aoai.add_event(p_owner_id character varying, p_event_code character varying, p_event_markdown character varying, p_start_utc timestamp without time zone, p_end_utc timestamp without time zone, p_organizer_name character varying, p_organizer_email character varying, p_event_url character varying, p_event_url_text character varying, p_max_token_cap integer, p_daily_request_cap integer, p_active boolean) RETURNS TABLE(event_id character varying, owner_id character varying, event_code character varying, event_markdown character varying, start_utc timestamp without time zone, end_utc timestamp without time zone, organizer_name character varying, organizer_email character varying, event_url character varying, event_url_text character varying, max_token_cap integer, daily_request_cap integer, active boolean)
     LANGUAGE plpgsql
     AS $$
 DECLARE
@@ -174,6 +174,55 @@ $$;
 ALTER FUNCTION aoai.add_event_attendee(p_user_id character varying, p_event_id character varying) OWNER TO admin;
 
 --
+-- Name: aoai_add_metric(uuid, uuid, uuid, integer); Type: FUNCTION; Schema: aoai; Owner: admin
+--
+
+CREATE FUNCTION aoai.aoai_add_metric(p_api_key uuid, p_event_id uuid, p_catalog_id uuid, p_daily_request_cap integer) RETURNS bigint
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+    estimated_count BIGINT;
+BEGIN
+    INSERT INTO aoai.metric(api_key, event_id, catalog_id)
+    VALUES (p_api_key, p_event_id, p_catalog_id);
+
+    SELECT COUNT(*) INTO estimated_count FROM aoai.metric WHERE api_key = p_api_key and date_stamp = CURRENT_DATE;
+
+    IF estimated_count > p_daily_request_cap THEN
+        UPDATE aoai.event_attendee SET daily_locked = true WHERE api_key = p_api_key;
+		INSERT INTO aoai.event_attendee_locked(api_key) VALUES (p_api_key);
+    END IF;
+
+    RETURN estimated_count;
+END;
+$$;
+
+
+ALTER FUNCTION aoai.aoai_add_metric(p_api_key uuid, p_event_id uuid, p_catalog_id uuid, p_daily_request_cap integer) OWNER TO admin;
+
+--
+-- Name: aoai_update_clear_daily_locked(); Type: FUNCTION; Schema: aoai; Owner: admin
+--
+
+CREATE FUNCTION aoai.aoai_update_clear_daily_locked() RETURNS void
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+    updated_keys text[];
+BEGIN
+    UPDATE aoai.event_attendee
+    SET daily_locked = false
+    WHERE api_key IN (SELECT api_key FROM aoai.event_attendee_locked)
+    RETURNING api_key INTO updated_keys;
+
+    DELETE FROM aoai.event_attendee_locked WHERE api_key = ANY(updated_keys);
+END;
+$$;
+
+
+ALTER FUNCTION aoai.aoai_update_clear_daily_locked() OWNER TO admin;
+
+--
 -- Name: get_attendee_authorized(character varying, uuid); Type: FUNCTION; Schema: aoai; Owner: admin
 --
 
@@ -272,10 +321,6 @@ $$;
 
 ALTER FUNCTION aoai.get_models_by_event(p_event_id character varying) OWNER TO admin;
 
---
--- Name: get_owner_id(character varying); Type: FUNCTION; Schema: aoai; Owner: admin
---
-
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
@@ -317,6 +362,17 @@ CREATE TABLE aoai.event_attendee (
 
 
 ALTER TABLE aoai.event_attendee OWNER TO admin;
+
+--
+-- Name: event_attendee_locked; Type: TABLE; Schema: aoai; Owner: admin
+--
+
+CREATE TABLE aoai.event_attendee_locked (
+    api_key uuid NOT NULL
+);
+
+
+ALTER TABLE aoai.event_attendee_locked OWNER TO admin;
 
 --
 -- Name: event_catalog_map; Type: TABLE; Schema: aoai; Owner: admin
