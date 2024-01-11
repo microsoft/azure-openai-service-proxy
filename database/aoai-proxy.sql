@@ -174,10 +174,10 @@ $$;
 ALTER FUNCTION aoai.add_event_attendee(p_user_id character varying, p_event_id character varying) OWNER TO admin;
 
 --
--- Name: aoai_add_metric(uuid, uuid, uuid, integer); Type: FUNCTION; Schema: aoai; Owner: admin
+-- Name: add_metric(uuid, uuid, uuid, integer); Type: FUNCTION; Schema: aoai; Owner: admin
 --
 
-CREATE FUNCTION aoai.aoai_add_metric(p_api_key uuid, p_event_id uuid, p_catalog_id uuid, p_daily_request_cap integer) RETURNS bigint
+CREATE FUNCTION aoai.add_metric(p_api_key uuid, p_event_id uuid, p_catalog_id uuid, p_daily_request_cap integer) RETURNS bigint
     LANGUAGE plpgsql
     AS $$
 DECLARE
@@ -198,13 +198,13 @@ END;
 $$;
 
 
-ALTER FUNCTION aoai.aoai_add_metric(p_api_key uuid, p_event_id uuid, p_catalog_id uuid, p_daily_request_cap integer) OWNER TO admin;
+ALTER FUNCTION aoai.add_metric(p_api_key uuid, p_event_id uuid, p_catalog_id uuid, p_daily_request_cap integer) OWNER TO admin;
 
 --
--- Name: aoai_update_clear_daily_locked(); Type: FUNCTION; Schema: aoai; Owner: admin
+-- Name: clear_daily_locked_attendees(); Type: FUNCTION; Schema: aoai; Owner: admin
 --
 
-CREATE FUNCTION aoai.aoai_update_clear_daily_locked() RETURNS void
+CREATE FUNCTION aoai.clear_daily_locked_attendees() RETURNS void
     LANGUAGE plpgsql
     AS $$
 DECLARE
@@ -220,7 +220,7 @@ END;
 $$;
 
 
-ALTER FUNCTION aoai.aoai_update_clear_daily_locked() OWNER TO admin;
+ALTER FUNCTION aoai.clear_daily_locked_attendees() OWNER TO admin;
 
 --
 -- Name: get_attendee_authorized(character varying, uuid); Type: FUNCTION; Schema: aoai; Owner: admin
