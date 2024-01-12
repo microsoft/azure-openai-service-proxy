@@ -1,13 +1,13 @@
-import { ClientPrincipalContextProvider } from "@aaronpowell/react-static-web-apps-auth";
 import { FluentProvider, webLightTheme } from "@fluentui/react-components";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
-import PlaygroundLayout from "./pages/playground/_Layout";
 import "./index.css";
+import { Registration } from "./pages/event/Registration";
+import EventLayout from "./pages/event/_Layout";
 import { Chat } from "./pages/playground/Chat";
 import { Image } from "./pages/playground/Image";
-import { Registration } from "./pages/event/Registration";
+import PlaygroundLayout from "./pages/playground/_Layout";
 import reportWebVitals from "./reportWebVitals";
 
 const router = createBrowserRouter([
@@ -23,8 +23,14 @@ const router = createBrowserRouter([
         path: "/images",
         element: <Image />,
       },
+    ],
+  },
+  {
+    path: "/event",
+    element: <EventLayout />,
+    children: [
       {
-        path: "/event/:id",
+        path: ":id",
         element: <Registration />,
       },
     ],
@@ -37,9 +43,7 @@ const root = ReactDOM.createRoot(
 root.render(
   <React.StrictMode>
     <FluentProvider theme={webLightTheme}>
-      <ClientPrincipalContextProvider>
-        <RouterProvider router={router} />
-      </ClientPrincipalContextProvider>
+      <RouterProvider router={router} />
     </FluentProvider>
   </React.StrictMode>
 );
