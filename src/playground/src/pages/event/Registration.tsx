@@ -6,7 +6,7 @@ import {
   StaticWebAuthLogins,
   useClientPrincipal,
 } from "@aaronpowell/react-static-web-apps-auth";
-import { Form, useLoaderData, useSubmit } from "react-router-dom";
+import { Form, useLoaderData } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import { Button } from "@fluentui/react-components";
 
