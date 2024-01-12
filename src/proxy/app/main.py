@@ -14,6 +14,7 @@ from .config import Config
 # pylint: disable=E0402
 from .db_manager import DBManager
 from .monitor import Monitor
+from .routes.attendee import AttendeeApi as attendee_router
 from .routes.chat_completions import ChatCompletions as chat_completions_router
 from .routes.completions import Completions as completions_router
 from .routes.embeddings import Embeddings as embeddings_router
@@ -101,6 +102,8 @@ images_route = images_router(
 
 event_registration_route = event_registration_router(db_manager=db_manager)
 
+attendee_route = attendee_router(db_manager=db_manager)
+
 app.include_router(completion_router.include_router(), prefix="/api/v1", tags=["completions"])
 app.include_router(chat_route.include_router(), prefix="/api/v1", tags=["chat-completions"])
 app.include_router(embeddings_route.include_router(), prefix="/api/v1", tags=["embeddings"])
@@ -112,6 +115,7 @@ app.include_router(images_route.include_router(), prefix="/api/v1", tags=["image
 app.include_router(
     event_registration_route.include_router(), prefix="/api/v1", tags=["event-registration"]
 )
+app.include_router(attendee_route.include_router(), prefix="/api/v1", tags=["attendee"])
 
 
 @app.exception_handler(ResponseValidationError)
