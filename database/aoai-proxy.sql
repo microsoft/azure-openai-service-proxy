@@ -223,10 +223,10 @@ $$;
 ALTER FUNCTION aoai.clear_daily_locked_attendee() OWNER TO admin;
 
 --
--- Name: get_attendee_authorized(character varying, uuid); Type: FUNCTION; Schema: aoai; Owner: admin
+-- Name: get_attendee_authorized(uuid); Type: FUNCTION; Schema: aoai; Owner: admin
 --
 
-CREATE FUNCTION aoai.get_attendee_authorized(p_event_code character varying, p_api_key uuid) RETURNS TABLE(user_id character varying, event_id character varying, event_code character varying, organizer_name character varying, organizer_email character varying, event_url character varying, event_url_text character varying, max_token_cap integer, daily_request_cap integer)
+CREATE FUNCTION aoai.get_attendee_authorized(p_api_key uuid) RETURNS TABLE(user_id character varying, event_id character varying, event_code character varying, organizer_name character varying, organizer_email character varying, event_url character varying, event_url_text character varying, max_token_cap integer, daily_request_cap integer)
     LANGUAGE plpgsql
     AS $$
 DECLARE
@@ -253,14 +253,40 @@ BEGIN
         EA.api_key = p_api_key AND
         EA.active = true AND
         EA.daily_locked = false AND
-        E.event_code = p_event_code AND
         E.active = true AND
         current_utc BETWEEN E.start_utc AND E.end_utc;
 END;
 $$;
 
 
-ALTER FUNCTION aoai.get_attendee_authorized(p_event_code character varying, p_api_key uuid) OWNER TO admin;
+ALTER FUNCTION aoai.get_attendee_authorized(p_api_key uuid) OWNER TO admin;
+
+--
+-- Name: get_event_registration_by_event_id(character varying); Type: FUNCTION; Schema: aoai; Owner: admin
+--
+
+CREATE FUNCTION aoai.get_event_registration_by_event_id(p_event_id character varying) RETURNS TABLE(event_id character varying, event_code character varying, event_url character varying, event_url_text character varying, organizer_name character varying, organizer_email character varying, event_markdown character varying, start_utc timestamp without time zone, end_utc timestamp without time zone)
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+    RETURN QUERY
+    SELECT
+		e.event_id,
+        e.event_code,
+        e.event_url,
+        e.event_url_text,
+        e.organizer_name,
+        e.organizer_email,
+        e.event_markdown,
+        e.start_utc,
+        e.end_utc
+    FROM aoai.event as e
+    WHERE e.event_id = p_event_id;
+END;
+$$;
+
+
+ALTER FUNCTION aoai.get_event_registration_by_event_id(p_event_id character varying) OWNER TO admin;
 
 --
 -- Name: get_event_registration_by_event_id(character varying); Type: FUNCTION; Schema: aoai; Owner: admin

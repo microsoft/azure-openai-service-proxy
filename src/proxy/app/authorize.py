@@ -1,7 +1,6 @@
 """ Authorize a user to access to an event based specific time bound event."""
 
 import logging
-import string
 from uuid import UUID
 
 import asyncpg
@@ -29,17 +28,13 @@ class Authorize:
         self.monitor = Monitor(connection_string=connection_string)
         self.logging = logging.getLogger(__name__)
 
-    async def __is_user_authorized(
-        self, event_code: str, api_key: UUID, deployment_name: str
-    ) -> AuthorizeResponse:
+    async def __is_user_authorized(self, api_key: UUID, deployment_name: str) -> AuthorizeResponse:
         """Check if user is authorized"""
 
         try:
             conn = await self.db_manager.get_connection()
 
-            result = await conn.fetchrow(
-                "SELECT * from aoai.get_attendee_authorized($1, $2)", event_code, api_key
-            )
+            result = await conn.fetchrow("SELECT * from aoai.get_attendee_authorized($1)", api_key)
 
             if result is None or len(result) == 0:
                 raise HTTPException(
@@ -75,41 +70,17 @@ class Authorize:
     async def __authorize(self, *, access_token: str, deployment_name: str) -> AuthorizeResponse:
         """Authorizes a user to access a specific time bound event."""
 
-        id_parts = access_token.split("/")
-
-        if len(id_parts) != 2:
-            raise HTTPException(
-                status_code=401,
-                detail="Authentication failed.",
-            )
-
-        event_code = id_parts[0].strip()
-        api_key = id_parts[1].strip()
-
-        if not 4 <= len(event_code) <= MAX_AUTH_TOKEN_LENGTH:
-            raise HTTPException(
-                status_code=401,
-                detail="Authentication failed.",
-            )
-
         # is the user_id a valid guid
         try:
-            api_key = UUID(api_key)
+            api_key = UUID(access_token)
         except ValueError as exc:
             raise HTTPException(
                 status_code=401,
                 detail="Authentication failed.",
             ) from exc
 
-        # check event code is only printable characters
-        if not all(c in string.printable for c in event_code):
-            raise HTTPException(
-                status_code=401,
-                detail="Authentication failed.",
-            )
-
         authorize_response = await self.__is_user_authorized(
-            event_code=event_code, api_key=api_key, deployment_name=deployment_name
+            api_key=api_key, deployment_name=deployment_name
         )
 
         return authorize_response
