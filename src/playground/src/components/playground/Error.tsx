@@ -8,7 +8,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@fluentui/react-components";
-import { usePromptErrorContext } from "../providers/PromptErrorProvider";
+import { usePromptErrorContext } from "../../providers/PromptErrorProvider";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeExternalLinks from "rehype-external-links";

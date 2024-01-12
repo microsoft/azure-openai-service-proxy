@@ -3,7 +3,7 @@ import { Card } from "./Card";
 import { DividerBlock } from "./DividerBlock";
 import { ParamInput } from "./ParamInput";
 import { ImageGenerationOptions } from "@azure/openai";
-import { useEventDataContext } from "../providers/EventDataProvider";
+import { useEventDataContext } from "../../providers/EventDataProvider";
 
 type ImageParamsCardProps = {
   updateSettings: (

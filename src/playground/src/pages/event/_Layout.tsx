@@ -1,8 +1,6 @@
-import { Unauthorised } from "./components/Unauthorised";
-import { Error } from "./components/Error";
 import { Outlet } from "react-router-dom";
-import { Header } from "./components/Headers";
 import { makeStyles } from "@fluentui/react-components";
+import { ClientPrincipalContextProvider } from "@aaronpowell/react-static-web-apps-auth";
 
 const useStyles = makeStyles({
   container: {
@@ -17,19 +15,17 @@ const useStyles = makeStyles({
   },
 });
 
-function App() {
+function Layout() {
   const styles = useStyles();
 
   return (
-    <div className={styles.container}>
-      <nav>
-        <Header />
-      </nav>
-      <Outlet />
-      <Unauthorised />
-      <Error />
-    </div>
+    <ClientPrincipalContextProvider>
+      <div className={styles.container}>
+        <nav></nav>
+        <Outlet />
+      </div>
+    </ClientPrincipalContextProvider>
   );
 }
 
-export default App;
+export default Layout;

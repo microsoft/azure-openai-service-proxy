@@ -1,22 +1,19 @@
-import { ClientPrincipalContextProvider } from "@aaronpowell/react-static-web-apps-auth";
 import { FluentProvider, webLightTheme } from "@fluentui/react-components";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
-import App from "./App";
 import "./index.css";
-import { Chat } from "./pages/Chat";
-import { Image } from "./pages/Image";
 import { Registration } from "./pages/event/Registration";
-import { EventDataProvider } from "./providers/EventDataProvider";
-import { OpenAIClientProvider } from "./providers/OpenAIProvider";
-import { PromptErrorProvider } from "./providers/PromptErrorProvider";
+import EventLayout from "./pages/event/_Layout";
+import { Chat } from "./pages/playground/Chat";
+import { Image } from "./pages/playground/Image";
+import PlaygroundLayout from "./pages/playground/_Layout";
 import reportWebVitals from "./reportWebVitals";
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <App />,
+    element: <PlaygroundLayout />,
     children: [
       {
         path: "/",
@@ -26,8 +23,14 @@ const router = createBrowserRouter([
         path: "/images",
         element: <Image />,
       },
+    ],
+  },
+  {
+    path: "/event",
+    element: <EventLayout />,
+    children: [
       {
-        path: "/event/:id",
+        path: ":id",
         element: <Registration />,
       },
     ],
@@ -40,15 +43,7 @@ const root = ReactDOM.createRoot(
 root.render(
   <React.StrictMode>
     <FluentProvider theme={webLightTheme}>
-      <EventDataProvider>
-        <OpenAIClientProvider>
-          <PromptErrorProvider>
-            <ClientPrincipalContextProvider>
-              <RouterProvider router={router} />
-            </ClientPrincipalContextProvider>
-          </PromptErrorProvider>
-        </OpenAIClientProvider>
-      </EventDataProvider>
+      <RouterProvider router={router} />
     </FluentProvider>
   </React.StrictMode>
 );

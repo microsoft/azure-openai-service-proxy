@@ -1,8 +1,8 @@
 import { Label, Select } from "@fluentui/react-components";
 import { ParamInput } from "./ParamInput";
 import { useCallback } from "react";
-import { UsageData } from "../interfaces/UsageData";
-import { useEventDataContext } from "../providers/EventDataProvider";
+import { UsageData } from "../../interfaces/UsageData";
+import { useEventDataContext } from "../../providers/EventDataProvider";
 import { DividerBlock } from "./DividerBlock";
 import type { GetChatCompletionsOptions } from "@azure/openai";
 import { Card } from "./Card";

@@ -1,5 +1,5 @@
 import { ChatMessage, GetChatCompletionsOptions } from "@azure/openai";
-import { UsageData } from "../interfaces/UsageData";
+import { UsageData } from "../../interfaces/UsageData";
 
 const defaultSysPrompt: ChatMessage = {
   role: "system",

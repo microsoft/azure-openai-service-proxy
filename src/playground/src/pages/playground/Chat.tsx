@@ -1,8 +1,8 @@
 import { useReducer } from "react";
-import { ChatCard } from "../components/ChatCard";
-import { SystemCard } from "../components/SystemCard";
-import { ChatParamsCard } from "../components/ChatParamsCard";
-import { useOpenAIClientContext } from "../providers/OpenAIProvider";
+import { ChatCard } from "../../components/playground/ChatCard";
+import { SystemCard } from "../../components/playground/SystemCard";
+import { ChatParamsCard } from "../../components/playground/ChatParamsCard";
+import { useOpenAIClientContext } from "../../providers/OpenAIProvider";
 import type {
   ChatMessage,
   FunctionDefinition,
