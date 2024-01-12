@@ -9,7 +9,7 @@ export const action: ActionFunction = async ({ params }) => {
   }
 
   const response = await fetch(
-    `/api/${API_VERSION}/user/event/${id}/register`,
+    `/api/${API_VERSION}/attendee/event/${id}/register`,
     {
       method: "POST",
     }
@@ -19,5 +19,5 @@ export const action: ActionFunction = async ({ params }) => {
     throw new Response("Failed to register", { status: 500 });
   }
 
-  return redirect(`/user/event/${id}`);
+  return redirect(`/attendee/event/${id}`);
 };
