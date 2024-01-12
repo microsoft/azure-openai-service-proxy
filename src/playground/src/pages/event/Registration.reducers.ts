@@ -1,12 +1,23 @@
 import { RegistrationState } from "./Registration.state";
 
-export type RegistrationAction = {
-  type: "PROFILE_LOADED";
-  payload: {
-    loaded: RegistrationState["profileLoaded"];
-    profile: RegistrationState["profile"];
-  };
-};
+export type RegistrationAction =
+  | {
+      type: "PROFILE_LOADED";
+      payload: {
+        loaded: RegistrationState["profileLoaded"];
+        profile: RegistrationState["profile"];
+      };
+    }
+  | {
+      type: "REGISTERING";
+    }
+  | {
+      type: "REGISTERED";
+    }
+  | { type: "ALREADY_REGISTERED" }
+  | {
+      type: "REGISTERING_FAILED";
+    };
 
 export const reducer = (
   state: RegistrationState,

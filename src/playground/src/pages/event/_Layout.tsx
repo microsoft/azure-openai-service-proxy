@@ -15,7 +15,7 @@ const useStyles = makeStyles({
   },
 });
 
-function Layout() {
+export function Layout() {
   const styles = useStyles();
 
   return (
@@ -27,5 +27,3 @@ function Layout() {
     </ClientPrincipalContextProvider>
   );
 }
-
-export default Layout;

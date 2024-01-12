@@ -3,8 +3,12 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import "./index.css";
-import { Registration } from "./pages/event/Registration";
-import EventLayout from "./pages/event/_Layout";
+import {
+  Registration,
+  loader as registrationLoader,
+  Layout as EventLayout,
+  action as registrationAction,
+} from "./pages/event";
 import { Chat } from "./pages/playground/Chat";
 import { Image } from "./pages/playground/Image";
 import PlaygroundLayout from "./pages/playground/_Layout";
@@ -32,6 +36,8 @@ const router = createBrowserRouter([
       {
         path: ":id",
         element: <Registration />,
+        loader: registrationLoader,
+        action: registrationAction,
       },
     ],
   },
