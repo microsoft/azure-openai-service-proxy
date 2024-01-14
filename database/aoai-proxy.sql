@@ -597,6 +597,22 @@ ALTER TABLE ONLY aoai.metric
 
 
 --
+-- Name: metric fk_metric_owner_catalog; Type: FK CONSTRAINT; Schema: aoai; Owner: admin
+--
+
+ALTER TABLE ONLY aoai.metric
+    ADD CONSTRAINT fk_metric_owner_catalog FOREIGN KEY (catalog_id) REFERENCES aoai.owner_catalog(catalog_id);
+
+
+--
+-- Name: metric_count fk_metriccount_eventattendee; Type: FK CONSTRAINT; Schema: aoai; Owner: admin
+--
+
+ALTER TABLE ONLY aoai.metric_count
+    ADD CONSTRAINT fk_metriccount_eventattendee FOREIGN KEY (api_key) REFERENCES aoai.event_attendee(api_key) ON DELETE CASCADE;
+
+
+--
 -- Name: owner_event_map fk_ownereventmap_event; Type: FK CONSTRAINT; Schema: aoai; Owner: admin
 --
 
