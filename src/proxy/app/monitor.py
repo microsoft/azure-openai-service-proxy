@@ -96,10 +96,6 @@ class Monitor:
 
         except asyncpg.exceptions.PostgresError as error:
             self.logging.error("Postgres error: %s", str(error))
-            raise HTTPException(
-                status_code=503,
-                detail="Error writing to monitor log.",
-            ) from error
 
         except Exception as exception:
             logging.error("General exception in event_authorized: %s", str(exception))
