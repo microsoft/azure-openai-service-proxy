@@ -77,19 +77,19 @@ CREATE PROCEDURE aoai.add_attendee_metric(IN p_api_key uuid, IN p_event_id chara
     LANGUAGE plpgsql
     AS $$
 BEGIN
---     PERFORM request_count FROM aoai.metric_count
+--     PERFORM request_count FROM aoai.event_attendee_request
 --     WHERE api_key = p_api_key AND date_stamp = CURRENT_DATE;
 
     IF EXISTS
-		(SELECT 1 FROM aoai.metric_count WHERE api_key = p_api_key AND date_stamp = CURRENT_DATE)
+		(SELECT 1 FROM aoai.event_attendee_request WHERE api_key = p_api_key AND date_stamp = CURRENT_DATE)
 	THEN
         -- If a record exists, increment the count
-        UPDATE aoai.metric_count
+        UPDATE aoai.event_attendee_request
         SET request_count = request_count + 1
         WHERE api_key = p_api_key AND date_stamp = CURRENT_DATE;
     ELSE
         -- If no record exists, insert a new one with count set to 1
-        INSERT INTO aoai.metric_count(api_key, date_stamp, request_count)
+        INSERT INTO aoai.event_attendee_request(api_key, date_stamp, request_count)
         VALUES (p_api_key, CURRENT_DATE, 1);
     END IF;
 
@@ -241,7 +241,7 @@ BEGIN
     current_utc := current_timestamp AT TIME ZONE 'UTC';
 
 -- 	get the current number of requests made for current date by api_key
-	SELECT request_count INTO v_request_count FROM aoai.metric_count
+	SELECT request_count INTO v_request_count FROM aoai.event_attendee_request
     WHERE api_key = p_api_key AND date_stamp = CURRENT_DATE;
 
 	IF NOT FOUND THEN
@@ -404,6 +404,19 @@ CREATE TABLE aoai.event_attendee (
 ALTER TABLE aoai.event_attendee OWNER TO admin;
 
 --
+-- Name: event_attendee_request; Type: TABLE; Schema: aoai; Owner: admin
+--
+
+CREATE TABLE aoai.event_attendee_request (
+    api_key uuid NOT NULL,
+    date_stamp date NOT NULL,
+    request_count integer NOT NULL
+);
+
+
+ALTER TABLE aoai.event_attendee_request OWNER TO admin;
+
+--
 -- Name: event_catalog_map; Type: TABLE; Schema: aoai; Owner: admin
 --
 
@@ -429,19 +442,6 @@ CREATE TABLE aoai.metric (
 
 
 ALTER TABLE aoai.metric OWNER TO admin;
-
---
--- Name: metric_count; Type: TABLE; Schema: aoai; Owner: admin
---
-
-CREATE TABLE aoai.metric_count (
-    api_key uuid NOT NULL,
-    date_stamp date NOT NULL,
-    request_count integer NOT NULL
-);
-
-
-ALTER TABLE aoai.metric_count OWNER TO admin;
 
 --
 -- Name: owner; Type: TABLE; Schema: aoai; Owner: admin
@@ -503,19 +503,19 @@ ALTER TABLE ONLY aoai.event_attendee
 
 
 --
+-- Name: event_attendee_request eventattendeerequest_pkey; Type: CONSTRAINT; Schema: aoai; Owner: admin
+--
+
+ALTER TABLE ONLY aoai.event_attendee_request
+    ADD CONSTRAINT eventattendeerequest_pkey PRIMARY KEY (api_key, date_stamp);
+
+
+--
 -- Name: event_catalog_map eventcatalogmap_pkey; Type: CONSTRAINT; Schema: aoai; Owner: admin
 --
 
 ALTER TABLE ONLY aoai.event_catalog_map
     ADD CONSTRAINT eventcatalogmap_pkey PRIMARY KEY (event_id, catalog_id);
-
-
---
--- Name: metric_count metric_count_pkey; Type: CONSTRAINT; Schema: aoai; Owner: admin
---
-
-ALTER TABLE ONLY aoai.metric_count
-    ADD CONSTRAINT metric_count_pkey PRIMARY KEY (api_key, date_stamp);
 
 
 --
@@ -565,6 +565,14 @@ ALTER TABLE ONLY aoai.event_attendee
 
 
 --
+-- Name: event_attendee_request fk_eventattendeerequest_eventattendee; Type: FK CONSTRAINT; Schema: aoai; Owner: admin
+--
+
+ALTER TABLE ONLY aoai.event_attendee_request
+    ADD CONSTRAINT fk_eventattendeerequest_eventattendee FOREIGN KEY (api_key) REFERENCES aoai.event_attendee(api_key) ON DELETE CASCADE;
+
+
+--
 -- Name: event_catalog_map fk_eventcatalogmap_event; Type: FK CONSTRAINT; Schema: aoai; Owner: admin
 --
 
@@ -602,14 +610,6 @@ ALTER TABLE ONLY aoai.metric
 
 ALTER TABLE ONLY aoai.metric
     ADD CONSTRAINT fk_metric_owner_catalog FOREIGN KEY (catalog_id) REFERENCES aoai.owner_catalog(catalog_id);
-
-
---
--- Name: metric_count fk_metriccount_eventattendee; Type: FK CONSTRAINT; Schema: aoai; Owner: admin
---
-
-ALTER TABLE ONLY aoai.metric_count
-    ADD CONSTRAINT fk_metriccount_eventattendee FOREIGN KEY (api_key) REFERENCES aoai.event_attendee(api_key) ON DELETE CASCADE;
 
 
 --

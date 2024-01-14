@@ -64,7 +64,7 @@ class Authorize:
                 detail="Authentication failed. General exception.",
             ) from exception
 
-    @lru_cache_with_expiry(maxsize=128, ttl=300)
+    @lru_cache_with_expiry(maxsize=128, ttl=180)
     async def __authorize(self, *, access_token: str, deployment_name: str) -> AuthorizeResponse:
         """Authorizes a user to access a specific time bound event."""
 
