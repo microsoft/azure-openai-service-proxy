@@ -8,7 +8,7 @@ from fastapi import HTTPException
 
 # pylint: disable=E0402
 from .lru_cache_with_expiry import lru_cache_with_expiry
-from .monitor import Monitor, MonitorEntity
+from .monitor import MonitorEntity
 
 MAX_AUTH_TOKEN_LENGTH = 40
 
@@ -22,10 +22,8 @@ class AuthorizeResponse(MonitorEntity):
 class Authorize:
     """Authorizes a user to access a specific time bound event."""
 
-    def __init__(self, *, connection_string: str, db_manager) -> None:
-        self.connection_string = connection_string
+    def __init__(self, *, db_manager) -> None:
         self.db_manager = db_manager
-        self.monitor = Monitor(connection_string=connection_string)
         self.logging = logging.getLogger(__name__)
 
     async def __is_user_authorized(self, api_key: UUID, deployment_name: str) -> AuthorizeResponse:

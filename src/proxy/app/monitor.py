@@ -1,47 +1,16 @@
 """ usage logging """
 
-import base64
 import json
 import logging
 from uuid import UUID
 
-from azure.core.exceptions import AzureError
-from azure.storage.queue import QueueServiceClient
+import asyncpg
 from fastapi import HTTPException
 from pydantic import BaseModel
 
+from .db_manager import DBManager
+
 logging.basicConfig(level=logging.WARNING)
-
-USAGE_LOGGING_NAME = "monitor"
-
-
-class StreamingUsageEstimator:
-    """Usage estimator for chat streaming API - note, no visibility of BYOD tokens"""
-
-    def __init__(self):
-        self.count = 0
-
-    def reset(self):
-        """reset"""
-
-        self.count = 0
-
-    def count_tokens(self, chunk: bytes):
-        """increment"""
-
-        chunk = chunk.decode("ascii")
-        data_segments = chunk.split("data: ")
-
-        for data in data_segments:
-            if data:
-                if "[DONE]\n\n" == data:
-                    self.count -= 1
-                    break
-
-                if '"finish_reason":null' in data:
-                    self.count += 1
-
-        print(f"Usage count: {self.count}")
 
 
 class MonitorEntity(BaseModel):
@@ -108,25 +77,33 @@ class UUIDEncoder(json.JSONEncoder):
 class Monitor:
     """tracking"""
 
-    def __init__(self, connection_string: str):
+    def __init__(self, db_manager: DBManager):
         self.logging = logging.getLogger(__name__)
-        self.queue_service_client = QueueServiceClient.from_connection_string(connection_string)
-        self.queue_client = self.queue_service_client.get_queue_client(USAGE_LOGGING_NAME)
+        self.db_manager = db_manager
 
-    def log_api_call(self, *, entity: MonitorEntity):
+    async def log_api_call(self, *, entity: MonitorEntity):
         """write event to Azure Storage account Queue called USAGE_LOGGING_NAME"""
 
-        message = json.dumps(entity.__dict__, cls=UUIDEncoder)
-        # base64 encode the message to a string
-        message = base64.b64encode(message.encode("ascii")).decode("ascii")
+        conn = await self.db_manager.get_connection()
+
         try:
-            self.queue_client.send_message(message)
-        except AzureError as azure_error:
-            logging.error(" AzureError: %s", str(azure_error))
+            await conn.execute(
+                "CALL aoai.add_attendee_metric($1, $2, $3)",
+                entity.api_key,
+                entity.event_id,
+                entity.catalog_id,
+            )
+
+        except asyncpg.exceptions.PostgresError as error:
+            self.logging.error("Postgres error: %s", str(error))
+            raise HTTPException(
+                status_code=503,
+                detail="Error writing to monitor log.",
+            ) from error
 
         except Exception as exception:
             logging.error("General exception in event_authorized: %s", str(exception))
             raise HTTPException(
                 status_code=401,
-                detail="Authentication failed. General exception.",
+                detail="Monitor update failed. General exception.",
             ) from exception

@@ -7,9 +7,6 @@ httpx>=0.25.0,<0.26.0
 pydantic>=2.4.2,<2.5.0
 async-lru>=2.0.4, <2.1.0
 pytz
-azure-core>=1.29.4, <2.0.0
-azure-data-tables>=12.4.4, <13.0.0
-azure-storage-queue>=12.8.0, <13.0.0
 Black
 ruff
 cachetools>=5.3.2, <5.4.0

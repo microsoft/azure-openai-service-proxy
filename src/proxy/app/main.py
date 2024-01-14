@@ -31,15 +31,6 @@ DEFAULT_IMAGES_GENERATIONS_API_VERSION = "2023-06-01-preview"
 OPENAI_IMAGES_API_VERSION = "2023-12-01-preview"
 
 try:
-    storage_connection_string = os.environ["AZURE_STORAGE_CONNECTION_STRING"]
-except KeyError as key_error:
-    print("Please set the environment variable AZURE_STORAGE_CONNECTION_STRING")
-    raise HTTPException(
-        status_code=500,
-        detail="Please set the environment variable AZURE_STORAGE_CONNECTION_STRING",
-    ) from key_error
-
-try:
     sql_connection_string = os.environ["POSTGRES_CONNECTION_STRING"]
 except KeyError as key_error:
     print("Please set the environment variable POSTGRES_CONNECTION_STRING")
@@ -57,9 +48,10 @@ app = FastAPI(
     # redoc_url=None,  # Disable redoc
 )
 
-monitor = Monitor(connection_string=storage_connection_string)
+
 db_manager = DBManager(connection_string=sql_connection_string)
-authorize = Authorize(connection_string=storage_connection_string, db_manager=db_manager)
+monitor = Monitor(db_manager=db_manager)
+authorize = Authorize(db_manager=db_manager)
 config = Config(db_manager=db_manager, monitor=monitor)
 
 
