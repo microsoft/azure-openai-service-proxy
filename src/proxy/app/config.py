@@ -46,7 +46,7 @@ class Config:
         self.monitor = monitor
         self.logging = logging.getLogger(__name__)
 
-    @lru_cache_with_expiry(maxsize=128, ttl=300)
+    @lru_cache_with_expiry(maxsize=128, ttl=180)
     async def get_event_catalog(
         self, event_id: str, deployment_name: str | None
     ) -> list[Deployment]:
@@ -125,7 +125,7 @@ class Config:
 
         authorize_response.catalog_id = deployments[index].catalog_id
 
-        self.monitor.log_api_call(entity=authorize_response)
+        await self.monitor.log_api_call(entity=authorize_response)
 
         return deployments[index]
 

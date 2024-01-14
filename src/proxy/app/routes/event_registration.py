@@ -1,7 +1,7 @@
 """ event_info route """
 
-import datetime
 import logging
+from datetime import datetime
 
 import asyncpg
 from fastapi import APIRouter, HTTPException
@@ -12,11 +12,6 @@ logging.basicConfig(level=logging.INFO)
 
 class EventRegistrationResponse(BaseModel):
     """Event Info Response"""
-
-    class Config:
-        """Config to allow for datetime serialisation"""
-
-        arbitrary_types_allowed = True
 
     event_id: str
     event_code: str

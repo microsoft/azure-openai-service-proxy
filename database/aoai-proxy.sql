@@ -70,31 +70,36 @@ CREATE TYPE aoai.model_type AS ENUM (
 ALTER TYPE aoai.model_type OWNER TO admin;
 
 --
--- Name: add_attendee_metric(uuid, uuid, uuid, integer); Type: FUNCTION; Schema: aoai; Owner: admin
+-- Name: add_attendee_metric(uuid, character varying, uuid); Type: PROCEDURE; Schema: aoai; Owner: admin
 --
 
-CREATE FUNCTION aoai.add_attendee_metric(p_api_key uuid, p_event_id uuid, p_catalog_id uuid, p_daily_request_cap integer) RETURNS bigint
+CREATE PROCEDURE aoai.add_attendee_metric(IN p_api_key uuid, IN p_event_id character varying, IN p_catalog_id uuid)
     LANGUAGE plpgsql
     AS $$
-DECLARE
-    estimated_count BIGINT;
 BEGIN
-    INSERT INTO aoai.metric(api_key, event_id, catalog_id)
-    VALUES (p_api_key, p_event_id, p_catalog_id);
+--     PERFORM request_count FROM aoai.event_attendee_request
+--     WHERE api_key = p_api_key AND date_stamp = CURRENT_DATE;
 
-    SELECT COUNT(*) INTO estimated_count FROM aoai.metric WHERE api_key = p_api_key and date_stamp = CURRENT_DATE;
-
-    IF estimated_count > p_daily_request_cap THEN
-        UPDATE aoai.event_attendee SET daily_locked = true WHERE api_key = p_api_key;
-		INSERT INTO aoai.event_attendee_locked(api_key) VALUES (p_api_key);
+    IF EXISTS
+		(SELECT 1 FROM aoai.event_attendee_request WHERE api_key = p_api_key AND date_stamp = CURRENT_DATE)
+	THEN
+        -- If a record exists, increment the count
+        UPDATE aoai.event_attendee_request
+        SET request_count = request_count + 1
+        WHERE api_key = p_api_key AND date_stamp = CURRENT_DATE;
+    ELSE
+        -- If no record exists, insert a new one with count set to 1
+        INSERT INTO aoai.event_attendee_request(api_key, date_stamp, request_count)
+        VALUES (p_api_key, CURRENT_DATE, 1);
     END IF;
 
-    RETURN estimated_count;
+    INSERT INTO aoai.metric(api_key, event_id, catalog_id)
+    VALUES (p_api_key, p_event_id, p_catalog_id);
 END;
 $$;
 
 
-ALTER FUNCTION aoai.add_attendee_metric(p_api_key uuid, p_event_id uuid, p_catalog_id uuid, p_daily_request_cap integer) OWNER TO admin;
+ALTER PROCEDURE aoai.add_attendee_metric(IN p_api_key uuid, IN p_event_id character varying, IN p_catalog_id uuid) OWNER TO admin;
 
 --
 -- Name: add_event(character varying, character varying, character varying, timestamp without time zone, timestamp without time zone, character varying, character varying, character varying, character varying, integer, integer, boolean); Type: FUNCTION; Schema: aoai; Owner: admin
@@ -231,8 +236,18 @@ CREATE FUNCTION aoai.get_attendee_authorized(p_api_key uuid) RETURNS TABLE(user_
     AS $$
 DECLARE
     current_utc timestamp;
+	v_request_count integer;
 BEGIN
     current_utc := current_timestamp AT TIME ZONE 'UTC';
+
+-- 	get the current number of requests made for current date by api_key
+	SELECT request_count INTO v_request_count FROM aoai.event_attendee_request
+    WHERE api_key = p_api_key AND date_stamp = CURRENT_DATE;
+
+	IF NOT FOUND THEN
+		v_request_count = 0;
+	END IF;
+
 
     RETURN QUERY
     SELECT
@@ -252,8 +267,8 @@ BEGIN
     WHERE
         EA.api_key = p_api_key AND
         EA.active = true AND
-        EA.daily_locked = false AND
         E.active = true AND
+		v_request_count < E.daily_request_cap AND
         current_utc BETWEEN E.start_utc AND E.end_utc;
 END;
 $$;
@@ -382,23 +397,24 @@ CREATE TABLE aoai.event_attendee (
     user_id character varying(128) NOT NULL,
     event_id character varying(50) NOT NULL,
     active boolean NOT NULL,
-    api_key uuid NOT NULL,
-    daily_locked boolean DEFAULT false NOT NULL
+    api_key uuid NOT NULL
 );
 
 
 ALTER TABLE aoai.event_attendee OWNER TO admin;
 
 --
--- Name: event_attendee_locked; Type: TABLE; Schema: aoai; Owner: admin
+-- Name: event_attendee_request; Type: TABLE; Schema: aoai; Owner: admin
 --
 
-CREATE TABLE aoai.event_attendee_locked (
-    api_key uuid NOT NULL
+CREATE TABLE aoai.event_attendee_request (
+    api_key uuid NOT NULL,
+    date_stamp date NOT NULL,
+    request_count integer NOT NULL
 );
 
 
-ALTER TABLE aoai.event_attendee_locked OWNER TO admin;
+ALTER TABLE aoai.event_attendee_request OWNER TO admin;
 
 --
 -- Name: event_catalog_map; Type: TABLE; Schema: aoai; Owner: admin
@@ -420,7 +436,6 @@ CREATE TABLE aoai.metric (
     event_id character varying(50) NOT NULL,
     api_key uuid NOT NULL,
     date_stamp date DEFAULT CURRENT_DATE NOT NULL,
-    request_id integer NOT NULL,
     time_stamp time without time zone DEFAULT CURRENT_TIME NOT NULL,
     catalog_id uuid NOT NULL
 );
@@ -472,34 +487,6 @@ CREATE TABLE aoai.owner_event_map (
 ALTER TABLE aoai.owner_event_map OWNER TO admin;
 
 --
--- Name: request_id_seq; Type: SEQUENCE; Schema: aoai; Owner: admin
---
-
-CREATE SEQUENCE aoai.request_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER SEQUENCE aoai.request_id_seq OWNER TO admin;
-
---
--- Name: request_id_seq; Type: SEQUENCE OWNED BY; Schema: aoai; Owner: admin
---
-
-ALTER SEQUENCE aoai.request_id_seq OWNED BY aoai.metric.request_id;
-
-
---
--- Name: metric request_id; Type: DEFAULT; Schema: aoai; Owner: admin
---
-
-ALTER TABLE ONLY aoai.metric ALTER COLUMN request_id SET DEFAULT nextval('aoai.request_id_seq'::regclass);
-
-
---
 -- Name: event event_pkey; Type: CONSTRAINT; Schema: aoai; Owner: admin
 --
 
@@ -516,19 +503,19 @@ ALTER TABLE ONLY aoai.event_attendee
 
 
 --
+-- Name: event_attendee_request eventattendeerequest_pkey; Type: CONSTRAINT; Schema: aoai; Owner: admin
+--
+
+ALTER TABLE ONLY aoai.event_attendee_request
+    ADD CONSTRAINT eventattendeerequest_pkey PRIMARY KEY (api_key, date_stamp);
+
+
+--
 -- Name: event_catalog_map eventcatalogmap_pkey; Type: CONSTRAINT; Schema: aoai; Owner: admin
 --
 
 ALTER TABLE ONLY aoai.event_catalog_map
     ADD CONSTRAINT eventcatalogmap_pkey PRIMARY KEY (event_id, catalog_id);
-
-
---
--- Name: metric metric_pkey; Type: CONSTRAINT; Schema: aoai; Owner: admin
---
-
-ALTER TABLE ONLY aoai.metric
-    ADD CONSTRAINT metric_pkey PRIMARY KEY (api_key, date_stamp, request_id);
 
 
 --
@@ -578,6 +565,14 @@ ALTER TABLE ONLY aoai.event_attendee
 
 
 --
+-- Name: event_attendee_request fk_eventattendeerequest_eventattendee; Type: FK CONSTRAINT; Schema: aoai; Owner: admin
+--
+
+ALTER TABLE ONLY aoai.event_attendee_request
+    ADD CONSTRAINT fk_eventattendeerequest_eventattendee FOREIGN KEY (api_key) REFERENCES aoai.event_attendee(api_key) ON DELETE CASCADE;
+
+
+--
 -- Name: event_catalog_map fk_eventcatalogmap_event; Type: FK CONSTRAINT; Schema: aoai; Owner: admin
 --
 
@@ -607,6 +602,14 @@ ALTER TABLE ONLY aoai.owner_catalog
 
 ALTER TABLE ONLY aoai.metric
     ADD CONSTRAINT fk_metric FOREIGN KEY (event_id) REFERENCES aoai.event(event_id) ON DELETE CASCADE;
+
+
+--
+-- Name: metric fk_metric_owner_catalog; Type: FK CONSTRAINT; Schema: aoai; Owner: admin
+--
+
+ALTER TABLE ONLY aoai.metric
+    ADD CONSTRAINT fk_metric_owner_catalog FOREIGN KEY (catalog_id) REFERENCES aoai.owner_catalog(catalog_id);
 
 
 --
