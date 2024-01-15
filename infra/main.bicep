@@ -40,15 +40,6 @@ var postgresServerName = '${prefix}-postgresql'
 var postgresAdminUser = 'admin${uniqueString(resourceGroup.id)}'
 var postgresDatabaseName = 'aoai-proxy'
 
-// // Create storage account for the service
-// module storageAccount 'storage.bicep' = {
-//   name: 'storage'
-//   scope: resourceGroup
-//   params: {
-//     name: '${take(replace(prefix, '-', ''), 16)}storage'
-//     location: location
-//   }
-// }
 
 // Create PostgreSQL database
 module postgresServer 'core/database/postgresql/flexibleserver.bicep' = {
@@ -139,37 +130,6 @@ module monitoring 'core/monitor/monitoring.bicep' = {
   }
 }
 
-// // create an app service plan for the Monitor Azure Function
-// module appServicePlan 'core/host/appserviceplan.bicep' = {
-//   name: 'appServicePlan'
-//   scope: resourceGroup
-//   params: {
-//     name: '${prefix}-app-service-plan'
-//     location: location
-//     tags: tags
-//     sku: {
-//       name: 'Y1'
-//     }
-//   }
-// }
-
-// module MonitorFunction 'core/host/functions.bicep' = {
-//   name: 'azureFunctions'
-//   scope: resourceGroup
-//   params: {
-//     name: '${prefix}-monitor-function'
-//     location: location
-//     tags: tags
-//     runtimeVersion: '~4'
-//     runtimeName: 'dotnet'
-//     appServicePlanId: appServicePlan.outputs.id
-//     storageAccountName: storageAccount.outputs.name
-//     alwaysOn: false
-//     appSettings: {
-//       AzureProxyStorageAccount: storageAccount.outputs.connectionString
-//     }
-//   }
-// }
 
 // Admin app
 module admin 'admin.bicep' = {
