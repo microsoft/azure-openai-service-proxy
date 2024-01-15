@@ -23,3 +23,5 @@ cd src/playground
 nvm install
 npm i
 npm install -g @azure/static-web-apps-cli
+
+
