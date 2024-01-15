@@ -9,8 +9,18 @@ export const loader: LoaderFunction = async ({ params }) => {
     throw new Response("Not Found", { status: 404 });
   }
 
-  const response = await fetch(`/api/${API_VERSION}/event/${id}`);
-  const eventDetails = await response.json();
+  const [eventDetailsResponse, attendeeRegistrationResponse] =
+    await Promise.all([
+      fetch(`/api/${API_VERSION}/event/${id}`),
+      fetch(`/api/${API_VERSION}/attendee/event/${id}`),
+    ]);
+  const eventDetails = await eventDetailsResponse.json();
+  const attendeeRegistration = attendeeRegistrationResponse.ok
+    ? await attendeeRegistrationResponse.json()
+    : undefined;
 
-  return toCamelCase(eventDetails);
+  return {
+    event: toCamelCase(eventDetails),
+    attendee: toCamelCase(attendeeRegistration),
+  };
 };

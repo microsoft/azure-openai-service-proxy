@@ -17,7 +17,8 @@ export type RegistrationAction =
   | { type: "ALREADY_REGISTERED" }
   | {
       type: "REGISTERING_FAILED";
-    };
+    }
+  | { type: "TOGGLE_API_KEY_VISIBILITY" };
 
 export const reducer = (
   state: RegistrationState,
@@ -29,6 +30,12 @@ export const reducer = (
         ...state,
         profileLoaded: action.payload.loaded,
         profile: action.payload.profile,
+      };
+
+    case "TOGGLE_API_KEY_VISIBILITY":
+      return {
+        ...state,
+        showApiKey: !state.showApiKey,
       };
     default:
       return state;

@@ -22,6 +22,21 @@ class AttendeeApi:
         self.router = APIRouter()
         self.logger = logging.getLogger(__name__)
 
+    def get_user_id(self, request: Request):
+        """Get user id from request"""
+
+        header = request.headers.get("x-ms-client-principal")
+
+        if not header:
+            raise HTTPException(status_code=401)
+
+        encoded = base64.b64decode(header)
+        decoded = encoded.decode("ascii")
+        principal = json.loads(decoded)
+
+        user_id = principal.get("userId")
+        return user_id
+
     def include_router(self):
         """include router"""
 
@@ -33,12 +48,7 @@ class AttendeeApi:
             """Register attendee"""
             logging.info("Registering attendee")
             try:
-                header = request.headers.get("x-ms-client-principal")
-                encoded = base64.b64decode(header)
-                decoded = encoded.decode("ascii")
-                principal = json.loads(decoded)
-
-                user_id = principal.get("userId")
+                user_id = self.get_user_id(request=request)
 
                 conn = await self.db_manager.get_connection()
 
@@ -52,6 +62,39 @@ class AttendeeApi:
                     )
 
                 return AttendeeRegistrationResponse()
+            except Exception as error:
+                logging.error(error)
+                raise error
+
+        @self.router.get("/attendee/event/{event_id}", status_code=200)
+        async def get_attendees(request: Request, event_id: str):
+            """Get attendees"""
+            logging.info("Getting attendees")
+            try:
+                user_id = self.get_user_id(request=request)
+                conn = await self.db_manager.get_connection()
+
+                result = await conn.fetch(
+                    "SELECT EA.api_key, EA.active "
+                    "FROM aoai.event_attendee EA "
+                    "WHERE EA.event_id = $1 "
+                    "AND EA.user_id = $2",
+                    event_id,
+                    user_id,
+                )
+
+                if not result:
+                    raise HTTPException(
+                        status_code=404, detail=f"Event with id {event_id} not found"
+                    )
+
+                if len(result) == 0:
+                    raise HTTPException(
+                        status_code=404, detail=f"Event with id {event_id} not found"
+                    )
+
+                return result[0]
+
             except Exception as error:
                 logging.error(error)
                 raise error
