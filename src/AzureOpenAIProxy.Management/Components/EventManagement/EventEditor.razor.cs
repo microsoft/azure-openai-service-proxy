@@ -20,12 +20,15 @@ public partial class EventEditor : ComponentBase
 
     private bool isSubmitting = false;
 
+    private IEnumerable<TimeZoneInfo>? TimeZones { get; set; }
+
     protected override Task OnInitializedAsync()
     {
         Model ??= new();
         editContext = new(Model);
         editContext.OnValidationRequested += EditContext_OnValidationRequested;
         messageStore = new(editContext);
+        TimeZones = TimeZoneInfo.GetSystemTimeZones();
         return Task.CompletedTask;
     }
 
@@ -48,6 +51,12 @@ public partial class EventEditor : ComponentBase
         {
             return;
         }
+
+        DateTimeOffset startWithTimezone = new(Model.Start!.Value, Model.SelectedTimeZone!.GetUtcOffset(Model.Start!.Value));
+        DateTimeOffset endWithTimezone = new(Model.End!.Value, Model.SelectedTimeZone!.GetUtcOffset(Model.End!.Value));
+
+        Model.Start = new DateTime(startWithTimezone.UtcDateTime.Ticks, DateTimeKind.Unspecified);
+        Model.End = new DateTime(endWithTimezone.UtcDateTime.Ticks, DateTimeKind.Unspecified);
 
         isSubmitting = true;
         await OnValidSubmit.InvokeAsync(Model);

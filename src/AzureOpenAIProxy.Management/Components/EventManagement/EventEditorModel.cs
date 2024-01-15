@@ -32,4 +32,7 @@ public class EventEditorModel
     [Required(ErrorMessage = "Specify the maximum number of requests allowed per day per token")]
     public int DailyRequestCap { get; set; } = 10000;
     public bool Active { get; set; }
+
+    [Required(ErrorMessage = "Time zone is required")]
+    public TimeZoneInfo? SelectedTimeZone { get; set; }
 }
