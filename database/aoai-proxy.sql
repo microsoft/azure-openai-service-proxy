@@ -206,32 +206,10 @@ $$;
 ALTER FUNCTION aoai.add_event_attendee(p_user_id character varying, p_event_id character varying) OWNER TO admin;
 
 --
--- Name: clear_daily_locked_attendee(); Type: FUNCTION; Schema: aoai; Owner: admin
---
-
-CREATE FUNCTION aoai.clear_daily_locked_attendee() RETURNS void
-    LANGUAGE plpgsql
-    AS $$
-DECLARE
-    updated_keys text[];
-BEGIN
-    UPDATE aoai.event_attendee
-    SET daily_locked = false
-    WHERE api_key IN (SELECT api_key FROM aoai.event_attendee_locked)
-    RETURNING api_key INTO updated_keys;
-
-    DELETE FROM aoai.event_attendee_locked WHERE api_key = ANY(updated_keys);
-END;
-$$;
-
-
-ALTER FUNCTION aoai.clear_daily_locked_attendee() OWNER TO admin;
-
---
 -- Name: get_attendee_authorized(uuid); Type: FUNCTION; Schema: aoai; Owner: admin
 --
 
-CREATE FUNCTION aoai.get_attendee_authorized(p_api_key uuid) RETURNS TABLE(user_id character varying, event_id character varying, event_code character varying, organizer_name character varying, organizer_email character varying, event_url character varying, event_url_text character varying, max_token_cap integer, daily_request_cap integer)
+CREATE FUNCTION aoai.get_attendee_authorized(p_api_key uuid) RETURNS TABLE(user_id character varying, event_id character varying, event_code character varying, organizer_name character varying, organizer_email character varying, event_url character varying, event_url_text character varying, max_token_cap integer, daily_request_cap integer, rate_limit_exceed boolean)
     LANGUAGE plpgsql
     AS $$
 DECLARE
@@ -259,7 +237,8 @@ BEGIN
         E.event_url,
         E.event_url_text,
         E.max_token_cap,
-        E.daily_request_cap
+        E.daily_request_cap,
+		(CASE WHEN v_request_count > E.daily_request_cap THEN true ELSE false END) AS rate_limit_exceed
     FROM
         aoai.event E
     INNER JOIN
@@ -268,7 +247,6 @@ BEGIN
         EA.api_key = p_api_key AND
         EA.active = true AND
         E.active = true AND
-		v_request_count < E.daily_request_cap AND
         current_utc BETWEEN E.start_utc AND E.end_utc;
 END;
 $$;

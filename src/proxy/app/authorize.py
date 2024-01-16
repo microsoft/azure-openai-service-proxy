@@ -40,10 +40,20 @@ class Authorize:
                     detail="Authentication failed.",
                 )
 
+            if result.get("rate_limit_exceed"):
+                raise HTTPException(
+                    status_code=429,
+                    detail=(
+                        f"The event daily request rate of {result.get('daily_request_cap')} "
+                        "calls to has been exceeded. Requests are disabled until UTC midnight."
+                    ),
+                )
+
             result_dict = dict(result)
             result_dict["is_authorized"] = True
             result_dict["deployment_name"] = deployment_name
             result_dict["api_key"] = api_key
+            del result_dict["rate_limit_exceed"]
 
             return AuthorizeResponse(**result_dict)
 

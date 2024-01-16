@@ -3,7 +3,7 @@
 import logging
 import os
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import ResponseValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -108,6 +108,14 @@ app.include_router(
     event_registration_route.include_router(), prefix="/api/v1", tags=["event-registration"]
 )
 app.include_router(attendee_route.include_router(), prefix="/api/v1", tags=["attendee"])
+
+
+@app.exception_handler(HTTPException)
+async def custom_http_exception_handler(request: Request, exc: HTTPException):
+    """custom http exception handler - formats in the style of OpenAI API"""
+
+    content = {"error": {"code": exc.status_code, "message": exc.detail}}
+    return JSONResponse(status_code=exc.status_code, content=content)
 
 
 @app.exception_handler(ResponseValidationError)
