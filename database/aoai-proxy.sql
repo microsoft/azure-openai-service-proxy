@@ -70,7 +70,7 @@ CREATE TYPE aoai.model_type AS ENUM (
 ALTER TYPE aoai.model_type OWNER TO admin;
 
 --
--- Name: add_attendee_metric(uuid, character varying, uuid); Type: PROCEDURE; Schema: aoai; Owner: admin
+-- Name: add_attendee_metric(character varying, character varying, uuid); Type: PROCEDURE; Schema: aoai; Owner: admin
 --
 
 CREATE PROCEDURE aoai.add_attendee_metric(IN p_api_key character varying, IN p_event_id character varying, IN p_catalog_id uuid)
@@ -206,7 +206,7 @@ $$;
 ALTER FUNCTION aoai.add_event_attendee(p_user_id character varying, p_event_id character varying) OWNER TO admin;
 
 --
--- Name: get_attendee_authorized(uuid); Type: FUNCTION; Schema: aoai; Owner: admin
+-- Name: get_attendee_authorized(character varying); Type: FUNCTION; Schema: aoai; Owner: admin
 --
 
 CREATE FUNCTION aoai.get_attendee_authorized(p_api_key character varying) RETURNS TABLE(user_id character varying, event_id character varying, event_code character varying, organizer_name character varying, organizer_email character varying, event_url character varying, event_url_text character varying, max_token_cap integer, daily_request_cap integer, rate_limit_exceed boolean)
