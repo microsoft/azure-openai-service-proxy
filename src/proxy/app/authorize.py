@@ -75,17 +75,8 @@ class Authorize:
             ) from exception
 
     @lru_cache_with_expiry(maxsize=128, ttl=180)
-    async def __authorize(self, *, access_token: str, deployment_name: str) -> AuthorizeResponse:
+    async def __authorize(self, *, api_key: str, deployment_name: str) -> AuthorizeResponse:
         """Authorizes a user to access a specific time bound event."""
-
-        # is the user_id a valid guid
-        try:
-            api_key = UUID(access_token)
-        except ValueError as exc:
-            raise HTTPException(
-                status_code=401,
-                detail="Authentication failed.",
-            ) from exc
 
         authorize_response = await self.__is_user_authorized(
             api_key=api_key, deployment_name=deployment_name
@@ -104,6 +95,6 @@ class Authorize:
                 detail="Authentication failed.",
             )
 
-        access_token = headers.get("api-key")
+        api_key = headers.get("api-key")
 
-        return await self.__authorize(access_token=access_token, deployment_name=deployment_name)
+        return await self.__authorize(api_key=api_key, deployment_name=deployment_name)

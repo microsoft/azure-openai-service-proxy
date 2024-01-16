@@ -73,7 +73,7 @@ ALTER TYPE aoai.model_type OWNER TO admin;
 -- Name: add_attendee_metric(uuid, character varying, uuid); Type: PROCEDURE; Schema: aoai; Owner: admin
 --
 
-CREATE PROCEDURE aoai.add_attendee_metric(IN p_api_key uuid, IN p_event_id character varying, IN p_catalog_id uuid)
+CREATE PROCEDURE aoai.add_attendee_metric(IN p_api_key character varying, IN p_event_id character varying, IN p_catalog_id uuid)
     LANGUAGE plpgsql
     AS $$
 BEGIN
@@ -99,7 +99,7 @@ END;
 $$;
 
 
-ALTER PROCEDURE aoai.add_attendee_metric(IN p_api_key uuid, IN p_event_id character varying, IN p_catalog_id uuid) OWNER TO admin;
+ALTER PROCEDURE aoai.add_attendee_metric(IN p_api_key character varying, IN p_event_id character varying, IN p_catalog_id uuid) OWNER TO admin;
 
 --
 -- Name: add_event(character varying, character varying, character varying, timestamp without time zone, timestamp without time zone, character varying, character varying, character varying, character varying, integer, integer, boolean); Type: FUNCTION; Schema: aoai; Owner: admin
@@ -187,7 +187,7 @@ CREATE FUNCTION aoai.add_event_attendee(p_user_id character varying, p_event_id 
     LANGUAGE plpgsql
     AS $$
 DECLARE
-    v_api_key UUID;
+    v_api_key character varying;
 BEGIN
 	SELECT api_key INTO v_api_key FROM aoai.event_attendee WHERE user_id = p_user_id;
 
@@ -209,7 +209,7 @@ ALTER FUNCTION aoai.add_event_attendee(p_user_id character varying, p_event_id c
 -- Name: get_attendee_authorized(uuid); Type: FUNCTION; Schema: aoai; Owner: admin
 --
 
-CREATE FUNCTION aoai.get_attendee_authorized(p_api_key uuid) RETURNS TABLE(user_id character varying, event_id character varying, event_code character varying, organizer_name character varying, organizer_email character varying, event_url character varying, event_url_text character varying, max_token_cap integer, daily_request_cap integer, rate_limit_exceed boolean)
+CREATE FUNCTION aoai.get_attendee_authorized(p_api_key character varying) RETURNS TABLE(user_id character varying, event_id character varying, event_code character varying, organizer_name character varying, organizer_email character varying, event_url character varying, event_url_text character varying, max_token_cap integer, daily_request_cap integer, rate_limit_exceed boolean)
     LANGUAGE plpgsql
     AS $$
 DECLARE
@@ -252,7 +252,7 @@ END;
 $$;
 
 
-ALTER FUNCTION aoai.get_attendee_authorized(p_api_key uuid) OWNER TO admin;
+ALTER FUNCTION aoai.get_attendee_authorized(p_api_key character varying) OWNER TO admin;
 
 --
 -- Name: get_event_registration_by_event_id(character varying); Type: FUNCTION; Schema: aoai; Owner: admin
@@ -375,7 +375,7 @@ CREATE TABLE aoai.event_attendee (
     user_id character varying(128) NOT NULL,
     event_id character varying(50) NOT NULL,
     active boolean NOT NULL,
-    api_key uuid NOT NULL
+    api_key character varying(36) NOT NULL
 );
 
 
@@ -386,7 +386,7 @@ ALTER TABLE aoai.event_attendee OWNER TO admin;
 --
 
 CREATE TABLE aoai.event_attendee_request (
-    api_key uuid NOT NULL,
+    api_key character varying NOT NULL,
     date_stamp date NOT NULL,
     request_count integer NOT NULL
 );
@@ -412,7 +412,7 @@ ALTER TABLE aoai.event_catalog_map OWNER TO admin;
 
 CREATE TABLE aoai.metric (
     event_id character varying(50) NOT NULL,
-    api_key uuid NOT NULL,
+    api_key character varying NOT NULL,
     date_stamp date DEFAULT CURRENT_DATE NOT NULL,
     time_stamp time without time zone DEFAULT CURRENT_TIME NOT NULL,
     catalog_id uuid NOT NULL
