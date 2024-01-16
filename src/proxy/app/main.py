@@ -112,7 +112,10 @@ app.include_router(attendee_route.include_router(), prefix="/api/v1", tags=["att
 
 @app.exception_handler(HTTPException)
 async def custom_http_exception_handler(request: Request, exc: HTTPException):
-    return JSONResponse(status_code=exc.status_code, content=exc.detail)
+    """custom http exception handler - formats in the style of OpenAI API"""
+
+    content = {"error": {"code": exc.status_code, "message": exc.detail}}
+    return JSONResponse(status_code=exc.status_code, content=content)
 
 
 @app.exception_handler(ResponseValidationError)

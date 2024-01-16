@@ -43,12 +43,10 @@ class Authorize:
             if result.get("rate_limit_exceed"):
                 raise HTTPException(
                     status_code=429,
-                    detail={
-                        "error": {
-                            "code": "429",
-                            "message": "Daily request rate exceeded",
-                        }
-                    },
+                    detail=(
+                        f"The event daily request rate of {result.get('daily_request_cap')} "
+                        "calls to has been exceeded. Requests are disabled until UTC midnight."
+                    ),
                 )
 
             result_dict = dict(result)
