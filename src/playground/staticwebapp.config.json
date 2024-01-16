@@ -1,0 +1,12 @@
+{
+  "routes": [
+    {
+      "route": "/attendee*",
+      "allowedRoles": ["authenticated"]
+    },
+    {
+      "route": "/api/v1/attendee*",
+      "allowedRoles": ["authenticated"]
+    }
+  ]
+}
