@@ -9,6 +9,9 @@ public partial class EventList : ComponentBase
     [Inject]
     public required IEventService EventService { get; set; }
 
+    [Inject]
+    public required IConfiguration Configuration { get; set; }
+
     public IEnumerable<Event>? Events { get; set; }
 
     protected override async Task OnInitializedAsync() => Events = await EventService.GetOwnerEventsAsync();

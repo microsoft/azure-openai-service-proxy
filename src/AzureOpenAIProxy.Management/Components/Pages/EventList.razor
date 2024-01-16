@@ -13,6 +13,7 @@
             <MudTh>Duration</MudTh>
             <MudTh>Active</MudTh>
             <MudTh></MudTh>
+            <MudTh></MudTh>
         </HeaderContent>
         <RowTemplate>
             <MudTd DataLabel="Event">@context.EventCode</MudTd>
@@ -25,6 +26,10 @@
             <MudTd>
                 <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="@($"/event/{context.EventId}")">Edit
                 </MudButton>
+            </MudTd>
+            <MudTd>
+                <MudButton Variant="Variant.Filled" Color="Color.Secondary" Target="=_blank"
+                    Href="@($"{Configuration["PlaygroundUrl"]}/event/{context.EventId}")">Attendee Page</MudButton>
             </MudTd>
         </RowTemplate>
     </MudTable>
