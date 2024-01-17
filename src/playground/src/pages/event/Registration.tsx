@@ -43,8 +43,6 @@ export const Registration = () => {
   const [state, dispatch] = useReducer(reducer, {
     profileLoaded: false,
     showApiKey: false,
-    event,
-    attendee,
   });
   const { loaded, clientPrincipal } = useClientPrincipal();
 
@@ -75,24 +73,24 @@ export const Registration = () => {
     );
 
   const copyToClipboard = async () => {
-    await navigator.clipboard.writeText(state.attendee!.apiKey);
+    await navigator.clipboard.writeText(attendee!.apiKey);
     notify();
   };
 
   return (
     <section className={styles.container}>
-      <h1>{state.event?.eventCode}</h1>
+      <h1>{event?.eventCode}</h1>
       <div>
-        <ReactMarkdown>{state.event?.eventMarkdown}</ReactMarkdown>
+        <ReactMarkdown>{event?.eventMarkdown}</ReactMarkdown>
       </div>
-      {state.profileLoaded && state.profile && !state.attendee && (
+      {state.profileLoaded && state.profile && !attendee && (
         <div>
           <Form method="post">
             <Button type="submit">Register</Button>
           </Form>
         </div>
       )}
-      {state.profileLoaded && state.profile && state.attendee && (
+      {state.profileLoaded && state.profile && attendee && (
         <div>
           <Field label="API Key" size="large">
             <div className={styles.apiKeyDisplay}>
@@ -101,7 +99,7 @@ export const Registration = () => {
                 id="apiKey"
                 type={state.showApiKey ? "text" : "password"}
                 readOnly={true}
-                value={state.attendee.apiKey}
+                value={attendee.apiKey}
                 disabled={true}
               />
               <Button
