@@ -1,15 +1,36 @@
-import type { AttendeeRegistration, EventDetails } from "./Registration.state";
-import { useEffect, useReducer } from "react";
-import { reducer } from "./Registration.reducers";
+import { useClientPrincipal } from "@aaronpowell/react-static-web-apps-auth";
 import {
-  Logout,
-  StaticWebAuthLogins,
-  useClientPrincipal,
-} from "@aaronpowell/react-static-web-apps-auth";
-import { Form, useLoaderData } from "react-router-dom";
-import ReactMarkdown from "react-markdown";
-import { Button, Input, Label } from "@fluentui/react-components";
+  Button,
+  Field,
+  Input,
+  Link,
+  Toast,
+  ToastTitle,
+  ToastTrigger,
+  Toaster,
+  makeStyles,
+  shorthands,
+  useId,
+  useToastController,
+} from "@fluentui/react-components";
 import { CopyRegular, EyeOffRegular, EyeRegular } from "@fluentui/react-icons";
+import { useEffect, useReducer } from "react";
+import ReactMarkdown from "react-markdown";
+import { Form, useLoaderData } from "react-router-dom";
+import { reducer } from "./Registration.reducers";
+import type { AttendeeRegistration, EventDetails } from "./Registration.state";
+
+const useStyles = makeStyles({
+  container: {
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "start",
+    alignItems: "center",
+    height: "100vh",
+    ...shorthands.padding("0", "var(--global-margin)"),
+  },
+  apiKeyDisplay: { display: "flex", alignItems: "center", columnGap: "4px" },
+});
 
 export const Registration = () => {
   const { event, attendee } = useLoaderData() as {
@@ -17,7 +38,7 @@ export const Registration = () => {
     attendee?: AttendeeRegistration;
   };
 
-  console.log({ event, attendee });
+  const styles = useStyles();
 
   const [state, dispatch] = useReducer(reducer, {
     profileLoaded: false,
@@ -34,8 +55,32 @@ export const Registration = () => {
     });
   }, [loaded, clientPrincipal]);
 
+  const toasterId = useId("toaster");
+  const { dispatchToast } = useToastController(toasterId);
+
+  const notify = () =>
+    dispatchToast(
+      <Toast>
+        <ToastTitle
+          action={
+            <ToastTrigger>
+              <Link>Dismiss</Link>
+            </ToastTrigger>
+          }
+        >
+          API Key copied.
+        </ToastTitle>
+      </Toast>,
+      { position: "top", intent: "success" }
+    );
+
+  const copyToClipboard = async () => {
+    await navigator.clipboard.writeText(state.attendee!.apiKey);
+    notify();
+  };
+
   return (
-    <section>
+    <section className={styles.container}>
       <h1>{state.event?.eventCode}</h1>
       <div>
         <ReactMarkdown>{state.event?.eventMarkdown}</ReactMarkdown>
@@ -49,36 +94,31 @@ export const Registration = () => {
       )}
       {state.profileLoaded && state.profile && state.attendee && (
         <div>
-          <Label htmlFor="apiKey">API Key</Label>
-          <Input
-            name="apiKey"
-            id="apiKey"
-            type={state.showApiKey ? "text" : "password"}
-            readOnly={true}
-            value={state.attendee.apiKey}
-            disabled={true}
-          />
-          <Button
-            icon={state.showApiKey ? <EyeRegular /> : <EyeOffRegular />}
-            onClick={() => dispatch({ type: "TOGGLE_API_KEY_VISIBILITY" })}
-          />
-          <Button
-            icon={<CopyRegular />}
-            onClick={() =>
-              navigator.clipboard.writeText(state.attendee!.apiKey)
-            }
-          />
-          <br />
-          <Logout postLogoutRedirect={window.location.href} />
+          <Field label="API Key" size="large">
+            <div className={styles.apiKeyDisplay}>
+              <Input
+                name="apiKey"
+                id="apiKey"
+                type={state.showApiKey ? "text" : "password"}
+                readOnly={true}
+                value={state.attendee.apiKey}
+                disabled={true}
+              />
+              <Button
+                icon={state.showApiKey ? <EyeRegular /> : <EyeOffRegular />}
+                onClick={() => dispatch({ type: "TOGGLE_API_KEY_VISIBILITY" })}
+              />
+              <Button icon={<CopyRegular />} onClick={copyToClipboard} />
+            </div>
+          </Field>
         </div>
       )}
+
       {state.profileLoaded && !state.profile && (
-        <StaticWebAuthLogins
-          azureAD={false}
-          twitter={false}
-          postLoginRedirect={window.location.href}
-        />
+        <p>Please login to register.</p>
       )}
+
+      <Toaster toasterId={toasterId} />
     </section>
   );
 };

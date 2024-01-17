@@ -1,6 +1,7 @@
 import { Outlet } from "react-router-dom";
 import { makeStyles } from "@fluentui/react-components";
 import { ClientPrincipalContextProvider } from "@aaronpowell/react-static-web-apps-auth";
+import { Header } from "../../components/event/Header";
 
 const useStyles = makeStyles({
   container: {
@@ -21,7 +22,9 @@ export function Layout() {
   return (
     <ClientPrincipalContextProvider>
       <div className={styles.container}>
-        <nav></nav>
+        <nav>
+          <Header />
+        </nav>
         <Outlet />
       </div>
     </ClientPrincipalContextProvider>
