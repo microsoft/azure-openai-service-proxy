@@ -5,7 +5,6 @@
       "appLocation": "src/playground",
       "outputLocation": "dist",
       "appBuildCommand": "npm run build",
-      "run": "npm run dev",
       "appDevserverUrl": "http://localhost:5173",
       "apiDevserverUrl": "http://localhost:8000"
     }
