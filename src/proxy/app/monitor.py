@@ -27,7 +27,7 @@ class MonitorEntity(BaseModel):
     organizer_name: str
     organizer_email: str
     deployment_name: str
-    api_key: UUID
+    api_key: str
     catalog_id: UUID | None = None
 
     def __init__(
@@ -43,7 +43,7 @@ class MonitorEntity(BaseModel):
         organizer_name: str,
         organizer_email: str,
         deployment_name: str,
-        api_key: UUID,
+        api_key: str,
         catalog_id: UUID | None = None,
     ) -> None:
         super().__init__(
