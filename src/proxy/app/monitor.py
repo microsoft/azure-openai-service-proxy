@@ -24,6 +24,7 @@ class MonitorEntity(BaseModel):
     event_code: str
     event_url: str
     event_url_text: str
+    event_image_url: str | None = None
     organizer_name: str
     organizer_email: str
     deployment_name: str
@@ -40,6 +41,7 @@ class MonitorEntity(BaseModel):
         event_code: str,
         event_url: str,
         event_url_text: str,
+        event_image_url: str,
         organizer_name: str,
         organizer_email: str,
         deployment_name: str,
@@ -55,6 +57,7 @@ class MonitorEntity(BaseModel):
             event_code=event_code,
             event_url=event_url,
             event_url_text=event_url_text,
+            event_image_url=event_image_url,
             organizer_name=organizer_name,
             organizer_email=organizer_email,
             deployment_name=deployment_name,
