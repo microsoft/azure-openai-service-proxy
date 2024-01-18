@@ -104,9 +104,7 @@ class ChatCompletions(RequestManager):
         async_mgr = OpenAIAsyncManager(deployment)
 
         if model.stream:
-            response, http_status_code = await async_mgr.async_post_streaming(
-                openai_request, url, self.usage
-            )
+            response, http_status_code = await async_mgr.async_post_streaming(openai_request, url)
         else:
             response, http_status_code = await async_mgr.async_openai_post(openai_request, url)
 
