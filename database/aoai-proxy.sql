@@ -23,7 +23,7 @@ SET row_security = off;
 CREATE SCHEMA aoai;
 
 
-ALTER SCHEMA aoai OWNER TO admin;
+ALTER SCHEMA aoai OWNER TO proxyadmin;
 
 --
 -- Name: pgcrypto; Type: EXTENSION; Schema: -; Owner: -
@@ -53,7 +53,7 @@ CREATE TYPE aoai.model_type AS ENUM (
 );
 
 
-ALTER TYPE aoai.model_type OWNER TO admin;
+ALTER TYPE aoai.model_type OWNER TO proxyadmin;
 
 --
 -- Name: add_attendee_metric(character varying, character varying, uuid); Type: PROCEDURE; Schema: aoai; Owner: admin
@@ -85,7 +85,7 @@ END;
 $$;
 
 
-ALTER PROCEDURE aoai.add_attendee_metric(IN p_api_key character varying, IN p_event_id character varying, IN p_catalog_id uuid) OWNER TO admin;
+ALTER PROCEDURE aoai.add_attendee_metric(IN p_api_key character varying, IN p_event_id character varying, IN p_catalog_id uuid) OWNER TO proxyadmin;
 
 --
 -- Name: add_event(character varying, character varying, character varying, timestamp without time zone, timestamp without time zone, character varying, character varying, character varying, character varying, integer, integer, boolean); Type: FUNCTION; Schema: aoai; Owner: admin
@@ -163,7 +163,7 @@ END;
 $$;
 
 
-ALTER FUNCTION aoai.add_event(p_owner_id character varying, p_event_code character varying, p_event_markdown character varying, p_start_utc timestamp without time zone, p_end_utc timestamp without time zone, p_organizer_name character varying, p_organizer_email character varying, p_event_url character varying, p_event_url_text character varying, p_max_token_cap integer, p_daily_request_cap integer, p_active boolean) OWNER TO admin;
+ALTER FUNCTION aoai.add_event(p_owner_id character varying, p_event_code character varying, p_event_markdown character varying, p_start_utc timestamp without time zone, p_end_utc timestamp without time zone, p_organizer_name character varying, p_organizer_email character varying, p_event_url character varying, p_event_url_text character varying, p_max_token_cap integer, p_daily_request_cap integer, p_active boolean) OWNER TO proxyadmin;
 
 --
 -- Name: add_event_attendee(character varying, character varying); Type: FUNCTION; Schema: aoai; Owner: admin
@@ -189,7 +189,7 @@ END;
 $$;
 
 
-ALTER FUNCTION aoai.add_event_attendee(p_user_id character varying, p_event_id character varying) OWNER TO admin;
+ALTER FUNCTION aoai.add_event_attendee(p_user_id character varying, p_event_id character varying) OWNER TO proxyadmin;
 
 --
 -- Name: get_attendee_authorized(character varying); Type: FUNCTION; Schema: aoai; Owner: admin
@@ -238,7 +238,7 @@ END;
 $$;
 
 
-ALTER FUNCTION aoai.get_attendee_authorized(p_api_key character varying) OWNER TO admin;
+ALTER FUNCTION aoai.get_attendee_authorized(p_api_key character varying) OWNER TO proxyadmin;
 
 --
 -- Name: get_event_registration_by_event_id(character varying); Type: FUNCTION; Schema: aoai; Owner: admin
@@ -266,7 +266,7 @@ END;
 $$;
 
 
-ALTER FUNCTION aoai.get_event_registration_by_event_id(p_event_id character varying) OWNER TO admin;
+ALTER FUNCTION aoai.get_event_registration_by_event_id(p_event_id character varying) OWNER TO proxyadmin;
 
 --
 -- Name: get_models_by_deployment_name(character varying, character varying); Type: FUNCTION; Schema: aoai; Owner: admin
@@ -296,7 +296,7 @@ END;
 $$;
 
 
-ALTER FUNCTION aoai.get_models_by_deployment_name(p_event_id character varying, p_deployment_id character varying) OWNER TO admin;
+ALTER FUNCTION aoai.get_models_by_deployment_name(p_event_id character varying, p_deployment_id character varying) OWNER TO proxyadmin;
 
 --
 -- Name: get_models_by_event(character varying); Type: FUNCTION; Schema: aoai; Owner: admin
@@ -327,7 +327,7 @@ END;
 $$;
 
 
-ALTER FUNCTION aoai.get_models_by_event(p_event_id character varying) OWNER TO admin;
+ALTER FUNCTION aoai.get_models_by_event(p_event_id character varying) OWNER TO proxyadmin;
 
 SET default_tablespace = '';
 
@@ -355,7 +355,7 @@ CREATE TABLE aoai.event (
 );
 
 
-ALTER TABLE aoai.event OWNER TO admin;
+ALTER TABLE aoai.event OWNER TO proxyadmin;
 
 --
 -- Name: event_attendee; Type: TABLE; Schema: aoai; Owner: admin
@@ -369,7 +369,7 @@ CREATE TABLE aoai.event_attendee (
 );
 
 
-ALTER TABLE aoai.event_attendee OWNER TO admin;
+ALTER TABLE aoai.event_attendee OWNER TO proxyadmin;
 
 --
 -- Name: event_attendee_request; Type: TABLE; Schema: aoai; Owner: admin
@@ -382,7 +382,7 @@ CREATE TABLE aoai.event_attendee_request (
 );
 
 
-ALTER TABLE aoai.event_attendee_request OWNER TO admin;
+ALTER TABLE aoai.event_attendee_request OWNER TO proxyadmin;
 
 --
 -- Name: event_catalog_map; Type: TABLE; Schema: aoai; Owner: admin
@@ -394,7 +394,7 @@ CREATE TABLE aoai.event_catalog_map (
 );
 
 
-ALTER TABLE aoai.event_catalog_map OWNER TO admin;
+ALTER TABLE aoai.event_catalog_map OWNER TO proxyadmin;
 
 --
 -- Name: metric; Type: TABLE; Schema: aoai; Owner: admin
@@ -409,7 +409,7 @@ CREATE TABLE aoai.metric (
 );
 
 
-ALTER TABLE aoai.metric OWNER TO admin;
+ALTER TABLE aoai.metric OWNER TO proxyadmin;
 
 --
 -- Name: owner; Type: TABLE; Schema: aoai; Owner: admin
@@ -422,7 +422,7 @@ CREATE TABLE aoai.owner (
 );
 
 
-ALTER TABLE aoai.owner OWNER TO admin;
+ALTER TABLE aoai.owner OWNER TO proxyadmin;
 
 --
 -- Name: owner_catalog; Type: TABLE; Schema: aoai; Owner: admin
@@ -440,7 +440,7 @@ CREATE TABLE aoai.owner_catalog (
 );
 
 
-ALTER TABLE aoai.owner_catalog OWNER TO admin;
+ALTER TABLE aoai.owner_catalog OWNER TO proxyadmin;
 
 --
 -- Name: owner_event_map; Type: TABLE; Schema: aoai; Owner: admin
@@ -453,7 +453,7 @@ CREATE TABLE aoai.owner_event_map (
 );
 
 
-ALTER TABLE aoai.owner_event_map OWNER TO admin;
+ALTER TABLE aoai.owner_event_map OWNER TO proxyadmin;
 
 --
 -- Name: event event_pkey; Type: CONSTRAINT; Schema: aoai; Owner: admin
