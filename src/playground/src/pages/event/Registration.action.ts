@@ -1,4 +1,4 @@
-import { ActionFunction, redirect } from "react-router-dom";
+import { ActionFunction } from "react-router-dom";
 import { API_VERSION } from "../../constants";
 
 export const action: ActionFunction = async ({ params }) => {
@@ -19,5 +19,5 @@ export const action: ActionFunction = async ({ params }) => {
     throw new Response("Failed to register", { status: 500 });
   }
 
-  return redirect(`/attendee/event/${id}`);
+  return null;
 };

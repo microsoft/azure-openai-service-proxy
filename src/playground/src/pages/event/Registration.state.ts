@@ -10,12 +10,10 @@ export type EventDetails = {
   organizerEmail: string;
 };
 
-export type AttendeeRegistration = { apiKey: string; active: boolean }
+export type AttendeeRegistration = { apiKey: string; active: boolean };
 
 export type RegistrationState = {
   profileLoaded: boolean;
   profile?: ClientPrincipal;
-  event: EventDetails;
-  attendee?: AttendeeRegistration;
   showApiKey: boolean;
 };
