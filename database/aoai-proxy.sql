@@ -40,20 +40,6 @@ COMMENT ON EXTENSION pgcrypto IS 'cryptographic functions';
 
 
 --
--- Name: uuid-ossp; Type: EXTENSION; Schema: -; Owner: -
---
-
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA aoai;
-
-
---
--- Name: EXTENSION "uuid-ossp"; Type: COMMENT; Schema: -; Owner:
---
-
-COMMENT ON EXTENSION "uuid-ossp" IS 'generate universally unique identifiers (UUIDs)';
-
-
---
 -- Name: model_type; Type: TYPE; Schema: aoai; Owner: admin
 --
 
@@ -110,8 +96,8 @@ CREATE FUNCTION aoai.add_event(p_owner_id character varying, p_event_code charac
     AS $$
 DECLARE
     v_hash BYTEA;
-    v_guid1 uuid := aoai.uuid_generate_v4();
-    v_guid2 uuid := aoai.uuid_generate_v4();
+    v_guid1 uuid := aoai.gen_random_uuid();
+    v_guid2 uuid := aoai.gen_random_uuid();
     v_guid_string VARCHAR(128);
     v_hash_string VARCHAR(64);
     v_half1 VARCHAR(4);
@@ -192,7 +178,7 @@ BEGIN
 	SELECT api_key INTO v_api_key FROM aoai.event_attendee WHERE user_id = p_user_id;
 
     IF v_api_key IS NULL THEN
-		v_api_key := aoai.uuid_generate_v4();
+		v_api_key := aoai.gen_random_uuid();
 
 		INSERT INTO aoai.event_attendee(user_id, event_id, active, api_key)
 		VALUES (p_user_id, p_event_id, true, v_api_key);
@@ -617,4 +603,3 @@ ALTER TABLE ONLY aoai.owner_event_map
 
 
 DROP SCHEMA IF EXISTS PUBLIC CASCADE ;
-DROP DATABASE IF EXISTS postgres WITH (FORCE);

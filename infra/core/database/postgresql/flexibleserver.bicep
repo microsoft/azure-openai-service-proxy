@@ -16,7 +16,7 @@ param allowedSingleIPs array = []
 param version string
 
 // Latest official version 2022-12-01 does not have Bicep types available
-resource postgresServer 'Microsoft.DBforPostgreSQL/flexibleServers@2022-12-01' = {
+resource postgresServer 'Microsoft.DBforPostgreSQL/flexibleServers@2023-06-01-preview' = {
   location: location
   tags: tags
   name: name
@@ -59,6 +59,15 @@ resource postgresServer 'Microsoft.DBforPostgreSQL/flexibleServers@2022-12-01' =
     }
   }]
 
+}
+
+resource postgresServerExtensions 'Microsoft.DBforPostgreSQL/flexibleServers/configurations@2023-06-01-preview' = {
+  parent: postgresServer
+  name: 'pgcrypto.extension'
+  properties: {
+    value: 'on'
+    source: 'user-override'
+  }
 }
 
 output POSTGRES_DOMAIN_NAME string = postgresServer.properties.fullyQualifiedDomainName

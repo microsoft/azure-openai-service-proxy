@@ -37,7 +37,7 @@ resource resourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' = {
 var prefix = '${name}-${resourceToken}'
 
 var postgresServerName = '${prefix}-postgresql'
-var postgresAdminUser = 'admin${uniqueString(resourceGroup.id)}'
+var postgresAdminUser = 'admin'
 var postgresDatabaseName = 'aoai-proxy'
 
 
