@@ -19,7 +19,7 @@ public partial class EventEdit : ComponentBase
     [Inject]
     public NavigationManager NavigationManager { get; set; } = null!;
 
-    public EventEditorModel Model { get; set; } = null!;
+    public EventEditorModel Model { get; set; } = new();
 
     public IEnumerable<OwnerCatalog> CurrentModels { get; set; } = null!;
 
@@ -49,20 +49,17 @@ public partial class EventEdit : ComponentBase
         CurrentModels = evt.Catalogs;
         SelectedModels = CurrentModels.Select(oc => oc.CatalogId.ToString());
 
-        Model = new()
-        {
-            Name = evt.EventCode,
-            Description = evt.EventMarkdown,
-            Start = evt.StartUtc,
-            End = evt.EndUtc,
-            Url = evt.EventUrl,
-            UrlText = evt.EventUrlText,
-            OrganizerEmail = evt.OrganizerEmail,
-            OrganizerName = evt.OrganizerName,
-            Active = evt.Active,
-            MaxTokenCap = evt.MaxTokenCap,
-            DailyRequestCap = evt.DailyRequestCap,
-        };
+        Model.Name = evt.EventCode;
+        Model.Description = evt.EventMarkdown;
+        Model.Start = evt.StartUtc;
+        Model.End = evt.EndUtc;
+        Model.Url = evt.EventUrl;
+        Model.UrlText = evt.EventUrlText;
+        Model.OrganizerEmail = evt.OrganizerEmail;
+        Model.OrganizerName = evt.OrganizerName;
+        Model.Active = evt.Active;
+        Model.MaxTokenCap = evt.MaxTokenCap;
+        Model.DailyRequestCap = evt.DailyRequestCap;
     }
 
     private async Task OnValidSubmit(EventEditorModel model)
