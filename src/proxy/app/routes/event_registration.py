@@ -4,6 +4,7 @@ import logging
 from datetime import datetime
 
 import asyncpg
+from app.lru_cache_with_expiry import lru_cache_with_expiry
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
@@ -17,6 +18,7 @@ class EventRegistrationResponse(BaseModel):
     event_code: str
     event_url: str
     event_url_text: str
+    event_image_url: str | None = None
     organizer_name: str
     organizer_email: str
     event_markdown: str
@@ -29,6 +31,7 @@ class EventRegistrationResponse(BaseModel):
         event_code: str,
         event_url: str,
         event_url_text: str,
+        event_image_url: str | None,
         organizer_name: str,
         organizer_email: str,
         event_markdown: str,
@@ -40,6 +43,7 @@ class EventRegistrationResponse(BaseModel):
             event_code=event_code,
             event_url=event_url,
             event_url_text=event_url_text,
+            event_image_url=event_image_url,
             organizer_name=organizer_name,
             organizer_email=organizer_email,
             event_markdown=event_markdown,
@@ -68,6 +72,7 @@ class EventRegistrationInfo:
 
         return self.router
 
+    @lru_cache_with_expiry(maxsize=20, ttl=180)
     async def get_event_info(self, event_id: str) -> EventRegistrationResponse:
         """get event info"""
 
@@ -85,6 +90,9 @@ class EventRegistrationInfo:
                 )
 
             return EventRegistrationResponse(**result[0])
+
+        except HTTPException:
+            raise
 
         except asyncpg.exceptions.PostgresError as error:
             self.logger.error("Postgres error: %s", str(error))

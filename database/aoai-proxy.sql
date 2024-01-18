@@ -209,7 +209,7 @@ ALTER FUNCTION aoai.add_event_attendee(p_user_id character varying, p_event_id c
 -- Name: get_attendee_authorized(character varying); Type: FUNCTION; Schema: aoai; Owner: admin
 --
 
-CREATE FUNCTION aoai.get_attendee_authorized(p_api_key character varying) RETURNS TABLE(user_id character varying, event_id character varying, event_code character varying, organizer_name character varying, organizer_email character varying, event_url character varying, event_url_text character varying, max_token_cap integer, daily_request_cap integer, rate_limit_exceed boolean)
+CREATE FUNCTION aoai.get_attendee_authorized(p_api_key character varying) RETURNS TABLE(user_id character varying, event_id character varying, event_code character varying, organizer_name character varying, organizer_email character varying, event_url character varying, event_url_text character varying, event_image_url character varying, max_token_cap integer, daily_request_cap integer, rate_limit_exceed boolean)
     LANGUAGE plpgsql
     AS $$
 DECLARE
@@ -226,7 +226,6 @@ BEGIN
 		v_request_count = 0;
 	END IF;
 
-
     RETURN QUERY
     SELECT
         EA.user_id,
@@ -236,6 +235,7 @@ BEGIN
         E.organizer_email,
         E.event_url,
         E.event_url_text,
+		E.event_image_url,
         E.max_token_cap,
         E.daily_request_cap,
 		(CASE WHEN v_request_count > E.daily_request_cap THEN true ELSE false END) AS rate_limit_exceed
@@ -258,7 +258,7 @@ ALTER FUNCTION aoai.get_attendee_authorized(p_api_key character varying) OWNER T
 -- Name: get_event_registration_by_event_id(character varying); Type: FUNCTION; Schema: aoai; Owner: admin
 --
 
-CREATE FUNCTION aoai.get_event_registration_by_event_id(p_event_id character varying) RETURNS TABLE(event_id character varying, event_code character varying, event_url character varying, event_url_text character varying, organizer_name character varying, organizer_email character varying, event_markdown character varying, start_utc timestamp without time zone, end_utc timestamp without time zone)
+CREATE FUNCTION aoai.get_event_registration_by_event_id(p_event_id character varying) RETURNS TABLE(event_id character varying, event_code character varying, event_url character varying, event_url_text character varying, event_image_url character varying, organizer_name character varying, organizer_email character varying, event_markdown character varying, start_utc timestamp without time zone, end_utc timestamp without time zone)
     LANGUAGE plpgsql
     AS $$
 BEGIN
@@ -268,6 +268,7 @@ BEGIN
         e.event_code,
         e.event_url,
         e.event_url_text,
+		e.event_image_url,
         e.organizer_name,
         e.organizer_email,
         e.event_markdown,
@@ -285,7 +286,7 @@ ALTER FUNCTION aoai.get_event_registration_by_event_id(p_event_id character vary
 -- Name: get_models_by_deployment_name(character varying, character varying); Type: FUNCTION; Schema: aoai; Owner: admin
 --
 
-CREATE FUNCTION aoai.get_models_by_deployment_name(p_event_id character varying, p_deployment_id character varying) RETURNS TABLE(deployment_name character varying, resource_name character varying, endpoint_key character varying, model_type aoai.model_type, catalog_id uuid)
+CREATE FUNCTION aoai.get_models_by_deployment_name(p_event_id character varying, p_deployment_id character varying) RETURNS TABLE(deployment_name character varying, resource_name character varying, endpoint_key character varying, model_type aoai.model_type, catalog_id uuid, location character varying)
     LANGUAGE plpgsql
     AS $$
 BEGIN
@@ -295,7 +296,8 @@ BEGIN
         OC.resource_name,
         OC.endpoint_key,
         OC.model_type,
-        OC.catalog_id
+        OC.catalog_id,
+		OC.location
     FROM
         aoai.event_catalog_map EC
     INNER JOIN
@@ -314,7 +316,7 @@ ALTER FUNCTION aoai.get_models_by_deployment_name(p_event_id character varying, 
 -- Name: get_models_by_event(character varying); Type: FUNCTION; Schema: aoai; Owner: admin
 --
 
-CREATE FUNCTION aoai.get_models_by_event(p_event_id character varying) RETURNS TABLE(deployment_name character varying, resource_name character varying, endpoint_key character varying, model_type aoai.model_type, catalog_id uuid)
+CREATE FUNCTION aoai.get_models_by_event(p_event_id character varying) RETURNS TABLE(deployment_name character varying, resource_name character varying, endpoint_key character varying, model_type aoai.model_type, catalog_id uuid, location character varying)
     LANGUAGE plpgsql
     AS $$
 BEGIN
@@ -324,7 +326,8 @@ BEGIN
         OC.resource_name,
         OC.endpoint_key,
         OC.model_type,
-        OC.catalog_id
+        OC.catalog_id,
+		OC.location
     FROM
         aoai.event_catalog_map EC
     INNER JOIN
@@ -361,7 +364,8 @@ CREATE TABLE aoai.event (
     event_url_text character varying(256) NOT NULL,
     max_token_cap integer NOT NULL,
     daily_request_cap integer NOT NULL,
-    active boolean NOT NULL
+    active boolean NOT NULL,
+    event_image_url character varying(256)
 );
 
 
@@ -445,7 +449,8 @@ CREATE TABLE aoai.owner_catalog (
     resource_name character varying(64) NOT NULL,
     endpoint_key character varying(128) NOT NULL,
     active boolean NOT NULL,
-    model_type aoai.model_type NOT NULL
+    model_type aoai.model_type NOT NULL,
+    location character varying(64) DEFAULT ''::character varying NOT NULL
 );
 
 

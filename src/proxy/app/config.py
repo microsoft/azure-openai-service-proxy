@@ -29,6 +29,7 @@ class Deployment:
         model_type: str,
         resource_name: str,
         catalog_id: uuid,
+        location: str,
     ):
         """init deployment"""
         self.endpoint_key = endpoint_key
@@ -36,6 +37,7 @@ class Deployment:
         self.deployment_name = deployment_name
         self.resource_name = resource_name
         self.catalog_id = catalog_id
+        self.location = location
 
 
 class Config:
