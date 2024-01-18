@@ -1,6 +1,7 @@
 """ Request Manager base class """
 
 import logging
+from collections.abc import AsyncGenerator
 
 from fastapi import APIRouter, HTTPException, Request
 
@@ -85,6 +86,11 @@ class RequestManager:
 
         deployment = await self.config.get_catalog_by_deployment_name(authorize_response)
         response, http_status_code = await call_method(model, deployment)
+
+        if not isinstance(response, AsyncGenerator) and "model" in response:
+            response = self.model_to_dict(response)
+            response["model"] = response["model"] + ":" + deployment.location.lower()
+            response["location"] = deployment.location.lower()
 
         return response, http_status_code
 
