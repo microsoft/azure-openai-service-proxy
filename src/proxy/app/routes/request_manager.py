@@ -90,7 +90,6 @@ class RequestManager:
         if not isinstance(response, AsyncGenerator) and "model" in response:
             response = self.model_to_dict(response)
             response["model"] = response["model"] + ":" + deployment.location.lower()
-            response["location"] = deployment.location.lower()
 
         return response, http_status_code
 
