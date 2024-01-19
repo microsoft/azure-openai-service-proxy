@@ -61,13 +61,4 @@ resource postgresServer 'Microsoft.DBforPostgreSQL/flexibleServers@2023-06-01-pr
 
 }
 
-resource postgresServerExtensions 'Microsoft.DBforPostgreSQL/flexibleServers/configurations@2023-06-01-preview' = {
-  parent: postgresServer
-  name: 'pgcrypto.extension'
-  properties: {
-    value: 'on'
-    source: 'user-override'
-  }
-}
-
 output POSTGRES_DOMAIN_NAME string = postgresServer.properties.fullyQualifiedDomainName
