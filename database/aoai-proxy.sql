@@ -17,13 +17,13 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 --
--- Name: aoai; Type: SCHEMA; Schema: -; Owner: admin
+-- Name: aoai; Type: SCHEMA; Schema: -; Owner: azure_pg_admin
 --
 
 CREATE SCHEMA aoai;
 
 
-ALTER SCHEMA aoai OWNER TO proxyadmin;
+ALTER SCHEMA aoai OWNER TO azure_pg_admin;
 
 --
 -- Name: pgcrypto; Type: EXTENSION; Schema: -; Owner: -
@@ -40,7 +40,7 @@ COMMENT ON EXTENSION pgcrypto IS 'cryptographic functions';
 
 
 --
--- Name: model_type; Type: TYPE; Schema: aoai; Owner: admin
+-- Name: model_type; Type: TYPE; Schema: aoai; Owner: azure_pg_admin
 --
 
 CREATE TYPE aoai.model_type AS ENUM (
@@ -49,14 +49,15 @@ CREATE TYPE aoai.model_type AS ENUM (
     'openai-dalle2',
     'openai-dalle3',
     'openai-whisper',
-    'openai-completion'
+    'openai-completion',
+    'openai-instruct'
 );
 
 
-ALTER TYPE aoai.model_type OWNER TO proxyadmin;
+ALTER TYPE aoai.model_type OWNER TO azure_pg_admin;
 
 --
--- Name: add_attendee_metric(character varying, character varying, uuid); Type: PROCEDURE; Schema: aoai; Owner: admin
+-- Name: add_attendee_metric(character varying, character varying, uuid); Type: PROCEDURE; Schema: aoai; Owner: azure_pg_admin
 --
 
 CREATE PROCEDURE aoai.add_attendee_metric(IN p_api_key character varying, IN p_event_id character varying, IN p_catalog_id uuid)
@@ -85,10 +86,10 @@ END;
 $$;
 
 
-ALTER PROCEDURE aoai.add_attendee_metric(IN p_api_key character varying, IN p_event_id character varying, IN p_catalog_id uuid) OWNER TO proxyadmin;
+ALTER PROCEDURE aoai.add_attendee_metric(IN p_api_key character varying, IN p_event_id character varying, IN p_catalog_id uuid) OWNER TO azure_pg_admin;
 
 --
--- Name: add_event(character varying, character varying, character varying, timestamp without time zone, timestamp without time zone, character varying, character varying, character varying, character varying, integer, integer, boolean); Type: FUNCTION; Schema: aoai; Owner: admin
+-- Name: add_event(character varying, character varying, character varying, timestamp without time zone, timestamp without time zone, character varying, character varying, character varying, character varying, integer, integer, boolean); Type: FUNCTION; Schema: aoai; Owner: azure_pg_admin
 --
 
 CREATE FUNCTION aoai.add_event(p_owner_id character varying, p_event_code character varying, p_event_markdown character varying, p_start_utc timestamp without time zone, p_end_utc timestamp without time zone, p_organizer_name character varying, p_organizer_email character varying, p_event_url character varying, p_event_url_text character varying, p_max_token_cap integer, p_daily_request_cap integer, p_active boolean) RETURNS TABLE(event_id character varying, owner_id character varying, event_code character varying, event_markdown character varying, start_utc timestamp without time zone, end_utc timestamp without time zone, organizer_name character varying, organizer_email character varying, event_url character varying, event_url_text character varying, max_token_cap integer, daily_request_cap integer, active boolean)
@@ -163,10 +164,10 @@ END;
 $$;
 
 
-ALTER FUNCTION aoai.add_event(p_owner_id character varying, p_event_code character varying, p_event_markdown character varying, p_start_utc timestamp without time zone, p_end_utc timestamp without time zone, p_organizer_name character varying, p_organizer_email character varying, p_event_url character varying, p_event_url_text character varying, p_max_token_cap integer, p_daily_request_cap integer, p_active boolean) OWNER TO proxyadmin;
+ALTER FUNCTION aoai.add_event(p_owner_id character varying, p_event_code character varying, p_event_markdown character varying, p_start_utc timestamp without time zone, p_end_utc timestamp without time zone, p_organizer_name character varying, p_organizer_email character varying, p_event_url character varying, p_event_url_text character varying, p_max_token_cap integer, p_daily_request_cap integer, p_active boolean) OWNER TO azure_pg_admin;
 
 --
--- Name: add_event_attendee(character varying, character varying); Type: FUNCTION; Schema: aoai; Owner: admin
+-- Name: add_event_attendee(character varying, character varying); Type: FUNCTION; Schema: aoai; Owner: azure_pg_admin
 --
 
 CREATE FUNCTION aoai.add_event_attendee(p_user_id character varying, p_event_id character varying) RETURNS uuid
@@ -189,10 +190,10 @@ END;
 $$;
 
 
-ALTER FUNCTION aoai.add_event_attendee(p_user_id character varying, p_event_id character varying) OWNER TO proxyadmin;
+ALTER FUNCTION aoai.add_event_attendee(p_user_id character varying, p_event_id character varying) OWNER TO azure_pg_admin;
 
 --
--- Name: get_attendee_authorized(character varying); Type: FUNCTION; Schema: aoai; Owner: admin
+-- Name: get_attendee_authorized(character varying); Type: FUNCTION; Schema: aoai; Owner: azure_pg_admin
 --
 
 CREATE FUNCTION aoai.get_attendee_authorized(p_api_key character varying) RETURNS TABLE(user_id character varying, event_id character varying, event_code character varying, organizer_name character varying, organizer_email character varying, event_url character varying, event_url_text character varying, event_image_url character varying, max_token_cap integer, daily_request_cap integer, rate_limit_exceed boolean)
@@ -238,10 +239,10 @@ END;
 $$;
 
 
-ALTER FUNCTION aoai.get_attendee_authorized(p_api_key character varying) OWNER TO proxyadmin;
+ALTER FUNCTION aoai.get_attendee_authorized(p_api_key character varying) OWNER TO azure_pg_admin;
 
 --
--- Name: get_event_registration_by_event_id(character varying); Type: FUNCTION; Schema: aoai; Owner: admin
+-- Name: get_event_registration_by_event_id(character varying); Type: FUNCTION; Schema: aoai; Owner: azure_pg_admin
 --
 
 CREATE FUNCTION aoai.get_event_registration_by_event_id(p_event_id character varying) RETURNS TABLE(event_id character varying, event_code character varying, event_url character varying, event_url_text character varying, event_image_url character varying, organizer_name character varying, organizer_email character varying, event_markdown character varying, start_utc timestamp without time zone, end_utc timestamp without time zone)
@@ -266,10 +267,10 @@ END;
 $$;
 
 
-ALTER FUNCTION aoai.get_event_registration_by_event_id(p_event_id character varying) OWNER TO proxyadmin;
+ALTER FUNCTION aoai.get_event_registration_by_event_id(p_event_id character varying) OWNER TO azure_pg_admin;
 
 --
--- Name: get_models_by_deployment_name(character varying, character varying); Type: FUNCTION; Schema: aoai; Owner: admin
+-- Name: get_models_by_deployment_name(character varying, character varying); Type: FUNCTION; Schema: aoai; Owner: azure_pg_admin
 --
 
 CREATE FUNCTION aoai.get_models_by_deployment_name(p_event_id character varying, p_deployment_id character varying) RETURNS TABLE(deployment_name character varying, resource_name character varying, endpoint_key character varying, model_type aoai.model_type, catalog_id uuid, location character varying)
@@ -296,10 +297,10 @@ END;
 $$;
 
 
-ALTER FUNCTION aoai.get_models_by_deployment_name(p_event_id character varying, p_deployment_id character varying) OWNER TO proxyadmin;
+ALTER FUNCTION aoai.get_models_by_deployment_name(p_event_id character varying, p_deployment_id character varying) OWNER TO azure_pg_admin;
 
 --
--- Name: get_models_by_event(character varying); Type: FUNCTION; Schema: aoai; Owner: admin
+-- Name: get_models_by_event(character varying); Type: FUNCTION; Schema: aoai; Owner: azure_pg_admin
 --
 
 CREATE FUNCTION aoai.get_models_by_event(p_event_id character varying) RETURNS TABLE(deployment_name character varying, resource_name character varying, endpoint_key character varying, model_type aoai.model_type, catalog_id uuid, location character varying)
@@ -327,14 +328,14 @@ END;
 $$;
 
 
-ALTER FUNCTION aoai.get_models_by_event(p_event_id character varying) OWNER TO proxyadmin;
+ALTER FUNCTION aoai.get_models_by_event(p_event_id character varying) OWNER TO azure_pg_admin;
 
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
 
 --
--- Name: event; Type: TABLE; Schema: aoai; Owner: admin
+-- Name: event; Type: TABLE; Schema: aoai; Owner: azure_pg_admin
 --
 
 CREATE TABLE aoai.event (
@@ -355,10 +356,10 @@ CREATE TABLE aoai.event (
 );
 
 
-ALTER TABLE aoai.event OWNER TO proxyadmin;
+ALTER TABLE aoai.event OWNER TO azure_pg_admin;
 
 --
--- Name: event_attendee; Type: TABLE; Schema: aoai; Owner: admin
+-- Name: event_attendee; Type: TABLE; Schema: aoai; Owner: azure_pg_admin
 --
 
 CREATE TABLE aoai.event_attendee (
@@ -369,10 +370,10 @@ CREATE TABLE aoai.event_attendee (
 );
 
 
-ALTER TABLE aoai.event_attendee OWNER TO proxyadmin;
+ALTER TABLE aoai.event_attendee OWNER TO azure_pg_admin;
 
 --
--- Name: event_attendee_request; Type: TABLE; Schema: aoai; Owner: admin
+-- Name: event_attendee_request; Type: TABLE; Schema: aoai; Owner: azure_pg_admin
 --
 
 CREATE TABLE aoai.event_attendee_request (
@@ -382,10 +383,10 @@ CREATE TABLE aoai.event_attendee_request (
 );
 
 
-ALTER TABLE aoai.event_attendee_request OWNER TO proxyadmin;
+ALTER TABLE aoai.event_attendee_request OWNER TO azure_pg_admin;
 
 --
--- Name: event_catalog_map; Type: TABLE; Schema: aoai; Owner: admin
+-- Name: event_catalog_map; Type: TABLE; Schema: aoai; Owner: azure_pg_admin
 --
 
 CREATE TABLE aoai.event_catalog_map (
@@ -394,10 +395,10 @@ CREATE TABLE aoai.event_catalog_map (
 );
 
 
-ALTER TABLE aoai.event_catalog_map OWNER TO proxyadmin;
+ALTER TABLE aoai.event_catalog_map OWNER TO azure_pg_admin;
 
 --
--- Name: metric; Type: TABLE; Schema: aoai; Owner: admin
+-- Name: metric; Type: TABLE; Schema: aoai; Owner: azure_pg_admin
 --
 
 CREATE TABLE aoai.metric (
@@ -409,10 +410,10 @@ CREATE TABLE aoai.metric (
 );
 
 
-ALTER TABLE aoai.metric OWNER TO proxyadmin;
+ALTER TABLE aoai.metric OWNER TO azure_pg_admin;
 
 --
--- Name: owner; Type: TABLE; Schema: aoai; Owner: admin
+-- Name: owner; Type: TABLE; Schema: aoai; Owner: azure_pg_admin
 --
 
 CREATE TABLE aoai.owner (
@@ -422,10 +423,10 @@ CREATE TABLE aoai.owner (
 );
 
 
-ALTER TABLE aoai.owner OWNER TO proxyadmin;
+ALTER TABLE aoai.owner OWNER TO azure_pg_admin;
 
 --
--- Name: owner_catalog; Type: TABLE; Schema: aoai; Owner: admin
+-- Name: owner_catalog; Type: TABLE; Schema: aoai; Owner: azure_pg_admin
 --
 
 CREATE TABLE aoai.owner_catalog (
@@ -440,10 +441,10 @@ CREATE TABLE aoai.owner_catalog (
 );
 
 
-ALTER TABLE aoai.owner_catalog OWNER TO proxyadmin;
+ALTER TABLE aoai.owner_catalog OWNER TO azure_pg_admin;
 
 --
--- Name: owner_event_map; Type: TABLE; Schema: aoai; Owner: admin
+-- Name: owner_event_map; Type: TABLE; Schema: aoai; Owner: azure_pg_admin
 --
 
 CREATE TABLE aoai.owner_event_map (
@@ -453,10 +454,10 @@ CREATE TABLE aoai.owner_event_map (
 );
 
 
-ALTER TABLE aoai.owner_event_map OWNER TO proxyadmin;
+ALTER TABLE aoai.owner_event_map OWNER TO azure_pg_admin;
 
 --
--- Name: event event_pkey; Type: CONSTRAINT; Schema: aoai; Owner: admin
+-- Name: event event_pkey; Type: CONSTRAINT; Schema: aoai; Owner: azure_pg_admin
 --
 
 ALTER TABLE ONLY aoai.event
@@ -464,7 +465,7 @@ ALTER TABLE ONLY aoai.event
 
 
 --
--- Name: event_attendee eventattendee_pkey; Type: CONSTRAINT; Schema: aoai; Owner: admin
+-- Name: event_attendee eventattendee_pkey; Type: CONSTRAINT; Schema: aoai; Owner: azure_pg_admin
 --
 
 ALTER TABLE ONLY aoai.event_attendee
@@ -472,7 +473,7 @@ ALTER TABLE ONLY aoai.event_attendee
 
 
 --
--- Name: event_attendee_request eventattendeerequest_pkey; Type: CONSTRAINT; Schema: aoai; Owner: admin
+-- Name: event_attendee_request eventattendeerequest_pkey; Type: CONSTRAINT; Schema: aoai; Owner: azure_pg_admin
 --
 
 ALTER TABLE ONLY aoai.event_attendee_request
@@ -480,7 +481,7 @@ ALTER TABLE ONLY aoai.event_attendee_request
 
 
 --
--- Name: event_catalog_map eventcatalogmap_pkey; Type: CONSTRAINT; Schema: aoai; Owner: admin
+-- Name: event_catalog_map eventcatalogmap_pkey; Type: CONSTRAINT; Schema: aoai; Owner: azure_pg_admin
 --
 
 ALTER TABLE ONLY aoai.event_catalog_map
@@ -488,7 +489,7 @@ ALTER TABLE ONLY aoai.event_catalog_map
 
 
 --
--- Name: owner owner_pkey; Type: CONSTRAINT; Schema: aoai; Owner: admin
+-- Name: owner owner_pkey; Type: CONSTRAINT; Schema: aoai; Owner: azure_pg_admin
 --
 
 ALTER TABLE ONLY aoai.owner
@@ -496,7 +497,7 @@ ALTER TABLE ONLY aoai.owner
 
 
 --
--- Name: owner_catalog ownercatalog_pkey; Type: CONSTRAINT; Schema: aoai; Owner: admin
+-- Name: owner_catalog ownercatalog_pkey; Type: CONSTRAINT; Schema: aoai; Owner: azure_pg_admin
 --
 
 ALTER TABLE ONLY aoai.owner_catalog
@@ -504,7 +505,7 @@ ALTER TABLE ONLY aoai.owner_catalog
 
 
 --
--- Name: owner_event_map ownereventmap_pkey; Type: CONSTRAINT; Schema: aoai; Owner: admin
+-- Name: owner_event_map ownereventmap_pkey; Type: CONSTRAINT; Schema: aoai; Owner: azure_pg_admin
 --
 
 ALTER TABLE ONLY aoai.owner_event_map
@@ -512,21 +513,21 @@ ALTER TABLE ONLY aoai.owner_event_map
 
 
 --
--- Name: api_key_unique_index; Type: INDEX; Schema: aoai; Owner: admin
+-- Name: api_key_unique_index; Type: INDEX; Schema: aoai; Owner: azure_pg_admin
 --
 
 CREATE UNIQUE INDEX api_key_unique_index ON aoai.event_attendee USING btree (api_key);
 
 
 --
--- Name: event_id_index; Type: INDEX; Schema: aoai; Owner: admin
+-- Name: event_id_index; Type: INDEX; Schema: aoai; Owner: azure_pg_admin
 --
 
 CREATE INDEX event_id_index ON aoai.metric USING btree (event_id);
 
 
 --
--- Name: event_attendee fk_eventattendee_event; Type: FK CONSTRAINT; Schema: aoai; Owner: admin
+-- Name: event_attendee fk_eventattendee_event; Type: FK CONSTRAINT; Schema: aoai; Owner: azure_pg_admin
 --
 
 ALTER TABLE ONLY aoai.event_attendee
@@ -534,7 +535,7 @@ ALTER TABLE ONLY aoai.event_attendee
 
 
 --
--- Name: event_attendee_request fk_eventattendeerequest_eventattendee; Type: FK CONSTRAINT; Schema: aoai; Owner: admin
+-- Name: event_attendee_request fk_eventattendeerequest_eventattendee; Type: FK CONSTRAINT; Schema: aoai; Owner: azure_pg_admin
 --
 
 ALTER TABLE ONLY aoai.event_attendee_request
@@ -542,7 +543,7 @@ ALTER TABLE ONLY aoai.event_attendee_request
 
 
 --
--- Name: event_catalog_map fk_eventcatalogmap_event; Type: FK CONSTRAINT; Schema: aoai; Owner: admin
+-- Name: event_catalog_map fk_eventcatalogmap_event; Type: FK CONSTRAINT; Schema: aoai; Owner: azure_pg_admin
 --
 
 ALTER TABLE ONLY aoai.event_catalog_map
@@ -550,7 +551,7 @@ ALTER TABLE ONLY aoai.event_catalog_map
 
 
 --
--- Name: event_catalog_map fk_eventcatalogmap_ownercatalog; Type: FK CONSTRAINT; Schema: aoai; Owner: admin
+-- Name: event_catalog_map fk_eventcatalogmap_ownercatalog; Type: FK CONSTRAINT; Schema: aoai; Owner: azure_pg_admin
 --
 
 ALTER TABLE ONLY aoai.event_catalog_map
@@ -558,7 +559,7 @@ ALTER TABLE ONLY aoai.event_catalog_map
 
 
 --
--- Name: owner_catalog fk_groupmodels_group; Type: FK CONSTRAINT; Schema: aoai; Owner: admin
+-- Name: owner_catalog fk_groupmodels_group; Type: FK CONSTRAINT; Schema: aoai; Owner: azure_pg_admin
 --
 
 ALTER TABLE ONLY aoai.owner_catalog
@@ -566,7 +567,7 @@ ALTER TABLE ONLY aoai.owner_catalog
 
 
 --
--- Name: metric fk_metric; Type: FK CONSTRAINT; Schema: aoai; Owner: admin
+-- Name: metric fk_metric; Type: FK CONSTRAINT; Schema: aoai; Owner: azure_pg_admin
 --
 
 ALTER TABLE ONLY aoai.metric
@@ -574,7 +575,7 @@ ALTER TABLE ONLY aoai.metric
 
 
 --
--- Name: metric fk_metric_owner_catalog; Type: FK CONSTRAINT; Schema: aoai; Owner: admin
+-- Name: metric fk_metric_owner_catalog; Type: FK CONSTRAINT; Schema: aoai; Owner: azure_pg_admin
 --
 
 ALTER TABLE ONLY aoai.metric
@@ -582,7 +583,7 @@ ALTER TABLE ONLY aoai.metric
 
 
 --
--- Name: owner_event_map fk_ownereventmap_event; Type: FK CONSTRAINT; Schema: aoai; Owner: admin
+-- Name: owner_event_map fk_ownereventmap_event; Type: FK CONSTRAINT; Schema: aoai; Owner: azure_pg_admin
 --
 
 ALTER TABLE ONLY aoai.owner_event_map
@@ -590,7 +591,7 @@ ALTER TABLE ONLY aoai.owner_event_map
 
 
 --
--- Name: owner_event_map fk_ownereventmap_owner; Type: FK CONSTRAINT; Schema: aoai; Owner: admin
+-- Name: owner_event_map fk_ownereventmap_owner; Type: FK CONSTRAINT; Schema: aoai; Owner: azure_pg_admin
 --
 
 ALTER TABLE ONLY aoai.owner_event_map
