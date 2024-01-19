@@ -7,15 +7,9 @@
     {
       "route": "/api/v1/attendee*",
       "allowedRoles": ["authenticated"]
-    },
-    {
-      "route": "/*",
-      "serve": "/index.html",
-      "statusCode": 200
     }
   ],
   "navigationFallback": {
-    "rewrite": "/index.html",
-    "statusCode": 200
+    "rewrite": "/index.html"
   }
 }
