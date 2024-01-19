@@ -8,5 +8,8 @@
       "route": "/api/v1/attendee*",
       "allowedRoles": ["authenticated"]
     }
-  ]
+  ],
+  "navigationFallback": {
+    "rewrite": "/index.html"
+  }
 }
