@@ -1,10 +1,11 @@
 """ Database manager """
 
+import asyncio
 import logging
 
 import asyncpg
-from asyncpg import create_pool
-from fastapi import HTTPException
+
+MAX_RETRIES = 6
 
 logging.basicConfig(level=logging.WARNING)
 
@@ -21,17 +22,17 @@ class DBManager:
     async def get_connection(self):
         """connect to database"""
         if self.pool is None:
-            try:
-                # self.sql_conn = await asyncpg.connect(self.connection_string)
-                self.pool = await create_pool(
-                    self.connection_string, max_size=100, max_inactive_connection_lifetime=4
-                )
-
-            except asyncpg.exceptions.PostgresError as error:
-                self.logging.error("Postgres error connecting to server: %s", str(error))
-                raise HTTPException(
-                    status_code=503,
-                    detail="Postgres error connecting to server.",
-                ) from error
+            for i in range(MAX_RETRIES):
+                try:
+                    self.pool = await asyncpg.create_pool(
+                        self.connection_string, max_size=200, max_inactive_connection_lifetime=4
+                    )
+                    break  # If the connection is successful, break the loop
+                except asyncpg.exceptions.PostgresError:
+                    if i < MAX_RETRIES - 1:  # i is zero indexed
+                        await asyncio.sleep(2**i)  # exponential backoff
+                        print(f"Retrying connection to database. Attempt {i+1} of {MAX_RETRIES}")
+                    else:
+                        raise  # If this was the last retry and it still failed, raise the exception
 
         return self.pool
