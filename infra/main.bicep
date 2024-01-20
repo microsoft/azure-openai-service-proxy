@@ -27,41 +27,15 @@ param postgresAdminPassword string
 
 var resourceToken = toLower(uniqueString(subscription().id, name, location))
 var tags = { 'azd-env-name': name }
+var prefix = '${name}-${resourceToken}'
+
+var postgresAdminUser = 'admin${uniqueString(resourceGroup.id)}'
+var postgresDatabaseName = 'aoai-proxy'
 
 resource resourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   name: '${name}-rg'
   location: location
   tags: tags
-}
-
-var prefix = '${name}-${resourceToken}'
-
-var postgresServerName = '${prefix}-postgresql'
-var postgresAdminUser = 'admin${uniqueString(resourceGroup.id)}'
-var postgresDatabaseName = 'aoai-proxy'
-
-
-// Create PostgreSQL database
-module postgresServer 'core/database/postgresql/flexibleserver.bicep' = {
-  name: 'postgresql'
-  scope: resourceGroup
-  params: {
-    name: postgresServerName
-    location: location
-    tags: tags
-    sku: {
-      name: 'Standard_B1ms'
-      tier: 'Burstable'
-    }
-    storage: {
-      storageSizeGB: 32
-    }
-    version: '16'
-    administratorLogin: postgresAdminUser
-    administratorLoginPassword: postgresAdminPassword
-    databaseNames: [ postgresDatabaseName ]
-    allowAzureIPsFirewall: true
-  }
 }
 
 // Container apps host (including container registry)
@@ -78,6 +52,20 @@ module containerApps 'core/host/container-apps.bicep' = {
   }
 }
 
+// PostgreSQL Server
+module postgresServer 'db.bicep' = {
+  name: 'postgres-server'
+  scope: resourceGroup
+  params: {
+    name: '${prefix}-postgresql'
+    location: location
+    tags: tags
+    postgresAdminUser: postgresAdminUser
+    postgresAdminPassword: postgresAdminPassword
+    postgresDatabaseName: postgresDatabaseName
+  }
+}
+
 // Proxy app
 module proxy 'proxy.bicep' = {
   name: 'proxy'
@@ -90,7 +78,7 @@ module proxy 'proxy.bicep' = {
     containerAppsEnvironmentName: containerApps.outputs.environmentName
     containerRegistryName: containerApps.outputs.registryName
     exists: proxyAppExists
-    postgresServer: postgresServer.outputs.POSTGRES_DOMAIN_NAME
+    postgresServer: postgresServer.outputs.DOMAIN_NAME
     postgresDatabase: postgresDatabaseName
     postgresUser: postgresAdminUser
     postgresPassword: postgresAdminPassword
@@ -130,7 +118,6 @@ module monitoring 'core/monitor/monitoring.bicep' = {
   }
 }
 
-
 // Admin app
 module admin 'admin.bicep' = {
   name: 'admin'
@@ -143,7 +130,7 @@ module admin 'admin.bicep' = {
     containerAppsEnvironmentName: containerApps.outputs.environmentName
     containerRegistryName: containerApps.outputs.registryName
     exists: adminAppExists
-    postgresServer: postgresServer.outputs.POSTGRES_DOMAIN_NAME
+    postgresServer: postgresServer.outputs.DOMAIN_NAME
     postgresDatabase: postgresDatabaseName
     postgresUser: postgresAdminUser
     postgresPassword: postgresAdminPassword
