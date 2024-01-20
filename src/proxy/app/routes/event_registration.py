@@ -76,12 +76,13 @@ class EventRegistrationInfo:
     async def get_event_info(self, event_id: str) -> EventRegistrationResponse:
         """get event info"""
 
-        try:
-            conn = await self.db_manager.get_connection()
+        pool = await self.db_manager.get_connection()
 
-            result = await conn.fetch(
-                "SELECT * FROM aoai.get_event_registration_by_event_id($1)", event_id
-            )
+        try:
+            async with pool.acquire() as conn:
+                result = await conn.fetch(
+                    "SELECT * FROM aoai.get_event_registration_by_event_id($1)", event_id
+                )
 
             if not result:
                 raise HTTPException(

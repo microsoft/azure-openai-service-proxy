@@ -50,11 +50,12 @@ class AttendeeApi:
             try:
                 user_id = self.get_user_id(request=request)
 
-                conn = await self.db_manager.get_connection()
+                pool = await self.db_manager.get_connection()
 
-                result = await conn.fetch(
-                    "SELECT * FROM aoai.add_event_attendee($1, $2)", user_id, event_id
-                )
+                async with pool.acquire() as conn:
+                    result = await conn.fetch(
+                        "SELECT * FROM aoai.add_event_attendee($1, $2)", user_id, event_id
+                    )
 
                 if not result:
                     raise HTTPException(
@@ -70,18 +71,21 @@ class AttendeeApi:
         async def get_attendees(request: Request, event_id: str):
             """Get attendees"""
             logging.info("Getting attendees")
+
+            pool = await self.db_manager.get_connection()
+
             try:
                 user_id = self.get_user_id(request=request)
-                conn = await self.db_manager.get_connection()
 
-                result = await conn.fetch(
-                    "SELECT EA.api_key, EA.active "
-                    "FROM aoai.event_attendee EA "
-                    "WHERE EA.event_id = $1 "
-                    "AND EA.user_id = $2",
-                    event_id,
-                    user_id,
-                )
+                async with pool.acquire() as conn:
+                    result = await conn.fetch(
+                        "SELECT EA.api_key, EA.active "
+                        "FROM aoai.event_attendee EA "
+                        "WHERE EA.event_id = $1 "
+                        "AND EA.user_id = $2",
+                        event_id,
+                        user_id,
+                    )
 
                 if not result:
                     raise HTTPException(
