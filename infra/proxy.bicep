@@ -29,6 +29,8 @@ module app 'core/host/container-app-upsert.bicep' = {
     containerAppsEnvironmentName: containerAppsEnvironmentName
     containerRegistryName: containerRegistryName
     targetPort: 3100
+    containerCpuCoreCount: '1.0'
+    containerMemory:'2.0Gi'
     env: [
       {
         name: 'POSTGRES_CONNECTION_STRING'

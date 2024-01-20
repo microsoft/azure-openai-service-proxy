@@ -102,7 +102,7 @@ class Monitor:
             self.logging.error("Postgres error: %s", str(error))
             raise HTTPException(
                 status_code=501,
-                detail="Postgres Monitor request failed - asyncpg exception.",
+                detail="Postgres Monitor request failed.",
             ) from error
 
         except Exception as exception:
