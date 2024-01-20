@@ -25,7 +25,7 @@ class DBManager:
             for i in range(MAX_RETRIES):
                 try:
                     self.pool = await asyncpg.create_pool(
-                        self.connection_string, max_size=200, max_inactive_connection_lifetime=6
+                        self.connection_string, max_size=300, max_inactive_connection_lifetime=600
                     )
                     break  # If the connection is successful, break the loop
                 except asyncpg.exceptions.PostgresError:
