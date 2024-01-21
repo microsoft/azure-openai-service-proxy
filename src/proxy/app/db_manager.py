@@ -1,9 +1,9 @@
 """ Database manager """
 
-import asyncio
 import logging
 
 import asyncpg
+from fastapi import FastAPI, HTTPException
 
 MAX_RETRIES = 6
 
@@ -13,26 +13,24 @@ logging.basicConfig(level=logging.WARNING)
 class DBManager:
     """Database manager"""
 
-    def __init__(self, connection_string: str) -> None:
-        self.connection_string = connection_string
-        self.sql_conn = None
-        self.pool = None
+    def __init__(self, app: FastAPI) -> None:
+        # self.connection_string = connection_string
+        # self.sql_conn = None
+        # self.pool = None
         self.logging = logging.getLogger(__name__)
+        self.app = app
+
+    async def create_pool(self, connection_string: str):
+        """create database pool"""
+        print("Creating connection pool")
+        try:
+            self.app.pool = await asyncpg.create_pool(
+                connection_string, max_size=200, max_inactive_connection_lifetime=600
+            )
+        except asyncpg.exceptions.PostgresError as error:
+            self.logging.error("Postgres error: %s", str(error))
+            raise HTTPException(status_code=501, detail="Postgres error opening pool") from error
 
     async def get_connection(self):
         """connect to database"""
-        if self.pool is None:
-            for i in range(MAX_RETRIES):
-                try:
-                    self.pool = await asyncpg.create_pool(
-                        self.connection_string, max_size=200, max_inactive_connection_lifetime=60
-                    )
-                    break  # If the connection is successful, break the loop
-                except asyncpg.exceptions.PostgresError:
-                    if i < MAX_RETRIES - 1:  # i is zero indexed
-                        await asyncio.sleep(2**i)  # exponential backoff
-                        print(f"Retrying connection to database. Attempt {i+1} of {MAX_RETRIES}")
-                    else:
-                        raise  # If this was the last retry and it still failed, raise the exception
-
-        return self.pool
+        return self.app.pool

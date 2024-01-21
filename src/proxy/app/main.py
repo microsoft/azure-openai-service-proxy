@@ -49,7 +49,7 @@ app = FastAPI(
 )
 
 
-db_manager = DBManager(connection_string=sql_connection_string)
+db_manager = DBManager(app=app)
 monitor = Monitor(db_manager=db_manager)
 authorize = Authorize(db_manager=db_manager)
 config = Config(db_manager=db_manager, monitor=monitor)
@@ -130,6 +130,7 @@ async def validation_exception_handler(request, exc):
 @app.on_event("startup")
 async def startup_event():
     """startup event"""
+    await db_manager.create_pool(connection_string=sql_connection_string)
 
 
 if os.environ.get("ENVIRONMENT") == "development":
