@@ -11,4 +11,3 @@ Black
 ruff
 cachetools>=5.3.2, <5.4.0
 asyncpg>=0.29.0, <0.30.0
-tenacity>=8.2.3, <8.3.0

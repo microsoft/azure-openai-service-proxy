@@ -31,7 +31,7 @@ module app 'core/host/container-app-upsert.bicep' = {
     targetPort: 3100
     // containerCpuCoreCount: '1.0'
     // containerMemory:'2.0Gi'
-    containerMaxReplicas: 5
+    containerMaxReplicas: 2
     env: [
       {
         name: 'POSTGRES_CONNECTION_STRING'
