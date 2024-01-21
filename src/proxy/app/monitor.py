@@ -88,9 +88,7 @@ class Monitor:
     @retry(
         stop=stop_after_attempt(4),
         wait=wait_fixed(1),
-        retry=retry_if_exception_type(
-            (ConnectionError, TimeoutError, asyncpg.exceptions.TooManyConnectionsError)
-        ),
+        retry=retry_if_exception_type(asyncpg.exceptions.TooManyConnectionsError),
     )
     async def execute_query(self, pool, entity: MonitorEntity):
         """execute query"""
