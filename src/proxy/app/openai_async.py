@@ -3,11 +3,9 @@
 import json
 import logging
 from collections.abc import AsyncGenerator
+from typing import Any
 
 import httpx
-import openai
-import openai.error
-import openai.openai_object
 from fastapi import HTTPException
 
 from .config import Deployment
@@ -35,9 +33,7 @@ class OpenAIAsyncManager:
         """init in memory session manager"""
         self.deployment = deployment
 
-    async def async_openai_post(
-        self, openai_request: str, url: str
-    ) -> tuple[openai.openai_object.OpenAIObject, int]:
+    async def async_openai_post(self, openai_request: str, url: str) -> Any:
         """async openai post"""
 
         headers = {

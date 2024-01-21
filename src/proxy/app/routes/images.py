@@ -1,8 +1,8 @@
 """ dalle-3 and beyond """
 
 from enum import Enum
+from typing import Any
 
-import openai.openai_object
 from fastapi import Request, Response
 from pydantic import BaseModel
 
@@ -89,7 +89,7 @@ class Images(RequestManager):
         self,
         model: object,
         deployment: Deployment,
-    ) -> tuple[openai.openai_object.OpenAIObject, int]:
+    ) -> Any:
         """call openai with retry"""
 
         openai_request = {

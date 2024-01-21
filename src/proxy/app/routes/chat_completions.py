@@ -3,7 +3,6 @@
 from collections.abc import AsyncGenerator
 from typing import Any
 
-import openai.openai_object
 from fastapi import Request, Response
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
@@ -60,7 +59,7 @@ class ChatCompletions(RequestManager):
             request: Request,
             response: Response,
             deployment_name: str = None,
-        ) -> openai.openai_object.OpenAIObject | str | StreamingResponse:
+        ) -> Any:
             """OpenAI chat completion response"""
 
             if "extension" in request.url.path:
@@ -82,9 +81,7 @@ class ChatCompletions(RequestManager):
 
         return self.router
 
-    async def call_openai_chat(
-        self, model: object, deployment: Deployment
-    ) -> tuple[openai.openai_object.OpenAIObject, int] | AsyncGenerator:
+    async def call_openai_chat(self, model: object, deployment: Deployment) -> Any:
         """call openai with retry"""
 
         if self.is_extension:

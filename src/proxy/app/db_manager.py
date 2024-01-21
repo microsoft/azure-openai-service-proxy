@@ -5,8 +5,6 @@ import logging
 import asyncpg
 from fastapi import FastAPI, HTTPException
 
-MAX_RETRIES = 6
-
 logging.basicConfig(level=logging.WARNING)
 
 
@@ -30,6 +28,10 @@ class DBManager:
         except asyncpg.exceptions.PostgresError as error:
             self.logging.error("Postgres error: %s", str(error))
             raise HTTPException(status_code=501, detail="Postgres error opening pool") from error
+
+        except Exception as exception:
+            self.logging.error("Error: %s", str(exception))
+            raise HTTPException(status_code=501, detail="Error opening pool") from exception
 
     async def get_connection(self):
         """connect to database"""

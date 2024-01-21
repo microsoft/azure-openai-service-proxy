@@ -1,7 +1,8 @@
 """ OpenAI Embeddings API route """
 
 
-import openai.openai_object
+from typing import Any
+
 from fastapi import Request, Response
 from pydantic import BaseModel
 
@@ -35,7 +36,7 @@ class Embeddings(RequestManager):
             request: Request,
             response: Response,
             deployment_name: str = None,
-        ) -> openai.openai_object.OpenAIObject:
+        ) -> Any:
             """OpenAI chat completion response"""
 
             completion, status_code = await self.process_request(
@@ -54,7 +55,7 @@ class Embeddings(RequestManager):
         self,
         model: object,
         deployment: Deployment,
-    ) -> tuple[openai.openai_object.OpenAIObject, int]:
+    ) -> Any:
         """call openai with retry"""
 
         url = (
