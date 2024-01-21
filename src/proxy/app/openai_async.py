@@ -12,8 +12,8 @@ from fastapi import HTTPException
 
 from .config import Deployment
 
-HTTPX_TIMEOUT_SECONDS = 60
-HTTPX_STREAMING_TIMEOUT_SECONDS = 10
+HTTPX_TIMEOUT_SECONDS = 120
+HTTPX_STREAMING_TIMEOUT_SECONDS = 20
 
 logging.basicConfig(level=logging.WARNING)
 logger = logging.getLogger(__name__)
