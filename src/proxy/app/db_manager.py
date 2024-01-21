@@ -25,7 +25,7 @@ class DBManager:
         print("Creating connection pool")
         try:
             self.app.pool = await asyncpg.create_pool(
-                connection_string, max_size=200, max_inactive_connection_lifetime=600
+                connection_string, max_size=40, max_inactive_connection_lifetime=600
             )
         except asyncpg.exceptions.PostgresError as error:
             self.logging.error("Postgres error: %s", str(error))
