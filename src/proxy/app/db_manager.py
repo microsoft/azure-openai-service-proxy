@@ -12,9 +12,6 @@ class DBManager:
     """Database manager"""
 
     def __init__(self, app: FastAPI) -> None:
-        # self.connection_string = connection_string
-        # self.sql_conn = None
-        # self.pool = None
         self.logging = logging.getLogger(__name__)
         self.app = app
 
