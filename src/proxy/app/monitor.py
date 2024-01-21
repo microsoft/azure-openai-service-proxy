@@ -7,6 +7,7 @@ from uuid import UUID
 import asyncpg
 from fastapi import HTTPException
 from pydantic import BaseModel
+from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_fixed
 
 from .db_manager import DBManager
 
@@ -84,19 +85,30 @@ class Monitor:
         self.logging = logging.getLogger(__name__)
         self.db_manager = db_manager
 
+    @retry(
+        stop=stop_after_attempt(4),
+        wait=wait_fixed(1),
+        retry=retry_if_exception_type(
+            (ConnectionError, TimeoutError, asyncpg.exceptions.TooManyConnectionsError)
+        ),
+    )
+    async def execute_query(self, pool, entity: MonitorEntity):
+        """execute query"""
+        async with pool.acquire() as conn:
+            await conn.execute(
+                "CALL aoai.add_attendee_metric($1, $2, $3)",
+                entity.api_key,
+                entity.event_id,
+                entity.catalog_id,
+            )
+
     async def log_api_call(self, *, entity: MonitorEntity):
         """write event to Azure Storage account Queue called USAGE_LOGGING_NAME"""
 
         pool = await self.db_manager.get_connection()
 
         try:
-            async with pool.acquire() as conn:
-                await conn.execute(
-                    "CALL aoai.add_attendee_metric($1, $2, $3)",
-                    entity.api_key,
-                    entity.event_id,
-                    entity.catalog_id,
-                )
+            await self.execute_query(pool, entity)
 
         except asyncpg.exceptions.PostgresError as error:
             self.logging.error("Postgres error: %s", str(error))
