@@ -15,3 +15,16 @@ services:
     project: ./src/AzureOpenAIProxy.Management
     language: csharp
     host: containerapp
+    hooks:
+      predeploy:
+        shell: sh
+        continueOnError: false
+        interactive: false
+        run: ./infra/scripts/setup-app-redirect-uris.sh
+
+hooks:
+  preprovision:
+    shell: sh
+    continueOnError: false
+    interactive: false
+    run: ./infra/scripts/setup-app-registration.sh
