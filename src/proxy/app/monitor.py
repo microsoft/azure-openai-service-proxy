@@ -87,22 +87,27 @@ class Monitor:
     async def log_api_call(self, *, entity: MonitorEntity):
         """write event to Azure Storage account Queue called USAGE_LOGGING_NAME"""
 
-        conn = await self.db_manager.get_connection()
+        pool = await self.db_manager.get_connection()
 
         try:
-            await conn.execute(
-                "CALL aoai.add_attendee_metric($1, $2, $3)",
-                entity.api_key,
-                entity.event_id,
-                entity.catalog_id,
-            )
+            async with pool.acquire() as conn:
+                await conn.execute(
+                    "CALL aoai.add_attendee_metric($1, $2, $3)",
+                    entity.api_key,
+                    entity.event_id,
+                    entity.catalog_id,
+                )
 
         except asyncpg.exceptions.PostgresError as error:
             self.logging.error("Postgres error: %s", str(error))
+            raise HTTPException(
+                status_code=501,
+                detail="Postgres Monitor request failed.",
+            ) from error
 
         except Exception as exception:
             logging.error("General exception in event_authorized: %s", str(exception))
             raise HTTPException(
-                status_code=401,
+                status_code=501,
                 detail="Monitor update failed. General exception.",
             ) from exception

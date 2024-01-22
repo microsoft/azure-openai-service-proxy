@@ -56,17 +56,20 @@ class Config:
 
         config = []
 
-        try:
-            conn = await self.db_manager.get_connection()
+        pool = await self.db_manager.get_connection()
 
-            if deployment_name is None:
-                result = await conn.fetch("SELECT * FROM aoai.get_models_by_event($1)", event_id)
-            else:
-                result = await conn.fetch(
-                    "SELECT * FROM aoai.get_models_by_deployment_name($1, $2)",
-                    event_id,
-                    deployment_name,
-                )
+        try:
+            async with pool.acquire() as conn:
+                if deployment_name is None:
+                    result = await conn.fetch(
+                        "SELECT * FROM aoai.get_models_by_event($1)", event_id
+                    )
+                else:
+                    result = await conn.fetch(
+                        "SELECT * FROM aoai.get_models_by_deployment_name($1, $2)",
+                        event_id,
+                        deployment_name,
+                    )
 
             for row in result:
                 deployment_item = Deployment(**row)

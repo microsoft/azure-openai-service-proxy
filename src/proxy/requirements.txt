@@ -1,13 +1,9 @@
-tenacity>=8.2.3,<8.3.0
-openai>=0.28.1,<0.29.0
-fastapi>=0.103.1,<0.104.0
-uvicorn>=0.23.2,<0.24.0
+fastapi>=0.103.1,<0.200.0
+uvicorn>=0.23.2,<0.30.0
 gunicorn>=21.2.0,<21.3.0
-httpx>=0.25.0,<0.26.0
-pydantic>=2.4.2,<2.5.0
-async-lru>=2.0.4, <2.1.0
-pytz
-Black
-ruff
+httpx>=0.25.0,<0.30.0
+pydantic>=2.4.2,<2.6.0
 cachetools>=5.3.2, <5.4.0
 asyncpg>=0.29.0, <0.30.0
+Black
+ruff

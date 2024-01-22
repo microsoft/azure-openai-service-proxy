@@ -2,14 +2,13 @@
 
 from enum import Enum
 from os import environ
+from typing import Any
 
-import openai.openai_object
 from fastapi import Request, Response
 from pydantic import BaseModel
 
 # pylint: disable=E0402
 from ..authorize import AuthorizeResponse
-from ..config import Deployment
 from ..openai_async import OpenAIAsyncManager
 from .request_manager import RequestManager
 
@@ -106,7 +105,7 @@ class ImagesGenerations(RequestManager):
         request: Request,
         response: Response,
         authorize_response: AuthorizeResponse,
-    ) -> tuple[Deployment, openai.openai_object.OpenAIObject, int]:
+    ) -> Any:
         """call openai with retry"""
 
         self.validate_input(images)

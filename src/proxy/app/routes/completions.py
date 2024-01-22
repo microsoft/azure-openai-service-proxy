@@ -2,7 +2,6 @@
 
 from typing import Any
 
-import openai.openai_object
 from fastapi import Request, Response
 from pydantic import BaseModel
 
@@ -41,7 +40,7 @@ class Completions(RequestManager):
             request: Request,
             response: Response,
             deployment_name: str = None,
-        ) -> openai.openai_object.OpenAIObject | str:
+        ) -> Any:
             """OpenAI completion response"""
 
             completion, status_code = await self.process_request(
@@ -61,7 +60,7 @@ class Completions(RequestManager):
         self,
         model: object,
         deployment: Deployment,
-    ) -> tuple[openai.openai_object.OpenAIObject, int]:
+    ) -> Any:
         """call openai with retry"""
 
         url = (

@@ -29,10 +29,13 @@ class Authorize:
     async def __is_user_authorized(self, api_key: UUID, deployment_name: str) -> AuthorizeResponse:
         """Check if user is authorized"""
 
-        try:
-            conn = await self.db_manager.get_connection()
+        pool = await self.db_manager.get_connection()
 
-            result = await conn.fetchrow("SELECT * from aoai.get_attendee_authorized($1)", api_key)
+        try:
+            async with pool.acquire() as conn:
+                result = await conn.fetchrow(
+                    "SELECT * from aoai.get_attendee_authorized($1)", api_key
+                )
 
             if result is None or len(result) == 0:
                 raise HTTPException(

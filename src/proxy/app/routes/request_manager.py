@@ -8,7 +8,6 @@ from fastapi import APIRouter, HTTPException, Request
 # pylint: disable=E0402
 from ..authorize import Authorize, AuthorizeResponse
 from ..config import Config
-from ..rate_limit import RateLimit
 
 logging.basicConfig(level=logging.INFO)
 
@@ -22,7 +21,6 @@ class RequestManager:
         self.api_version = api_version
 
         self.router = APIRouter()
-        self.rate_limit = RateLimit()
         self.logger = logging.getLogger(__name__)
         self._is_extension = False
 
@@ -45,12 +43,6 @@ class RequestManager:
         authorize_response = await self.authorize.authorize_azure_api_access(
             headers=request.headers, deployment_name=deployment_name
         )
-
-        if self.rate_limit.is_call_rate_exceeded(authorize_response.user_id):
-            raise HTTPException(
-                status_code=429,
-                detail="Rate limit exceeded. Try again in 10 seconds",
-            )
 
         return authorize_response
 
@@ -77,12 +69,6 @@ class RequestManager:
         if hasattr(model, "max_tokens"):
             if model.max_tokens is not None and model.max_tokens > authorize_response.max_token_cap:
                 model.max_tokens = authorize_response.max_token_cap
-
-        if self.rate_limit.is_call_rate_exceeded(authorize_response.user_id):
-            raise HTTPException(
-                status_code=429,
-                detail="Rate limit exceeded. Try again in 10 seconds",
-            )
 
         deployment = await self.config.get_catalog_by_deployment_name(authorize_response)
         response, http_status_code = await call_method(model, deployment)
