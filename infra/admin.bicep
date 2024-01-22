@@ -44,6 +44,10 @@ module app 'core/host/container-app-upsert.bicep' = {
         name: 'AzureAd__ClientId'
         value: clientId
       }
+      {
+        name: 'ASPNETCORE_FORWARDEDHEADERS_ENABLED'
+        value: true
+      }
     ]
   }
 }
