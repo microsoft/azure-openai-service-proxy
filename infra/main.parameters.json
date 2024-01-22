@@ -13,6 +13,12 @@
     },
     "postgresAdminPassword": {
       "value": "$(secretOrRandomPassword ${AZURE_KEY_VAULT_NAME} postgresAdminPassword)"
+    },
+    "authTenantId": {
+      "value": "${AUTH_TENANT_ID}"
+    },
+    "authClientId": {
+      "value": "${AUTH_CLIENT_ID}"
     }
   }
 }

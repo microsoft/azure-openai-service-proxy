@@ -25,6 +25,9 @@ param swaLocation string
 @description('PostGreSQL Server administrator password')
 param postgresAdminPassword string
 
+param authTenantId string = subscription().tenantId
+param authClientId string
+
 var resourceToken = toLower(uniqueString(subscription().id, name, location))
 var tags = { 'azd-env-name': name }
 var prefix = '${name}-${resourceToken}'
@@ -134,6 +137,8 @@ module admin 'admin.bicep' = {
     postgresDatabase: postgresDatabaseName
     postgresUser: postgresAdminUser
     postgresPassword: postgresAdminPassword
+    tenantId: authTenantId
+    clientId: authClientId
   }
 }
 
