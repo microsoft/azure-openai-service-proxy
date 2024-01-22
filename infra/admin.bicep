@@ -28,7 +28,7 @@ module app 'core/host/container-app-upsert.bicep' = {
     exists: exists
     containerAppsEnvironmentName: containerAppsEnvironmentName
     containerRegistryName: containerRegistryName
-    targetPort: 8081
+    targetPort: 8080
     env: [
       {
         name: 'ConnectionStrings__AoaiProxyContext'
