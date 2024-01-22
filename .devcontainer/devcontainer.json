@@ -15,7 +15,8 @@
     },
     "ghcr.io/devcontainers/features/python:1": {
       "version": "3.11"
-    }
+    },
+    "ghcr.io/devcontainers/features/azure-cli:1": {}
   },
 
   // Configure tool-specific properties.
