@@ -32,10 +32,16 @@ module app 'core/host/container-app-upsert.bicep' = {
     containerCpuCoreCount: '0.75'
     containerMemory:'1.5Gi'
     containerMaxReplicas: 2
+    secrets: [
+      {
+        name: 'postconstr'
+        value: 'postgresql://${postgresUser}:${postgresPassword}@${postgresServer}/${postgresDatabase}'
+      }
+    ]
     env: [
       {
         name: 'POSTGRES_CONNECTION_STRING'
-        value: 'postgresql://${postgresUser}:${postgresPassword}@${postgresServer}/${postgresDatabase}'
+        secretRef: 'postconstr'
       }
     ]
   }
