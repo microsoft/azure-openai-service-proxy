@@ -46,7 +46,7 @@ module app 'core/host/container-app-upsert.bicep' = {
       }
       {
         name: 'ASPNETCORE_FORWARDEDHEADERS_ENABLED'
-        value: true
+        value: 'true'
       }
     ]
   }
