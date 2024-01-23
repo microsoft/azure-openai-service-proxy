@@ -12,6 +12,8 @@ param postgresUser string
 param postgresPassword string
 param postgresDatabase string
 param postgresServer string
+param clientId string
+param tenantId string
 
 resource adminIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
   name: identityName
@@ -28,11 +30,23 @@ module app 'core/host/container-app-upsert.bicep' = {
     exists: exists
     containerAppsEnvironmentName: containerAppsEnvironmentName
     containerRegistryName: containerRegistryName
-    targetPort: 8081
+    targetPort: 8080
     env: [
       {
         name: 'ConnectionStrings__AoaiProxyContext'
         value: 'Server=${postgresServer};Port=5432;User Id=${postgresUser};Password=${postgresPassword};Database=${postgresDatabase};Ssl Mode=Require;'
+      }
+      {
+        name: 'AzureAd__TenantId'
+        value: tenantId
+      }
+      {
+        name: 'AzureAd__ClientId'
+        value: clientId
+      }
+      {
+        name: 'ASPNETCORE_FORWARDEDHEADERS_ENABLED'
+        value: 'true'
       }
     ]
   }
