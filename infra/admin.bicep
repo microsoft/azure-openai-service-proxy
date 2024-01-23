@@ -14,6 +14,7 @@ param postgresDatabase string
 param postgresServer string
 param clientId string
 param tenantId string
+param playgroundUrl string
 
 resource adminIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
   name: identityName
@@ -47,6 +48,10 @@ module app 'core/host/container-app-upsert.bicep' = {
       {
         name: 'ASPNETCORE_FORWARDEDHEADERS_ENABLED'
         value: 'true'
+      }
+      {
+        name: 'PlaygroundUrl'
+        value: playgroundUrl
       }
     ]
   }

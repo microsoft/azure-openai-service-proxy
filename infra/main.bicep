@@ -139,6 +139,7 @@ module admin 'admin.bicep' = {
     postgresPassword: postgresAdminPassword
     tenantId: authTenantId
     clientId: authClientId
+    playgroundUrl: playground.outputs.SERVICE_WEB_URI
   }
 }
 
