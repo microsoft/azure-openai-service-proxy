@@ -20,7 +20,7 @@ services:
         shell: sh
         continueOnError: false
         interactive: false
-        run: ./infra/scripts/setup-app-redirect-uris.sh
+        run: ../../infra/scripts/setup-app-redirect-uris.sh
 
 hooks:
   preprovision:
