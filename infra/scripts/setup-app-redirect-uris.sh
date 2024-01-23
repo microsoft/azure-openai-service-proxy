@@ -37,10 +37,10 @@ if [ $SERVICE_ADMIN_URI ]; then
         echo "$SERVICE_ADMIN_URI$signin_path already registered as a redirect uri"
     else
         echo "Registering $SERVICE_ADMIN_URI$signin_path as a redirect uri"
-        az ad app update --id $app_id --web-redirect-uris $(echo $existing_redirects | jq -r 'join(" ")') "${SERVICE_ADMIN_URI}${signin_path}"
+        az ad app update --id $AUTH_CLIENT_ID --web-redirect-uris $(echo $existing_redirects | jq -r 'join(" ")') "${SERVICE_ADMIN_URI}${signin_path}"
 
         # Refresh app registration and redirect uris
-        app_registration=$(az ad app show --id $app_id -o json)
+        app_registration=$(az ad app show --id $AUTH_CLIENT_ID -o json)
         existing_redirects=$(echo $app_registration | jq '.web.redirectUris')
     fi
 fi
