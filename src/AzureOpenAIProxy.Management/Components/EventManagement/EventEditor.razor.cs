@@ -62,4 +62,14 @@ public partial class EventEditor : ComponentBase
         await OnValidSubmit.InvokeAsync(Model);
         isSubmitting = false;
     }
+
+    private Task<IEnumerable<TimeZoneInfo>> FilterTimezones(string filter)
+    {
+        if (string.IsNullOrEmpty(filter))
+        {
+            return Task.FromResult(TimeZones!);
+        }
+
+        return Task.FromResult(TimeZones!.Where(tz => tz.Id.Contains(filter, StringComparison.OrdinalIgnoreCase)));
+    }
 }
