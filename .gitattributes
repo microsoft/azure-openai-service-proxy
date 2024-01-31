@@ -1,1 +1,5 @@
-post-create.sh text eol=lf
+# Auto-detect text files, ensure they use LF.
+* text=auto eol=lf working-tree-encoding=UTF-8
+
+# Bash scripts
+*.sh text eol=lf
