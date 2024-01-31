@@ -2,7 +2,7 @@
 
 @namespace AzureOpenAIProxy.Management.Components.EventManagement
 
-<EditForm OnValidSubmit="@HandleValidSubmit" EditContext="@editContext" @Disabled="@isSubmitting">
+<EditForm OnValidSubmit="@HandleValidSubmit" EditContext="@editContext" Disabled="@isSubmitting">
     <ValidationSummary />
     <DataAnnotationsValidator />
 
@@ -21,7 +21,8 @@
                 <MudTextField Label="End Date" @bind-Value="Model.End" InputType="InputType.DateTimeLocal"
                     For="@(() => Model.End)" Format="s" />
 
-                <MudSelect @bind-Value="Model.SelectedTimeZone" Label="Time Zone" FullWidth="true" For="@(() => Model.SelectedTimeZone)">
+                <MudSelect @bind-Value="Model.SelectedTimeZone" Label="Time Zone" FullWidth="true"
+                    For="@(() => Model.SelectedTimeZone)">
                     @foreach (var timeZone in TimeZones)
                     {
                         <MudSelectItem Value="@timeZone">@timeZone</MudSelectItem>
