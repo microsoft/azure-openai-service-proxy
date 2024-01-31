@@ -1,5 +1,12 @@
 #!/bin/bash
 
+account_info=$(az account show 2>&1)
+if [[ $? -ne 0 ]]; then
+    echo "You must be logged in to Azure to run this script"
+    echo "Run 'az login' to log in to Azure"
+    exit 1
+fi
+
 echo "Loading azd .env file from current environment"
 
 # Use the `get-values` azd command to retrieve environment variables from the `.env` file
@@ -18,7 +25,7 @@ app_registration=$(az ad app show --id $AUTH_CLIENT_ID -o json)
 existing_redirects=$(echo $app_registration | jq '.web.redirectUris')
 
 if [ $ENVIRONMENT == 'development' ]; then
-    echo Ensuring localhost is registered as a redirect uri
+    echo Ensuring http://localhost:5175 is registered as a redirect uri
     if $(echo $existing_redirects | jq "contains([\"http://localhost:5175${signin_path}\"])"); then
         echo "http://localhost:5175$signin_path already registered as a redirect uri"
     else

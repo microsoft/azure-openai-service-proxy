@@ -1,5 +1,12 @@
 #!/bin/bash
 
+account_info=$(az account show 2>&1)
+if [[ $? -ne 0 ]]; then
+    echo "You must be logged in to Azure to run this script"
+    echo "Run 'az login' to log in to Azure"
+    exit 1
+fi
+
 echo "Loading azd .env file from current environment"
 
 # Use the `get-values` azd command to retrieve environment variables from the `.env` file
@@ -10,17 +17,18 @@ done <<EOF
 $(azd env get-values)
 EOF
 
+AUTH_APP_NAME="$AZURE_ENV_NAME-app"
+
 signin_path='/signin-oidc'
 
-app_name=${1:-"aoai-proxy-admin"}
-app_registrations=$(az ad app list --filter "displayname eq '$app_name'" -o json)
+app_registrations=$(az ad app list --filter "displayname eq '$AUTH_APP_NAME'" -o json)
 app_count=$(echo $app_registrations | jq '. | length')
 
 if [ $app_count -eq 0 ]; then
-    echo "Creating app registration for $app_name"
-    app_id=$(az ad app create --display-name $app_name --sign-in-audience AzureADMyOrg --enable-id-token-issuance true | jq -r '.appId')
+    echo "Creating app registration for $AUTH_APP_NAME"
+    app_id=$(az ad app create --display-name $AUTH_APP_NAME --sign-in-audience AzureADMyOrg --enable-id-token-issuance true | jq -r '.appId')
 else
-    echo "App registration for $app_name already exists"
+    echo "App registration for $AUTH_APP_NAME already exists"
 
     app_id=$(echo $app_registrations | jq -r '.[0].appId')
 fi

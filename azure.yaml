@@ -28,3 +28,8 @@ hooks:
     continueOnError: false
     interactive: false
     run: ./infra/scripts/setup-app-registration.sh
+  postdown:
+    shell: sh
+    continueOnError: false
+    interactive: false
+    run: ./infra/scripts/cleanup-app-registration.sh
