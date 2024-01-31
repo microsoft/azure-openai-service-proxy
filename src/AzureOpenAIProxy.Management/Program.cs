@@ -30,6 +30,8 @@ builder.Services.AddScoped<IModelService, ModelService>();
 
 builder.Services.AddMudServices();
 
+builder.Services.AddApplicationInsightsTelemetry();
+
 WebApplication app = builder.Build();
 
 // Configure the HTTP request pipeline.

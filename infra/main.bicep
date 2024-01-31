@@ -140,6 +140,7 @@ module admin 'admin.bicep' = {
     tenantId: authTenantId
     clientId: authClientId
     playgroundUrl: playground.outputs.SERVICE_WEB_URI
+    appInsightsConnectionString: monitoring.outputs.applicationInsightsConnectionString
   }
 }
 

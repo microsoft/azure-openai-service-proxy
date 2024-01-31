@@ -15,6 +15,7 @@ param postgresServer string
 param clientId string
 param tenantId string
 param playgroundUrl string
+param appInsightsConnectionString string
 
 resource adminIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
   name: identityName
@@ -52,6 +53,10 @@ module app 'core/host/container-app-upsert.bicep' = {
       {
         name: 'PlaygroundUrl'
         value: playgroundUrl
+      }
+      {
+        name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
+        value: appInsightsConnectionString
       }
     ]
   }

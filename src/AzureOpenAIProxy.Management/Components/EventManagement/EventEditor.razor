@@ -2,7 +2,7 @@
 
 @namespace AzureOpenAIProxy.Management.Components.EventManagement
 
-<EditForm OnValidSubmit="@HandleValidSubmit" EditContext="@editContext" @Disabled="@isSubmitting">
+<EditForm OnValidSubmit="@HandleValidSubmit" EditContext="@editContext" Disabled="@isSubmitting">
     <ValidationSummary />
     <DataAnnotationsValidator />
 
@@ -21,12 +21,20 @@
                 <MudTextField Label="End Date" @bind-Value="Model.End" InputType="InputType.DateTimeLocal"
                     For="@(() => Model.End)" Format="s" />
 
-                <MudSelect @bind-Value="Model.SelectedTimeZone" Label="Time Zone" FullWidth="true" For="@(() => Model.SelectedTimeZone)">
-                    @foreach (var timeZone in TimeZones)
-                    {
-                        <MudSelectItem Value="@timeZone">@timeZone</MudSelectItem>
-                    }
-                </MudSelect>
+                <MudAutocomplete T="TimeZoneInfo" @bind-Value="Model.SelectedTimeZone" Label="Time Zone" FullWidth="true"
+                    For="@(() => Model.SelectedTimeZone)" SearchFunc="FilterTimezones">
+                    <ItemTemplate Context="e">
+                        <MudText>
+                            <MudIcon Icon="@Icons.Material.Filled.CheckBoxOutlineBlank" Class="mb-n1 mr-3" />
+                            @e.DisplayName
+                        </MudText>
+                    </ItemTemplate>
+                    <ItemSelectedTemplate Context="e">
+                        <MudText>
+                            <MudIcon Icon="@Icons.Material.Filled.CheckBox" Class="mb-n1 mr-3" />@e.DisplayName
+                        </MudText>
+                    </ItemSelectedTemplate>
+                </MudAutocomplete>
             </div>
             <MudTextField Label="Description" @bind-Value="Model.Description" Lines="10"
                 For="@(() => Model.Description)" />
