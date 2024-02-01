@@ -16,9 +16,12 @@ done <<EOF
 $(azd env get-values)
 EOF
 
-if [[ -z "${AUTH_TENANT_ID}" ]]; then
-    echo "AUTH_TENANT_ID is not set. No app to delete."
+if [[ -z "${AUTH_CLIENT_ID}" ]]; then
+    echo "AUTH_CLIENT_ID is not set. No app to delete."
 fi
 
-echo Deleting app registration for $AUTH_TENANT_ID
-az ad app delete --id $AUTH_TENANT_ID
+echo Deleting app registration for $AUTH_CLIENT_ID
+az ad app delete --id $AUTH_CLIENT_ID
+
+azd env set AUTH_CLIENT_ID ""
+azd env set AUTH_TENANT_ID ""
