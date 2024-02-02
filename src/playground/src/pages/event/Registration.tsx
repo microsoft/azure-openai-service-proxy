@@ -80,13 +80,15 @@ export const Registration = () => {
   return (
     <section className={styles.container}>
       <h1>{event?.eventCode}</h1>
-      <div>
-        <p>
-          <strong>Starts:</strong> {new Date(event?.startTimestamp).toLocaleString()},&nbsp;
-          <strong>Ends:</strong> {new Date(event?.endTimestamp).toLocaleString()},&nbsp;
-          <strong>Time zone:</strong> {event?.timeZoneLabel}
-        </p>
-      </div>
+      {event?.startTimestamp && event?.endTimestamp && event?.timeZoneLabel && (
+        <div>
+          <p>
+            <strong>Starts:</strong> {new Date(event?.startTimestamp).toLocaleString()},&nbsp;
+            <strong>Ends:</strong> {new Date(event?.endTimestamp).toLocaleString()},&nbsp;
+            <strong>Time zone:</strong> {event?.timeZoneLabel}
+          </p>
+        </div>
+      )}
       <div>
         <ReactMarkdown>{event?.eventMarkdown}</ReactMarkdown>
       </div>
