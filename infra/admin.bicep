@@ -39,34 +39,30 @@ module app 'core/host/container-app-upsert.bicep' = {
         value: 'Server=${postgresServer};Port=5432;User Id=${postgresUser};Password=${postgresPassword};Database=${postgresDatabase};Ssl Mode=Require;'
       }
       {
-        name: 'TenantId'
+        name: 'tenant-id'
         value: tenantId
       }
       {
-        name: 'ClientId'
+        name: 'client-id'
         value: clientId
       }
       {
-        name: 'PlaygroundUrl'
-        value: playgroundUrl
-      }
-      {
-        name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
+        name: 'app-insights-connection-string'
         value: appInsightsConnectionString
       }
     ]
     env: [
       {
         name: 'ConnectionStrings__AoaiProxyContext'
-        value: 'postconstr'
+        secretRef: 'postconstr'
       }
       {
         name: 'AzureAd__TenantId'
-        value: 'tenantId'
+        secretRef: 'tenant-id'
       }
       {
         name: 'AzureAd__ClientId'
-        value: 'clientId'
+        secretRef: 'client-id'
       }
       {
         name: 'ASPNETCORE_FORWARDEDHEADERS_ENABLED'
@@ -78,7 +74,7 @@ module app 'core/host/container-app-upsert.bicep' = {
       }
       {
         name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
-        value: 'appInsightsConnectionString'
+        secretRef: 'app-insights-connection-string'
       }
     ]
   }
