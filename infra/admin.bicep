@@ -33,18 +33,36 @@ module app 'core/host/container-app-upsert.bicep' = {
     containerAppsEnvironmentName: containerAppsEnvironmentName
     containerRegistryName: containerRegistryName
     targetPort: 8080
-    env: [
+    secrets: [
       {
-        name: 'ConnectionStrings__AoaiProxyContext'
+        name: 'postconstr'
         value: 'Server=${postgresServer};Port=5432;User Id=${postgresUser};Password=${postgresPassword};Database=${postgresDatabase};Ssl Mode=Require;'
       }
       {
-        name: 'AzureAd__TenantId'
+        name: 'tenant-id'
         value: tenantId
       }
       {
-        name: 'AzureAd__ClientId'
+        name: 'client-id'
         value: clientId
+      }
+      {
+        name: 'app-insights-connection-string'
+        value: appInsightsConnectionString
+      }
+    ]
+    env: [
+      {
+        name: 'ConnectionStrings__AoaiProxyContext'
+        secretRef: 'postconstr'
+      }
+      {
+        name: 'AzureAd__TenantId'
+        secretRef: 'tenant-id'
+      }
+      {
+        name: 'AzureAd__ClientId'
+        secretRef: 'client-id'
       }
       {
         name: 'ASPNETCORE_FORWARDEDHEADERS_ENABLED'
@@ -56,7 +74,7 @@ module app 'core/host/container-app-upsert.bicep' = {
       }
       {
         name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
-        value: appInsightsConnectionString
+        secretRef: 'app-insights-connection-string'
       }
     ]
   }
