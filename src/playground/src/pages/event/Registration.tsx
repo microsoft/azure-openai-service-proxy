@@ -77,15 +77,27 @@ export const Registration = () => {
     notify();
   };
 
+  const adjustedLocalTime = (timestamp: Date, utcOffsetInMinutes: number): Date => {
+    // returns time zone adjusted date/time
+    const date = new Date(timestamp);
+    // get the timezone offset component that was added as no tz supplied in date time
+    const tz = date.getTimezoneOffset();
+    // remove the browser based timezone offset
+    date.setMinutes(date.getMinutes() - tz);
+    // add the event timezone offset
+    date.setMinutes(date.getMinutes() - utcOffsetInMinutes);
+
+    return date;
+  };
+
   return (
     <section className={styles.container}>
       <h1>{event?.eventCode}</h1>
       {event?.startTimestamp && event?.endTimestamp && event?.timeZoneLabel && (
         <div>
           <p>
-            <strong>Starts:</strong> {new Date(event?.startTimestamp).toLocaleString()},&nbsp;
-            <strong>Ends:</strong> {new Date(event?.endTimestamp).toLocaleString()},&nbsp;
-            <strong>Time zone:</strong> {event?.timeZoneLabel}
+            <strong>Starts:</strong> {adjustedLocalTime(event?.startTimestamp, event?.timeZoneOffset).toLocaleString()},&nbsp;
+            <strong>Ends:</strong> {adjustedLocalTime(event?.endTimestamp, event?.timeZoneOffset).toLocaleString()},&nbsp;
           </p>
         </div>
       )}
