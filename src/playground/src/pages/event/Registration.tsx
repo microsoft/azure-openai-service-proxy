@@ -77,7 +77,7 @@ export const Registration = () => {
     notify();
   };
 
-  const adjustedLocalTime = (timestamp: Date, utcOffsetInMinutes: number): Date => {
+  const adjustedLocalTime = (timestamp: Date, utcOffsetInMinutes: number): string => {
     // returns time zone adjusted date/time
     const date = new Date(timestamp);
     // get the timezone offset component that was added as no tz supplied in date time
@@ -87,7 +87,24 @@ export const Registration = () => {
     // add the event timezone offset
     date.setMinutes(date.getMinutes() - utcOffsetInMinutes);
 
-    return date;
+    // Get the browser locale
+    const locale = navigator.language || navigator.languages[0];
+
+    // Specify the formatting options
+    const options = {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "numeric",
+      minute: "numeric",
+    };
+
+    // Create an Intl.DateTimeFormat object
+    const formatter = new Intl.DateTimeFormat(locale, options);
+    // Format the date
+    const formattedDate = formatter.format(date);
+    return formattedDate;
   };
 
   return (
@@ -95,10 +112,18 @@ export const Registration = () => {
       <h1>{event?.eventCode}</h1>
       {event?.startTimestamp && event?.endTimestamp && event?.timeZoneLabel && (
         <div>
-          <p>
-            <strong>Starts:</strong> {adjustedLocalTime(event?.startTimestamp, event?.timeZoneOffset).toLocaleString()},&nbsp;
-            <strong>Ends:</strong> {adjustedLocalTime(event?.endTimestamp, event?.timeZoneOffset).toLocaleString()},&nbsp;
-          </p>
+          <table>
+            <tbody>
+              <tr>
+                <td><strong>Starts:</strong></td>
+                <td>{adjustedLocalTime(event?.startTimestamp, event?.timeZoneOffset)}</td>
+              </tr>
+              <tr>
+                <td><strong>Ends:</strong></td>
+                <td>{adjustedLocalTime(event?.endTimestamp, event?.timeZoneOffset)}</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       )}
       <div>
