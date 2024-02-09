@@ -126,7 +126,7 @@ export const Registration = () => {
           </table>
         </div>
       )}
-      <div>
+      <div style={{ textAlign: "center", padding: "40px" }}>
         <ReactMarkdown>{event?.eventMarkdown}</ReactMarkdown>
       </div>
       {state.profileLoaded && state.profile && !attendee && (
