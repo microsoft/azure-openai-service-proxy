@@ -55,6 +55,7 @@ public partial class EventEdit : ComponentBase
         Model.End = evt.EndTimestamp;
         Model.Url = evt.EventUrl;
         Model.UrlText = evt.EventUrlText;
+        Model.EventImageUrl = evt.EventImageUrl;
         Model.OrganizerEmail = evt.OrganizerEmail;
         Model.OrganizerName = evt.OrganizerName;
         Model.Active = evt.Active;

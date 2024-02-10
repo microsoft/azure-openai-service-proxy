@@ -3,6 +3,8 @@ using AzureOpenAIProxy.Management.Components.EventManagement;
 using AzureOpenAIProxy.Management.Database;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
+using Npgsql.Internal.Postgres;
+using NpgsqlTypes;
 
 namespace AzureOpenAIProxy.Management.Services;
 
@@ -15,6 +17,7 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
             EventCode = model.Name!,
             EventUrlText = model.UrlText!,
             EventUrl = model.Url!,
+            EventImageUrl = model.EventImageUrl!,
             EventMarkdown = model.Description!,
             StartTimestamp = model.Start!.Value,
             EndTimestamp = model.End!.Value,
@@ -33,7 +36,7 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
         await conn.OpenAsync();
         using DbCommand cmd = conn.CreateCommand();
 
-        cmd.CommandText = $"SELECT * FROM aoai.add_event(@OwnerId, @EventCode, @EventMarkdown, @StartTimestamp, @EndTimestamp, @TimeZoneOffset, @TimeZoneLabel,  @OrganiserName, @OrganiserEmail, @EventUrl, @EventUrlText, @MaxTokenCap, @DailyRequestCap, @Active)";
+        cmd.CommandText = $"SELECT * FROM aoai.add_event(@OwnerId, @EventCode, @EventMarkdown, @StartTimestamp, @EndTimestamp, @TimeZoneOffset, @TimeZoneLabel,  @OrganiserName, @OrganiserEmail, @EventUrl, @EventUrlText, @MaxTokenCap, @DailyRequestCap, @Active, @EventImageUrl)";
 
         cmd.Parameters.Add(new NpgsqlParameter("OwnerId", entraId));
         cmd.Parameters.Add(new NpgsqlParameter("EventCode", newEvent.EventCode));
@@ -49,6 +52,10 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
         cmd.Parameters.Add(new NpgsqlParameter("MaxTokenCap", newEvent.MaxTokenCap));
         cmd.Parameters.Add(new NpgsqlParameter("DailyRequestCap", newEvent.DailyRequestCap));
         cmd.Parameters.Add(new NpgsqlParameter("Active", newEvent.Active));
+
+        var parameter = new NpgsqlParameter("@EventImageUrl", NpgsqlDbType.Text);
+        parameter.Value = newEvent.EventImageUrl ?? (object)DBNull.Value;
+        cmd.Parameters.Add(parameter);
 
         var reader = await cmd.ExecuteReaderAsync();
 
@@ -86,6 +93,7 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
         evt.EndTimestamp = model.End!.Value;
         evt.EventUrl = model.Url!;
         evt.EventUrlText = model.UrlText!;
+        evt.EventImageUrl = model.EventImageUrl!;
         evt.OrganizerEmail = model.OrganizerEmail!;
         evt.OrganizerName = model.OrganizerName!;
         evt.Active = model.Active;

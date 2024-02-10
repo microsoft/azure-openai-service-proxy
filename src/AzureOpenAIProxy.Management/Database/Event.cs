@@ -26,6 +26,8 @@ public partial class Event
 
     public string EventUrlText { get; set; } = null!;
 
+    public string EventImageUrl { get; set; } = null!;
+
     public int MaxTokenCap { get; set; }
 
     public int DailyRequestCap { get; set; }
