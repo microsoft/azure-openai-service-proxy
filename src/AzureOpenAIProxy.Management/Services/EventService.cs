@@ -36,7 +36,7 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
         await conn.OpenAsync();
         using DbCommand cmd = conn.CreateCommand();
 
-        cmd.CommandText = $"SELECT * FROM aoai.add_event(@OwnerId, @EventCode, @EventMarkdown, @StartTimestamp, @EndTimestamp, @TimeZoneOffset, @TimeZoneLabel,  @OrganiserName, @OrganiserEmail, @EventUrl, @EventUrlText, @MaxTokenCap, @DailyRequestCap, @Active, @EventImageUrl)";
+        cmd.CommandText = $"SELECT * FROM aoai.add_event(@OwnerId, @EventCode, @EventMarkdown, @StartTimestamp, @EndTimestamp, @TimeZoneOffset, @TimeZoneLabel,  @OrganizerName, @OrganizerEmail, @EventUrl, @EventUrlText, @MaxTokenCap, @DailyRequestCap, @Active, @EventImageUrl)";
 
         cmd.Parameters.Add(new NpgsqlParameter("OwnerId", entraId));
         cmd.Parameters.Add(new NpgsqlParameter("EventCode", newEvent.EventCode));
@@ -45,8 +45,8 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
         cmd.Parameters.Add(new NpgsqlParameter("EndTimestamp", newEvent.EndTimestamp));
         cmd.Parameters.Add(new NpgsqlParameter("TimeZoneOffset", newEvent.TimeZoneOffset));
         cmd.Parameters.Add(new NpgsqlParameter("TimeZoneLabel", newEvent.TimeZoneLabel));
-        cmd.Parameters.Add(new NpgsqlParameter("OrganiserName", newEvent.OrganizerName));
-        cmd.Parameters.Add(new NpgsqlParameter("OrganiserEmail", newEvent.OrganizerEmail));
+        cmd.Parameters.Add(new NpgsqlParameter("OrganizerName", newEvent.OrganizerName));
+        cmd.Parameters.Add(new NpgsqlParameter("OrganizerEmail", newEvent.OrganizerEmail));
         cmd.Parameters.Add(new NpgsqlParameter("EventUrl", newEvent.EventUrl));
         cmd.Parameters.Add(new NpgsqlParameter("EventUrlText", newEvent.EventUrlText));
         cmd.Parameters.Add(new NpgsqlParameter("MaxTokenCap", newEvent.MaxTokenCap));
