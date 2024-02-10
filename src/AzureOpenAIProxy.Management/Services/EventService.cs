@@ -16,8 +16,10 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
             EventUrlText = model.UrlText!,
             EventUrl = model.Url!,
             EventMarkdown = model.Description!,
-            StartUtc = model.Start!.Value,
-            EndUtc = model.End!.Value,
+            StartTimestamp = model.Start!.Value,
+            EndTimestamp = model.End!.Value,
+            TimeZoneOffset = model.TimeZoneOffset,
+            TimeZoneLabel = model.TimeZoneLabel!,
             OrganizerName = model.OrganizerName!,
             OrganizerEmail = model.OrganizerEmail!,
             MaxTokenCap = model.MaxTokenCap,
@@ -31,13 +33,15 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
         await conn.OpenAsync();
         using DbCommand cmd = conn.CreateCommand();
 
-        cmd.CommandText = $"SELECT * FROM aoai.add_event(@OwnerId, @EventCode, @EventMarkdown, @StartUtc, @EndUtc, @OrganiserName, @OrganiserEmail, @EventUrl, @EventUrlText, @MaxTokenCap, @DailyRequestCap, @Active)";
+        cmd.CommandText = $"SELECT * FROM aoai.add_event(@OwnerId, @EventCode, @EventMarkdown, @StartTimestamp, @EndTimestamp, @TimeZoneOffset, @TimeZoneLabel,  @OrganiserName, @OrganiserEmail, @EventUrl, @EventUrlText, @MaxTokenCap, @DailyRequestCap, @Active)";
 
         cmd.Parameters.Add(new NpgsqlParameter("OwnerId", entraId));
         cmd.Parameters.Add(new NpgsqlParameter("EventCode", newEvent.EventCode));
         cmd.Parameters.Add(new NpgsqlParameter("EventMarkdown", newEvent.EventMarkdown));
-        cmd.Parameters.Add(new NpgsqlParameter("StartUtc", newEvent.StartUtc));
-        cmd.Parameters.Add(new NpgsqlParameter("EndUtc", newEvent.EndUtc));
+        cmd.Parameters.Add(new NpgsqlParameter("StartTimestamp", newEvent.StartTimestamp));
+        cmd.Parameters.Add(new NpgsqlParameter("EndTimestamp", newEvent.EndTimestamp));
+        cmd.Parameters.Add(new NpgsqlParameter("TimeZoneOffset", newEvent.TimeZoneOffset));
+        cmd.Parameters.Add(new NpgsqlParameter("TimeZoneLabel", newEvent.TimeZoneLabel));
         cmd.Parameters.Add(new NpgsqlParameter("OrganiserName", newEvent.OrganizerName));
         cmd.Parameters.Add(new NpgsqlParameter("OrganiserEmail", newEvent.OrganizerEmail));
         cmd.Parameters.Add(new NpgsqlParameter("EventUrl", newEvent.EventUrl));
@@ -78,8 +82,8 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
 
         evt.EventCode = model.Name!;
         evt.EventMarkdown = model.Description!;
-        evt.StartUtc = model.Start!.Value;
-        evt.EndUtc = model.End!.Value;
+        evt.StartTimestamp = model.Start!.Value;
+        evt.EndTimestamp = model.End!.Value;
         evt.EventUrl = model.Url!;
         evt.EventUrlText = model.UrlText!;
         evt.OrganizerEmail = model.OrganizerEmail!;

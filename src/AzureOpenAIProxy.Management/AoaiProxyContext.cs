@@ -43,7 +43,7 @@ public partial class AoaiProxyContext : DbContext
                 .HasColumnName("event_id");
             entity.Property(e => e.Active).HasColumnName("active");
             entity.Property(e => e.DailyRequestCap).HasColumnName("daily_request_cap");
-            entity.Property(e => e.EndUtc)
+            entity.Property(e => e.EndTimestamp)
                 .HasColumnType("timestamp(6) without time zone")
                 .HasColumnName("end_utc");
             entity.Property(e => e.EventCode)
@@ -68,7 +68,7 @@ public partial class AoaiProxyContext : DbContext
             entity.Property(e => e.OwnerId)
                 .HasDefaultValueSql("gen_random_uuid()")
                 .HasColumnName("owner_id");
-            entity.Property(e => e.StartUtc)
+            entity.Property(e => e.StartTimestamp)
                 .HasColumnType("timestamp(6) without time zone")
                 .HasColumnName("start_utc");
 
@@ -106,8 +106,6 @@ public partial class AoaiProxyContext : DbContext
                 .HasColumnName("event_id");
             entity.Property(e => e.Active).HasColumnName("active");
             entity.Property(e => e.ApiKey).HasColumnName("api_key");
-            entity.Property(e => e.TotalRequests).HasColumnName("total_requests");
-            entity.Property(e => e.TotalTokens).HasColumnName("total_tokens");
 
             entity.HasOne(d => d.Event).WithMany(p => p.EventAttendees)
                 .HasForeignKey(d => d.EventId)

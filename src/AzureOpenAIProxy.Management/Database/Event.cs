@@ -10,9 +10,13 @@ public partial class Event
 
     public string EventMarkdown { get; set; } = null!;
 
-    public DateTime StartUtc { get; set; }
+    public DateTime StartTimestamp { get; set; }
 
-    public DateTime EndUtc { get; set; }
+    public DateTime EndTimestamp { get; set; }
+
+    public int TimeZoneOffset { get; set; }
+
+    public string TimeZoneLabel { get; set; } = null!;
 
     public string OrganizerName { get; set; } = null!;
 

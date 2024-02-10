@@ -51,8 +51,8 @@ public partial class EventEdit : ComponentBase
 
         Model.Name = evt.EventCode;
         Model.Description = evt.EventMarkdown;
-        Model.Start = evt.StartUtc;
-        Model.End = evt.EndUtc;
+        Model.Start = evt.StartTimestamp;
+        Model.End = evt.EndTimestamp;
         Model.Url = evt.EventUrl;
         Model.UrlText = evt.EventUrlText;
         Model.OrganizerEmail = evt.OrganizerEmail;
