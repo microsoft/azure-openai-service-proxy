@@ -91,7 +91,7 @@ export const Registration = () => {
     const locale = navigator.language || navigator.languages[0];
 
     // Specify the formatting options
-    const options = {
+    const options: Intl.DateTimeFormatOptions = {
       weekday: "long",
       year: "numeric",
       month: "long",
