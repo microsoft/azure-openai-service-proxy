@@ -12,6 +12,8 @@ public partial class OwnerCatalog
 
     public string EndpointKey { get; set; } = null!;
 
+    public string Location { get; set; } = null!;
+
     public bool Active { get; set; }
 
     public ModelType? ModelType { get; set; }

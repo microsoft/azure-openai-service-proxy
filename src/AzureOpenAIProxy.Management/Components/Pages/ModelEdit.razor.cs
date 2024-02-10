@@ -38,6 +38,7 @@ public partial class ModelEdit : ComponentBase
             EndpointKey = m.EndpointKey,
             ModelType = m.ModelType,
             ResourceName = m.ResourceName,
+            Location = m.Location,
             Active = m.Active,
         };
     }
@@ -56,6 +57,7 @@ public partial class ModelEdit : ComponentBase
         m.EndpointKey = model.EndpointKey!;
         m.ModelType = model.ModelType!.Value;
         m.ResourceName = model.ResourceName!;
+        m.Location = model.Location!;
         m.Active = model.Active;
 
         await DbContext.SaveChangesAsync();

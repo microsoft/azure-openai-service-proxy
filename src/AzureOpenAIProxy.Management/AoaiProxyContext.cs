@@ -153,6 +153,9 @@ public partial class AoaiProxyContext : DbContext
             entity.Property(e => e.EndpointKey)
                 .HasMaxLength(128)
                 .HasColumnName("endpoint_key");
+            entity.Property(e => e.Location)
+                .HasMaxLength(64)
+                .HasColumnName("location");
             entity.Property(e => e.OwnerId).HasColumnName("owner_id");
             entity.Property(e => e.ResourceName)
                 .HasMaxLength(64)

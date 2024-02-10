@@ -15,6 +15,9 @@ public class ModelEditorModel
     public string? EndpointKey { get; set; }
 
     [Required]
+    public string? Location { get; set; }
+
+    [Required]
     public bool Active { get; set; }
 
     [Required]

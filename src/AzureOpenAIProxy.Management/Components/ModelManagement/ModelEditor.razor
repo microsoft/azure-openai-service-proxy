@@ -15,6 +15,7 @@
                 InputType="@(maskKey ? InputType.Password : InputType.Text)" Adornment="Adornment.End"
                 AdornmentIcon="@(maskKey ? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility)"
                 AdornmentAriaLabel="Show Password" OnAdornmentClick="ToggleMaskKey" />
+            <MudTextField Label="Location" @bind-Value="Model.Location" For="@(() => Model.Location)" />
             <div class="d-flex">
                 <MudSelect Label="Model Type" @bind-Value="Model.ModelType" Placeholder="Please Select"
                     For="@(() => Model.ModelType)">
