@@ -45,7 +45,7 @@ public partial class AoaiProxyContext : DbContext
             entity.Property(e => e.DailyRequestCap).HasColumnName("daily_request_cap");
             entity.Property(e => e.EndTimestamp)
                 .HasColumnType("timestamp(6) without time zone")
-                .HasColumnName("end_utc");
+                .HasColumnName("end_timestamp");
             entity.Property(e => e.EventCode)
                 .HasMaxLength(64)
                 .HasColumnName("event_code");
@@ -70,7 +70,13 @@ public partial class AoaiProxyContext : DbContext
                 .HasColumnName("owner_id");
             entity.Property(e => e.StartTimestamp)
                 .HasColumnType("timestamp(6) without time zone")
-                .HasColumnName("start_utc");
+                .HasColumnName("start_timestamp");
+            
+            entity.Property(e => e.TimeZoneLabel)
+                .HasMaxLength(64)
+                .HasColumnName("time_zone_label");
+
+            entity.Property(e => e.TimeZoneOffset).HasColumnName("time_zone_offset");
 
             entity.HasMany(d => d.Catalogs).WithMany(p => p.Events)
                 .UsingEntity<Dictionary<string, object>>(
