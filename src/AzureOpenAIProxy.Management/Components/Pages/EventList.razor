@@ -8,8 +8,7 @@
         Breakpoint="Breakpoint.Sm">
         <HeaderContent>
             <MudTh>Event</MudTh>
-            <MudTh>Organiser Name</MudTh>
-            <MudTh>Organiser Email</MudTh>
+            <MudTh>Organiser</MudTh>
             <MudTh>Duration</MudTh>
             <MudTh>Active</MudTh>
             <MudTh></MudTh>
@@ -17,11 +16,15 @@
         </HeaderContent>
         <RowTemplate>
             <MudTd DataLabel="Event">@context.EventCode</MudTd>
-            <MudTd DataLabel="OrganiserName">@context.OrganizerName</MudTd>
-            <MudTd DataLabel="OrganiserEmail"><a href="mailto:@context.OrganizerEmail">@context.OrganizerEmail</a>
-            </MudTd>
+            <MudTd DataLabel="OrganiserName">@context.OrganizerName<br/>@context.OrganizerEmail</MudTd>
             <MudTd DataLabel="Duration">@context.StartTimestamp.ToString("dd/MM/yyyy HH:mm") -
-                @context.EndTimestamp.ToString("dd/MM/yyyy HH:mm")</MudTd>
+                @context.EndTimestamp.ToString("dd/MM/yyyy HH:mm")<br/>
+                @{
+                    var timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById(@context.TimeZoneLabel);
+                    var displayName = timeZoneInfo.DisplayName;
+                }
+                @displayName
+            </MudTd>
             <MudTd DataLabel="Active">@(context.Active ? "Yes" : "No")</MudTd>
             <MudTd>
                 <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="@($"/event/{context.EventId}")">Edit
