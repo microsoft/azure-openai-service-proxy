@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 16.1
+-- Dumped from database version 16.1 (Debian 16.1-1.pgdg120+1)
 -- Dumped by pg_dump version 16.1 (Debian 16.1-1.pgdg110+1)
 
 SET statement_timeout = 0;
@@ -89,10 +89,10 @@ $$;
 ALTER PROCEDURE aoai.add_attendee_metric(IN p_api_key character varying, IN p_event_id character varying, IN p_catalog_id uuid) OWNER TO azure_pg_admin;
 
 --
--- Name: add_event(character varying, character varying, character varying, timestamp without time zone, timestamp without time zone, integer, character varying, character varying, character varying, character varying, character varying, integer, integer, boolean); Type: FUNCTION; Schema: aoai; Owner: azure_pg_admin
+-- Name: add_event(character varying, character varying, character varying, timestamp without time zone, timestamp without time zone, integer, character varying, character varying, character varying, character varying, character varying, integer, integer, boolean, character varying); Type: FUNCTION; Schema: aoai; Owner: azure_pg_admin
 --
 
-CREATE FUNCTION aoai.add_event(p_owner_id character varying, p_event_code character varying, p_event_markdown character varying, p_start_timestamp timestamp without time zone, p_end_timestamp timestamp without time zone, p_time_zone_offset integer, p_time_zone_label character varying, p_organizer_name character varying, p_organizer_email character varying, p_event_url character varying, p_event_url_text character varying, p_max_token_cap integer, p_daily_request_cap integer, p_active boolean) RETURNS TABLE(event_id character varying, owner_id character varying, event_code character varying, event_markdown character varying, start_timestamp timestamp without time zone, end_timestamp timestamp without time zone, organizer_name character varying, organizer_email character varying, event_url character varying, event_url_text character varying, max_token_cap integer, daily_request_cap integer, active boolean)
+CREATE FUNCTION aoai.add_event(p_owner_id character varying, p_event_code character varying, p_event_markdown character varying, p_start_timestamp timestamp without time zone, p_end_timestamp timestamp without time zone, p_time_zone_offset integer, p_time_zone_label character varying, p_organizer_name character varying, p_organizer_email character varying, p_event_url character varying, p_event_url_text character varying, p_max_token_cap integer, p_daily_request_cap integer, p_active boolean, p_event_image_url character varying DEFAULT NULL::character varying) RETURNS TABLE(event_id character varying, owner_id character varying, event_code character varying, event_markdown character varying, start_timestamp timestamp without time zone, end_timestamp timestamp without time zone, organizer_name character varying, organizer_email character varying, event_url character varying, event_url_text character varying, event_image_url character varying, max_token_cap integer, daily_request_cap integer, active boolean)
     LANGUAGE plpgsql
     AS $$
 DECLARE
@@ -127,6 +127,7 @@ BEGIN
         organizer_email,
         event_url,
         event_url_text,
+		event_image_url,
         max_token_cap,
         daily_request_cap,
         active
@@ -144,6 +145,7 @@ BEGIN
 		p_organizer_email,
 		p_event_url,
 		p_event_url_text,
+		p_event_image_url,
 		p_max_token_cap,
 		p_daily_request_cap,
 		p_active
@@ -161,14 +163,14 @@ BEGIN
     );
 
 	RETURN QUERY
-	SELECT e.event_id, e.owner_id, e.event_code, e.event_markdown, e.start_timestamp, e.end_timestamp, e.organizer_name, e.organizer_email, e.event_url, e.event_url_text, e.max_token_cap, e.daily_request_cap, e.active
+	SELECT e.event_id, e.owner_id, e.event_code, e.event_markdown, e.start_timestamp, e.end_timestamp, e.organizer_name, e.organizer_email, e.event_url, e.event_url_text, e.event_image_url, e.max_token_cap, e.daily_request_cap, e.active
 	FROM aoai.event as e WHERE e.event_id = v_final_hash;
 
 END;
 $$;
 
 
-ALTER FUNCTION aoai.add_event(p_owner_id character varying, p_event_code character varying, p_event_markdown character varying, p_start_timestamp timestamp without time zone, p_end_timestamp timestamp without time zone, p_time_zone_offset integer, p_time_zone_label character varying, p_organizer_name character varying, p_organizer_email character varying, p_event_url character varying, p_event_url_text character varying, p_max_token_cap integer, p_daily_request_cap integer, p_active boolean) OWNER TO azure_pg_admin;
+ALTER FUNCTION aoai.add_event(p_owner_id character varying, p_event_code character varying, p_event_markdown character varying, p_start_timestamp timestamp without time zone, p_end_timestamp timestamp without time zone, p_time_zone_offset integer, p_time_zone_label character varying, p_organizer_name character varying, p_organizer_email character varying, p_event_url character varying, p_event_url_text character varying, p_max_token_cap integer, p_daily_request_cap integer, p_active boolean, p_event_image_url character varying) OWNER TO azure_pg_admin;
 
 --
 -- Name: add_event_attendee(character varying, character varying); Type: FUNCTION; Schema: aoai; Owner: azure_pg_admin
@@ -180,7 +182,7 @@ CREATE FUNCTION aoai.add_event_attendee(p_user_id character varying, p_event_id 
 DECLARE
     v_api_key character varying;
 BEGIN
-	SELECT api_key INTO v_api_key FROM aoai.event_attendee WHERE user_id = p_user_id;
+	SELECT api_key INTO v_api_key FROM aoai.event_attendee WHERE user_id = p_user_id AND event_id = p_event_id;
 
     IF v_api_key IS NULL THEN
 		v_api_key := aoai.gen_random_uuid();
