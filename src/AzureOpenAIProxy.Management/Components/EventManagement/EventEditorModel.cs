@@ -25,10 +25,6 @@ public class EventEditorModel
     [Required]
     public DateTime? Start { get; set; }
     [Required]
-    public int TimeZoneOffset { get; set; } = 0;
-    [Required]
-    public string? TimeZoneLabel { get; set; } = "UTC";
-    [Required]
     public DateTime? End { get; set; }
     [Required(ErrorMessage = "Organizer name is required")]
     [StringLength(128)]

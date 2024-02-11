@@ -21,8 +21,8 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
             EventMarkdown = model.Description!,
             StartTimestamp = model.Start!.Value,
             EndTimestamp = model.End!.Value,
-            TimeZoneOffset = model.TimeZoneOffset,
-            TimeZoneLabel = model.TimeZoneLabel!,
+            // TimeZoneOffset = model.TimeZoneOffset,
+            // TimeZoneLabel = model.TimeZoneLabel!,
             OrganizerName = model.OrganizerName!,
             OrganizerEmail = model.OrganizerEmail!,
             MaxTokenCap = model.MaxTokenCap,
@@ -99,6 +99,8 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
         evt.Active = model.Active;
         evt.MaxTokenCap = model.MaxTokenCap;
         evt.DailyRequestCap = model.DailyRequestCap;
+        evt.TimeZoneLabel = model.SelectedTimeZone!.Id;
+        evt.TimeZoneOffset = (int)model.SelectedTimeZone.BaseUtcOffset.TotalMinutes;
 
         await db.SaveChangesAsync();
 

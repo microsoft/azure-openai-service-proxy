@@ -70,6 +70,6 @@ public partial class EventEditor : ComponentBase
             return Task.FromResult(TimeZones!);
         }
 
-        return Task.FromResult(TimeZones!.Where(tz => tz.Id.Contains(filter, StringComparison.OrdinalIgnoreCase)));
+        return Task.FromResult(TimeZones!.Where(tz => tz.DisplayName.Contains(filter, StringComparison.OrdinalIgnoreCase)));
     }
 }
