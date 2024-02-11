@@ -21,8 +21,8 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
             EventMarkdown = model.Description!,
             StartTimestamp = model.Start!.Value,
             EndTimestamp = model.End!.Value,
-            // TimeZoneOffset = model.TimeZoneOffset,
-            // TimeZoneLabel = model.TimeZoneLabel!,
+            TimeZoneOffset = model.SelectedTimeZone!.BaseUtcOffset.Minutes,
+            TimeZoneLabel = model.SelectedTimeZone!.Id,
             OrganizerName = model.OrganizerName!,
             OrganizerEmail = model.OrganizerEmail!,
             MaxTokenCap = model.MaxTokenCap,
@@ -75,7 +75,11 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
     public async Task<IEnumerable<Event>> GetOwnerEventsAsync()
     {
         string entraId = await authService.GetCurrentUserEntraIdAsync();
-        return await db.Events.Where(e => e.OwnerEventMaps.Any(o => o.Owner.OwnerId == entraId)).ToListAsync();
+        return await db.Events
+            .Where(e => e.OwnerEventMaps.Any(o => o.Owner.OwnerId == entraId))
+            .OrderByDescending(e => e.Active)
+            .ThenBy(e => e.StartTimestamp)
+            .ToListAsync();
     }
 
     public async Task<Event?> UpdateEventAsync(string id, EventEditorModel model)
