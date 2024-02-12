@@ -16,17 +16,7 @@
             <h1>Models</h1>
 
             <MudCard>
-                <MudCardContent>
-                    <MudSelect Label="Models" MultiSelection="true" @bind-SelectedValues="SelectedModels"
-                        MultiSelectionTextFunc="@(new Func<List<string>, string>(SelectedModelsDisplay))"
-                        Disabled="@modelsUpdating">
-                        @foreach (var model in AvailableModels)
-                        {
-                            <MudSelectItem Value="@model.CatalogId.ToString()">@model.DeploymentName</MudSelectItem>
-                        }
-                    </MudSelect>
 
-                </MudCardContent>
                 <MudCardActions>
                     @if (!modelsUpdating)
                     {
@@ -40,6 +30,19 @@
                     }
 
                 </MudCardActions>
+
+                <MudCardContent>
+                    <MudSelect Label="Models" MultiSelection="true" @bind-SelectedValues="SelectedModels"
+                        MultiSelectionTextFunc="@(new Func<List<string>, string>(SelectedModelsDisplay))"
+                        Disabled="@modelsUpdating">
+                        @foreach (var model in AvailableModels)
+                        {
+                            <MudSelectItem Value="@model.CatalogId.ToString()">@model.DeploymentName</MudSelectItem>
+                        }
+                    </MudSelect>
+
+                </MudCardContent>
+
             </MudCard>
         </MudItem>
     </MudGrid>

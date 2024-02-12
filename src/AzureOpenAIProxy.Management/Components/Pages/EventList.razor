@@ -4,6 +4,8 @@
 <MudStack>
     <h3>Events</h3>
 
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/events/new">New Event</MudButton>
+
     <MudTable Items="@Events" Loading="@(Events is null)" LoadingProgressColor="Color.Info" Hover="true"
         Breakpoint="Breakpoint.Sm">
         <HeaderContent>
@@ -36,7 +38,5 @@
             </MudTd>
         </RowTemplate>
     </MudTable>
-
-    <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/events/new">New Event</MudButton>
 
 </MudStack>
