@@ -14,6 +14,7 @@ public class ModelService(IAuthService authService, AoaiProxyContext db) : IMode
         {
             Owner = owner,
             Active = model.Active,
+            FriendlyName = model.FriendlyName,
             DeploymentName = model.DeploymentName!,
             EndpointKey = model.EndpointKey!,
             Location = model.Location!,

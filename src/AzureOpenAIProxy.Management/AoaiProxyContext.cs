@@ -160,6 +160,11 @@ public partial class AoaiProxyContext : DbContext
             entity.Property(e => e.Location)
                 .HasMaxLength(64)
                 .HasColumnName("location");
+
+            entity.Property(e => e.FriendlyName)
+                .HasMaxLength(64)
+                .HasColumnName("friendly_name");
+
             entity.Property(e => e.OwnerId).HasColumnName("owner_id");
             entity.Property(e => e.EndpointUrl)
                 .HasMaxLength(64)
@@ -172,6 +177,7 @@ public partial class AoaiProxyContext : DbContext
             entity.HasOne(d => d.Owner).WithMany(p => p.OwnerCatalogs)
                 .HasForeignKey(d => d.OwnerId)
                 .HasConstraintName("fk_groupmodels_group");
+
         });
 
         modelBuilder.Entity<OwnerEventMap>(entity =>

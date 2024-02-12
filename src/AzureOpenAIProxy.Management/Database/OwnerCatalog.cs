@@ -14,6 +14,8 @@ public partial class OwnerCatalog
 
     public string Location { get; set; } = null!;
 
+    public string? FriendlyName { get; set; }
+
     public bool Active { get; set; }
 
     public ModelType? ModelType { get; set; }

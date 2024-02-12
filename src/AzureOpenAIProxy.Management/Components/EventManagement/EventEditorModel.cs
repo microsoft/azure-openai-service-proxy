@@ -5,6 +5,11 @@ namespace AzureOpenAIProxy.Management.Components.EventManagement;
 
 public class EventEditorModel
 {
+
+    [Required(ErrorMessage = "Friendly name is required")]
+    [StringLength(64)]
+    public string? FriendlyName { get; set; }
+
     [Required(ErrorMessage = "Event name is required")]
     [StringLength(64)]
     public string? Name { get; set; }

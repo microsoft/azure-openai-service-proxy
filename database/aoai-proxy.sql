@@ -448,7 +448,8 @@ CREATE TABLE aoai.owner_catalog (
     endpoint_key character varying(128) NOT NULL,
     active boolean NOT NULL,
     model_type aoai.model_type NOT NULL,
-    location character varying(64) DEFAULT ''::character varying NOT NULL
+    location character varying(64) DEFAULT ''::character varying NOT NULL,
+    friendly_name character varying(64) NOT NULL
 );
 
 

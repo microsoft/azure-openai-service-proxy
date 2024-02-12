@@ -7,15 +7,21 @@
 
     <MudCard>
         <MudCardContent>
-            <MudTextField Label="Deployment Name" @bind-Value="Model.DeploymentName"
-                For="@(() => Model.DeploymentName)" />
-            <MudTextField Label="Endpoint URL" @bind-Value="Model.EndpointUrl" For="@(() => Model.EndpointUrl)"
-                Adornment="Adornment.End" AdornmentText="https://my-openai-resource.openai.azure.com" />
+            <MudTextField Label="Friendly Name" @bind-Value="Model.FriendlyName" For="@(() => Model.FriendlyName)" />
+
             <MudTextField Label="Endpoint Key" @bind-Value="Model.EndpointKey" For="@(() => Model.EndpointKey)"
                 InputType="@(maskKey ? InputType.Password : InputType.Text)" Adornment="Adornment.End"
                 AdornmentIcon="@(maskKey ? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility)"
                 AdornmentAriaLabel="Show Password" OnAdornmentClick="ToggleMaskKey" />
+
+            <MudTextField Label="Endpoint URL" @bind-Value="Model.EndpointUrl" For="@(() => Model.EndpointUrl)"
+                Adornment="Adornment.End" AdornmentText="https://my-ai-resource.azure.com" />
+
             <MudTextField Label="Location" @bind-Value="Model.Location" For="@(() => Model.Location)" />
+
+            <MudTextField Label="Deployment Name (case sensitive)" @bind-Value="Model.DeploymentName"
+                For="@(() => Model.DeploymentName)" />
+
             <div class="d-flex">
                 <MudSelect Label="Model Type" @bind-Value="Model.ModelType" Placeholder="Please Select"
                     For="@(() => Model.ModelType)">
@@ -27,6 +33,7 @@
                 </MudSelect>
                 <MudSwitch @bind-Value="Model.Active" Label="Active" Color="Color.Primary" />
             </div>
+
         </MudCardContent>
         <MudCardActions>
             <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled"

@@ -7,6 +7,10 @@ public class ModelEditorModel
 {
     [Required]
     [StringLength(64)]
+    public string? FriendlyName { get; set; }
+
+    [Required]
+    [StringLength(64)]
     public string? DeploymentName { get; set; }
 
     [Required]
