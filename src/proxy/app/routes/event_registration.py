@@ -22,8 +22,10 @@ class EventRegistrationResponse(BaseModel):
     organizer_name: str
     organizer_email: str
     event_markdown: str
-    start_utc: datetime
-    end_utc: datetime
+    start_timestamp: datetime
+    end_timestamp: datetime
+    time_zone_label: str
+    time_zone_offset: int
 
     def __init__(
         self,
@@ -35,8 +37,10 @@ class EventRegistrationResponse(BaseModel):
         organizer_name: str,
         organizer_email: str,
         event_markdown: str,
-        start_utc: datetime,
-        end_utc: datetime,
+        start_timestamp: datetime,
+        end_timestamp: datetime,
+        time_zone_label: str,
+        time_zone_offset: int,
     ) -> None:
         super().__init__(
             event_id=event_id,
@@ -47,8 +51,10 @@ class EventRegistrationResponse(BaseModel):
             organizer_name=organizer_name,
             organizer_email=organizer_email,
             event_markdown=event_markdown,
-            start_utc=start_utc,
-            end_utc=end_utc,
+            start_timestamp=start_timestamp,
+            end_timestamp=end_timestamp,
+            time_zone_label=time_zone_label,
+            time_zone_offset=time_zone_offset,
         )
 
 
@@ -96,16 +102,13 @@ class EventRegistrationInfo:
             raise
 
         except asyncpg.exceptions.PostgresError as error:
-            self.logger.error("Postgres error: %s", str(error))
-            raise HTTPException(
-                status_code=503,
-                detail="Error reading model catalog.",
-            ) from error
+            self.logger.error("Postgres error: get_event_info %s", str(error))
+            raise HTTPException(status_code=503, detail="Postgres error: get_event_info") from error
 
         except Exception as exp:
-            self.logger.error("Postgres exception: %s", str(exp))
+            self.logger.error("get_event_info exception: %s", str(exp))
             self.logger.error(exp)
             raise HTTPException(
-                detail="Error reading model catalog.",
+                detail="get_event_info exception.",
                 status_code=503,
             ) from exp

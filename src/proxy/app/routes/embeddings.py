@@ -1,6 +1,5 @@
 """ OpenAI Embeddings API route """
 
-
 from typing import Any
 
 from fastapi import Request, Response
@@ -59,7 +58,7 @@ class Embeddings(RequestManager):
         """call openai with retry"""
 
         url = (
-            f"https://{deployment.resource_name}.openai.azure.com/openai/deployments/"
+            f"{deployment.endpoint_url}/openai/deployments/"
             f"{deployment.deployment_name}/embeddings"
             f"?api-version={self.api_version}"
         )

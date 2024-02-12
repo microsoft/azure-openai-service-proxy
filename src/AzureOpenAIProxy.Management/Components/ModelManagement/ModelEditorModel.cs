@@ -6,13 +6,24 @@ namespace AzureOpenAIProxy.Management.Components.ModelManagement;
 public class ModelEditorModel
 {
     [Required]
+    [StringLength(64)]
+    public string? FriendlyName { get; set; }
+
+    [Required]
+    [StringLength(64)]
     public string? DeploymentName { get; set; }
 
     [Required]
-    public string? ResourceName { get; set; }
+    [StringLength(256)]
+    public string? EndpointUrl { get; set; }
 
     [Required]
+    [StringLength(128)]
     public string? EndpointKey { get; set; }
+
+    [Required]
+    [StringLength(64)]
+    public string? Location { get; set; }
 
     [Required]
     public bool Active { get; set; }

@@ -8,9 +8,13 @@ public partial class OwnerCatalog
 
     public string DeploymentName { get; set; } = null!;
 
-    public string ResourceName { get; set; } = null!;
+    public string EndpointUrl { get; set; } = null!;
 
     public string EndpointKey { get; set; } = null!;
+
+    public string Location { get; set; } = null!;
+
+    public string? FriendlyName { get; set; } = null!;
 
     public bool Active { get; set; }
 

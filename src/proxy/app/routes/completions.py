@@ -64,7 +64,7 @@ class Completions(RequestManager):
         """call openai with retry"""
 
         url = (
-            f"https://{deployment.resource_name}.openai.azure.com/openai/deployments/"
+            f"{deployment.endpoint_url}/openai/deployments/"
             f"{deployment.deployment_name}/completions"
             f"?api-version={self.api_version}"
         )

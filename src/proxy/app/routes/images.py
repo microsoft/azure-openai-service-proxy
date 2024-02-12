@@ -101,7 +101,7 @@ class Images(RequestManager):
         }
 
         url = (
-            f"https://{deployment.resource_name}.openai.azure.com/openai/deployments/"
+            f"{deployment.endpoint_url}/openai/deployments/"
             f"{deployment.deployment_name}/images/generations"
             f"?api-version={self.api_version}"
         )

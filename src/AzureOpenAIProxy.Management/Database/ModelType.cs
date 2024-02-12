@@ -15,5 +15,7 @@ public enum ModelType
     [PgName("openai-whisper")]
     OpenAI_Whisper,
     [PgName("openai-completion")]
-    OpenAI_Completion
+    OpenAI_Completion,
+    [PgName("azure-ai-search")]
+    Azure_AI_Search
 }

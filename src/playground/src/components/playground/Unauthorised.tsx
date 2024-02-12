@@ -27,8 +27,7 @@ export const Unauthorised = () => {
         <DialogBody>
           <DialogTitle>Invalid Event Code</DialogTitle>
           <DialogContent>
-            The event code provided is invalid, please check the code and try
-            again.
+            The API Key provided is invalid or the event has expired. Please check the API Key and the event start and end times.
           </DialogContent>
           <DialogActions>
             <DialogTrigger disableButtonEnhancement>

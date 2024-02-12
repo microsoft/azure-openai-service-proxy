@@ -9,15 +9,17 @@
         Breakpoint="Breakpoint.Sm">
         <HeaderContent>
             <MudTh>Deployment Name</MudTh>
-            <MudTh>Resource Name</MudTh>
+            <MudTh>Endpoint URL</MudTh>
             <MudTh>Model Type</MudTh>
+            <MudTh>Location</MudTh>
             <MudTh>Active</MudTh>
             <MudTh></MudTh>
         </HeaderContent>
         <RowTemplate>
             <MudTd DataLabel="DeploymentName">@context.DeploymentName</MudTd>
-            <MudTd DataLabel="ResourceName">@context.ResourceName</MudTd>
+            <MudTd DataLabel="EndpointUrl">@context.EndpointUrl</MudTd>
             <MudTd DataLabel="ModelType">@(context.ModelType!.Value.ToString().Replace("_", " "))</MudTd>
+            <MudTd DataLabel="Location">@(context.Location)</MudTd>
             <MudTd DataLabel="Active">@(context.Active ? "Yes" : "No")</MudTd>
             <MudTd>
                 <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="@($"/models/{context.CatalogId}")">Edit

@@ -29,7 +29,7 @@ public partial class AoaiProxyContext : DbContext
         modelBuilder.HasPostgresEnum(
             "aoai",
             "model_type",
-            ["openai-chat", "openai-embedding", "openai-dalle2", "openai-dalle3", "openai-whisper", "openai-completion"]);
+            ["openai-chat", "openai-embedding", "openai-dalle2", "openai-dalle3", "openai-whisper", "openai-completion", "azure-ai-search"]);
 
         modelBuilder.Entity<Event>(entity =>
         {
@@ -43,9 +43,9 @@ public partial class AoaiProxyContext : DbContext
                 .HasColumnName("event_id");
             entity.Property(e => e.Active).HasColumnName("active");
             entity.Property(e => e.DailyRequestCap).HasColumnName("daily_request_cap");
-            entity.Property(e => e.EndUtc)
+            entity.Property(e => e.EndTimestamp)
                 .HasColumnType("timestamp(6) without time zone")
-                .HasColumnName("end_utc");
+                .HasColumnName("end_timestamp");
             entity.Property(e => e.EventCode)
                 .HasMaxLength(64)
                 .HasColumnName("event_code");
@@ -58,6 +58,10 @@ public partial class AoaiProxyContext : DbContext
             entity.Property(e => e.EventUrlText)
                 .HasMaxLength(256)
                 .HasColumnName("event_url_text");
+            entity.Property(e => e.EventImageUrl)
+                .HasMaxLength(256)
+                .IsRequired(false)
+                .HasColumnName("event_image_url");
             entity.Property(e => e.MaxTokenCap).HasColumnName("max_token_cap");
             entity.Property(e => e.OrganizerEmail)
                 .HasMaxLength(128)
@@ -68,9 +72,15 @@ public partial class AoaiProxyContext : DbContext
             entity.Property(e => e.OwnerId)
                 .HasDefaultValueSql("gen_random_uuid()")
                 .HasColumnName("owner_id");
-            entity.Property(e => e.StartUtc)
+            entity.Property(e => e.StartTimestamp)
                 .HasColumnType("timestamp(6) without time zone")
-                .HasColumnName("start_utc");
+                .HasColumnName("start_timestamp");
+
+            entity.Property(e => e.TimeZoneLabel)
+                .HasMaxLength(64)
+                .HasColumnName("time_zone_label");
+
+            entity.Property(e => e.TimeZoneOffset).HasColumnName("time_zone_offset");
 
             entity.HasMany(d => d.Catalogs).WithMany(p => p.Events)
                 .UsingEntity<Dictionary<string, object>>(
@@ -106,8 +116,6 @@ public partial class AoaiProxyContext : DbContext
                 .HasColumnName("event_id");
             entity.Property(e => e.Active).HasColumnName("active");
             entity.Property(e => e.ApiKey).HasColumnName("api_key");
-            entity.Property(e => e.TotalRequests).HasColumnName("total_requests");
-            entity.Property(e => e.TotalTokens).HasColumnName("total_tokens");
 
             entity.HasOne(d => d.Event).WithMany(p => p.EventAttendees)
                 .HasForeignKey(d => d.EventId)
@@ -149,10 +157,18 @@ public partial class AoaiProxyContext : DbContext
             entity.Property(e => e.EndpointKey)
                 .HasMaxLength(128)
                 .HasColumnName("endpoint_key");
-            entity.Property(e => e.OwnerId).HasColumnName("owner_id");
-            entity.Property(e => e.ResourceName)
+            entity.Property(e => e.Location)
                 .HasMaxLength(64)
-                .HasColumnName("resource_name");
+                .HasColumnName("location");
+
+            entity.Property(e => e.FriendlyName)
+                .HasMaxLength(64)
+                .HasColumnName("friendly_name");
+
+            entity.Property(e => e.OwnerId).HasColumnName("owner_id");
+            entity.Property(e => e.EndpointUrl)
+                .HasMaxLength(64)
+                .HasColumnName("endpoint_url");
             entity.Property(e => e.ModelType)
                 .HasColumnName("model_type")
                 .HasDefaultValueSql("'openai-chat'::aoai.model_type");
@@ -161,6 +177,7 @@ public partial class AoaiProxyContext : DbContext
             entity.HasOne(d => d.Owner).WithMany(p => p.OwnerCatalogs)
                 .HasForeignKey(d => d.OwnerId)
                 .HasConstraintName("fk_groupmodels_group");
+
         });
 
         modelBuilder.Entity<OwnerEventMap>(entity =>

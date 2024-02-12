@@ -77,10 +77,56 @@ export const Registration = () => {
     notify();
   };
 
+  const adjustedLocalTime = (timestamp: Date, utcOffsetInMinutes: number): string => {
+    // returns time zone adjusted date/time
+    const date = new Date(timestamp);
+    // get the timezone offset component that was added as no tz supplied in date time
+    const tz = date.getTimezoneOffset();
+    // remove the browser based timezone offset
+    date.setMinutes(date.getMinutes() - tz);
+    // add the event timezone offset
+    date.setMinutes(date.getMinutes() - utcOffsetInMinutes);
+
+    // Get the browser locale
+    const locale = navigator.language || navigator.languages[0];
+
+    // Specify the formatting options
+    const options: Intl.DateTimeFormatOptions = {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "numeric",
+      minute: "numeric",
+    };
+
+    // Create an Intl.DateTimeFormat object
+    const formatter = new Intl.DateTimeFormat(locale, options);
+    // Format the date
+    const formattedDate = formatter.format(date);
+    return formattedDate;
+  };
+
   return (
     <section className={styles.container}>
       <h1>{event?.eventCode}</h1>
-      <div>
+      {event?.startTimestamp && event?.endTimestamp && event?.timeZoneLabel && (
+        <div>
+          <table>
+            <tbody>
+              <tr>
+                <td><strong>Starts:</strong></td>
+                <td>{adjustedLocalTime(event?.startTimestamp, event?.timeZoneOffset)}</td>
+              </tr>
+              <tr>
+                <td><strong>Ends:</strong></td>
+                <td>{adjustedLocalTime(event?.endTimestamp, event?.timeZoneOffset)}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      )}
+      <div style={{ textAlign: "center", padding: "40px" }}>
         <ReactMarkdown>{event?.eventMarkdown}</ReactMarkdown>
       </div>
       {state.profileLoaded && state.profile && !attendee && (
@@ -109,6 +155,12 @@ export const Registration = () => {
               <Button icon={<CopyRegular />} onClick={copyToClipboard} />
             </div>
           </Field>
+          <div>
+            <p>
+              Copy the API Key. Then connect to the&nbsp;
+              <Link href={`${window.location.origin}`}>OpenAI Playground</Link>
+            </p>
+          </div>
         </div>
       )}
 

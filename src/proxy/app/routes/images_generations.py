@@ -120,7 +120,7 @@ class ImagesGenerations(RequestManager):
         }
 
         url = (
-            f"https://{deployment.resource_name}.openai.azure.com"
+            f"{deployment.endpoint_url}"
             "/openai/images/generations:submit"
             f"?api-version={self.api_version}"
         )
@@ -161,7 +161,7 @@ class ImagesGenerations(RequestManager):
             return self.report_exception("Oops, failed to find service to generate image.", 404)
 
         url = (
-            f"https://{deployment.resource_name}.openai.azure.com"
+            f"{deployment.endpoint_url}"
             f"/openai/operations/images/{image_id}"
             f"?api-version={self.api_version}"
         )

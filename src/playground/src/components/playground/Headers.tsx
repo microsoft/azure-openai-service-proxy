@@ -33,7 +33,7 @@ export const Header = () => {
           }}
         >
           <Tab value="chat">Chat</Tab>
-          <Tab value="images">Image</Tab>
+          {/* <Tab value="images">Image</Tab> */}
         </TabList>
         <div className={styles.right}>
           <ApiKeyInput />

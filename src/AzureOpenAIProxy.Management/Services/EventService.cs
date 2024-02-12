@@ -3,6 +3,8 @@ using AzureOpenAIProxy.Management.Components.EventManagement;
 using AzureOpenAIProxy.Management.Database;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
+using Npgsql.Internal.Postgres;
+using NpgsqlTypes;
 
 namespace AzureOpenAIProxy.Management.Services;
 
@@ -15,9 +17,12 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
             EventCode = model.Name!,
             EventUrlText = model.UrlText!,
             EventUrl = model.Url!,
+            EventImageUrl = model.EventImageUrl!,
             EventMarkdown = model.Description!,
-            StartUtc = model.Start!.Value,
-            EndUtc = model.End!.Value,
+            StartTimestamp = model.Start!.Value,
+            EndTimestamp = model.End!.Value,
+            TimeZoneOffset = model.SelectedTimeZone!.BaseUtcOffset.Minutes,
+            TimeZoneLabel = model.SelectedTimeZone!.Id,
             OrganizerName = model.OrganizerName!,
             OrganizerEmail = model.OrganizerEmail!,
             MaxTokenCap = model.MaxTokenCap,
@@ -31,20 +36,26 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
         await conn.OpenAsync();
         using DbCommand cmd = conn.CreateCommand();
 
-        cmd.CommandText = $"SELECT * FROM aoai.add_event(@OwnerId, @EventCode, @EventMarkdown, @StartUtc, @EndUtc, @OrganiserName, @OrganiserEmail, @EventUrl, @EventUrlText, @MaxTokenCap, @DailyRequestCap, @Active)";
+        cmd.CommandText = $"SELECT * FROM aoai.add_event(@OwnerId, @EventCode, @EventMarkdown, @StartTimestamp, @EndTimestamp, @TimeZoneOffset, @TimeZoneLabel,  @OrganizerName, @OrganizerEmail, @EventUrl, @EventUrlText, @MaxTokenCap, @DailyRequestCap, @Active, @EventImageUrl)";
 
         cmd.Parameters.Add(new NpgsqlParameter("OwnerId", entraId));
         cmd.Parameters.Add(new NpgsqlParameter("EventCode", newEvent.EventCode));
         cmd.Parameters.Add(new NpgsqlParameter("EventMarkdown", newEvent.EventMarkdown));
-        cmd.Parameters.Add(new NpgsqlParameter("StartUtc", newEvent.StartUtc));
-        cmd.Parameters.Add(new NpgsqlParameter("EndUtc", newEvent.EndUtc));
-        cmd.Parameters.Add(new NpgsqlParameter("OrganiserName", newEvent.OrganizerName));
-        cmd.Parameters.Add(new NpgsqlParameter("OrganiserEmail", newEvent.OrganizerEmail));
+        cmd.Parameters.Add(new NpgsqlParameter("StartTimestamp", newEvent.StartTimestamp));
+        cmd.Parameters.Add(new NpgsqlParameter("EndTimestamp", newEvent.EndTimestamp));
+        cmd.Parameters.Add(new NpgsqlParameter("TimeZoneOffset", newEvent.TimeZoneOffset));
+        cmd.Parameters.Add(new NpgsqlParameter("TimeZoneLabel", newEvent.TimeZoneLabel));
+        cmd.Parameters.Add(new NpgsqlParameter("OrganizerName", newEvent.OrganizerName));
+        cmd.Parameters.Add(new NpgsqlParameter("OrganizerEmail", newEvent.OrganizerEmail));
         cmd.Parameters.Add(new NpgsqlParameter("EventUrl", newEvent.EventUrl));
         cmd.Parameters.Add(new NpgsqlParameter("EventUrlText", newEvent.EventUrlText));
         cmd.Parameters.Add(new NpgsqlParameter("MaxTokenCap", newEvent.MaxTokenCap));
         cmd.Parameters.Add(new NpgsqlParameter("DailyRequestCap", newEvent.DailyRequestCap));
         cmd.Parameters.Add(new NpgsqlParameter("Active", newEvent.Active));
+
+        var parameter = new NpgsqlParameter("@EventImageUrl", NpgsqlDbType.Text);
+        parameter.Value = newEvent.EventImageUrl ?? (object)DBNull.Value;
+        cmd.Parameters.Add(parameter);
 
         var reader = await cmd.ExecuteReaderAsync();
 
@@ -64,7 +75,11 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
     public async Task<IEnumerable<Event>> GetOwnerEventsAsync()
     {
         string entraId = await authService.GetCurrentUserEntraIdAsync();
-        return await db.Events.Where(e => e.OwnerEventMaps.Any(o => o.Owner.OwnerId == entraId)).ToListAsync();
+        return await db.Events
+            .Where(e => e.OwnerEventMaps.Any(o => o.Owner.OwnerId == entraId))
+            .OrderByDescending(e => e.Active)
+            .ThenBy(e => e.StartTimestamp)
+            .ToListAsync();
     }
 
     public async Task<Event?> UpdateEventAsync(string id, EventEditorModel model)
@@ -78,15 +93,18 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
 
         evt.EventCode = model.Name!;
         evt.EventMarkdown = model.Description!;
-        evt.StartUtc = model.Start!.Value;
-        evt.EndUtc = model.End!.Value;
+        evt.StartTimestamp = model.Start!.Value;
+        evt.EndTimestamp = model.End!.Value;
         evt.EventUrl = model.Url!;
         evt.EventUrlText = model.UrlText!;
+        evt.EventImageUrl = model.EventImageUrl!;
         evt.OrganizerEmail = model.OrganizerEmail!;
         evt.OrganizerName = model.OrganizerName!;
         evt.Active = model.Active;
         evt.MaxTokenCap = model.MaxTokenCap;
         evt.DailyRequestCap = model.DailyRequestCap;
+        evt.TimeZoneLabel = model.SelectedTimeZone!.Id;
+        evt.TimeZoneOffset = (int)model.SelectedTimeZone.BaseUtcOffset.TotalMinutes;
 
         await db.SaveChangesAsync();
 
