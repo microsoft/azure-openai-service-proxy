@@ -75,7 +75,7 @@ public partial class AoaiProxyContext : DbContext
             entity.Property(e => e.StartTimestamp)
                 .HasColumnType("timestamp(6) without time zone")
                 .HasColumnName("start_timestamp");
-            
+
             entity.Property(e => e.TimeZoneLabel)
                 .HasMaxLength(64)
                 .HasColumnName("time_zone_label");
@@ -161,9 +161,9 @@ public partial class AoaiProxyContext : DbContext
                 .HasMaxLength(64)
                 .HasColumnName("location");
             entity.Property(e => e.OwnerId).HasColumnName("owner_id");
-            entity.Property(e => e.ResourceName)
+            entity.Property(e => e.EndpointUrl)
                 .HasMaxLength(64)
-                .HasColumnName("resource_name");
+                .HasColumnName("endpoint_url");
             entity.Property(e => e.ModelType)
                 .HasColumnName("model_type")
                 .HasDefaultValueSql("'openai-chat'::aoai.model_type");

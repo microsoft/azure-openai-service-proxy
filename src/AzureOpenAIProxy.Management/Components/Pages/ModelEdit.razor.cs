@@ -37,7 +37,7 @@ public partial class ModelEdit : ComponentBase
             DeploymentName = m.DeploymentName,
             EndpointKey = m.EndpointKey,
             ModelType = m.ModelType,
-            ResourceName = m.ResourceName,
+            EndpointUrl = m.EndpointUrl,
             Location = m.Location,
             Active = m.Active,
         };
@@ -56,7 +56,7 @@ public partial class ModelEdit : ComponentBase
         m.DeploymentName = model.DeploymentName!;
         m.EndpointKey = model.EndpointKey!;
         m.ModelType = model.ModelType!.Value;
-        m.ResourceName = model.ResourceName!;
+        m.EndpointUrl = model.EndpointUrl!;
         m.Location = model.Location!;
         m.Active = model.Active;
 

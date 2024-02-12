@@ -27,7 +27,7 @@ class Deployment:
         endpoint_key: str,
         deployment_name: str,
         model_type: str,
-        resource_name: str,
+        endpoint_url: str,
         catalog_id: uuid,
         location: str,
     ):
@@ -35,7 +35,7 @@ class Deployment:
         self.endpoint_key = endpoint_key
         self.model_type = model_type
         self.deployment_name = deployment_name
-        self.resource_name = resource_name
+        self.endpoint_url = endpoint_url
         self.catalog_id = catalog_id
         self.location = location
 

@@ -86,13 +86,13 @@ class ChatCompletions(RequestManager):
 
         if self.is_extension:
             url = (
-                f"https://{deployment.resource_name}.openai.azure.com/openai/deployments/"
+                f"{deployment.endpoint_url}/openai/deployments/"
                 f"{deployment.deployment_name}/extensions/chat/completions"
                 f"?api-version={self.api_version}"
             )
         else:
             url = (
-                f"https://{deployment.resource_name}.openai.azure.com/openai/deployments/"
+                f"{deployment.endpoint_url}/openai/deployments/"
                 f"{deployment.deployment_name}/chat/completions"
                 f"?api-version={self.api_version}"
             )

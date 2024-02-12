@@ -9,8 +9,8 @@
         <MudCardContent>
             <MudTextField Label="Deployment Name" @bind-Value="Model.DeploymentName"
                 For="@(() => Model.DeploymentName)" />
-            <MudTextField Label="Resource Name" @bind-Value="Model.ResourceName" For="@(() => Model.ResourceName)"
-                Adornment="Adornment.End" AdornmentText=".openai.azure.com" />
+            <MudTextField Label="Endpoint URL" @bind-Value="Model.EndpointUrl" For="@(() => Model.EndpointUrl)"
+                Adornment="Adornment.End" AdornmentText="https://my-openai-resource.openai.azure.com" />
             <MudTextField Label="Endpoint Key" @bind-Value="Model.EndpointKey" For="@(() => Model.EndpointKey)"
                 InputType="@(maskKey ? InputType.Password : InputType.Text)" Adornment="Adornment.End"
                 AdornmentIcon="@(maskKey ? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility)"

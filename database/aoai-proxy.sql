@@ -2,8 +2,8 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 16.1 (Debian 16.1-1.pgdg120+1)
--- Dumped by pg_dump version 16.1 (Debian 16.1-1.pgdg110+1)
+-- Dumped from database version 16.1
+-- Dumped by pg_dump version 16.2 (Debian 16.2-1.pgdg110+1)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -50,7 +50,8 @@ CREATE TYPE aoai.model_type AS ENUM (
     'openai-dalle3',
     'openai-whisper',
     'openai-completion',
-    'openai-instruct'
+    'openai-instruct',
+    'azure-ai-search'
 );
 
 
@@ -443,7 +444,7 @@ CREATE TABLE aoai.owner_catalog (
     owner_id character varying(128) NOT NULL,
     catalog_id uuid DEFAULT gen_random_uuid() NOT NULL,
     deployment_name character varying(64) NOT NULL,
-    resource_name character varying(64) NOT NULL,
+    endpoint_url character varying(256) NOT NULL,
     endpoint_key character varying(128) NOT NULL,
     active boolean NOT NULL,
     model_type aoai.model_type NOT NULL,
