@@ -157,8 +157,7 @@ export const Registration = () => {
           </Field>
           <div>
             <p>
-              Copy the API Key. Then connect to the&nbsp;
-              <Link href={`${window.location.origin}`}>OpenAI Playground</Link>
+              Copy the API Key, then navigate to the <Link href={`${window.location.origin}`}>Proxy Playground</Link>.
             </p>
           </div>
         </div>
