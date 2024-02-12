@@ -29,7 +29,7 @@ public partial class AoaiProxyContext : DbContext
         modelBuilder.HasPostgresEnum(
             "aoai",
             "model_type",
-            ["openai-chat", "openai-embedding", "openai-dalle2", "openai-dalle3", "openai-whisper", "openai-completion"]);
+            ["openai-chat", "openai-embedding", "openai-dalle2", "openai-dalle3", "openai-whisper", "openai-completion", "azure-ai-search"]);
 
         modelBuilder.Entity<Event>(entity =>
         {
