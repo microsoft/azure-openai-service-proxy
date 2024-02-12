@@ -155,7 +155,7 @@ export const Registration = () => {
               <Button icon={<CopyRegular />} onClick={copyToClipboard} />
             </div>
           </Field>
-          <div>
+          <div style={{ textAlign: "center" }}>
             <p>
               Copy the API Key, then connect to the&nbsp;
               <Link href={`${window.location.origin}`}>OpenAI Playground</Link>
