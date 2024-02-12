@@ -34,6 +34,7 @@ public partial class ModelEdit : ComponentBase
 
         Model = new()
         {
+            FriendlyName = m.FriendlyName,
             DeploymentName = m.DeploymentName,
             EndpointKey = m.EndpointKey,
             ModelType = m.ModelType,
@@ -53,6 +54,7 @@ public partial class ModelEdit : ComponentBase
             return;
         }
 
+        m.FriendlyName = model.FriendlyName!;
         m.DeploymentName = model.DeploymentName!;
         m.EndpointKey = model.EndpointKey!;
         m.ModelType = model.ModelType!.Value;
