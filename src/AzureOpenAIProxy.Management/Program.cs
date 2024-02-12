@@ -21,7 +21,7 @@ builder.Services.AddDbContext<AoaiProxyContext>(options =>
     NpgsqlDataSourceBuilder dataSourceBuilder = new(builder.Configuration.GetConnectionString("AoaiProxyContext"));
     dataSourceBuilder.MapEnum<ModelType>();
     NpgsqlDataSource dataSource = dataSourceBuilder.Build();
-    options.UseNpgsql(dataSource);
+    options.UseNpgsql(dataSource, options => options.CommandTimeout(20)); // Set the connection timeout to 20 seconds
 });
 
 builder.Services.AddScoped<IEventService, EventService>();
