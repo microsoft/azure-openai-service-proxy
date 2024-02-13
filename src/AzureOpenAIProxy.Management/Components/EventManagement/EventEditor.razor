@@ -7,6 +7,14 @@
     <DataAnnotationsValidator />
 
     <MudCard>
+
+        <MudCardActions>
+            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled"
+                Color="@(isSubmitting ? Color.Info : Color.Primary)" Class="ml-auto"
+                StartIcon="@Icons.Material.Filled.Save" Disabled="@isSubmitting">@(isSubmitting ? "Saving" : "Save")
+            </MudButton>
+        </MudCardActions>
+
         <MudCardContent>
             <MudTextField Label="Event Name" @bind-Value="Model.Name" For="@(() => Model.Name)" />
             <MudTextField Label="Event URL text" @bind-Value="Model.UrlText" For="@(() => Model.UrlText)" />
@@ -17,42 +25,40 @@
             <MudTextField Label="Organiser Name" @bind-Value="Model.OrganizerName" For="@(() => Model.OrganizerName)" />
             <MudTextField Label="Organiser Email" @bind-Value="Model.OrganizerEmail" InputType="InputType.Email"
                 For="@(() => Model.OrganizerEmail)" />
-            <div class="d-flex">
-                <MudTextField Label="Start Date" @bind-Value="Model.Start" InputType="InputType.DateTimeLocal"
-                    For="@(() => Model.Start)" Format="s" />
-                <MudTextField Label="End Date" @bind-Value="Model.End" InputType="InputType.DateTimeLocal"
-                    For="@(() => Model.End)" Format="s" />
 
-                <MudAutocomplete T="TimeZoneInfo" @bind-Value="Model.SelectedTimeZone" Label="Time Zone" FullWidth="true"
-                    For="@(() => Model.SelectedTimeZone)" SearchFunc="FilterTimezones">
-                    <ItemTemplate Context="e">
-                        <MudText>
-                            <MudIcon Icon="@Icons.Material.Filled.CheckBoxOutlineBlank" Class="mb-n1 mr-3" />
-                            @e.DisplayName
-                        </MudText>
-                    </ItemTemplate>
-                    <ItemSelectedTemplate Context="e">
-                        <MudText>
-                            <MudIcon Icon="@Icons.Material.Filled.CheckBox" Class="mb-n1 mr-3" />@e.DisplayName
-                        </MudText>
-                    </ItemSelectedTemplate>
-                </MudAutocomplete>
-            </div>
+
+            <MudTextField Label="Start Date" @bind-Value="Model.Start" InputType="InputType.DateTimeLocal"
+                For="@(() => Model.Start)" Format="s" />
+
+            <MudTextField Label="End Date" @bind-Value="Model.End" InputType="InputType.DateTimeLocal"
+                For="@(() => Model.End)" Format="s" />
+
+            <MudAutocomplete T="TimeZoneInfo" @bind-Value="Model.SelectedTimeZone" Label="Time Zone (Start typing the location)" FullWidth="true"
+                For="@(() => Model.SelectedTimeZone)" SearchFunc="FilterTimezones">
+                <ItemTemplate Context="e">
+                    <MudText>
+                        <MudIcon Icon="@Icons.Material.Filled.CheckBoxOutlineBlank" Class="mb-n1 mr-3" />
+                        @e.DisplayName
+                    </MudText>
+                </ItemTemplate>
+                <ItemSelectedTemplate Context="e">
+                    <MudText>
+                        <MudIcon Icon="@Icons.Material.Filled.CheckBox" Class="mb-n1 mr-3" />@e.DisplayName
+                    </MudText>
+                </ItemSelectedTemplate>
+            </MudAutocomplete>
+
+
+            <MudNumericField Label="Max Tokens" @bind-Value="Model.MaxTokenCap" Min="0"
+                For="@(() => Model.MaxTokenCap)" />
+            <MudNumericField Label="Daily Request Cap" @bind-Value="Model.DailyRequestCap" Min="0"
+                For="@(() => Model.DailyRequestCap)" />
+
+
+            <MudSwitch @bind-Value="Model.Active" Label="Active" Color="Color.Primary" />
             <MudTextField Label="Description" @bind-Value="Model.Description" Lines="10"
-                For="@(() => Model.Description)" />
-            <div class="d-flex">
-                <MudNumericField Label="Max Tokens" @bind-Value="Model.MaxTokenCap" Min="0"
-                    For="@(() => Model.MaxTokenCap)" />
-                <MudNumericField Label="Daily Request Cap" @bind-Value="Model.DailyRequestCap" Min="0"
-                    For="@(() => Model.DailyRequestCap)" />
-                <MudSwitch @bind-Value="Model.Active" Label="Active" Color="Color.Primary" />
-            </div>
+                    For="@(() => Model.Description)" />
         </MudCardContent>
-        <MudCardActions>
-            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled"
-                Color="@(isSubmitting ? Color.Info : Color.Primary)" Class="ml-auto"
-                StartIcon="@Icons.Material.Filled.Save" Disabled="@isSubmitting">@(isSubmitting ? "Saving" : "Save")
-            </MudButton>
-        </MudCardActions>
+
     </MudCard>
 </EditForm>

@@ -5,6 +5,9 @@
 <MudStack>
     <h3>Available AOAI Models</h3>
 
+
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/models/new">New Model</MudButton>
+
     <MudTable Items="@Models" Loading="@(Models is null)" LoadingProgressColor="Color.Info" Hover="true"
         Breakpoint="Breakpoint.Sm">
         <HeaderContent>
@@ -27,7 +30,5 @@
             </MudTd>
         </RowTemplate>
     </MudTable>
-
-    <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/models/new">New Model</MudButton>
 
 </MudStack>
