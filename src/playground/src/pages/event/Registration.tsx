@@ -157,7 +157,7 @@ export const Registration = () => {
           </Field>
           <div>
             <p>
-              Copy the API Key, then navigate to the <Link href={`${window.location.origin}`}>Proxy Playground</Link>.
+              Copy the API Key, then navigate to the <Link href={`${window.location.origin}`}>Playground</Link>.
             </p>
           </div>
         </div>
