@@ -1,9 +1,11 @@
+using System.Data.Common;
 using System.Security.Claims;
 using AzureOpenAIProxy.Management.Database;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.UI;
+using Npgsql;
 
 namespace AzureOpenAIProxy.Management;
 
@@ -51,24 +53,35 @@ public static class AuthExtensions
 
         string id = principal.GetEntraId();
 
-        if (await db.Owners.AnyAsync(o => o.OwnerId == id))
+        using DbConnection conn = db.Database.GetDbConnection();
+        await conn.OpenAsync();
+        var cmd = conn.CreateCommand();
+
+        cmd.CommandText = $"SELECT * FROM aoai.owner WHERE owner_id = @owner_id";
+        cmd.Parameters.Add(new NpgsqlParameter("owner_id", id));
+        var reader = await cmd.ExecuteReaderAsync();
+
+        if (reader.HasRows)
         {
+            await reader.DisposeAsync();
+            await conn.CloseAsync();
+
             logger.LogInformation("User {id} already registered", id);
             return;
         }
 
-        Owner owner = new()
-        {
-            OwnerId = id,
-            Email = principal.Identity?.Name ?? "Unknown",
-            Name = principal.Claims.FirstOrDefault(c => c.Type == "name")?.Value ?? "Unknown"
-        };
+        await reader.DisposeAsync();
 
-        db.Owners.Add(owner);
-        // Regsiter the current user
-        await db.SaveChangesAsync();
-
+        cmd = conn.CreateCommand();
+        cmd.CommandText = $"INSERT INTO aoai.owner (owner_id, email, name) VALUES (@owner_id, @email, @name)";
+        cmd.Parameters.Add(new NpgsqlParameter("owner_id", id));
+        cmd.Parameters.Add(new NpgsqlParameter("email", principal.Identity?.Name ?? "Unknown"));
+        cmd.Parameters.Add(new NpgsqlParameter("name", principal.Claims.FirstOrDefault(c => c.Type == "name")?.Value ?? "Unknown"));
+        await cmd.ExecuteNonQueryAsync();
         logger.LogInformation("User {id} registered", id);
+
+        await reader.DisposeAsync();
+        await conn.CloseAsync();
     }
 
     public static string GetEntraId(this ClaimsPrincipal principal)

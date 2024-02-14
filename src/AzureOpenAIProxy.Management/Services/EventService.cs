@@ -67,6 +67,9 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
             }
         }
 
+        await reader.DisposeAsync();
+        await conn.CloseAsync();
+
         return newEvent;
     }
 
