@@ -33,7 +33,7 @@ class Authorize:
         try:
             async with pool.acquire() as conn:
                 result = await conn.fetchrow(
-                    "SELECT * from aoai.get_attendee_authorizedd($1)", api_key
+                    "SELECT * from aoai.get_attendee_authorized($1)", api_key
                 )
 
             if result is None or len(result) == 0:
