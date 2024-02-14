@@ -11,6 +11,7 @@
     <MudTable Items="@Models" Loading="@(Models is null)" LoadingProgressColor="Color.Info" Hover="true"
         Breakpoint="Breakpoint.Sm">
         <HeaderContent>
+            <MudTh>Friendly Name</MudTh>
             <MudTh>Deployment Name</MudTh>
             <MudTh>Endpoint URL</MudTh>
             <MudTh>Model Type</MudTh>
@@ -19,6 +20,7 @@
             <MudTh></MudTh>
         </HeaderContent>
         <RowTemplate>
+            <MudTd DataLabel="FriendlyName">@context.FriendlyName</MudTd>
             <MudTd DataLabel="DeploymentName">@context.DeploymentName</MudTd>
             <MudTd DataLabel="EndpointUrl">@context.EndpointUrl</MudTd>
             <MudTd DataLabel="ModelType">@(context.ModelType!.Value.ToString().Replace("_", " "))</MudTd>

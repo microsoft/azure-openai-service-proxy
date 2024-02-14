@@ -77,7 +77,7 @@ public partial class EventEdit : ComponentBase
     }
 
     private string SelectedModelsDisplay(List<string> ids) =>
-        ids.Count == 0 ? "Select one or more models" : string.Join(", ", AvailableModels.Where(oc => ids.Contains(oc.CatalogId.ToString())).Select(oc => oc.DeploymentName));
+        ids.Count == 0 ? "Select one or more models" : string.Join(", ", AvailableModels.Where(oc => ids.Contains(oc.CatalogId.ToString())).Select(oc => oc.FriendlyName));
 
     private async Task UpdateModels()
     {
