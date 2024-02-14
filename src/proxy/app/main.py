@@ -133,6 +133,12 @@ async def startup_event():
     await db_manager.create_pool(connection_string=sql_connection_string)
 
 
+@app.on_event("shutdown")
+async def shutdown_event():
+    """shutdown event"""
+    await db_manager.close_pool()
+
+
 if os.environ.get("ENVIRONMENT") == "development":
     app.add_middleware(
         CORSMiddleware,

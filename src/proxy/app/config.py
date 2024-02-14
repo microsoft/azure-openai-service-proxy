@@ -81,14 +81,13 @@ class Config:
             self.logging.error("Postgres error: %s", str(error))
             raise HTTPException(
                 status_code=503,
-                detail="Error reading model catalog.",
+                detail=f"Error reading model catalog. {str(error)}",
             ) from error
 
         except Exception as exp:
             self.logging.error("Postgres exception: %s", str(exp))
-            self.logging.error(exp)
             raise HTTPException(
-                detail="Error reading model catalog.",
+                detail=f"Error reading model catalog. {str(exp)}",
                 status_code=503,
             ) from exp
 

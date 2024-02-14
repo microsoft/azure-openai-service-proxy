@@ -34,7 +34,7 @@ class Authorize:
         try:
             async with pool.acquire() as conn:
                 result = await conn.fetchrow(
-                    "SELECT * from aoai.get_attendee_authorized($1)", api_key
+                    "SELECT * from aoai.get_attendee_authorizedd($1)", api_key
                 )
 
             if result is None or len(result) == 0:
@@ -67,14 +67,14 @@ class Authorize:
             self.logging.error("Postgres error: %s", str(error))
             raise HTTPException(
                 status_code=503,
-                detail="Error reading model catalog.",
+                detail=f"Error reading model catalog. {str(error)}",
             ) from error
 
         except Exception as exception:
             self.logging.error("General exception in user_authorized: %s", str(exception))
             raise HTTPException(
                 status_code=401,
-                detail="Authentication failed. General exception.",
+                detail=f"Authentication failed. General exception. {str(exception)}",
             ) from exception
 
     @lru_cache_with_expiry(maxsize=128, ttl=180)

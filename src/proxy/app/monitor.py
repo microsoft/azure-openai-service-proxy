@@ -102,12 +102,12 @@ class Monitor:
             self.logging.error("Postgres error: %s", str(error))
             raise HTTPException(
                 status_code=501,
-                detail="Postgres Monitor request failed.",
+                detail=f"Postgres Monitor request failed. {str(error)}",
             ) from error
 
         except Exception as exception:
             logging.error("General exception in event_authorized: %s", str(exception))
             raise HTTPException(
                 status_code=501,
-                detail="Monitor update failed. General exception.",
+                detail=f"Postgres Monitor request failed. {str(exception)}",
             ) from exception

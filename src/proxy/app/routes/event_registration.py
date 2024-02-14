@@ -103,12 +103,14 @@ class EventRegistrationInfo:
 
         except asyncpg.exceptions.PostgresError as error:
             self.logger.error("Postgres error: get_event_info %s", str(error))
-            raise HTTPException(status_code=503, detail="Postgres error: get_event_info") from error
+            raise HTTPException(
+                status_code=503, detail=f"Postgres error: get_event_info {str(error)}"
+            ) from error
 
         except Exception as exp:
             self.logger.error("get_event_info exception: %s", str(exp))
             self.logger.error(exp)
             raise HTTPException(
-                detail="get_event_info exception.",
+                detail=f"Postgres error: get_event_info {str(exp)}",
                 status_code=503,
             ) from exp

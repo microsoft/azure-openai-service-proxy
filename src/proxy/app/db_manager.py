@@ -24,11 +24,32 @@ class DBManager:
             )
         except asyncpg.exceptions.PostgresError as error:
             self.logging.error("Postgres error: %s", str(error))
-            raise HTTPException(status_code=501, detail="Postgres error opening pool") from error
+            raise HTTPException(
+                status_code=501, detail=f"Postgres error opening pool exp {str(error)}"
+            ) from error
 
         except Exception as exception:
             self.logging.error("Error: %s", str(exception))
-            raise HTTPException(status_code=501, detail="Error opening pool") from exception
+            raise HTTPException(
+                status_code=501, detail=f"Postgres error opening pool exp {str(exception)}"
+            ) from exception
+
+    async def close_pool(self):
+        """close database pool"""
+        print("Closing connection pool")
+        try:
+            await self.app.pool.close()
+        except asyncpg.exceptions.PostgresError as error:
+            self.logging.error("Postgres error: %s", str(error))
+            raise HTTPException(
+                status_code=501, detail=f"Postgres error closing pool {str(error)}"
+            ) from error
+
+        except Exception as exception:
+            self.logging.error("Error: %s", str(exception))
+            raise HTTPException(
+                status_code=501, detail=f"Postgres error closing pool {str(exception)}"
+            ) from exception
 
     async def get_connection(self):
         """connect to database"""
