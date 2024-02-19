@@ -9,11 +9,13 @@ import React, {
 } from "react";
 import { eventInfo } from "../api/eventInfo";
 
-type EventData = {
+export type EventData = {
   name: string;
   url: string;
-  url_text: string;
-  max_token_cap: number;
+  urlText: string;
+  maxTokenCap: number;
+  capabilities: Record<string, string[]>;
+  imageUrl?: string;
 };
 
 export enum AuthStatus {
@@ -57,10 +59,12 @@ const EventDataProvider: React.FC<PropsWithChildren> = ({ children }) => {
       try {
         const data = await eventInfo(eventCode, abortController);
         setEventData(() => ({
-          name: data.event_name,
+          name: data.event_code,
           url: data.event_url,
-          url_text: data.event_url_text,
-          max_token_cap: data.max_token_cap,
+          urlText: data.event_url_text,
+          maxTokenCap: data.max_token_cap,
+          capabilities: data.capabilities,
+          imageUrl: data.event_image_url,
         }));
         if (data.is_authorized) {
           setAuthStatus(AuthStatus.Authorized);
@@ -99,7 +103,7 @@ const EventDataProvider: React.FC<PropsWithChildren> = ({ children }) => {
         eventCode,
       }}
     >
-      {children}
+      {eventData && children}
     </EventDataContext.Provider>
   );
 };

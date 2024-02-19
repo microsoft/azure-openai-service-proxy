@@ -27,13 +27,13 @@ export const Chat = () => {
   const { client } = useOpenAIClientContext();
 
   const onPromptEntered = async (messages: ChatMessage[]) => {
-    if (client) {
+    if (client && state.model) {
       dispatch({ type: "chatStart", payload: messages[messages.length - 1] });
       try {
         const start = Date.now();
 
         const chatCompletions = await client.getChatCompletions(
-          "proxy",
+          state.model,
           messages.filter((m) => m.content),
           {
             ...state.params,
@@ -72,6 +72,8 @@ export const Chat = () => {
   ) => {
     if (name === "functionCall") {
       dispatch({ type: "updateFunctionCall", payload: value as string });
+    } else if (name === "model") {
+      dispatch({ type: "updateModel", payload: value as string });
     } else {
       dispatch({ type: "updateParameters", payload: { name, value } });
     }
@@ -95,6 +97,11 @@ export const Chat = () => {
         messageList={state.messages}
         onClear={clearMessageList}
         isLoading={state.isLoading}
+        canChat={
+          client !== undefined &&
+          state.model !== undefined &&
+          state.model !== ""
+        }
       />
 
       <ChatParamsCard

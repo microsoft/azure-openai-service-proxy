@@ -15,6 +15,7 @@ export type ChatState = {
   isLoading: boolean;
   params: GetChatCompletionsOptions;
   usageData: UsageData;
+  model?: string;
   messages: ChatMessageExtended[];
 };
 
