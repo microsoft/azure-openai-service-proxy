@@ -1,17 +1,22 @@
 import { ChatMessage, GetChatCompletionsOptions } from "@azure/openai";
 import { UsageData } from "../../interfaces/UsageData";
 
-const defaultSysPrompt: ChatMessage = {
+const defaultSysPrompt: ChatMessageExtended = {
   role: "system",
   content: "You are an AI assistant that helps people find information.",
+  isError: false,
 };
+
+export type ChatMessageExtended = ChatMessage & {
+  isError: boolean;
+}
 
 export type ChatState = {
   isLoading: boolean;
   params: GetChatCompletionsOptions;
   usageData: UsageData;
-  messages: ChatMessage[];
   model?: string;
+  messages: ChatMessageExtended[];
 };
 
 export const INITIAL_STATE: ChatState = {
