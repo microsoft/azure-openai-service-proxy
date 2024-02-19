@@ -6,6 +6,10 @@ import {
 } from "@fluentui/react-components";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ApiKeyInput } from "./EventCodeInput";
+import {
+  EventData,
+  useEventDataContext,
+} from "../../providers/EventDataProvider";
 
 const useStyles = makeStyles({
   container: {
@@ -18,10 +22,22 @@ const useStyles = makeStyles({
   },
 });
 
+const hasCapability = (
+  eventData: EventData | undefined,
+  capability: string
+) => {
+  if (!eventData) {
+    return false;
+  }
+  const capabilities = eventData.capabilities[capability];
+  return capabilities && capabilities.length > 0;
+};
+
 export const Header = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const styles = useStyles();
+  const { eventData } = useEventDataContext();
 
   return (
     <>
@@ -32,8 +48,12 @@ export const Header = () => {
             data.value === "chat" ? navigate("/") : navigate(`/${data.value}`);
           }}
         >
-          <Tab value="chat">Chat</Tab>
-          {/* <Tab value="images">Image</Tab> */}
+          {hasCapability(eventData, "openai-chat") && (
+            <Tab value="chat">Chat</Tab>
+          )}
+          {hasCapability(eventData, "openai-image") && (
+            <Tab value="images">Image</Tab>
+          )}
         </TabList>
         <div className={styles.right}>
           <ApiKeyInput />

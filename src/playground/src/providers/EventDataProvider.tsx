@@ -9,7 +9,7 @@ import React, {
 } from "react";
 import { eventInfo } from "../api/eventInfo";
 
-type EventData = {
+export type EventData = {
   name: string;
   url: string;
   urlText: string;
@@ -103,7 +103,7 @@ const EventDataProvider: React.FC<PropsWithChildren> = ({ children }) => {
         eventCode,
       }}
     >
-      {children}
+      {eventData && children}
     </EventDataContext.Provider>
   );
 };
