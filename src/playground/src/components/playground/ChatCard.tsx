@@ -14,10 +14,11 @@ import { Response } from "./Response";
 import { useEventDataContext } from "../../providers/EventDataProvider";
 import type { ChatMessage } from "@azure/openai";
 import { Card } from "./Card";
+import { ChatMessageExtended } from "../../pages/playground/Chat.state";
 
 interface CardProps {
   onPromptEntered: (messages: ChatMessage[]) => void;
-  messageList: ChatMessage[];
+  messageList: ChatMessageExtended[];
   onClear: () => void;
   isLoading: boolean;
 }
@@ -93,7 +94,7 @@ export const ChatCard = ({
         <ChatInput
           promptSubmitted={(userPrompt) => {
             onPromptEntered([
-              ...messageList,
+              ...messageList.filter((m) => !m.isError),
               { role: "user", content: userPrompt },
             ]);
           }}
