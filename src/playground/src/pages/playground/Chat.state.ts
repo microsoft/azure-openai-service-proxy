@@ -11,6 +11,7 @@ export type ChatState = {
   params: GetChatCompletionsOptions;
   usageData: UsageData;
   messages: ChatMessage[];
+  model?: string;
 };
 
 export const INITIAL_STATE: ChatState = {

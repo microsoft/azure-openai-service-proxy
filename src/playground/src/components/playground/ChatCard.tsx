@@ -20,6 +20,7 @@ interface CardProps {
   messageList: ChatMessage[];
   onClear: () => void;
   isLoading: boolean;
+  canChat: boolean;
 }
 
 const useStyles = makeStyles({
@@ -50,6 +51,7 @@ export const ChatCard = ({
   messageList,
   onClear,
   isLoading,
+  canChat,
 }: CardProps) => {
   const chat = useStyles();
   const chatContainerRef = useRef<HTMLDivElement>(null);
@@ -98,6 +100,7 @@ export const ChatCard = ({
             ]);
           }}
           onClear={onClear}
+          canChat={canChat}
         />
       )}
       {!isAuthorized && (
@@ -114,9 +117,11 @@ export const ChatCard = ({
 function ChatInput({
   promptSubmitted,
   onClear,
+  canChat,
 }: {
   promptSubmitted: (userPrompt: string) => void;
   onClear: () => void;
+  canChat: boolean;
 }) {
   const [userPrompt, setPrompt] = useState("");
 
@@ -150,6 +155,7 @@ function ChatInput({
             promptSubmitted(userPrompt);
             setPrompt("");
           }}
+          disabled={!canChat || !userPrompt}
         >
           Send
         </Button>

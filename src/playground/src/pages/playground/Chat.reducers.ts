@@ -79,6 +79,10 @@ type ChatAction =
   | {
       type: "updateFunctionCall";
       payload: string;
+    }
+  | {
+      type: "updateModel";
+      payload: string;
     };
 
 export function reducer(state: ChatState, action: ChatAction): ChatState {
@@ -179,6 +183,12 @@ export function reducer(state: ChatState, action: ChatAction): ChatState {
             ? action.payload
             : { name: action.payload },
         },
+      };
+
+    case "updateModel":
+      return {
+        ...state,
+        model: action.payload,
       };
 
     default:

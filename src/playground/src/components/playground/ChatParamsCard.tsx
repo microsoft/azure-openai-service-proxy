@@ -31,11 +31,36 @@ export const ChatParamsCard = ({
     [tokenUpdate]
   );
   const { eventData, isAuthorized } = useEventDataContext();
-  const maxTokens = eventData?.max_token_cap ?? 0;
+
+  if (!eventData) {
+    return null;
+  }
+
+  const maxTokens = eventData?.maxTokenCap ?? 0;
   const functions = startValues.functions;
 
   return (
     <Card header="Configuration">
+      <DividerBlock>
+        <>
+          <ParamInputLabel label="Model deployment" id="capabilities" />
+          <Select
+            id="capabilities"
+            disabled={!isAuthorized}
+            onChange={(e) => {
+              const newValue = e.currentTarget.value;
+              tokenUpdate("model", newValue);
+            }}
+          >
+            <option value="">Select a model</option>
+            {eventData.capabilities["openai-chat"].map((model) => (
+              <option key={model} value={model}>
+                {model}
+              </option>
+            ))}
+          </Select>
+        </>
+      </DividerBlock>
       <DividerBlock>
         <ParamInput
           label="Tokens"

@@ -66,7 +66,7 @@ export const ApiKeyInput = () => {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                {eventData!.url_text}
+                {eventData!.urlText}
               </a>
             </div>
           </Label>
