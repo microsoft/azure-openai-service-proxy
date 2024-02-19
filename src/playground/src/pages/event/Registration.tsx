@@ -19,6 +19,7 @@ import ReactMarkdown from "react-markdown";
 import { Form, useLoaderData } from "react-router-dom";
 import { reducer } from "./Registration.reducers";
 import type { AttendeeRegistration, EventDetails } from "./Registration.state";
+import { utcToZonedTime, format } from "date-fns-tz";
 
 const useStyles = makeStyles({
   container: {
@@ -31,6 +32,13 @@ const useStyles = makeStyles({
   },
   apiKeyDisplay: { display: "flex", alignItems: "center", columnGap: "4px" },
 });
+
+const adjustedLocalTime = (utcTime: string, timeZoneOffset: string) => {
+  const zonedTime = utcToZonedTime(`${utcTime}.000Z`, timeZoneOffset);
+  return format(zonedTime, "yyyy-MM-dd HH:mm:ss", {
+    timeZone: timeZoneOffset,
+  });
+};
 
 export const Registration = () => {
   const { event, attendee } = useLoaderData() as {
@@ -77,36 +85,6 @@ export const Registration = () => {
     notify();
   };
 
-  const adjustedLocalTime = (timestamp: Date, utcOffsetInMinutes: number): string => {
-    // returns time zone adjusted date/time
-    const date = new Date(timestamp);
-    // get the timezone offset component that was added as no tz supplied in date time
-    const tz = date.getTimezoneOffset();
-    // remove the browser based timezone offset
-    date.setMinutes(date.getMinutes() - tz);
-    // add the event timezone offset
-    date.setMinutes(date.getMinutes() - utcOffsetInMinutes);
-
-    // Get the browser locale
-    const locale = navigator.language || navigator.languages[0];
-
-    // Specify the formatting options
-    const options: Intl.DateTimeFormatOptions = {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      hour: "numeric",
-      minute: "numeric",
-    };
-
-    // Create an Intl.DateTimeFormat object
-    const formatter = new Intl.DateTimeFormat(locale, options);
-    // Format the date
-    const formattedDate = formatter.format(date);
-    return formattedDate;
-  };
-
   return (
     <section className={styles.container}>
       <h1>{event?.eventCode}</h1>
@@ -115,12 +93,23 @@ export const Registration = () => {
           <table>
             <tbody>
               <tr>
-                <td><strong>Starts:</strong></td>
-                <td>{adjustedLocalTime(event?.startTimestamp, event?.timeZoneOffset)}</td>
+                <td>
+                  <strong>Starts:</strong>
+                </td>
+                <td>
+                  {adjustedLocalTime(
+                    event?.startTimestamp,
+                    event?.timeZoneLabel
+                  )}
+                </td>
               </tr>
               <tr>
-                <td><strong>Ends:</strong></td>
-                <td>{adjustedLocalTime(event?.endTimestamp, event?.timeZoneOffset)}</td>
+                <td>
+                  <strong>Ends:</strong>
+                </td>
+                <td>
+                  {adjustedLocalTime(event?.endTimestamp, event?.timeZoneLabel)}
+                </td>
               </tr>
             </tbody>
           </table>
@@ -157,7 +146,8 @@ export const Registration = () => {
           </Field>
           <div>
             <p>
-              Copy the API Key, then navigate to the <Link href={`${window.location.origin}`}>Playground</Link>.
+              Copy the API Key, then navigate to the{" "}
+              <Link href={`${window.location.origin}`}>Playground</Link>.
             </p>
           </div>
         </div>
