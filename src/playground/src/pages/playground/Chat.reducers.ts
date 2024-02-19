@@ -6,25 +6,36 @@ import {
 } from "@azure/openai";
 import { ChatState, INITIAL_STATE } from "./Chat.state";
 
+const findRAIError = (
+  error: Record<string, { filtered: boolean; severity: number }>
+): string => {
+  const keys = Object.keys(error);
+
+  for (const key of keys) {
+    if (error[key].filtered) {
+      return `${key.charAt(0).toUpperCase() + key.slice(1)} (${
+        error[key].severity
+      })`;
+    }
+  }
+
+  return "Unknown error";
+};
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const createErrorMessage = (error: any): string => {
   const innerError = error.innererror;
 
-  const findRAIError = (
-    error: Record<string, { filtered: boolean; severity: number }>
-  ): string => {
-    const keys = Object.keys(error);
+  if (!innerError) {
+    const message = error.message;
 
-    for (const key of keys) {
-      if (error[key].filtered) {
-        return `${key.charAt(0).toUpperCase() + key.slice(1)} (${
-          error[key].severity
-        })`;
-      }
+    if (message) {
+      return message;
     }
 
-    return "Unknown error";
-  };
+    console.error(error);
+    return "The error does not match a known format, check the console.error output for more info";
+  }
 
   switch (innerError.code) {
     case "ResponsibleAIPolicyViolation":
@@ -87,7 +98,7 @@ export function reducer(state: ChatState, action: ChatAction): ChatState {
       return {
         ...state,
         isLoading: true,
-        messages: [...state.messages, action.payload],
+        messages: [...state.messages, { ...action.payload, isError: false }],
       };
 
     case "chatComplete": {
@@ -109,7 +120,7 @@ export function reducer(state: ChatState, action: ChatAction): ChatState {
         }
         newState = {
           ...newState,
-          messages: [...newState.messages, message],
+          messages: [...newState.messages, { ...message, isError: false }],
           usageData: {
             ...usageData,
             finish_reason: choice.finishReason || usageData.finish_reason,
@@ -132,13 +143,13 @@ export function reducer(state: ChatState, action: ChatAction): ChatState {
       return {
         ...state,
         isLoading: false,
-        messages: [...state.messages, errorMessage],
+        messages: [...state.messages, { ...errorMessage, isError: true }],
       };
     }
 
     case "updateSystemMessage": {
       const messages = state.messages;
-      messages[0] = action.payload;
+      messages[0] = { ...action.payload, isError: false };
       return { ...state, messages: [...messages] };
     }
 
