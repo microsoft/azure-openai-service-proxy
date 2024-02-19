@@ -19,8 +19,8 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
             EventUrl = model.Url!,
             EventImageUrl = model.EventImageUrl!,
             EventMarkdown = model.Description!,
-            StartTimestamp = model.Start!.Value,
-            EndTimestamp = model.End!.Value,
+            StartTimestamp = model.StartUtc(),
+            EndTimestamp = model.EndUtc(),
             TimeZoneOffset = model.SelectedTimeZone!.BaseUtcOffset.Minutes,
             TimeZoneLabel = model.SelectedTimeZone!.Id,
             OrganizerName = model.OrganizerName!,
@@ -93,8 +93,8 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
 
         evt.EventCode = model.Name!;
         evt.EventMarkdown = model.Description!;
-        evt.StartTimestamp = model.Start!.Value;
-        evt.EndTimestamp = model.End!.Value;
+        evt.StartTimestamp = model.StartUtc();
+        evt.EndTimestamp = model.EndUtc();
         evt.EventUrl = model.Url!;
         evt.EventUrlText = model.UrlText!;
         evt.EventImageUrl = model.EventImageUrl!;
