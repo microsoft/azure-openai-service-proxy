@@ -4,9 +4,9 @@ export type EventDetails = {
   id: string;
   eventCode: string;
   eventMarkdown: string;
-  startTimestamp: Date;
-  endTimestamp: Date;
-  timeZoneLabel: string
+  startTimestamp: string;
+  endTimestamp: string;
+  timeZoneLabel: string;
   timeZoneOffset: number;
   organizerName: string;
   organizerEmail: string;
