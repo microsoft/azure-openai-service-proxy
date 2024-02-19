@@ -35,7 +35,7 @@ const useStyles = makeStyles({
 
 const adjustedLocalTime = (utcTime: string, timeZoneOffset: string) => {
   const zonedTime = utcToZonedTime(`${utcTime}.000Z`, timeZoneOffset);
-  return format(zonedTime, "yyyy-MM-dd HH:mm:ss", {
+  return format(zonedTime, "E do LLL yyyy - hh:mm a", {
     timeZone: timeZoneOffset,
   });
 };
