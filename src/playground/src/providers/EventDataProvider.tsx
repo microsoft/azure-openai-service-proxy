@@ -103,7 +103,7 @@ const EventDataProvider: React.FC<PropsWithChildren> = ({ children }) => {
         eventCode,
       }}
     >
-      {eventData && children}
+      {children}
     </EventDataContext.Provider>
   );
 };
