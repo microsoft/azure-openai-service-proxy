@@ -63,7 +63,7 @@ const EventDataProvider: React.FC<PropsWithChildren> = ({ children }) => {
           url: data.event_url,
           urlText: data.event_url_text,
           maxTokenCap: data.max_token_cap,
-          capabilities: data.capabilities,
+          capabilities: data.capabilities || [],
           imageUrl: data.event_image_url,
         }));
         if (data.is_authorized) {

@@ -32,10 +32,6 @@ export const ChatParamsCard = ({
   );
   const { eventData, isAuthorized } = useEventDataContext();
 
-  if (!eventData) {
-    return null;
-  }
-
   const maxTokens = eventData?.maxTokenCap ?? 0;
   const functions = startValues.functions;
 
@@ -53,11 +49,13 @@ export const ChatParamsCard = ({
             }}
           >
             <option value="">Select a model</option>
-            {eventData.capabilities["openai-chat"].map((model) => (
-              <option key={model} value={model}>
-                {model}
-              </option>
-            ))}
+            {eventData &&
+              eventData.capabilities["openai-chat"] &&
+              eventData.capabilities["openai-chat"].map((model) => (
+                <option key={model} value={model}>
+                  {model}
+                </option>
+              ))}
           </Select>
         </>
       </DividerBlock>
