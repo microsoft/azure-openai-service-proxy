@@ -51,7 +51,7 @@ public static class AuthExtensions
 
         string id = principal.GetEntraId();
 
-        if (await db.Owners.AnyAsync(o => o.OwnerId == id))
+        if (db.Owners.Any(o => o.OwnerId == id))
         {
             logger.LogInformation("User {id} already registered", id);
             return;
@@ -66,7 +66,7 @@ public static class AuthExtensions
 
         db.Owners.Add(owner);
         // Regsiter the current user
-        await db.SaveChangesAsync();
+        db.SaveChanges();
 
         logger.LogInformation("User {id} registered", id);
     }

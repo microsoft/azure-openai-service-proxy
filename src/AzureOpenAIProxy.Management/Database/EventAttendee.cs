@@ -8,7 +8,7 @@ public partial class EventAttendee
 
     public bool Active { get; set; }
 
-    public Guid ApiKey { get; set; }
+    public string ApiKey { get; set; } = null!;
 
     public virtual Event Event { get; set; } = null!;
 }

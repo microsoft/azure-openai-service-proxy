@@ -62,7 +62,7 @@ public partial class ModelEdit : ComponentBase
         m.Location = model.Location!;
         m.Active = model.Active;
 
-        await DbContext.SaveChangesAsync();
+        DbContext.SaveChanges();
 
         NavigationManager.NavigateTo("/models");
     }

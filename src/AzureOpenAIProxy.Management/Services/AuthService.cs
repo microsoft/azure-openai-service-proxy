@@ -9,7 +9,7 @@ public class AuthService(AuthenticationStateProvider authenticationStateProvider
     public async Task<Owner> GetCurrentOwnerAsync()
     {
         string entraId = await GetCurrentUserEntraIdAsync();
-        return await db.Owners.FirstOrDefaultAsync(o => o.OwnerId == entraId) ?? throw new InvalidOperationException("EntraID is not a registered owner.");
+        return db.Owners.FirstOrDefault(o => o.OwnerId == entraId) ?? throw new InvalidOperationException("EntraID is not a registered owner.");
     }
 
     public async Task<string> GetCurrentUserEntraIdAsync()

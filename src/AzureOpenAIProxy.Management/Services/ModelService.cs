@@ -22,8 +22,8 @@ public class ModelService(IAuthService authService, AoaiProxyContext db) : IMode
             EndpointUrl = model.EndpointUrl!
         };
 
-        await db.OwnerCatalogs.AddAsync(catalog);
-        await db.SaveChangesAsync();
+        db.OwnerCatalogs.Add(catalog);
+        db.SaveChanges();
 
         return catalog;
     }
@@ -31,7 +31,7 @@ public class ModelService(IAuthService authService, AoaiProxyContext db) : IMode
     public async Task<IEnumerable<OwnerCatalog>> GetOwnerCatalogsAsync()
     {
         string entraId = await authService.GetCurrentUserEntraIdAsync();
-        return await db.OwnerCatalogs.Where(oc => oc.Owner.OwnerId == entraId).ToListAsync();
+        return db.OwnerCatalogs.Where(oc => oc.Owner.OwnerId == entraId).ToList();
     }
 
 }

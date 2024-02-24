@@ -75,16 +75,16 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
     public async Task<IEnumerable<Event>> GetOwnerEventsAsync()
     {
         string entraId = await authService.GetCurrentUserEntraIdAsync();
-        return await db.Events
+        return db.Events
             .Where(e => e.OwnerEventMaps.Any(o => o.Owner.OwnerId == entraId))
             .OrderByDescending(e => e.Active)
             .ThenBy(e => e.StartTimestamp)
-            .ToListAsync();
+            .ToList();
     }
 
     public async Task<Event?> UpdateEventAsync(string id, EventEditorModel model)
     {
-        Event? evt = await db.Events.FindAsync(id);
+        Event? evt = db.Events.Find(id);
 
         if (evt is null)
         {
@@ -106,14 +106,14 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
         evt.TimeZoneLabel = model.SelectedTimeZone!.Id;
         evt.TimeZoneOffset = (int)model.SelectedTimeZone.BaseUtcOffset.TotalMinutes;
 
-        await db.SaveChangesAsync();
+        db.SaveChanges();
 
         return evt;
     }
 
     public async Task<Event?> UpdateModelsForEventAsync(string id, IEnumerable<Guid> modelIds)
     {
-        Event? evt = await db.Events.Include(e => e.Catalogs).FirstOrDefaultAsync(e => e.EventId == id);
+        Event? evt = db.Events.Include(e => e.Catalogs).FirstOrDefault(e => e.EventId == id);
 
         if (evt is null)
         {
@@ -122,14 +122,14 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
 
         evt.Catalogs.Clear();
 
-        IEnumerable<OwnerCatalog> catalogs = await db.OwnerCatalogs.Where(oc => modelIds.Contains(oc.CatalogId)).ToListAsync();
+        IEnumerable<OwnerCatalog> catalogs = db.OwnerCatalogs.Where(oc => modelIds.Contains(oc.CatalogId)).ToList();
 
         foreach (OwnerCatalog catalog in catalogs)
         {
             evt.Catalogs.Add(catalog);
         }
 
-        await db.SaveChangesAsync();
+        db.SaveChanges();
         return evt;
     }
 }

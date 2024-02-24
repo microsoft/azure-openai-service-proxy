@@ -4,9 +4,9 @@ public partial class Owner
 {
     public string OwnerId { get; set; } = null!;
 
-    public string Email { get; set; } = null!;
-
     public string Name { get; set; } = null!;
+
+    public string Email { get; set; } = null!;
 
     public virtual ICollection<OwnerCatalog> OwnerCatalogs { get; set; } = new List<OwnerCatalog>();
 
