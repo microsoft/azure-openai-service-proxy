@@ -33,7 +33,7 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
         string entraId = await authService.GetCurrentUserEntraIdAsync();
 
         using DbConnection conn = db.Database.GetDbConnection();
-        await conn.OpenAsync();
+        conn.Open();
         using DbCommand cmd = conn.CreateCommand();
 
         cmd.CommandText = $"SELECT * FROM aoai.add_event(@OwnerId, @EventCode, @EventMarkdown, @StartTimestamp, @EndTimestamp, @TimeZoneOffset, @TimeZoneLabel,  @OrganizerName, @OrganizerEmail, @EventUrl, @EventUrlText, @MaxTokenCap, @DailyRequestCap, @Active, @EventImageUrl)";
