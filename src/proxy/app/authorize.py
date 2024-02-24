@@ -7,7 +7,6 @@ import asyncpg
 from fastapi import HTTPException
 
 # pylint: disable=E0402
-from .lru_cache_with_expiry import lru_cache_with_expiry
 from .monitor import MonitorEntity
 
 MAX_AUTH_TOKEN_LENGTH = 40
@@ -67,17 +66,17 @@ class Authorize:
             self.logging.error("Postgres error: %s", str(error))
             raise HTTPException(
                 status_code=503,
-                detail="Error reading model catalog.",
+                detail=f"Error reading model catalog. {str(error)}",
             ) from error
 
         except Exception as exception:
             self.logging.error("General exception in user_authorized: %s", str(exception))
             raise HTTPException(
                 status_code=401,
-                detail="Authentication failed. General exception.",
+                detail=f"Authentication failed. General exception. {str(exception)}",
             ) from exception
 
-    @lru_cache_with_expiry(maxsize=128, ttl=180)
+    # @lru_cache_with_expiry(maxsize=128, ttl=180)
     async def __authorize(self, *, api_key: str, deployment_name: str) -> AuthorizeResponse:
         """Authorizes a user to access a specific time bound event."""
 

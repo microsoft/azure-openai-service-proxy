@@ -14,8 +14,8 @@ public static class AuthExtensions
 
         builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
             .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"));
-        builder.Services.AddControllersWithViews()
-            .AddMicrosoftIdentityUI();
+        // builder.Services.AddControllersWithViews()
+        //     .AddMicrosoftIdentityUI();
 
         builder.Services.AddAuthorization(options =>
         {
@@ -31,7 +31,10 @@ public static class AuthExtensions
             };
         });
 
-        builder.Services.AddControllersWithViews()
+        // builder.Services.AddControllersWithViews()
+        //     .AddMicrosoftIdentityUI();
+
+        builder.Services.AddRazorPages()
             .AddMicrosoftIdentityUI();
 
         return builder;

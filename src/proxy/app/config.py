@@ -10,7 +10,6 @@ from fastapi import HTTPException
 # pylint: disable=E0402
 from .authorize import AuthorizeResponse
 from .db_manager import DBManager
-from .lru_cache_with_expiry import lru_cache_with_expiry
 from .monitor import Monitor
 
 # initiase the random number generator
@@ -48,7 +47,7 @@ class Config:
         self.monitor = monitor
         self.logging = logging.getLogger(__name__)
 
-    @lru_cache_with_expiry(maxsize=128, ttl=180)
+    # @lru_cache_with_expiry(maxsize=128, ttl=180)
     async def get_event_catalog(
         self, event_id: str, deployment_name: str | None
     ) -> list[Deployment]:
@@ -81,14 +80,13 @@ class Config:
             self.logging.error("Postgres error: %s", str(error))
             raise HTTPException(
                 status_code=503,
-                detail="Error reading model catalog.",
+                detail=f"Error reading model catalog. {str(error)}",
             ) from error
 
         except Exception as exp:
             self.logging.error("Postgres exception: %s", str(exp))
-            self.logging.error(exp)
             raise HTTPException(
-                detail="Error reading model catalog.",
+                detail=f"Error reading model catalog. {str(exp)}",
                 status_code=503,
             ) from exp
 

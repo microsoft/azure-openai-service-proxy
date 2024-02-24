@@ -37,7 +37,7 @@
                         Disabled="@modelsUpdating">
                         @foreach (var model in AvailableModels)
                         {
-                            <MudSelectItem Value="@model.CatalogId.ToString()">@model.DeploymentName</MudSelectItem>
+                            <MudSelectItem Value="@model.CatalogId.ToString()">@model.FriendlyName</MudSelectItem>
                         }
                     </MudSelect>
 
