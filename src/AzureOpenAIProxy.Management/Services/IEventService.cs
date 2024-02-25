@@ -7,11 +7,11 @@ public interface IEventService
 {
     Task<IEnumerable<Event>> GetOwnerEventsAsync();
 
-    Task<Event?> GetEventAsync(string id);
+    Event? GetEvent(string id);
 
     Task<Event?> CreateEventAsync(EventEditorModel model);
 
-    Task<Event?> UpdateEventAsync(string id, EventEditorModel model);
+    Event? UpdateEvent(string id, EventEditorModel model);
 
-    Task<Event?> UpdateModelsForEventAsync(string id, IEnumerable<Guid> modelIds);
+    Event? UpdateModelsForEvent(string id, IEnumerable<Guid> modelIds);
 }

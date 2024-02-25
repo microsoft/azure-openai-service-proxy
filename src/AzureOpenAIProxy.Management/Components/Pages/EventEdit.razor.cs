@@ -37,7 +37,7 @@ public partial class EventEdit : ComponentBase
             return;
         }
 
-        Event? evt = await EventService.GetEventAsync(Id);
+        Event? evt = EventService.GetEvent(Id);
 
         if (evt is null)
         {
@@ -66,7 +66,7 @@ public partial class EventEdit : ComponentBase
 
     private async Task OnValidSubmit(EventEditorModel model)
     {
-        Event? evt = await EventService.UpdateEventAsync(Id, model);
+        Event? evt = EventService.UpdateEvent(Id, model);
 
         if (evt is null)
         {
@@ -82,7 +82,7 @@ public partial class EventEdit : ComponentBase
     private async Task UpdateModels()
     {
         modelsUpdating = true;
-        await EventService.UpdateModelsForEventAsync(Id, SelectedModels.Select(Guid.Parse));
+        EventService.UpdateModelsForEvent(Id, SelectedModels.Select(Guid.Parse));
         modelsUpdating = false;
     }
 }

@@ -70,7 +70,7 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
         return newEvent;
     }
 
-    public Task<Event?> GetEventAsync(string id) => db.Events.Include(e => e.Catalogs).FirstOrDefaultAsync(e => e.EventId == id);
+    public Event? GetEvent(string id) => db.Events.Include(e => e.Catalogs).FirstOrDefault(e => e.EventId == id);
 
     public async Task<IEnumerable<Event>> GetOwnerEventsAsync()
     {
@@ -82,7 +82,7 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
             .ToList();
     }
 
-    public async Task<Event?> UpdateEventAsync(string id, EventEditorModel model)
+    public Event? UpdateEvent(string id, EventEditorModel model)
     {
         Event? evt = db.Events.Find(id);
 
@@ -111,7 +111,7 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
         return evt;
     }
 
-    public async Task<Event?> UpdateModelsForEventAsync(string id, IEnumerable<Guid> modelIds)
+    public Event? UpdateModelsForEvent(string id, IEnumerable<Guid> modelIds)
     {
         Event? evt = db.Events.Include(e => e.Catalogs).FirstOrDefault(e => e.EventId == id);
 
