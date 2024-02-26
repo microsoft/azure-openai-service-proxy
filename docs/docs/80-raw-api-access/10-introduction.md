@@ -6,6 +6,7 @@ The Azure OpenAI proxy service provides access to the Azure OpenAI APIs for deve
 2. `completions`,
 3. `embeddings`,
 4. `images generations`.
+5. `Azure AI Search`
 
 ## Access information
 

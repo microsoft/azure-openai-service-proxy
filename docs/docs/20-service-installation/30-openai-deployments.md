@@ -10,11 +10,12 @@ As at November 2023, the proxy supports the following model deployment classes:
 | `openai-completions` | davinci-002 or newer | This is the model deployment class for the Azure OpenAI Completions API. |
 | `openai-embeddings` | text-embedding-ada-002 or newer | This is the model deployment class for the Azure OpenAI Embeddings API. |
 | `openai-images-generations` | No model is deploy, just an Azure OpenAI resource in a location that supports the Images Generations API | This is the model deployment class for the Azure OpenAI Images Generations API. |
+| `azure-ai-search` | Not applicable | This allows for pass through acess to an instance of Azure AI Search |
 
 
 :::tip
 
-You can deploy multiple models of the same model deployment class. For example, you can deploy multiple `gpt-35-turbo` models, you'd give them different `friendly_name` and `deployment_name` values. The proxy will round robin across the models of the same model deployment class to balance the load.
+You can deploy multiple models of the same model deployment class. For example, you can deploy multiple `gpt-35-turbo` models in difference Azure OpenAI resources with the same name. The proxy will round robin across the models of the same deployment name to balance the load.
 
 :::
 
@@ -22,9 +23,8 @@ You can deploy multiple models of the same model deployment class. For example, 
 
 1. Open the Azure Portal.
 2. Create an Azure OpenAI resource in your subscription. See [Create and deploy an Azure OpenAI Service resource](https://learn.microsoft.com/azure/ai-services/openai/how-to/create-resource) for more information.
-   - Make a note of the `endpoint_key` and `resource_name` as you'll need them for the next step.
-     - You can find the `endpoint_key` in the Azure Portal under the `Keys and Endpoint` tab for the Azure OpenAI resource.
-     - The `resource_name` is the name of the Azure OpenAI resource you created.
+   - Make a note of the `endpoint_key` and `endpoint_url` as you'll need them for the next step.
+     - You can find the `endpoint_key` and `endpoint_url` in the Azure Portal under the `Keys and Endpoint` tab for the Azure OpenAI resource.
 3. Create an Azure OpenAI model deployment. See [Create an Azure OpenAI model deployment](https://learn.microsoft.com/azure/ai-services/openai/how-to/create-resource?pivots=web-portal#deploy-a-model) for more information. From the Azure Portal, select the Azure OpenAI resource, then select the `Deployments` tab, and finally select `Create deployment`
 
    1. Select the `+ Create new deployment`.
