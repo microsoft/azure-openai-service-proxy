@@ -37,7 +37,7 @@ class AzureAISearch(RequestManager):
             status_code=200,
             response_model=None,
         )
-        async def azure_ai_search_search(
+        async def azure_ai_search_post_search(
             search: AiSearchRequest,
             request: Request,
             response: Response,
@@ -49,7 +49,7 @@ class AzureAISearch(RequestManager):
                 deployment_name=index,
                 request=request,
                 model=search.root,
-                call_method=self.ai_search_search,
+                call_method=self.ai_search_post_search_request,
             )
 
             response.status_code = status_code
@@ -57,7 +57,7 @@ class AzureAISearch(RequestManager):
 
         return self.router
 
-    async def ai_search_search(
+    async def ai_search_post_search_request(
         self,
         search: object,
         deployment: Deployment,
