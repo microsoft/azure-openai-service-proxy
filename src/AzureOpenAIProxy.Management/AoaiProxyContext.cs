@@ -15,12 +15,6 @@ public partial class AoaiProxyContext : DbContext
     {
     }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        optionsBuilder.ConfigureWarnings(warnings =>
-            warnings.Ignore(CoreEventId.ManyServiceProvidersCreatedWarning));
-    }
-
     public virtual DbSet<Event> Events { get; set; }
 
     public virtual DbSet<EventAttendee> EventAttendees { get; set; }
