@@ -23,12 +23,15 @@ class AzureAISearch(RequestManager):
     def include_router(self):
         """include router"""
 
+        # Search search service API with POST method
+        # https://learn.microsoft.com/en-us/azure/search/search-get-started-rest#search-an-index
         @self.router.post(
             "/indexes/{index}/docs/search",
             status_code=200,
             response_model=None,
         )
-        # Python AI Search SDK support
+        # Search service API with Alternate OData syntax
+        # https://learn.microsoft.com/en-us/rest/api/searchservice/support-for-odata#search-service-api-with-alternate-odata-syntax
         @self.router.post(
             "/indexes('{index}')/docs/search.post.search",
             status_code=200,
