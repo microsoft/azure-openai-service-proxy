@@ -349,7 +349,7 @@ SET default_table_access_method = heap;
 
 CREATE TABLE aoai.event (
     event_id character varying(50) DEFAULT gen_random_uuid() NOT NULL,
-    owner_id character varying(128),
+    owner_id character varying(128) NOT NULL,
     event_code character varying(64) NOT NULL,
     event_markdown character varying(8192) NOT NULL,
     start_timestamp timestamp(6) without time zone NOT NULL,
