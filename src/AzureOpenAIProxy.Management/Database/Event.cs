@@ -14,10 +14,6 @@ public partial class Event
 
     public DateTime EndTimestamp { get; set; }
 
-    public int TimeZoneOffset { get; set; }
-
-    public string TimeZoneLabel { get; set; } = null!;
-
     public string OrganizerName { get; set; } = null!;
 
     public string OrganizerEmail { get; set; } = null!;
@@ -26,13 +22,17 @@ public partial class Event
 
     public string EventUrlText { get; set; } = null!;
 
-    public string EventImageUrl { get; set; } = null!;
-
     public int MaxTokenCap { get; set; }
 
     public int DailyRequestCap { get; set; }
 
     public bool Active { get; set; }
+
+    public string? EventImageUrl { get; set; }
+
+    public int TimeZoneOffset { get; set; }
+
+    public string TimeZoneLabel { get; set; } = null!;
 
     public virtual ICollection<EventAttendee> EventAttendees { get; set; } = new List<EventAttendee>();
 

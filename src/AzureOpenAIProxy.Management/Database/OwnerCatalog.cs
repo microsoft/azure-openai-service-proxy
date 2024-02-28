@@ -12,13 +12,13 @@ public partial class OwnerCatalog
 
     public string EndpointKey { get; set; } = null!;
 
-    public string Location { get; set; } = null!;
-
-    public string? FriendlyName { get; set; } = null!;
-
     public bool Active { get; set; }
 
     public ModelType? ModelType { get; set; }
+
+    public string Location { get; set; } = null!;
+
+    public string FriendlyName { get; set; } = null!;
 
     public virtual Owner Owner { get; set; } = null!;
 
