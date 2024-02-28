@@ -69,7 +69,7 @@ class RequestManager:
         if hasattr(model, "max_tokens"):
             if (
                 model.max_tokens is not None
-                and model.max_tokens > 0
+                and authorize_response.max_tokens > 0
                 and model.max_tokens > authorize_response.max_token_cap
             ):
                 model.max_tokens = authorize_response.max_token_cap
