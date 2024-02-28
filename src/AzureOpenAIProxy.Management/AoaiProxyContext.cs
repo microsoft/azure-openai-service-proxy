@@ -1,6 +1,5 @@
 ﻿using AzureOpenAIProxy.Management.Database;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace AzureOpenAIProxy.Management;
 
