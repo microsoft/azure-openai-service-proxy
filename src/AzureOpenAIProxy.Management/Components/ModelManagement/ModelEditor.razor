@@ -4,77 +4,47 @@
 
 @inject NavigationManager NavigationManager
 
-@code {
-    bool isDeletePath;
-
-    protected override void OnInitialized()
-    {
-        string path = new Uri(NavigationManager.Uri).AbsolutePath;
-        isDeletePath = path.Contains("delete");
-    }
-}
 
 <EditForm OnValidSubmit="@HandleValidSubmit" Model="@Model" @bind-Disabled="isSubmitting">
     <ValidationSummary />
     <DataAnnotationsValidator />
 
-    @if (isDeletePath)
-    {
-        <MudCard>
-            <MudCardContent>
-                <MudText Typo="Typo.h6" Class="mb-4">Are you sure you want to delete this model?</MudText>
-                <MudText Typo="Typo.body1" Class="mb-4">This action cannot be undone.</MudText>
-                <MudText Typo="Typo.body1" Class="mb-4">Friendly Name: @Model.FriendlyName</MudText>
-                <MudText Typo="Typo.body1" Class="mb-4">Resource Name: @Model.DeploymentName</MudText>
-                <MudText Typo="Typo.body1" Class="mb-4">Endpoint URL: @Model.EndpointUrl</MudText>
-                <MudText Typo="Typo.body1" Class="mb-4">If the resource fails to delete then it's in use.</MudText>
-            </MudCardContent>
-            <MudCardActions>
-                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled"
-                    Color="@(isSubmitting ? Color.Info : Color.Primary)" Class="ml-auto"
-                    StartIcon="@Icons.Material.Filled.Delete" Disabled="@isSubmitting">@(isSubmitting ? "Deleting" : "Delete")
-                </MudButton>
-            </MudCardActions>
-        </MudCard>
-    }
-    else
-    {
-        <MudCard>
-            <MudCardContent>
-                <MudTextField Label="Friendly Name" @bind-Value="Model.FriendlyName" For="@(() => Model.FriendlyName)" />
+    <MudCard>
+        <MudCardContent>
+            <MudTextField Label="Friendly Name" @bind-Value="Model.FriendlyName" For="@(() => Model.FriendlyName)" />
 
-                <MudTextField Label="Endpoint Key" @bind-Value="Model.EndpointKey" For="@(() => Model.EndpointKey)"
-                    InputType="@(maskKey ? InputType.Password : InputType.Text)" Adornment="Adornment.End"
-                    AdornmentIcon="@(maskKey ? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility)"
-                    AdornmentAriaLabel="Show Password" OnAdornmentClick="ToggleMaskKey" />
+            <MudTextField Label="Endpoint Key" @bind-Value="Model.EndpointKey" For="@(() => Model.EndpointKey)"
+                InputType="@(maskKey ? InputType.Password : InputType.Text)" Adornment="Adornment.End"
+                AdornmentIcon="@(maskKey ? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility)"
+                AdornmentAriaLabel="Show Password" OnAdornmentClick="ToggleMaskKey" />
 
-                <MudTextField Label="Endpoint URL" @bind-Value="Model.EndpointUrl" For="@(() => Model.EndpointUrl)"
-                    Adornment="Adornment.End" AdornmentText="https://my-ai-resource.azure.com" />
+            <MudTextField Label="Endpoint URL" @bind-Value="Model.EndpointUrl" For="@(() => Model.EndpointUrl)"
+                Adornment="Adornment.End" AdornmentText="https://my-ai-resource.azure.com" />
 
-                <MudTextField Label="Location" @bind-Value="Model.Location" For="@(() => Model.Location)" />
+            <MudTextField Label="Location" @bind-Value="Model.Location" For="@(() => Model.Location)" />
 
-                <MudTextField Label="Resource Name (Deployment or Index Name)" @bind-Value="Model.DeploymentName"
-                    For="@(() => Model.DeploymentName)" />
+            <MudTextField Label="Resource Name (Deployment or Index Name)" @bind-Value="Model.DeploymentName"
+                For="@(() => Model.DeploymentName)" />
 
-                <div class="d-flex">
-                    <MudSelect Label="Resource Type" @bind-Value="Model.ModelType" Placeholder="Please Select"
-                        For="@(() => Model.ModelType)">
-                        @foreach (ModelType modelType in Enum.GetValues(typeof(ModelType)))
-                        {
-                            <MudSelectItem Value="@((ModelType?)modelType)">@modelType.ToString().Replace("_", " ")
-                            </MudSelectItem>
-                        }
-                    </MudSelect>
-                    <MudSwitch @bind-Value="Model.Active" Label="Active" Color="Color.Primary" />
-                </div>
+            <div class="d-flex">
+                <MudSelect Label="Resource Type" @bind-Value="Model.ModelType" Placeholder="Please Select"
+                    For="@(() => Model.ModelType)">
+                    @foreach (ModelType modelType in Enum.GetValues(typeof(ModelType)))
+                    {
+                        <MudSelectItem Value="@((ModelType?)modelType)">@modelType.ToString().Replace("_", " ")
+                        </MudSelectItem>
+                    }
+                </MudSelect>
+                <MudSwitch @bind-Value="Model.Active" Label="Active" Color="Color.Primary" />
+            </div>
 
-            </MudCardContent>
-            <MudCardActions>
-                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled"
-                    Color="@(isSubmitting ? Color.Info : Color.Primary)" Class="ml-auto"
-                    StartIcon="@Icons.Material.Filled.Save" Disabled="@isSubmitting">@(isSubmitting ? "Saving" : "Save")
-                </MudButton>
-            </MudCardActions>
-        </MudCard>
-    }
+        </MudCardContent>
+        <MudCardActions>
+            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled"
+                Color="@(isSubmitting ? Color.Info : Color.Primary)" Class="ml-auto"
+                StartIcon="@Icons.Material.Filled.Save" Disabled="@isSubmitting">@(isSubmitting ? "Saving" : "Save")
+            </MudButton>
+        </MudCardActions>
+    </MudCard>
+
 </EditForm>
