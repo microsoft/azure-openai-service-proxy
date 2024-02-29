@@ -41,13 +41,12 @@ public class ModelService(IAuthService authService, AoaiProxyContext db) : IMode
         var usageInfo = await db.OwnerCatalogs.Where(oc => oc.CatalogId == catalogId)
             .Select(oc => new
             {
-                UsedInEvent = oc.Events.Count != 0,
-                UsedInMetric = db.Metrics.Any(m => m.CatalogId == catalogId)
+                UsedInEvent = oc.Events.Count != 0
             })
             .FirstAsync();
 
         // block deletion when it's in use to avoid cascading deletes
-        if (usageInfo.UsedInEvent || usageInfo.UsedInMetric)
+        if (usageInfo.UsedInEvent)
         {
             return;
         }

@@ -18,8 +18,6 @@ public partial class AoaiProxyContext : DbContext
 
     public virtual DbSet<EventAttendee> EventAttendees { get; set; }
 
-    public virtual DbSet<Metric> Metrics { get; set; }
-
     public virtual DbSet<Owner> Owners { get; set; }
 
     public virtual DbSet<OwnerCatalog> OwnerCatalogs { get; set; }
@@ -123,38 +121,6 @@ public partial class AoaiProxyContext : DbContext
             entity.HasOne(d => d.Event).WithMany(p => p.EventAttendees)
                 .HasForeignKey(d => d.EventId)
                 .HasConstraintName("fk_eventattendee_event");
-        });
-
-        modelBuilder.Entity<Metric>(entity =>
-        {
-            entity
-                .HasNoKey()
-                .ToTable("metric", "aoai");
-
-            entity.HasIndex(e => e.EventId, "event_id_index");
-
-            entity.Property(e => e.ApiKey)
-                .HasColumnType("character varying")
-                .HasColumnName("api_key");
-            entity.Property(e => e.CatalogId).HasColumnName("catalog_id");
-            entity.Property(e => e.DateStamp)
-                .HasDefaultValueSql("CURRENT_DATE")
-                .HasColumnName("date_stamp");
-            entity.Property(e => e.EventId)
-                .HasMaxLength(50)
-                .HasColumnName("event_id");
-            entity.Property(e => e.TimeStamp)
-                .HasDefaultValueSql("CURRENT_TIME")
-                .HasColumnName("time_stamp");
-
-            entity.HasOne(d => d.Catalog).WithMany()
-                .HasForeignKey(d => d.CatalogId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("fk_metric_owner_catalog");
-
-            entity.HasOne(d => d.Event).WithMany()
-                .HasForeignKey(d => d.EventId)
-                .HasConstraintName("fk_metric");
         });
 
         modelBuilder.Entity<Owner>(entity =>
