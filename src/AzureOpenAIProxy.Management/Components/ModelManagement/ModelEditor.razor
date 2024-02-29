@@ -19,11 +19,11 @@
 
             <MudTextField Label="Location" @bind-Value="Model.Location" For="@(() => Model.Location)" />
 
-            <MudTextField Label="Deployment Name (case sensitive)" @bind-Value="Model.DeploymentName"
+            <MudTextField Label="Resource Name (Deployment or Index Name)" @bind-Value="Model.DeploymentName"
                 For="@(() => Model.DeploymentName)" />
 
             <div class="d-flex">
-                <MudSelect Label="Model Type" @bind-Value="Model.ModelType" Placeholder="Please Select"
+                <MudSelect Label="Resource Type" @bind-Value="Model.ModelType" Placeholder="Please Select"
                     For="@(() => Model.ModelType)">
                     @foreach (ModelType modelType in Enum.GetValues(typeof(ModelType)))
                     {

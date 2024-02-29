@@ -3,18 +3,18 @@
 @namespace AzureOpenAIProxy.Management.Components.Pages
 
 <MudStack>
-    <h3>Available AOAI Models</h3>
+    <h3>Available Resources</h3>
 
 
-    <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/models/new">New Model</MudButton>
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/models/new">New Resource</MudButton>
 
     <MudTable Items="@Models" Loading="@(Models is null)" LoadingProgressColor="Color.Info" Hover="true"
         Breakpoint="Breakpoint.Sm">
         <HeaderContent>
             <MudTh>Friendly Name</MudTh>
-            <MudTh>Deployment Name</MudTh>
+            <MudTh>Resource Name</MudTh>
             <MudTh>Endpoint URL</MudTh>
-            <MudTh>Model Type</MudTh>
+            <MudTh>Resource Type</MudTh>
             <MudTh>Location</MudTh>
             <MudTh>Active</MudTh>
             <MudTh></MudTh>
