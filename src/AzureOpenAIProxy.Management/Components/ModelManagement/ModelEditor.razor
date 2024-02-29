@@ -1,7 +1,6 @@
 @using AzureOpenAIProxy.Management.Database
 @namespace AzureOpenAIProxy.Management.Components.ModelManagement
 
-
 <EditForm OnValidSubmit="@HandleValidSubmit" Model="@Model" @bind-Disabled="isSubmitting">
     <ValidationSummary />
     <DataAnnotationsValidator />
