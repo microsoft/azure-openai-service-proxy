@@ -1,8 +1,7 @@
 site_name: MS AI Tour - Introduction to Prompt Flow and RAG
 
 nav:
-  - English: index.md
-  - Demo cheat sheet: cheat_sheet.md
+  - Introduction: index.md
 
 plugins:
   - glightbox
