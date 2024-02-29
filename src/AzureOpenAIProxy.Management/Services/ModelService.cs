@@ -58,7 +58,7 @@ public class ModelService(IAuthService authService, AoaiProxyContext db) : IMode
     public async Task<IEnumerable<OwnerCatalog>> GetOwnerCatalogsAsync()
     {
         string entraId = await authService.GetCurrentUserEntraIdAsync();
-        return await db.OwnerCatalogs.Where(oc => oc.Owner.OwnerId == entraId).ToListAsync();
+        return await db.OwnerCatalogs.Where(oc => oc.Owner.OwnerId == entraId).OrderBy(oc => oc.FriendlyName).ToListAsync();
     }
 
 }
