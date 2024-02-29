@@ -17,6 +17,7 @@ public partial class ModelAdd : ComponentBase
     {
         OwnerCatalog _ = await ModelService.AddOwnerCatalogAsync(model);
 
-        NavigationManager.NavigateTo("/models", forceLoad: true);
+        // NavigationManager.NavigateTo("/models", forceLoad: true);
+        NavigationManager.NavigateTo("/models");
     }
 }

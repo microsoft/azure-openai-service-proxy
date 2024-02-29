@@ -18,6 +18,7 @@
             <MudTh>Location</MudTh>
             <MudTh>Active</MudTh>
             <MudTh></MudTh>
+            <MudTh></MudTh>
         </HeaderContent>
         <RowTemplate>
             <MudTd DataLabel="FriendlyName">@context.FriendlyName</MudTd>
@@ -28,6 +29,10 @@
             <MudTd DataLabel="Active">@(context.Active ? "Yes" : "No")</MudTd>
             <MudTd>
                 <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="@($"/models/{context.CatalogId}")">Edit
+                </MudButton>
+            </MudTd>
+            <MudTd>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="@($"/models/delete/{context.CatalogId}")">Delete
                 </MudButton>
             </MudTd>
         </RowTemplate>
