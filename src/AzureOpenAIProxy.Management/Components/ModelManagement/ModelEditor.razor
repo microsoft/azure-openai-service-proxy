@@ -22,17 +22,16 @@
             <MudTextField Label="Resource Name (Deployment or Index Name)" @bind-Value="Model.DeploymentName"
                 For="@(() => Model.DeploymentName)" />
 
-            <div class="d-flex">
-                <MudSelect Label="Resource Type" @bind-Value="Model.ModelType" Placeholder="Please Select"
-                    For="@(() => Model.ModelType)">
-                    @foreach (ModelType modelType in Enum.GetValues(typeof(ModelType)))
-                    {
-                        <MudSelectItem Value="@((ModelType?)modelType)">@modelType.ToString().Replace("_", " ")
-                        </MudSelectItem>
-                    }
-                </MudSelect>
-                <MudSwitch @bind-Value="Model.Active" Label="Active" Color="Color.Primary" />
-            </div>
+            <MudSelect Label="Resource Type" @bind-Value="Model.ModelType" Placeholder="Please Select"
+                For="@(() => Model.ModelType)">
+                @foreach (ModelType modelType in Enum.GetValues(typeof(ModelType)))
+                {
+                    <MudSelectItem Value="@((ModelType?)modelType)">@modelType.ToString().Replace("_", " ")
+                    </MudSelectItem>
+                }
+            </MudSelect>
+
+            <MudSwitch @bind-Value="Model.Active" Label="Active" Color="Color.Primary" />
 
         </MudCardContent>
         <MudCardActions>
