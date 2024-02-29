@@ -1,79 +1,20 @@
-# Website
+# Prompt Flow Demo Docs
 
-## Docs published on GitHub Pages
+Published at [Prompt Flow Demo/Workshop](https://gloveboxes.github.io/prompt_flow_demo_docs/)
 
-Docs are published on [GitHub Pages](https://gloveboxes.github.io/OpenAI-Whisper-Transcriber-Docs/)
 
-## Docusaurus
+For full documentation visit [mkdocs.org](https://www.mkdocs.org).
 
-This website is built using [Docusaurus 2](https://docusaurus.io/), a modern static website generator.
+## Commands
 
-## Contributing to the docs
+* `mkdocs new [dir-name]` - Create a new project.
+* `mkdocs serve` - Start the live-reloading docs server.
+* `mkdocs build` - Build the documentation site.
+* `mkdocs -h` - Print help message and exit.
 
-1. Install the latest version of node.js from [nodejs.org](https://nodejs.org/en/download/)
-2. Clone this repository
-3. Navigate to the directory you just cloned
-4. Install the dependencies
+## Project layout
 
-    ```bash
-    npm install
-    ```
-
-4. Start the website
-
-    ```bash
-    npm run start
-    ```
-
-5. Build and test the website
-
-    ```bash
-    npm run build
-    npm run serve
-    ```
-
-6. Add a new doc page
-
-    - Add your .md pages to the docs folder.
-    - Save
-    - Review your updates
-      - `npm run start`
-      - the browser will open to http://localhost:3000/OpenAI-Whisper-Transcriber-Docs/
-
-   
-
-<!-- ```
-$ yarn
-```
-
-### Local Development
-
-```
-$ yarn start
-```
-
-This command starts a local development server and opens up a browser window. Most changes are reflected live without having to restart the server.
-
-### Build
-
-```
-$ yarn build
-```
-
-This command generates static content into the `build` directory and can be served using any static contents hosting service.
-
-### Deployment
-
-Using SSH:
-
-```
-$ USE_SSH=true yarn deploy
-```
-
-Not using SSH:
-
-```
-$ GIT_USER=<Your GitHub username> yarn deploy
-```
-
-If you are using GitHub pages for hosting, this command is a convenient way to build the website and push to the `gh-pages` branch. -->
+    mkdocs.yml    # The configuration file.
+    docs/
+        index.md  # The documentation homepage.
+        ...       # Other markdown pages, images and other files.
