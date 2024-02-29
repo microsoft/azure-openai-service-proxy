@@ -5,7 +5,6 @@
 <MudStack>
     <h3>Available Resources</h3>
 
-
     <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/models/new">New Resource</MudButton>
 
     <MudTable Items="@Models" Loading="@(Models is null)" LoadingProgressColor="Color.Info" Hover="true"
@@ -32,7 +31,7 @@
                 </MudButton>
             </MudTd>
             <MudTd>
-                <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="@($"/models/delete/{context.CatalogId}")">Delete
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="() => OpenDialog(context)">Delete
                 </MudButton>
             </MudTd>
         </RowTemplate>
