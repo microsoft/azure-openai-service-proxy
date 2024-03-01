@@ -1,4 +1,4 @@
-site_name: MS AI Tour - Introduction to Prompt Flow and RAG
+site_name: Azure AI Proxy
 
 nav:
   - Introduction: index.md

@@ -2,6 +2,12 @@
 
 The solution consists of three parts; the proxy service, the proxy playground, with a similar look and feel to the official Azure OpenAI Playground, and event admin.
 
+## Deployment issues
+
+1. Entra app registration.
+1. Postgres requires manual registration of the `pgcrypto` extension.
+1. Deploying the AI Proxy Admin Portal does not work on macOS on Apple Silicon. The workaround for now is to deploy the admin portal on a Windows, Linux machine, or from GitHub Codespaces.
+
 ## Setup
 
 This repo is set up for deployment on Azure Container Apps using the configuration files in the `infra` folder.
