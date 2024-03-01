@@ -2,12 +2,17 @@ site_name: MS AI Tour - Introduction to Prompt Flow and RAG
 
 nav:
   - Introduction: index.md
+  - Resources: resources.md
+  - Events: events.md
+  - Deployment: deployment.md
 
 plugins:
   - glightbox
 
 theme:
   name: material
+  features:
+    - navigation.instant
 
   # Change Font: https://squidfunk.github.io/mkdocs-material/setup/changing-the-fonts/?h=fonts
   # Google Fonts Supported By Default: https://fonts.google.com/
