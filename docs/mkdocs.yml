@@ -5,6 +5,7 @@ nav:
   - Resources: resources.md
   - Events: events.md
   - Attendees: attendee.md
+  - Playground: playground.md
   - Deployment: deployment.md
 
 plugins:
