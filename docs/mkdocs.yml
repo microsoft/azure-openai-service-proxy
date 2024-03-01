@@ -4,7 +4,7 @@ nav:
   - Introduction: index.md
   - Resources: resources.md
   - Events: events.md
-  - Attendee: attendee.md
+  - Attendees: attendee.md
   - Deployment: deployment.md
 
 plugins:
