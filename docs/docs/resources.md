@@ -1,6 +1,6 @@
 # Configuring resources
 
-To use the Azure OpenAI proxy service, you need to configure the resources and events. This guide will walk you through the process of configuring the resources and events.
+To use the Azure OpenAI proxy service, you need to configure the resources. This guide will walk you through the process of configuring the resources.
 
 ## Configuring resources
 

@@ -1,8 +1,4 @@
----
-title: Lorem ipsum dolor sit amet
----
-
-<!-- # Azure AI Proxy -->
+# Azure AI Proxy
 
 ![](media/openai_proxy_banner.jpeg)
 
@@ -21,3 +17,12 @@ There are three primary use cases for the Azure OpenAI proxy service:
 The Azure OpenAI proxy service provides a `Playground-like` experience for developers to explore the Azure OpenAI chat completion using the time bound event code with different models and parameters.
 
 ![OpenAI Proxy Playground](media/openai_proxy_playground.png)
+
+## Azure AI Proxy overview
+
+The Azure AI Proxy consists of the following components:
+
+1. Self-service event management. Configure and manage events and resources for the events.
+1. Self-service attendee registration. Attendees can register for an event and receive a time bound API Key to access the AI Proxy service.
+1. The AI Proxy service. The AI Proxy service provides access to the Azure AI resources using a time bound API Key.
+1. The AI Playground. The AI Playground provides an AI `Playground` experience for developers to explore the Azure OpenAI chat completion using the time bound event code with different models and parameters.
