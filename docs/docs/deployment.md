@@ -71,7 +71,7 @@ The recommended way to deploy this app is with Dev Containers. Install the [VS C
 
     On completion, the following Azure resources will be provisioned:
 
-    ![Azure OpenAI Playground experience](../media/azure_resources.png)
+    ![Azure OpenAI Playground experience](media/azure_resources.png)
 
 1. When `azd` has finished deploying you'll see a link to the Azure Resource Group created for the solution.
 1. To make any changes to the app code, just run:

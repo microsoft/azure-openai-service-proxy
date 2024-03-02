@@ -6,6 +6,7 @@ nav:
   - Events: events.md
   - Attendees: attendee.md
   - Playground: playground.md
+  - SDKs: sdk.md
   - Deployment: deployment.md
 
 plugins:
