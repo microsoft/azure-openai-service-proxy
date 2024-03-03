@@ -6,8 +6,8 @@ The Azure AI Proxy is a transparent proxy that supports several Azure AI SDKs in
 
 For SDK access to Azure AI Proxy services, you need two things:
 
-1. The Azure AI Proxy endpoint URL which is the same as the proxy AI Playground URL. Note, the endpoint URL is prefixed with /api/v1, for example https://<YOUR_PROXY_PLAYGROUND_URL>/api/v1.
-1. A time bound API Key.
+1. The Azure AI Proxy endpoint URL which is the same as the proxy AI Playground URL. Note, the endpoint URL is prefixed with /api/v1, for example https://YOUR_PROXY_PLAYGROUND_URL/api/v1.
+1. A time bound API Key obtained from the event registration page.
 
 The Azure AI Proxy service URL is provided by the event organizer. The time bound API Key is provided to the attendees when they register for the event.
 
