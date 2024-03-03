@@ -1,6 +1,6 @@
 # SDK support
 
-The Azure AI Proxy is a transparent proxy service that provides access to the Azure OpenAI chat completion API, Azure AI Search, and other Azure AI services. The Azure AI Proxy provides support for the Azure OpenAI SDKs, LangChain, and REST endpoints for developer events, workshops, and hackathons. Access is granted using a time bound API Key.
+The Azure AI Proxy is a transparent proxy service that supports several Azure AI service including Azure OpenAI SDKs, Azure AI Search SDKs, LangChain, and REST endpoints for developer events, workshops, and hackathons. Access is granted using a time bound API Key and the Azure AI Proxy endpoint URL.
 
 ## Azure AI Proxy SDK access
 
@@ -28,7 +28,7 @@ The following is an example of calling the Azure OpenAI Chat Completions API usi
 ```python
 """ Test Azure OpenAI Chat Completions API """
 
-ENDPOINT_URL = "https://<YOUR_PROXY_NAME>azurestaticapps.net/api/v1"
+ENDPOINT_URL = "https://<YOUR_PROXY_PLAYGROUND_URL>/api/v1"
 API_KEY = "36a69054-0956-4eb6-963a-571089d46c58"
 
 import os
@@ -62,7 +62,7 @@ MESSAGES = [
 
 
 completion = client.chat.completions.create(
-    model=MODEL_NAME,  # e.g. gpt-35-instant
+    model=MODEL_NAME,
     messages=MESSAGES,
 )
 
@@ -81,9 +81,16 @@ Create a read-only Query API Key for the Azure AI Search service and use it with
 
 ### Azure AI Search Python SDK example
 
+The following is an example of calling the Azure AI Search API using the Azure AI Search Python SDK. Note, you can use with Azure Prompt Flow to retrieve the documentation.
 
 ```python
-ENDPOINT_URL = "https://<YOUR_PROXY_NAME>azurestaticapps.net/api/v1"
+""" Test Azure AI Search API """
+
+```python
+""" Test Azure AI Search API """
+
+```python
+ENDPOINT_URL = "https://<YOUR_PROXY_PLAYGROUND_URL>/api/v1"
 API_KEY = "36a69054-0956-4eb6-963a-571089d46c58"
 
 def retrieve_documentation(
