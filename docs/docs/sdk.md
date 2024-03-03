@@ -1,6 +1,6 @@
 # SDK support
 
-The Azure AI Proxy is a transparent proxy service that supports several Azure AI service including Azure OpenAI SDKs, Azure AI Search SDKs, LangChain, and REST endpoints for developer events, workshops, and hackathons. Access is granted using a time bound API Key and the Azure AI Proxy endpoint URL.
+The Azure AI Proxy is a transparent proxy that supports several Azure AI SDKs including Azure OpenAI SDKs, Azure AI Search SDKs, REST calls, as well as libraries like LangChain. Access is granted using a time bound API Key and the Azure AI Proxy endpoint URL.
 
 ## Azure AI Proxy SDK access
 
