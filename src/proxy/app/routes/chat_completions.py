@@ -18,8 +18,8 @@ class ChatCompletionsRequest(BaseModel):
 
     messages: list[dict[str, str]]
     dataSources: list[Any] | None = None
-    max_tokens: int = None
-    temperature: float = None
+    max_tokens: int | None = None
+    temperature: float | None = None
     n: int | None = None
     stream: bool = False
     top_p: float | None = None

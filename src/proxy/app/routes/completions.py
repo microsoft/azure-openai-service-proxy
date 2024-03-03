@@ -15,8 +15,8 @@ class CompletionsRequest(BaseModel):
     """OpenAI Compeletion Request"""
 
     prompt: str | list[str]
-    max_tokens: int = None
-    temperature: float = None
+    max_tokens: int | None = None
+    temperature: float | None = None
     top_p: float | None = None
     stop: Any | None = None
     frequency_penalty: float = 0
