@@ -30,10 +30,21 @@ module postgresServer 'core/database/postgresql/flexibleserver.bicep' = {
   }
 }
 
+resource postgresConfig 'Microsoft.DBforPostgreSQL/flexibleServers/configurations@2022-12-01' = {
+  dependsOn: [
+    postgresServer
+  ]
+  name: '${name}/azure.extensions'
+  properties: {
+    value: 'PGCRYPTO'
+    source: 'user-override'
+  }
+}
+
 resource sqlDeploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
   name: '${name}-deployment-script'
   dependsOn: [
-    postgresServer
+    postgresConfig
   ]
   location: location
   kind: 'AzureCLI'
@@ -72,15 +83,6 @@ resource sqlDeploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' 
       ${SQL_SCRIPT}
       EOF
     '''
-  }
-}
-
-resource flexibleServers_azure_extensions 'Microsoft.DBforPostgreSQL/flexibleServers/configurations@2023-06-01-preview' = {
-  parent: postgresServer
-  name: 'azure.extensions'
-  properties: {
-    value: 'PGCRYPTO'
-    source: 'user-override'
   }
 }
 
