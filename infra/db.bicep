@@ -14,10 +14,12 @@ module postgresServer 'core/database/postgresql/flexibleserver.bicep' = {
     location: location
     tags: tags
     sku: {
-      name: 'Standard_B2s'
-      tier: 'Burstable'
+      name: 'Standard_D4ds_v5'
+      tier: 'GeneralPurpose'
     }
     storage: {
+      iops: 240
+      tier: 'P6'
       storageSizeGB: 32
     }
     version: '16'
@@ -70,6 +72,15 @@ resource sqlDeploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' 
       ${SQL_SCRIPT}
       EOF
     '''
+  }
+}
+
+resource flexibleServers_azure_extensions 'Microsoft.DBforPostgreSQL/flexibleServers/configurations@2023-06-01-preview' = {
+  parent: postgresServer
+  name: 'azure.extensions'
+  properties: {
+    value: 'PGCRYPTO'
+    source: 'user-override'
   }
 }
 
