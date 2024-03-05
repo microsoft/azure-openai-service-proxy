@@ -15,6 +15,7 @@ This repo is set up for deployment on Azure Container Apps using the configurati
 1. An Azure subscription
 2. Deployed Azure OpenAI Models
 
+
 ### Required software
 
 Tested on Windows, macOS and Ubuntu 22.04.
@@ -29,7 +30,16 @@ Install:
 
 The AI Proxy admin is secured using Entra. You first need to register an application in your organizations Entra directory.
 
+1. Log into the Azure Portal.
+1. Select `Microsoft Entra ID` from the left-hand menu.
+1. Select `+ Add` dropdown, then select `App registration`.
+1. Name the registration, ensure `Accounts in this organizational directory only` is selected, and select `Register`.
+1. Navigate to `Overview`, and make a note of the `Application (client) ID` as you will need it when you deploy the solution.
 
+    ![](media/app-registration.png)
+
+1. When you deploy the solution, you will need to create a client secret.
+1. After the solution has been deployed, you will need to amend the app registration to add the redirect URI and enable the `ID tokens` under `Authentication`.
 
 ## Deploying
 
@@ -37,20 +47,18 @@ The recommended way to deploy this app is with Dev Containers. Install the [VS C
 
 !!! note
 
-    Deploying the AI Proxy Admin Portal does not work on macOS on Apple Silicon. The workaround for now is to deploy the solution from Windows, Linux machine, or from GitHub Codespaces.
+    Deploying the AI Proxy Admin Portal does not work on macOS on Apple Silicon. The workaround for now, is to deploy the solution from a Windows/ Linux machine, or GitHub Codespaces.
 
-1. Ensure Docker is installed
+1. Ensure Docker is installed and running.
 1. Clone the repo:
 
     ```shell
     git clone https://github.com/microsoft/azure-openai-service-proxy.git
     ```
 
-1. Using VS Code, open the `azure-openai-service-proxy/src/endpoint/simple-fastapi-container` folder:
-
-1. You will be prompted to `Reopen in Container`, click the button to do so.
-
-1. Login to Azure:
+1. Open the repo in VS Code.
+1. You will be prompted to `Reopen in Container`, click the button to do so. This will build the container and open the repo in a container.
+1. In the VS Code dev container, open a terminal and run the following commands to authenticate with Azure:
 
     ```shell
     azd auth login --use-device-code
@@ -60,23 +68,17 @@ The recommended way to deploy this app is with Dev Containers. Install the [VS C
     az login --use-device-code
     ```
 
-1. Entra app registration
-
-    The AI Proxy admin is secured using Entra. You first need to register an application in your organizations Entra directory.
-
-    1. Navigate to [entra.microsoft.com](https://entra.microsoft.com)
-    1. Select **Application**, then register an application.
-    1. Name the registration, select web type, single tenant, enable **token IDs**
-    1. Save
-    1. Navigate to **overview**, and make a note of the client ID as you will need it when you deploy the solution.
-
-1. Provision and deploy all the resources:
+1. Provision and deploy the proxy solution by running the following command in the terminal:
 
     ```shell
     azd up
     ```
 
-    It will prompt you to provide an `azd` environment name (like "aiproxy"), select a subscription from your Azure account, and select a location (like "eastus" or "sweden central"). Then azd will provision the resources in your account and deploy the latest code. If you get an error with deployment, changing the location can help, as there may be availability constraints for some of the resources.
+    You will be prompted for the following:
+    1. The environment name, keep the name short, max 7 characters to avoid invalid resource names being generated.
+    1. Select a subscription from your Azure account.
+    1. Select a location (like "eastus" or "sweden central"). Then azd will provision the resources in your account and deploy the latest code.
+    1. Select the location for the Static Web App.
 
     On completion, the following Azure resources will be provisioned:
 
