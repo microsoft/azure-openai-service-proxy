@@ -4,8 +4,6 @@ The solution consists of three parts; the proxy service, the proxy playground, w
 
 ## Deployment issues
 
-1. Entra app registration.
-1. Postgres requires manual registration of the `pgcrypto` extension.
 1. Deploying the AI Proxy Admin Portal does not work on macOS on Apple Silicon. The workaround for now is to deploy the admin portal on a Windows, Linux machine, or from GitHub Codespaces.
 
 ## Setup
@@ -19,22 +17,33 @@ This repo is set up for deployment on Azure Container Apps using the configurati
 
 ### Required software
 
-<!-- Tested on Windows, macOS and Ubuntu 22.04.
+Tested on Windows, macOS and Ubuntu 22.04.
 
 Install:
 
 1. [VS Code](https://code.visualstudio.com/)
 2. [VS Code Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
-3. [Docker](https://www.docker.com/products/docker-desktop) -->
+3. [Docker](https://www.docker.com/products/docker-desktop)
+
+## Create an Entra app registration
+
+The AI Proxy admin is secured using Entra. You first need to register an application in your organizations Entra directory.
+
+
 
 ## Deploying
 
 The recommended way to deploy this app is with Dev Containers. Install the [VS Code Remote Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) and Docker, open this repository in a container and you'll be ready to go.
 
+!!! note
+
+    Deploying the AI Proxy Admin Portal does not work on macOS on Apple Silicon. The workaround for now is to deploy the solution from Windows, Linux machine, or from GitHub Codespaces.
+
+1. Ensure Docker is installed
 1. Clone the repo:
 
     ```shell
-    git clone https://github.com/gloveboxes/azure-openai-service-proxy.git
+    git clone https://github.com/microsoft/azure-openai-service-proxy.git
     ```
 
 1. Using VS Code, open the `azure-openai-service-proxy/src/endpoint/simple-fastapi-container` folder:
