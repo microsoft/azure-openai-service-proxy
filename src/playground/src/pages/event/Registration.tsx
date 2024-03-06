@@ -66,18 +66,21 @@ export const Registration = () => {
             </ToastTrigger>
           }
         >
-          API Key copied.
+          Copied to clipboard.
         </ToastTitle>
       </Toast>,
       { position: "top", intent: "success" }
     );
 
-  const copyToClipboard = async () => {
-    await navigator.clipboard.writeText(attendee!.apiKey);
+  const copyToClipboard = async (value: string) => {
+    await navigator.clipboard.writeText(value);
     notify();
   };
 
-  const adjustedLocalTime = (timestamp: Date, utcOffsetInMinutes: number): string => {
+  const adjustedLocalTime = (
+    timestamp: Date,
+    utcOffsetInMinutes: number
+  ): string => {
     // returns time zone adjusted date/time
     const date = new Date(timestamp);
     // get the timezone offset component that was added as no tz supplied in date time
@@ -115,12 +118,26 @@ export const Registration = () => {
           <table>
             <tbody>
               <tr>
-                <td><strong>Starts:</strong></td>
-                <td>{adjustedLocalTime(event?.startTimestamp, event?.timeZoneOffset)}</td>
+                <td>
+                  <strong>Starts:</strong>
+                </td>
+                <td>
+                  {adjustedLocalTime(
+                    event?.startTimestamp,
+                    event?.timeZoneOffset
+                  )}
+                </td>
               </tr>
               <tr>
-                <td><strong>Ends:</strong></td>
-                <td>{adjustedLocalTime(event?.endTimestamp, event?.timeZoneOffset)}</td>
+                <td>
+                  <strong>Ends:</strong>
+                </td>
+                <td>
+                  {adjustedLocalTime(
+                    event?.endTimestamp,
+                    event?.timeZoneOffset
+                  )}
+                </td>
               </tr>
             </tbody>
           </table>
@@ -137,30 +154,56 @@ export const Registration = () => {
         </div>
       )}
       {state.profileLoaded && state.profile && attendee && (
-        <div>
-          <Field label="API Key" size="large">
-            <div className={styles.apiKeyDisplay}>
-              <Input
-                name="apiKey"
-                id="apiKey"
-                type={state.showApiKey ? "text" : "password"}
-                readOnly={true}
-                value={attendee.apiKey}
-                disabled={true}
-              />
-              <Button
-                icon={state.showApiKey ? <EyeRegular /> : <EyeOffRegular />}
-                onClick={() => dispatch({ type: "TOGGLE_API_KEY_VISIBILITY" })}
-              />
-              <Button icon={<CopyRegular />} onClick={copyToClipboard} />
-            </div>
-          </Field>
+        <>
           <div>
-            <p>
-              Copy the API Key, then navigate to the <Link href={`${window.location.origin}`}>Playground</Link>.
-            </p>
+            <Field label="API Key" size="large">
+              <div className={styles.apiKeyDisplay}>
+                <Input
+                  name="apiKey"
+                  id="apiKey"
+                  type={state.showApiKey ? "text" : "password"}
+                  readOnly={true}
+                  value={attendee.apiKey}
+                  disabled={true}
+                />
+                <Button
+                  icon={state.showApiKey ? <EyeRegular /> : <EyeOffRegular />}
+                  onClick={() =>
+                    dispatch({ type: "TOGGLE_API_KEY_VISIBILITY" })
+                  }
+                />
+                <Button
+                  icon={<CopyRegular />}
+                  onClick={() => copyToClipboard(attendee.apiKey)}
+                />
+              </div>
+            </Field>
+            <div>
+              <p>
+                Copy the API Key, then navigate to the{" "}
+                <Link href={`${window.location.origin}`}>Playground</Link>.
+              </p>
+            </div>
+            <Field label="Endpoint" size="large">
+              <div className={styles.apiKeyDisplay}>
+                <Input
+                  name="endpoint"
+                  id="endpoint"
+                  type="text"
+                  readOnly={true}
+                  value={`${window.location.origin}/api/v1`}
+                  disabled={true}
+                />
+                <Button
+                  icon={<CopyRegular />}
+                  onClick={() =>
+                    copyToClipboard(`${window.location.origin}/api/v1`)
+                  }
+                />
+              </div>
+            </Field>
           </div>
-        </div>
+        </>
       )}
 
       {state.profileLoaded && !state.profile && (
