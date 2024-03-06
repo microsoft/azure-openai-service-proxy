@@ -6,7 +6,7 @@ export type EventDetails = {
   eventMarkdown: string;
   startTimestamp: Date;
   endTimestamp: Date;
-  timeZoneLabel: string
+  timeZoneLabel: string;
   timeZoneOffset: number;
   organizerName: string;
   organizerEmail: string;
