@@ -13,7 +13,7 @@
 
         </MudItem>
         <MudItem xs="12" sm="5">
-            <h1>Models</h1>
+            <h1>Resources</h1>
 
             <MudCard>
 
@@ -21,7 +21,7 @@
                     @if (!modelsUpdating)
                     {
                         <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@UpdateModels" Class="ml-auto"
-                            StartIcon="@Icons.Material.Filled.Save">Update Models
+                            StartIcon="@Icons.Material.Filled.Save">Update Resources
                         </MudButton>
                     }
                     else
@@ -32,7 +32,7 @@
                 </MudCardActions>
 
                 <MudCardContent>
-                    <MudSelect Label="Models" MultiSelection="true" @bind-SelectedValues="SelectedModels"
+                    <MudSelect Label="Resources" MultiSelection="true" @bind-SelectedValues="SelectedModels"
                         MultiSelectionTextFunc="@(new Func<List<string>, string>(SelectedModelsDisplay))"
                         Disabled="@modelsUpdating">
                         @foreach (var model in AvailableModels)

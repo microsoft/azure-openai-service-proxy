@@ -3,7 +3,7 @@
 --
 
 -- Dumped from database version 16.1
--- Dumped by pg_dump version 16.2 (Debian 16.2-1.pgdg110+1)
+-- Dumped by pg_dump version 16.2 (Debian 16.2-1.pgdg110+2)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -64,6 +64,8 @@ ALTER TYPE aoai.model_type OWNER TO azure_pg_admin;
 CREATE PROCEDURE aoai.add_attendee_metric(IN p_api_key character varying, IN p_event_id character varying, IN p_catalog_id uuid)
     LANGUAGE plpgsql
     AS $$
+DECLARE
+	v_resource_string VARCHAR(64);
 BEGIN
 --     PERFORM request_count FROM aoai.event_attendee_request
 --     WHERE api_key = p_api_key AND date_stamp = CURRENT_DATE;
@@ -81,8 +83,10 @@ BEGIN
         VALUES (p_api_key, CURRENT_DATE, 1);
     END IF;
 
-    INSERT INTO aoai.metric(api_key, event_id, catalog_id)
-    VALUES (p_api_key, p_event_id, p_catalog_id);
+    SELECT model_type || ' | ' || deployment_name INTO v_resource_string FROM aoai.owner_catalog as oc WHERE oc.catalog_id = p_catalog_id;
+
+    INSERT INTO aoai.metric(api_key, event_id, resource)
+    VALUES (p_api_key, p_event_id, v_resource_string);
 END;
 $$;
 
@@ -349,7 +353,7 @@ SET default_table_access_method = heap;
 
 CREATE TABLE aoai.event (
     event_id character varying(50) DEFAULT gen_random_uuid() NOT NULL,
-    owner_id character varying(128),
+    owner_id character varying(128) NOT NULL,
     event_code character varying(64) NOT NULL,
     event_markdown character varying(8192) NOT NULL,
     start_timestamp timestamp(6) without time zone NOT NULL,
@@ -417,7 +421,7 @@ CREATE TABLE aoai.metric (
     api_key character varying NOT NULL,
     date_stamp date DEFAULT CURRENT_DATE NOT NULL,
     time_stamp time without time zone DEFAULT CURRENT_TIME NOT NULL,
-    catalog_id uuid NOT NULL
+    resource character varying(64) NOT NULL
 );
 
 
@@ -584,14 +588,6 @@ ALTER TABLE ONLY aoai.owner_catalog
 
 ALTER TABLE ONLY aoai.metric
     ADD CONSTRAINT fk_metric FOREIGN KEY (event_id) REFERENCES aoai.event(event_id) ON DELETE CASCADE;
-
-
---
--- Name: metric fk_metric_owner_catalog; Type: FK CONSTRAINT; Schema: aoai; Owner: azure_pg_admin
---
-
-ALTER TABLE ONLY aoai.metric
-    ADD CONSTRAINT fk_metric_owner_catalog FOREIGN KEY (catalog_id) REFERENCES aoai.owner_catalog(catalog_id);
 
 
 --

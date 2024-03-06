@@ -6,5 +6,6 @@ namespace AzureOpenAIProxy.Management.Services;
 public interface IModelService
 {
     Task<OwnerCatalog> AddOwnerCatalogAsync(ModelEditorModel model);
+    Task DeleteOwnerCatalogAsync(Guid catalogId);
     Task<IEnumerable<OwnerCatalog>> GetOwnerCatalogsAsync();
 }

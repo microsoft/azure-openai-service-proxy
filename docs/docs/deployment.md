@@ -98,6 +98,7 @@ The recommended way to deploy this app is with Dev Containers. Install the [VS C
 After the solution has been deployed, you will need to amend the app registration to add the redirect URI and enable the `ID tokens` under `Authentication`.
 
 1. Navigate to the AI Proxy Admin portal URL. You'll find the URL from the output of the `azd up` command under `Deploying service admin`.
+
 1. The log in will fail, but you will see the redirect URI in the error message. Copy the redirect URI, including the `/signin-oidc` prefix as you will need it when you update the app registration in the Azure Portal.
 
     ![](media/app_auth_error.png)

@@ -14,10 +14,12 @@ module postgresServer 'core/database/postgresql/flexibleserver.bicep' = {
     location: location
     tags: tags
     sku: {
-      name: 'Standard_B2s'
-      tier: 'Burstable'
+      name: 'Standard_D4ds_v5'
+      tier: 'GeneralPurpose'
     }
     storage: {
+      iops: 240
+      tier: 'P6'
       storageSizeGB: 32
     }
     version: '16'
@@ -28,10 +30,21 @@ module postgresServer 'core/database/postgresql/flexibleserver.bicep' = {
   }
 }
 
+resource postgresConfig 'Microsoft.DBforPostgreSQL/flexibleServers/configurations@2022-12-01' = {
+  dependsOn: [
+    postgresServer
+  ]
+  name: '${name}/azure.extensions'
+  properties: {
+    value: 'PGCRYPTO'
+    source: 'user-override'
+  }
+}
+
 resource sqlDeploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
   name: '${name}-deployment-script'
   dependsOn: [
-    postgresServer
+    postgresConfig
   ]
   location: location
   kind: 'AzureCLI'

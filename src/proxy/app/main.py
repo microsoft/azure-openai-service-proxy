@@ -15,6 +15,7 @@ from .config import Config
 from .db_manager import DBManager
 from .monitor import Monitor
 from .routes.attendee import AttendeeApi as attendee_router
+from .routes.azure_ai_search import AzureAISearch as azure_ai_search_router
 from .routes.chat_completions import ChatCompletions as chat_completions_router
 from .routes.completions import Completions as completions_router
 from .routes.embeddings import Embeddings as embeddings_router
@@ -28,6 +29,7 @@ DEFAULT_CHAT_COMPLETIONS_API_VERSION = "2023-09-01-preview"
 DEFAULT_EMBEDDINGS_API_VERSION = "2023-08-01-preview"
 DEFAULT_CHAT_COMPLETIONS_EXTENSIONS_API_VERSION = "2023-08-01-preview"
 DEFAULT_IMAGES_GENERATIONS_API_VERSION = "2023-06-01-preview"
+DEFAULT_SEARCH_API_VERSION = "2023-11-01"
 OPENAI_IMAGES_API_VERSION = "2023-12-01-preview"
 
 try:
@@ -96,6 +98,12 @@ event_registration_route = event_registration_router(db_manager=db_manager)
 
 attendee_route = attendee_router(db_manager=db_manager)
 
+search_route = azure_ai_search_router(
+    authorize=authorize,
+    config=config,
+    api_version=DEFAULT_SEARCH_API_VERSION,
+)
+
 app.include_router(completion_router.include_router(), prefix="/api/v1", tags=["completions"])
 app.include_router(chat_route.include_router(), prefix="/api/v1", tags=["chat-completions"])
 app.include_router(embeddings_route.include_router(), prefix="/api/v1", tags=["embeddings"])
@@ -108,6 +116,7 @@ app.include_router(
     event_registration_route.include_router(), prefix="/api/v1", tags=["event-registration"]
 )
 app.include_router(attendee_route.include_router(), prefix="/api/v1", tags=["attendee"])
+app.include_router(search_route.include_router(), prefix="/api/v1", tags=["search"])
 
 
 @app.exception_handler(HTTPException)

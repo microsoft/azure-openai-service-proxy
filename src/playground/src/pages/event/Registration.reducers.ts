@@ -8,16 +8,6 @@ export type RegistrationAction =
         profile: RegistrationState["profile"];
       };
     }
-  | {
-      type: "REGISTERING";
-    }
-  | {
-      type: "REGISTERED";
-    }
-  | { type: "ALREADY_REGISTERED" }
-  | {
-      type: "REGISTERING_FAILED";
-    }
   | { type: "TOGGLE_API_KEY_VISIBILITY" };
 
 export const reducer = (
@@ -37,6 +27,7 @@ export const reducer = (
         ...state,
         showApiKey: !state.showApiKey,
       };
+
     default:
       return state;
   }
