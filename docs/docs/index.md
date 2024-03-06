@@ -18,7 +18,7 @@ The Azure OpenAI proxy service provides a `Playground-like` experience for devel
 
 ![OpenAI Proxy Playground](media/openai_proxy_playground.png)
 
-## Azure AI Proxy overview
+## Azure AI Proxy Architecture
 
 The Azure AI Proxy consists of the following components:
 
