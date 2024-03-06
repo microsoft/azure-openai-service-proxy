@@ -15,6 +15,7 @@ This repo is set up for deployment on Azure Container Apps using the configurati
 1. An Azure subscription
 2. Deployed Azure OpenAI Models
 
+
 ### Required software
 
 Tested on Windows, macOS and Ubuntu 22.04.
@@ -29,7 +30,16 @@ Install:
 
 The AI Proxy admin is secured using Entra. You first need to register an application in your organizations Entra directory.
 
+1. Log into the Azure Portal.
+1. Select `Microsoft Entra ID` from the left-hand menu.
+1. Select `+ Add` dropdown, then select `App registration`.
+1. Name the registration, ensure `Accounts in this organizational directory only` is selected, and select `Register`.
+1. Navigate to `Overview`, and make a note of the `Application (client) ID` as you will need it when you deploy the solution.
 
+    ![](media/app-registration.png)
+
+1. When you deploy the solution, you will need to create a client secret.
+1. After the solution has been deployed, you will need to amend the app registration to add the redirect URI and enable the `ID tokens` under `Authentication`.
 
 ## Deploying
 
@@ -37,20 +47,18 @@ The recommended way to deploy this app is with Dev Containers. Install the [VS C
 
 !!! note
 
-    Deploying the AI Proxy Admin Portal does not work on macOS on Apple Silicon. The workaround for now is to deploy the solution from Windows, Linux machine, or from GitHub Codespaces.
+    Deploying the AI Proxy Admin Portal does not work on macOS on Apple Silicon. The workaround for now, is to deploy the solution from a Windows/ Linux machine, or GitHub Codespaces.
 
-1. Ensure Docker is installed
+1. Ensure Docker is installed and running.
 1. Clone the repo:
 
     ```shell
     git clone https://github.com/microsoft/azure-openai-service-proxy.git
     ```
 
-1. Using VS Code, open the `azure-openai-service-proxy/src/endpoint/simple-fastapi-container` folder:
-
-1. You will be prompted to `Reopen in Container`, click the button to do so.
-
-1. Login to Azure:
+1. Open the repo in VS Code.
+1. You will be prompted to `Reopen in Container`, click the button to do so. This will build the container and open the repo in a container.
+1. In the VS Code dev container, open a terminal and run the following commands to authenticate with Azure:
 
     ```shell
     azd auth login --use-device-code
@@ -60,34 +68,38 @@ The recommended way to deploy this app is with Dev Containers. Install the [VS C
     az login --use-device-code
     ```
 
-1. Entra app registration
-
-    The AI Proxy admin is secured using Entra. You first need to register an application in your organizations Entra directory.
-
-    1. Navigate to [entra.microsoft.com](https://entra.microsoft.com)
-    1. Select **Application**, then register an application.
-    1. Name the registration, select web type, single tenant, enable **token IDs**
-    1. Save
-    1. Navigate to **overview**, and make a note of the client ID as you will need it when you deploy the solution.
-
-1. Provision and deploy all the resources:
+1. Provision and deploy the proxy solution by running the following command in the terminal:
 
     ```shell
     azd up
     ```
 
-    It will prompt you to provide an `azd` environment name (like "aiproxy"), select a subscription from your Azure account, and select a location (like "eastus" or "sweden central"). Then azd will provision the resources in your account and deploy the latest code. If you get an error with deployment, changing the location can help, as there may be availability constraints for some of the resources.
+    You will be prompted for the following:
+    1. The environment name, keep the name short, max 7 characters to avoid invalid resource names being generated.
+    1. Select a subscription from your Azure account.
+    1. Select a location (like "eastus" or "sweden central"). Then azd will provision the resources in your account and deploy the latest code. Recommend deploying the proxy to the same location you plan to deploy your models.
+    1. Enter a value for the 'authClientId' infrastructure parameter. This is the Entra App Registration `Application (client) ID` you created.
+    1. Save the value in the environment for future use.
+    3. Enter a value for the 'swaLocation' infrastructure parameter. Recommend selecting a location close to or the same as the Azure location you previously selected.
+    4. Save the value in the environment for future use.
 
     On completion, the following Azure resources will be provisioned:
 
     ![Azure OpenAI Playground experience](media/azure_resources.png)
 
-1. When `azd` has finished deploying you'll see a link to the Azure Resource Group created for the solution.
-1. To make any changes to the app code, just run:
+2. When `azd` has finished deploying you'll see a link to the Azure Resource Group created for the solution.
 
-    ```shell
-    azd deploy
-    ```
+    The Admin and Playground links will be displayed when `azd up` completes.
+
+    ![](media/app_deployed.png)
+
+## Updating the deployed app
+
+To make any changes to the app code, just run:
+
+```shell
+azd deploy
+```
 
 ## Scaling the Proxy Service
 
@@ -106,25 +118,17 @@ You can configure multiple resources with the AI Proxy.
 | `openai-chat` | gpt-35-turbo, gpt-35-turbo-16k, or newer | This is the model deployment class for the Azure OpenAI Chat Completions API. |
 | `openai-completions` | davinci-002 or newer | This is the model deployment class for the Azure OpenAI Completions API. |
 | `openai-embeddings` | text-embedding-ada-002 or newer | This is the model deployment class for the Azure OpenAI Embeddings API. |
-| `azure-ai-search` | Azure AI Search index name | This allows for pass through acess to an instance of Azure AI Search |
+| `azure-ai-search` | Azure AI Search index name | This allows for pass through access to an instance of Azure AI Search for Search/Query only. Note, recommend creating a read-only query key in Azure AI Search, if you want to use Semantic Ranking then you need to create a Standard SKU for Azure AI Search.|
 | `openai-dall-e-3` | dall-3-e | This is the model deployment class for the Azure OpenAI Dall-e-3 models. |
 | `openai-dall-e-2` | No model is deploy, just an Azure OpenAI resource in a location that supports the Images Generations API | This is the model deployment class for the Azure OpenAI Images Generations API. |
 
-## Load balancing models
+## Load balancing resources
 
-You can deploy multiple models of the same model deployment class. For example, you can deploy multiple `gpt-35-turbo` models in difference Azure OpenAI resources with the same name. The proxy will round robin across the models of the same deployment name to balance the load.
+You can deploy multiple instances of model with the same deployment name. For example, you can deploy multiple `gpt-35-turbo` models in difference Azure OpenAI resources with the same deployment name. The proxy will round robin across the resources with the same deployment name to balance the load.
 
-## Deploy an Azure OpenAI models
+## Deploy an Azure AI Resources
 
 1. Open the Azure Portal.
-1. Create a Azure resource group for your models. Naming suggestions include `openai-proxy-models`.
-1. Create an Azure OpenAI resource in your subscription and add them to your models resource group. See [Create and deploy an Azure OpenAI Service resource](https://learn.microsoft.com/azure/ai-services/openai/how-to/create-resource) for more information.
-   - Make a note of the `endpoint_key` and `endpoint_url` as you'll need them for the next step.
-     - You can find the `endpoint_key` and `endpoint_url` in the Azure Portal under the `Keys and Endpoint` tab for the Azure OpenAI resource.
-1. Create an Azure OpenAI model deployment. See [Create an Azure OpenAI model deployment](https://learn.microsoft.com/azure/ai-services/openai/how-to/create-resource?pivots=web-portal#deploy-a-model) for more information. From the Azure Portal, select the Azure OpenAI resource, then select the `Deployments` tab, and finally select `Create deployment`
-
-   1. Select the `+ Create new deployment`.
-   2. Select the `Model`.
-   3. `Name` the deployment. Make a note of the name as you'll need it for the next step.
-   4. Select `Advanced options`, and select the `Tokens per Minute Rate Limit`.
-   5. Select `Create`.
+1. Create a Azure resource group for your models. Naming suggestions include `ai-proxy-resources`.
+1. Add AI resources to the resource group you created. See [Create and deploy an Azure OpenAI Service resource](https://learn.microsoft.com/azure/ai-services/openai/how-to/create-resource) for more information.
+1. Make a note of the `endpoint_key` and `endpoint_url` as you'll need them when you configure resources for the AI Proxy.
