@@ -88,11 +88,18 @@ The recommended way to deploy this app is with Dev Containers. Install the [VS C
     ![Azure OpenAI Playground experience](media/azure_resources.png)
 
 2. When `azd` has finished deploying you'll see a link to the Azure Resource Group created for the solution.
-3. To make any changes to the app code, just run:
 
-    ```shell
-    azd deploy
-    ```
+    The Admin and Playground links will be displayed when `azd up` completes.
+
+    ![](media/app_deployed.png)
+
+## Updating the deployed app
+
+To make any changes to the app code, just run:
+
+```shell
+azd deploy
+```
 
 ## Scaling the Proxy Service
 
@@ -111,25 +118,17 @@ You can configure multiple resources with the AI Proxy.
 | `openai-chat` | gpt-35-turbo, gpt-35-turbo-16k, or newer | This is the model deployment class for the Azure OpenAI Chat Completions API. |
 | `openai-completions` | davinci-002 or newer | This is the model deployment class for the Azure OpenAI Completions API. |
 | `openai-embeddings` | text-embedding-ada-002 or newer | This is the model deployment class for the Azure OpenAI Embeddings API. |
-| `azure-ai-search` | Azure AI Search index name | This allows for pass through acess to an instance of Azure AI Search |
+| `azure-ai-search` | Azure AI Search index name | This allows for pass through access to an instance of Azure AI Search for Search/Query only. Note, recommend creating a read-only query key in Azure AI Search, if you want to use Semantic Ranking then you need to create a Standard SKU for Azure AI Search.|
 | `openai-dall-e-3` | dall-3-e | This is the model deployment class for the Azure OpenAI Dall-e-3 models. |
 | `openai-dall-e-2` | No model is deploy, just an Azure OpenAI resource in a location that supports the Images Generations API | This is the model deployment class for the Azure OpenAI Images Generations API. |
 
-## Load balancing models
+## Load balancing resources
 
-You can deploy multiple models of the same model deployment class. For example, you can deploy multiple `gpt-35-turbo` models in difference Azure OpenAI resources with the same name. The proxy will round robin across the models of the same deployment name to balance the load.
+You can deploy multiple instances of model with the same deployment name. For example, you can deploy multiple `gpt-35-turbo` models in difference Azure OpenAI resources with the same deployment name. The proxy will round robin across the resources with the same deployment name to balance the load.
 
-## Deploy an Azure OpenAI models
+## Deploy an Azure AI Resources
 
 1. Open the Azure Portal.
-1. Create a Azure resource group for your models. Naming suggestions include `openai-proxy-models`.
-1. Create an Azure OpenAI resource in your subscription and add them to your models resource group. See [Create and deploy an Azure OpenAI Service resource](https://learn.microsoft.com/azure/ai-services/openai/how-to/create-resource) for more information.
-   - Make a note of the `endpoint_key` and `endpoint_url` as you'll need them for the next step.
-     - You can find the `endpoint_key` and `endpoint_url` in the Azure Portal under the `Keys and Endpoint` tab for the Azure OpenAI resource.
-1. Create an Azure OpenAI model deployment. See [Create an Azure OpenAI model deployment](https://learn.microsoft.com/azure/ai-services/openai/how-to/create-resource?pivots=web-portal#deploy-a-model) for more information. From the Azure Portal, select the Azure OpenAI resource, then select the `Deployments` tab, and finally select `Create deployment`
-
-   1. Select the `+ Create new deployment`.
-   2. Select the `Model`.
-   3. `Name` the deployment. Make a note of the name as you'll need it for the next step.
-   4. Select `Advanced options`, and select the `Tokens per Minute Rate Limit`.
-   5. Select `Create`.
+1. Create a Azure resource group for your models. Naming suggestions include `ai-proxy-resources`.
+1. Add AI resources to the resource group you created. See [Create and deploy an Azure OpenAI Service resource](https://learn.microsoft.com/azure/ai-services/openai/how-to/create-resource) for more information.
+1. Make a note of the `endpoint_key` and `endpoint_url` as you'll need them when you configure resources for the AI Proxy.
