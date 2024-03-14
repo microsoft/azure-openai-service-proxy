@@ -28,6 +28,8 @@ class ChatCompletionsRequest(BaseModel):
     presence_penalty: float | None = None
     functions: list[dict[str, Any]] | None = None
     function_call: str | dict[str, str] | None = None
+    tools: Any | None = None
+    tools_choice: Any | None = None
 
 
 class ChatCompletions(RequestManager):
