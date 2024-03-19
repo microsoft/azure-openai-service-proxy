@@ -41,7 +41,9 @@ export const Image = () => {
       return;
     }
 
-    dispatch({ type: "imageStart", payload: prompt });
+    const id = Date.now().toString();
+
+    dispatch({ type: "imageStart", payload: { prompt, id } });
 
     const response = await client.getImages(
       state.model,
@@ -49,7 +51,10 @@ export const Image = () => {
       state.parameters
     );
 
-    dispatch({ type: "imageComplete", payload: response });
+    dispatch({
+      type: "imageComplete",
+      payload: { response, id },
+    });
   };
 
   return (

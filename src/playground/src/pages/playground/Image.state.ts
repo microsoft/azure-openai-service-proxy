@@ -1,11 +1,17 @@
 import { GetImagesOptions, ImageGenerations } from "@azure/openai";
 
+export type ExtendedImageGenerations = {
+  prompt: string;
+  loaded: boolean;
+  id: string;
+  generations?: ImageGenerations;
+};
+
 export type ImageState = {
-  prompt?: string;
   isLoading: boolean;
   model?: string;
   parameters: GetImagesOptions;
-  images: ImageGenerations[];
+  images: ExtendedImageGenerations[];
 };
 
 export const INITIAL_STATE: ImageState = {

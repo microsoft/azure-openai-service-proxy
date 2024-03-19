@@ -10,7 +10,7 @@ import {
 import { useEventDataContext } from "../../providers/EventDataProvider";
 import { Card } from "./Card";
 import { Dispatch, useState } from "react";
-import { ImageGenerations } from "@azure/openai";
+import { ExtendedImageGenerations } from "../../pages/playground/Image.state";
 
 const useStyles = makeStyles({
   startCard: {
@@ -30,11 +30,38 @@ const useStyles = makeStyles({
     textAlign: "left",
   },
 
+  container: {
+    display: "grid",
+    gridTemplateRows: "1fr 1fr 5fr",
+  },
+
   imageList: {
+    ...shorthands.border("1px", "solid", "#ccc"),
+    display: "flex",
+  },
+
+  image: {
+    display: "flex",
+    flexDirection: "column",
+    ...shorthands.padding("15px"),
+    ...shorthands.margin("10px"),
+    ...shorthands.border("1px", "solid", "#333"),
+    maxHeight: "320px",
+  },
+
+  imageContainer: {
     display: "flex",
     ...shorthands.gap("2px"),
-    width: "200px",
-    height: "200px",
+    width: "300px",
+    height: "300px",
+    flexDirection: "column",
+    ...shorthands.overflow("hidden"),
+
+    "& img": {
+      width: "100%",
+      height: "100%",
+      objectFit: "cover",
+    },
   },
 });
 
@@ -74,39 +101,33 @@ const ImagePrompt = ({
   );
 };
 
-const ImageList = ({ images }: { images: ImageGenerations[] }) => {
+const ImageList = ({ images }: { images: ExtendedImageGenerations[] }) => {
   const styles = useStyles();
   return (
-    <>
+    <div className={styles.imageList}>
       {images.map((image) => (
-        <div
-          key={image.created.getMilliseconds()}
-          style={{
-            border: "1px solid #ccc",
-            padding: "3px",
-            flexGrow: "unset",
-            borderRadius: "5px",
-          }}
-        >
-          <div className={styles.imageList}>
-            {image.data.map((i) => {
-              const url = i.url;
-              return (
-                <>
-                  <img
-                    src={url}
-                    key={url}
-                    onClick={() => window.open(url)}
-                    style={{ cursor: "pointer" }}
-                  />
-                  <p>{i.revisedPrompt}</p>
-                </>
-              );
-            })}
+        <div key={image.id} className={styles.image}>
+          <div className={styles.imageContainer}>
+            {!image.generations && <p>Processing...</p>}
+            {image.generations &&
+              image.generations.data.map((i) => {
+                const url = i.url;
+                return (
+                  <>
+                    <img
+                      src={url}
+                      key={url}
+                      onClick={() => window.open(url)}
+                      style={{ cursor: "pointer" }}
+                    />
+                  </>
+                );
+              })}
           </div>
+          <p>{image.prompt}</p>
         </div>
       ))}
-    </>
+    </div>
   );
 };
 
@@ -116,13 +137,13 @@ export const ImageCard = ({
   canGenerate,
 }: {
   generateImage: Dispatch<string>;
-  images: ImageGenerations[];
+  images: ExtendedImageGenerations[];
   canGenerate: boolean;
 }) => {
   const { isAuthorized } = useEventDataContext();
   const styles = useStyles();
   return (
-    <Card header="DALL·E playground">
+    <Card header="DALL·E playground" className={styles.container}>
       {!isAuthorized && (
         <Card className={styles.startCard}>
           <Body1 style={{ textAlign: "center" }}>

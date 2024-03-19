@@ -15,11 +15,11 @@ type ImageAction =
     }
   | {
       type: "imageStart";
-      payload: string;
+      payload: { prompt: string; id: string };
     }
   | {
       type: "imageComplete";
-      payload: ImageGenerations;
+      payload: { response: ImageGenerations; id: string };
     }
   | {
       type: "imageError";
@@ -47,7 +47,14 @@ export function reducer(state: ImageState, action: ImageAction): ImageState {
       return {
         ...state,
         isLoading: true,
-        prompt: action.payload,
+        images: [
+          ...state.images,
+          {
+            prompt: action.payload.prompt,
+            id: action.payload.id,
+            loaded: false,
+          },
+        ],
       };
 
     case "imageComplete":
@@ -65,8 +72,16 @@ export function reducer(state: ImageState, action: ImageAction): ImageState {
 }
 function processImages(
   state: ImageState,
-  payload: ImageGenerations
+  payload: { response: ImageGenerations; id: string }
 ): ImageState {
-  console.log(payload);
-  return { ...state, isLoading: false, images: [...state.images, payload] };
+  let image = state.images.find((i) => i.id === payload.id);
+  if (!image) {
+    return state;
+  }
+  image = { ...image, generations: payload.response, loaded: true };
+  return {
+    ...state,
+    isLoading: false,
+    images: state.images.map((i) => (i.id === payload.id ? image : i)),
+  };
 }
