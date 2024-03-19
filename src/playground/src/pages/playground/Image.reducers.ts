@@ -46,7 +46,6 @@ export function reducer(state: ImageState, action: ImageAction): ImageState {
     case "imageStart":
       return {
         ...state,
-        isLoading: true,
         images: [
           ...state.images,
           {
@@ -63,7 +62,6 @@ export function reducer(state: ImageState, action: ImageAction): ImageState {
     case "imageError":
       return {
         ...state,
-        isLoading: false,
       };
 
     default:
@@ -81,7 +79,6 @@ function processImages(
   image = { ...image, generations: payload.response, loaded: true };
   return {
     ...state,
-    isLoading: false,
     images: state.images.map((i) => (i.id === payload.id ? image : i)),
   };
 }
