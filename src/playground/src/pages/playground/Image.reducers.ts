@@ -68,17 +68,23 @@ export function reducer(state: ImageState, action: ImageAction): ImageState {
       return state;
   }
 }
+
 function processImages(
   state: ImageState,
   payload: { response: ImageGenerations; id: string }
 ): ImageState {
-  let image = state.images.find((i) => i.id === payload.id);
-  if (!image) {
-    return state;
-  }
-  image = { ...image, generations: payload.response, loaded: true };
+  const updatedImages = state.images.map((image) =>
+    image.id === payload.id
+      ? {
+          ...image,
+          generations: payload.response,
+          loaded: true,
+        }
+      : image
+  );
+
   return {
     ...state,
-    images: state.images.map((i) => (i.id === payload.id ? image : i)),
+    images: updatedImages,
   };
 }
