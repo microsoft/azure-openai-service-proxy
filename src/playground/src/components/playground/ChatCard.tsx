@@ -12,13 +12,12 @@ import { Delete24Regular, SendRegular } from "@fluentui/react-icons";
 import { Message } from "./Message";
 import { Response } from "./Response";
 import { useEventDataContext } from "../../providers/EventDataProvider";
-import type { ChatMessage } from "@azure/openai";
 import { Card } from "./Card";
-import { ChatMessageExtended } from "../../pages/playground/Chat.state";
+import { ChatResponseMessageExtended } from "../../pages/playground/Chat.state";
 
 interface CardProps {
-  onPromptEntered: (messages: ChatMessage[]) => void;
-  messageList: ChatMessageExtended[];
+  onPromptEntered: (prompt: string) => void;
+  messageList: ChatResponseMessageExtended[];
   onClear: () => void;
   isLoading: boolean;
   canChat: boolean;
@@ -94,12 +93,7 @@ export const ChatCard = ({
       {isLoading && <Spinner />}
       {isAuthorized && (
         <ChatInput
-          promptSubmitted={(userPrompt) => {
-            onPromptEntered([
-              ...messageList.filter((m) => !m.isError),
-              { role: "user", content: userPrompt },
-            ]);
-          }}
+          promptSubmitted={onPromptEntered}
           onClear={onClear}
           canChat={canChat}
         />

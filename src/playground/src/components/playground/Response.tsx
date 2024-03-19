@@ -1,11 +1,11 @@
 import Markdown from "react-markdown";
-import { ChatMessage } from "@azure/openai";
+import { ChatResponseMessage } from "@azure/openai";
 import { makeStyles, shorthands } from "@fluentui/react-components";
 import SyntaxHighlighter from "react-syntax-highlighter";
 import { solarizedlight } from "react-syntax-highlighter/dist/esm/styles/prism";
 
 interface Props {
-  message: ChatMessage;
+  message: ChatResponseMessage;
 }
 
 const useStyles = makeStyles({

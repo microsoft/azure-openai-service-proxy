@@ -7,15 +7,18 @@ import {
 } from "@fluentui/react-components";
 import { Dispatch, useEffect, useState } from "react";
 import { Save24Regular } from "@fluentui/react-icons";
-import type { ChatMessage, FunctionDefinition } from "@azure/openai";
+import type {
+  ChatRequestSystemMessage,
+  FunctionDefinition,
+} from "@azure/openai";
 import { Card, CardHeader } from "./Card";
 import { DividerBlock } from "./DividerBlock";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { solarizedlight } from "react-syntax-highlighter/dist/esm/styles/prism";
 
 interface SystemProps {
-  defaultPrompt: ChatMessage;
-  onPromptChange: Dispatch<ChatMessage>;
+  defaultPrompt: ChatRequestSystemMessage;
+  onPromptChange: Dispatch<string>;
   functionsChange: Dispatch<FunctionDefinition[]>;
 }
 
@@ -62,7 +65,7 @@ export const SystemCard = ({
           }}
           onKeyDown={(event) => {
             if (event.key === "Enter") {
-              onPromptChange({ role: "system", content: sysPrompt });
+              onPromptChange(sysPrompt);
               setSaved(true);
             }
           }}
@@ -72,7 +75,7 @@ export const SystemCard = ({
             icon={<Save24Regular />}
             iconPosition="after"
             onClick={() => {
-              onPromptChange({ role: "system", content: sysPrompt });
+              onPromptChange(sysPrompt);
               setSaved(true);
             }}
           >
@@ -127,9 +130,7 @@ export const SystemCard = ({
                     if (!Array.isArray(j)) {
                       throw new Error("Functions JSON invalid");
                     }
-                    functionsChange(
-                      (j as FunctionDefinition[])
-                    );
+                    functionsChange(j as FunctionDefinition[]);
                     setSaved(true);
                     setEditFunctions(false);
                   } catch (e) {

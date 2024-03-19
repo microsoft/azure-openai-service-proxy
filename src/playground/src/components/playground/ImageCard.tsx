@@ -3,7 +3,6 @@ import {
   Button,
   Input,
   Label,
-  Spinner,
   makeStyles,
   shorthands,
   useId,
@@ -11,14 +10,7 @@ import {
 import { useEventDataContext } from "../../providers/EventDataProvider";
 import { Card } from "./Card";
 import { Dispatch, useState } from "react";
-import { ImageGenerations, ImageLocation } from "@azure/openai";
-
-export type ImageDetails = {
-  id: number;
-  prompt: string;
-  loaded: boolean;
-  generation?: ImageGenerations;
-};
+import { ImageGenerations } from "@azure/openai";
 
 const useStyles = makeStyles({
   startCard: {
@@ -46,7 +38,13 @@ const useStyles = makeStyles({
   },
 });
 
-const Search = ({ generateImage }: { generateImage: Dispatch<string> }) => {
+const ImagePrompt = ({
+  generateImage,
+  canGenerate,
+}: {
+  generateImage: Dispatch<string>;
+  canGenerate: boolean;
+}) => {
   const styles = useStyles();
   const promptId = useId();
   const [prompt, setPrompt] = useState("");
@@ -66,20 +64,23 @@ const Search = ({ generateImage }: { generateImage: Dispatch<string> }) => {
         onChange={(e) => setPrompt(e.target.value)}
         placeholder="Enter a prompt. Eg: cute picture of an cat"
       />
-      <Button onClick={() => generateImage(prompt)} disabled={!prompt}>
+      <Button
+        onClick={() => generateImage(prompt)}
+        disabled={!prompt || !canGenerate}
+      >
         Generate
       </Button>
     </div>
   );
 };
 
-const ImageList = ({ images }: { images: ImageDetails[] }) => {
+const ImageList = ({ images }: { images: ImageGenerations[] }) => {
   const styles = useStyles();
   return (
     <>
       {images.map((image) => (
         <div
-          key={image.id}
+          key={image.created.getMilliseconds()}
           style={{
             border: "1px solid #ccc",
             padding: "3px",
@@ -88,21 +89,21 @@ const ImageList = ({ images }: { images: ImageDetails[] }) => {
           }}
         >
           <div className={styles.imageList}>
-            {image.loaded &&
-              image.generation?.data.map((i) => {
-                const url = (i as ImageLocation).url;
-                return (
+            {image.data.map((i) => {
+              const url = i.url;
+              return (
+                <>
                   <img
                     src={url}
                     key={url}
                     onClick={() => window.open(url)}
                     style={{ cursor: "pointer" }}
                   />
-                );
-              })}
+                  <p>{i.revisedPrompt}</p>
+                </>
+              );
+            })}
           </div>
-          {!image.loaded && <Spinner />}
-          <p>{image.prompt}</p>
         </div>
       ))}
     </>
@@ -112,9 +113,11 @@ const ImageList = ({ images }: { images: ImageDetails[] }) => {
 export const ImageCard = ({
   generateImage,
   images,
+  canGenerate,
 }: {
   generateImage: Dispatch<string>;
-  images: ImageDetails[];
+  images: ImageGenerations[];
+  canGenerate: boolean;
 }) => {
   const { isAuthorized } = useEventDataContext();
   const styles = useStyles();
@@ -128,7 +131,9 @@ export const ImageCard = ({
         </Card>
       )}
 
-      {isAuthorized && <Search generateImage={generateImage} />}
+      {isAuthorized && (
+        <ImagePrompt generateImage={generateImage} canGenerate={canGenerate} />
+      )}
       {isAuthorized && <ImageList images={images} />}
     </Card>
   );

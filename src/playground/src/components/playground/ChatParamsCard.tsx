@@ -11,7 +11,7 @@ import { ParamInputLabel } from "./ParamInputLabel";
 interface ChatParamsCardProps {
   startValues: GetChatCompletionsOptions;
   tokenUpdate: (
-    label: keyof GetChatCompletionsOptions,
+    label: keyof GetChatCompletionsOptions | "model",
     newValue: number | string
   ) => void;
   usageData: UsageData;

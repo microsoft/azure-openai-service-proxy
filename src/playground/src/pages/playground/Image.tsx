@@ -1,10 +1,11 @@
 import { makeStyles } from "@fluentui/react-components";
 import { ImageParamsCard } from "../../components/playground/ImageParamsCard";
-import { ImageGenerationOptions } from "@azure/openai";
-import { useState } from "react";
-import { useEventDataContext } from "../../providers/EventDataProvider";
-import { ImageCard, ImageDetails } from "../../components/playground/ImageCard";
+import { GetImagesOptions } from "@azure/openai";
+import { useReducer } from "react";
+import { ImageCard } from "../../components/playground/ImageCard";
 import { useOpenAIClientContext } from "../../providers/OpenAIProvider";
+import { reducer } from "./Image.reducers";
+import { INITIAL_STATE } from "./Image.state";
 
 const useStyles = makeStyles({
   container: {
@@ -17,57 +18,52 @@ const useStyles = makeStyles({
 
 export const Image = () => {
   const styles = useStyles();
-  const { eventCode } = useEventDataContext();
   const { client } = useOpenAIClientContext();
-
-  const [imageSettings, setImageSettings] = useState<ImageGenerationOptions>({
-    n: 1,
-    size: "512x512",
-    responseFormat: "url",
-    user: eventCode,
-  });
-
-  const [images, setImages] = useState<ImageDetails[]>([]);
+  const [state, dispatch] = useReducer(reducer, INITIAL_STATE);
 
   const updateSettings = (
-    label: keyof ImageGenerationOptions,
+    label: keyof GetImagesOptions | "model",
     newValue: number | string
   ) => {
-    setImageSettings({
-      ...imageSettings,
-      [label]: newValue,
+    if (label === "model") {
+      dispatch({ type: "updateModel", payload: newValue as string });
+      return;
+    }
+
+    dispatch({
+      type: "updateParameters",
+      payload: { name: label, value: newValue },
     });
   };
 
   const generateImage = async (prompt: string) => {
-    if (!client) {
+    if (!client || !state.model) {
       return;
     }
 
-    const id = Date.now();
+    dispatch({ type: "imageStart", payload: prompt });
 
-    setImages((current) => [...current, { prompt, loaded: false, id }]);
+    const response = await client.getImages(
+      state.model,
+      prompt,
+      state.parameters
+    );
 
-    const response = await client.getImages(prompt, imageSettings);
-
-    setImages((current) => {
-      const updated = [...current];
-      const index = updated.findIndex((image) => image.id === id);
-      updated[index] = {
-        ...updated[index],
-        loaded: true,
-        generation: response,
-      };
-      return updated;
-    });
+    dispatch({ type: "imageComplete", payload: response });
   };
 
   return (
     <section className={styles.container}>
-      <ImageCard generateImage={generateImage} images={images} />
+      <ImageCard
+        generateImage={generateImage}
+        images={state.images}
+        canGenerate={
+          client !== undefined && state.model !== undefined && !state.isLoading
+        }
+      />
       <ImageParamsCard
         updateSettings={updateSettings}
-        settings={imageSettings}
+        settings={state.parameters}
       />
     </section>
   );
