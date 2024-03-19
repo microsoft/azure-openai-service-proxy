@@ -30,6 +30,7 @@ class MonitorEntity(BaseModel):
     deployment_name: str
     api_key: str
     catalog_id: UUID | None = None
+    usage: str | None = '{}'
 
     def __init__(
         self,
@@ -47,6 +48,7 @@ class MonitorEntity(BaseModel):
         deployment_name: str,
         api_key: str,
         catalog_id: UUID | None = None,
+        usage: str | None = '{}'
     ) -> None:
         super().__init__(
             is_authorized=is_authorized,
@@ -63,6 +65,7 @@ class MonitorEntity(BaseModel):
             deployment_name=deployment_name,
             api_key=api_key,
             catalog_id=catalog_id,
+            usage=usage,
         )
 
 
@@ -92,10 +95,11 @@ class Monitor:
         try:
             async with pool.acquire() as conn:
                 await conn.execute(
-                    "CALL aoai.add_attendee_metric($1, $2, $3)",
+                    "CALL aoai.add_attendee_metric($1, $2, $3, $4)",
                     entity.api_key,
                     entity.event_id,
                     entity.catalog_id,
+                    entity.usage,
                 )
 
         except asyncpg.exceptions.PostgresError as error:

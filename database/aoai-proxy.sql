@@ -58,10 +58,10 @@ CREATE TYPE aoai.model_type AS ENUM (
 ALTER TYPE aoai.model_type OWNER TO azure_pg_admin;
 
 --
--- Name: add_attendee_metric(character varying, character varying, uuid); Type: PROCEDURE; Schema: aoai; Owner: azure_pg_admin
+-- Name: add_attendee_metric(character varying, character varying, uuid, character varying); Type: PROCEDURE; Schema: aoai; Owner: azure_pg_admin
 --
 
-CREATE PROCEDURE aoai.add_attendee_metric(IN p_api_key character varying, IN p_event_id character varying, IN p_catalog_id uuid)
+CREATE PROCEDURE aoai.add_attendee_metric(IN p_api_key character varying, IN p_event_id character varying, IN p_catalog_id uuid, IN p_usage character varying)
     LANGUAGE plpgsql
     AS $$
 DECLARE
@@ -85,13 +85,13 @@ BEGIN
 
     SELECT model_type || ' | ' || deployment_name INTO v_resource_string FROM aoai.owner_catalog as oc WHERE oc.catalog_id = p_catalog_id;
 
-    INSERT INTO aoai.metric(api_key, event_id, resource)
-    VALUES (p_api_key, p_event_id, v_resource_string);
+    INSERT INTO aoai.metric(api_key, event_id, resource, usage)
+    VALUES (p_api_key, p_event_id, v_resource_string, p_usage);
 END;
 $$;
 
 
-ALTER PROCEDURE aoai.add_attendee_metric(IN p_api_key character varying, IN p_event_id character varying, IN p_catalog_id uuid) OWNER TO azure_pg_admin;
+ALTER PROCEDURE aoai.add_attendee_metric(IN p_api_key character varying, IN p_event_id character varying, IN p_catalog_id uuid, IN p_usage character varying) OWNER TO azure_pg_admin;
 
 --
 -- Name: add_event(character varying, character varying, character varying, timestamp without time zone, timestamp without time zone, integer, character varying, character varying, character varying, character varying, character varying, integer, integer, boolean, character varying); Type: FUNCTION; Schema: aoai; Owner: azure_pg_admin
@@ -421,7 +421,8 @@ CREATE TABLE aoai.metric (
     api_key character varying NOT NULL,
     date_stamp date DEFAULT CURRENT_DATE NOT NULL,
     time_stamp time without time zone DEFAULT CURRENT_TIME NOT NULL,
-    resource character varying(64) NOT NULL
+    resource character varying(64) NOT NULL,
+    usage character varying(255)
 );
 
 
