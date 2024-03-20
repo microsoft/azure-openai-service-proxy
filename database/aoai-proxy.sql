@@ -82,8 +82,8 @@ BEGIN
         WHERE api_key = p_api_key AND date_stamp = CURRENT_DATE;
     ELSE
         -- If no record exists, insert a new one with count set to 1
-        INSERT INTO aoai.event_attendee_request(api_key, date_stamp, request_count)
-        VALUES (p_api_key, CURRENT_DATE, 1);
+        INSERT INTO aoai.event_attendee_request(api_key, date_stamp, request_count, token_count)
+        VALUES (p_api_key, CURRENT_DATE, 1, v_token_count);
     END IF;
 
     SELECT model_type || ' | ' || deployment_name INTO v_resource_string FROM aoai.owner_catalog as oc WHERE oc.catalog_id = p_catalog_id;
