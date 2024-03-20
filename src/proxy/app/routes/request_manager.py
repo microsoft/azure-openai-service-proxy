@@ -1,8 +1,8 @@
 """ Request Manager base class """
 
+import json
 import logging
 from collections.abc import AsyncGenerator
-import json
 
 from fastapi import APIRouter, HTTPException, Request
 
@@ -82,8 +82,9 @@ class RequestManager:
             response = self.model_to_dict(response)
             response["model"] = response["model"] + ":" + deployment.location.lower()
 
-        authorize_response.usage = json.dumps(response.get('usage', {}))
-        await self.config.monitor.log_api_call(entity=authorize_response)
+            authorize_response.usage = json.dumps(response.get("usage", {}))
+            await self.config.monitor.log_api_call(entity=authorize_response)
+
         return response, http_status_code
 
     def throw_validation_error(self, message: str, status_code: int):
