@@ -78,6 +78,7 @@ class EventInfo(RequestManager):
             del event_info_dict["daily_request_cap"]
             del event_info_dict["api_key"]
             del event_info_dict["catalog_id"]
+            del event_info_dict["usage"]
 
             return EventInfoResponse(**event_info_dict)
 
