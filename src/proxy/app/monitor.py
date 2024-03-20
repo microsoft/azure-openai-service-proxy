@@ -6,7 +6,8 @@ from uuid import UUID
 
 import asyncpg
 from fastapi import HTTPException
-from pydantic import BaseModel
+from typing import Any
+from pydantic import BaseModel, Json
 
 from .db_manager import DBManager
 
@@ -30,7 +31,7 @@ class MonitorEntity(BaseModel):
     deployment_name: str
     api_key: str
     catalog_id: UUID | None = None
-    usage: str | None = '{}'
+    usage: Json[Any] | None = '{}'
 
     def __init__(
         self,
@@ -48,7 +49,7 @@ class MonitorEntity(BaseModel):
         deployment_name: str,
         api_key: str,
         catalog_id: UUID | None = None,
-        usage: str | None = '{}'
+        usage: Json[Any] | None = '{}'
     ) -> None:
         super().__init__(
             is_authorized=is_authorized,
