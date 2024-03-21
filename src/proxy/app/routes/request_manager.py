@@ -83,6 +83,7 @@ class RequestManager:
             response["model"] = response["model"] + ":" + deployment.location.lower()
 
         if isinstance(response, AsyncGenerator):
+            # there is no response object for streaming so set the usage to stream
             authorize_response.usage = '{"stream": true}'
         else:
             authorize_response.usage = json.dumps(response.get("usage", {}))
