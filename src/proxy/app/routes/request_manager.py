@@ -82,8 +82,12 @@ class RequestManager:
             response = self.model_to_dict(response)
             response["model"] = response["model"] + ":" + deployment.location.lower()
 
+        if isinstance(response, AsyncGenerator):
+            authorize_response.usage = '{"stream": true}'
+        else:
             authorize_response.usage = json.dumps(response.get("usage", {}))
-            await self.config.monitor.log_api_call(entity=authorize_response)
+
+        await self.config.monitor.log_api_call(entity=authorize_response)
 
         return response, http_status_code
 
