@@ -1,5 +1,6 @@
 """ Request Manager base class """
 
+import json
 import logging
 from collections.abc import AsyncGenerator
 
@@ -80,6 +81,9 @@ class RequestManager:
         if not isinstance(response, AsyncGenerator) and "model" in response:
             response = self.model_to_dict(response)
             response["model"] = response["model"] + ":" + deployment.location.lower()
+
+            authorize_response.usage = json.dumps(response.get("usage", {}))
+            await self.config.monitor.log_api_call(entity=authorize_response)
 
         return response, http_status_code
 

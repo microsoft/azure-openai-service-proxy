@@ -70,15 +70,19 @@ class EventInfo(RequestManager):
                 authorize_response=authorize_response
             )
 
-            event_info_dict = dict(authorize_response)
-            event_info_dict["capabilities"] = capabilities
-            del event_info_dict["user_id"]
-            del event_info_dict["event_id"]
-            del event_info_dict["deployment_name"]
-            del event_info_dict["daily_request_cap"]
-            del event_info_dict["api_key"]
-            del event_info_dict["catalog_id"]
+            # create a new EventInfoResponse object from authorize_response
+            event_info_response = EventInfoResponse(
+                is_authorized=authorize_response.is_authorized,
+                max_token_cap=authorize_response.max_token_cap,
+                event_code=authorize_response.event_code,
+                event_url=authorize_response.event_url,
+                event_url_text=authorize_response.event_url_text,
+                event_image_url=authorize_response.event_image_url,
+                organizer_name=authorize_response.organizer_name,
+                organizer_email=authorize_response.organizer_email,
+                capabilities=capabilities,
+            )
 
-            return EventInfoResponse(**event_info_dict)
+            return event_info_response
 
         return self.router

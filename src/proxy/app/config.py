@@ -128,8 +128,6 @@ class Config:
 
         authorize_response.catalog_id = deployments[index].catalog_id
 
-        await self.monitor.log_api_call(entity=authorize_response)
-
         return deployments[index]
 
     async def get_event_deployments(self, authorize_response: AuthorizeResponse) -> list[str]:

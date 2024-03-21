@@ -58,40 +58,43 @@ CREATE TYPE aoai.model_type AS ENUM (
 ALTER TYPE aoai.model_type OWNER TO azure_pg_admin;
 
 --
--- Name: add_attendee_metric(character varying, character varying, uuid); Type: PROCEDURE; Schema: aoai; Owner: azure_pg_admin
+-- Name: add_attendee_metric(character varying, character varying, uuid, jsonb); Type: PROCEDURE; Schema: aoai; Owner: azure_pg_admin
 --
 
-CREATE PROCEDURE aoai.add_attendee_metric(IN p_api_key character varying, IN p_event_id character varying, IN p_catalog_id uuid)
+CREATE PROCEDURE aoai.add_attendee_metric(IN p_api_key character varying, IN p_event_id character varying, IN p_catalog_id uuid, IN p_usage jsonb)
     LANGUAGE plpgsql
     AS $$
 DECLARE
 	v_resource_string VARCHAR(64);
+	v_token_count INTEGER;
 BEGIN
 --     PERFORM request_count FROM aoai.event_attendee_request
 --     WHERE api_key = p_api_key AND date_stamp = CURRENT_DATE;
+
+	v_token_count = COALESCE((p_usage ->> 'total_tokens')::integer, 0);
 
     IF EXISTS
 		(SELECT 1 FROM aoai.event_attendee_request WHERE api_key = p_api_key AND date_stamp = CURRENT_DATE)
 	THEN
         -- If a record exists, increment the count
         UPDATE aoai.event_attendee_request
-        SET request_count = request_count + 1
+        SET request_count = request_count + 1, token_count = token_count + v_token_count
         WHERE api_key = p_api_key AND date_stamp = CURRENT_DATE;
     ELSE
         -- If no record exists, insert a new one with count set to 1
-        INSERT INTO aoai.event_attendee_request(api_key, date_stamp, request_count)
-        VALUES (p_api_key, CURRENT_DATE, 1);
+        INSERT INTO aoai.event_attendee_request(api_key, date_stamp, request_count, token_count)
+        VALUES (p_api_key, CURRENT_DATE, 1, v_token_count);
     END IF;
 
     SELECT model_type || ' | ' || deployment_name INTO v_resource_string FROM aoai.owner_catalog as oc WHERE oc.catalog_id = p_catalog_id;
 
-    INSERT INTO aoai.metric(api_key, event_id, resource)
-    VALUES (p_api_key, p_event_id, v_resource_string);
+    INSERT INTO aoai.metric(api_key, event_id, resource, usage)
+    VALUES (p_api_key, p_event_id, v_resource_string, p_usage);
 END;
 $$;
 
 
-ALTER PROCEDURE aoai.add_attendee_metric(IN p_api_key character varying, IN p_event_id character varying, IN p_catalog_id uuid) OWNER TO azure_pg_admin;
+ALTER PROCEDURE aoai.add_attendee_metric(IN p_api_key character varying, IN p_event_id character varying, IN p_catalog_id uuid, IN p_usage jsonb) OWNER TO azure_pg_admin;
 
 --
 -- Name: add_event(character varying, character varying, character varying, timestamp without time zone, timestamp without time zone, integer, character varying, character varying, character varying, character varying, character varying, integer, integer, boolean, character varying); Type: FUNCTION; Schema: aoai; Owner: azure_pg_admin
@@ -394,7 +397,8 @@ ALTER TABLE aoai.event_attendee OWNER TO azure_pg_admin;
 CREATE TABLE aoai.event_attendee_request (
     api_key character varying NOT NULL,
     date_stamp date NOT NULL,
-    request_count integer NOT NULL
+    request_count integer NOT NULL,
+    token_count integer NOT NULL
 );
 
 
@@ -421,7 +425,8 @@ CREATE TABLE aoai.metric (
     api_key character varying NOT NULL,
     date_stamp date DEFAULT CURRENT_DATE NOT NULL,
     time_stamp time without time zone DEFAULT CURRENT_TIME NOT NULL,
-    resource character varying(64) NOT NULL
+    resource character varying(64) NOT NULL,
+    usage jsonb NOT NULL
 );
 
 
