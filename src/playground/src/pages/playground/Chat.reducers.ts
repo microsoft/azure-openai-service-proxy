@@ -168,7 +168,7 @@ export function reducer(state: ChatState, action: ChatAction): ChatState {
     case "clearMessages": {
       return {
         ...state,
-        messages: [state.messages[0]],
+        messages: [],
         usageData: INITIAL_STATE.usageData,
       };
     }
