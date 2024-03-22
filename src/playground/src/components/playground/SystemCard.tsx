@@ -18,7 +18,7 @@ import { solarizedlight } from "react-syntax-highlighter/dist/esm/styles/prism";
 
 interface SystemProps {
   defaultPrompt: ChatRequestSystemMessage;
-  onPromptChange: Dispatch<string>;
+  systemPromptChange: Dispatch<string>;
   functionsChange: Dispatch<FunctionDefinition[]>;
 }
 
@@ -32,7 +32,7 @@ const useStyles = makeStyles({
 
 export const SystemCard = ({
   defaultPrompt,
-  onPromptChange,
+  systemPromptChange,
   functionsChange,
 }: SystemProps) => {
   const [sysPrompt, setPrompt] = useState(defaultPrompt.content || "");
@@ -60,12 +60,10 @@ export const SystemCard = ({
           value={sysPrompt}
           textarea={{ rows: 10 }}
           resize="vertical"
-          onChange={(event) => {
-            setPrompt(event.target.value);
-          }}
+          onChange={(event) => setPrompt(event.target.value)}
           onKeyDown={(event) => {
-            if (event.key === "Enter") {
-              onPromptChange(sysPrompt);
+            if (event.key === "Enter" && !event.shiftKey) {
+              systemPromptChange(sysPrompt);
               setSaved(true);
             }
           }}
@@ -75,7 +73,7 @@ export const SystemCard = ({
             icon={<Save24Regular />}
             iconPosition="after"
             onClick={() => {
-              onPromptChange(sysPrompt);
+              systemPromptChange(sysPrompt);
               setSaved(true);
             }}
           >

@@ -7,7 +7,7 @@ import {
   Textarea,
   Spinner,
 } from "@fluentui/react-components";
-import { useEffect, useRef, useState } from "react";
+import { Dispatch, useEffect, useRef, useState } from "react";
 import { Delete24Regular, SendRegular } from "@fluentui/react-icons";
 import { Message } from "./Message";
 import { Response } from "./Response";
@@ -16,7 +16,7 @@ import { Card } from "./Card";
 import { ChatResponseMessageExtended } from "../../pages/playground/Chat.state";
 
 interface CardProps {
-  onPromptEntered: (prompt: string) => void;
+  onPromptEntered: Dispatch<string>;
   messageList: ChatResponseMessageExtended[];
   onClear: () => void;
   isLoading: boolean;
@@ -114,7 +114,7 @@ function ChatInput({
   onClear,
   canChat,
 }: {
-  promptSubmitted: (userPrompt: string) => void;
+  promptSubmitted: Dispatch<string>;
   onClear: () => void;
   canChat: boolean;
 }) {
@@ -125,12 +125,9 @@ function ChatInput({
     <CardFooter style={{ height: "10vh" }}>
       <Field className="user-query" style={{ width: "100%" }}>
         <Textarea
-          style={{}}
           value={userPrompt}
           placeholder="Type user query here (Shift + Enter for new line)"
-          onChange={(event) => {
-            setPrompt(event.target.value);
-          }}
+          onChange={(event) => setPrompt(event.target.value)}
           onKeyDown={(event) => {
             if (event.key === "Enter" && !event.shiftKey) {
               promptSubmitted(userPrompt);

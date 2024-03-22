@@ -62,44 +62,46 @@ export const Chat = () => {
   const { client } = useOpenAIClientContext();
 
   const onPromptEntered = async (prompt: string) => {
-    if (client && state.model) {
-      dispatch({ type: "chatStart", payload: prompt });
-      try {
-        const start = Date.now();
+    if (!client || !state.model) {
+      return;
+    }
 
-        const messages: ChatRequestMessage[] = [
-          state.systemPrompt,
-          ...state.messages.filter((m) => !m.isError).map(mapMessage),
-          { role: "user", content: prompt },
-        ];
+    dispatch({ type: "chatStart", payload: prompt });
+    try {
+      const start = Date.now();
 
-        const chatCompletions = await client.getChatCompletions(
-          state.model,
-          messages,
-          {
-            ...state.params,
-            functions: state.params.functions?.filter((f) => f.name),
-          }
-        );
-        const end = Date.now();
+      const messages: ChatRequestMessage[] = [
+        state.systemPrompt,
+        ...state.messages.filter((m) => !m.isError).map(mapMessage),
+        { role: "user", content: prompt },
+      ];
 
-        dispatch({
-          type: "chatComplete",
-          payload: {
-            choices: chatCompletions.choices,
-            totalTime: end - start,
-            completionTokens: chatCompletions.usage?.completionTokens,
-            promptTokens: chatCompletions.usage?.promptTokens,
-            totalTokens: chatCompletions.usage?.totalTokens,
-          },
-        });
-      } catch (error) {
-        dispatch({ type: "chatError", payload: error as unknown });
-      }
+      const chatCompletions = await client.getChatCompletions(
+        state.model,
+        messages,
+        {
+          ...state.params,
+          functions: state.params.functions?.filter((f) => f.name),
+        }
+      );
+      const end = Date.now();
+
+      dispatch({
+        type: "chatComplete",
+        payload: {
+          choices: chatCompletions.choices,
+          totalTime: end - start,
+          completionTokens: chatCompletions.usage?.completionTokens,
+          promptTokens: chatCompletions.usage?.promptTokens,
+          totalTokens: chatCompletions.usage?.totalTokens,
+        },
+      });
+    } catch (error) {
+      dispatch({ type: "chatError", payload: error as unknown });
     }
   };
 
-  const onPromptChange = (newPrompt: string) => {
+  const systemPromptChange = (newPrompt: string) => {
     dispatch({ type: "updateSystemMessage", payload: newPrompt });
   };
 
@@ -129,7 +131,7 @@ export const Chat = () => {
     <section className={styles.container}>
       <SystemCard
         defaultPrompt={state.systemPrompt}
-        onPromptChange={onPromptChange}
+        systemPromptChange={systemPromptChange}
         functionsChange={functionsChange}
       />
 
