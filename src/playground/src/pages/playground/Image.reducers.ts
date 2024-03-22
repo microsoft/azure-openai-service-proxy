@@ -23,7 +23,7 @@ type ImageAction =
     }
   | {
       type: "imageError";
-      payload: string;
+      payload: { error: unknown; id: string };
     };
 
 export function reducer(state: ImageState, action: ImageAction): ImageState {
@@ -52,6 +52,7 @@ export function reducer(state: ImageState, action: ImageAction): ImageState {
             prompt: action.payload.prompt,
             id: action.payload.id,
             loaded: false,
+            isError: false,
           },
         ],
       };
@@ -62,6 +63,16 @@ export function reducer(state: ImageState, action: ImageAction): ImageState {
     case "imageError":
       return {
         ...state,
+        images: state.images.map((image) =>
+          image.id === action.payload.id
+            ? {
+                ...image,
+                isError: true,
+                errorInfo: action.payload.error as Record<string, string>,
+                loaded: true,
+              }
+            : image
+        ),
       };
 
     default:

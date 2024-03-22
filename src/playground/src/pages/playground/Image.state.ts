@@ -5,6 +5,8 @@ export type ExtendedImageGenerations = {
   loaded: boolean;
   id: string;
   generations?: ImageGenerations;
+  isError: boolean;
+  errorInfo?: Record<string, string>;
 };
 
 export type ImageState = {

@@ -45,16 +45,23 @@ export const Image = () => {
 
     dispatch({ type: "imageStart", payload: { prompt, id } });
 
-    const response = await client.getImages(
-      state.model,
-      prompt,
-      state.parameters
-    );
+    try {
+      const response = await client.getImages(
+        state.model,
+        prompt,
+        state.parameters
+      );
 
-    dispatch({
-      type: "imageComplete",
-      payload: { response, id },
-    });
+      dispatch({
+        type: "imageComplete",
+        payload: { response, id },
+      });
+    } catch (error) {
+      dispatch({
+        type: "imageError",
+        payload: { error, id },
+      });
+    }
   };
 
   return (
@@ -62,9 +69,7 @@ export const Image = () => {
       <ImageCard
         generateImage={generateImage}
         images={state.images}
-        canGenerate={
-          client !== undefined && state.model !== undefined
-        }
+        canGenerate={client !== undefined && state.model !== undefined}
       />
       <ImageParamsCard
         updateSettings={updateSettings}

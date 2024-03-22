@@ -108,7 +108,7 @@ const ImageList = ({ images }: { images: ExtendedImageGenerations[] }) => {
       {images.map((image) => (
         <div key={image.id} className={styles.image}>
           <div className={styles.imageContainer}>
-            {!image.generations && <p>Processing...</p>}
+            {!image.loaded && <p>Processing...</p>}
             {image.generations &&
               image.generations.data.map((i) => {
                 const url = i.url;
@@ -123,6 +123,7 @@ const ImageList = ({ images }: { images: ExtendedImageGenerations[] }) => {
                   </>
                 );
               })}
+            {image.isError && <p>Error: {image.errorInfo?.message}</p>}
           </div>
           <p>{image.prompt}</p>
         </div>
