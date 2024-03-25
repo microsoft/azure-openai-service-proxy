@@ -109,6 +109,11 @@ export const ChatCard = ({
   );
 };
 
+const hasPrompt = (prompt: string) => {
+  const regex = /^\s*$/;
+  return !regex.test(prompt);
+};
+
 function ChatInput({
   promptSubmitted,
   onClear,
@@ -129,7 +134,11 @@ function ChatInput({
           placeholder="Type user query here (Shift + Enter for new line)"
           onChange={(event) => setPrompt(event.target.value)}
           onKeyDown={(event) => {
-            if (event.key === "Enter" && !event.shiftKey) {
+            if (
+              event.key === "Enter" &&
+              !event.shiftKey &&
+              hasPrompt(userPrompt)
+            ) {
               promptSubmitted(userPrompt);
               setPrompt("");
               event.preventDefault();
@@ -147,7 +156,7 @@ function ChatInput({
             promptSubmitted(userPrompt);
             setPrompt("");
           }}
-          disabled={!canChat || !userPrompt}
+          disabled={!canChat || !hasPrompt(userPrompt)}
         >
           Send
         </Button>
