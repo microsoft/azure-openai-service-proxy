@@ -78,7 +78,7 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
     public async Task<EventMetric> GetEventMetricsAsync(string eventId)
     {
         (int attendeeCount, int requestCount) = await GetAttendeeMetricsAsync(eventId);
-        IEnumerable<(ModelType modelType, int count)> modelCount = await GetModelCountAsync(eventId);
+        IEnumerable<(ModelType modelType, string deploymentName, int count)> modelCount = await GetModelCountAsync(eventId);
 
         return new()
         {
@@ -89,22 +89,23 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
         };
     }
 
-    private async Task<IEnumerable<(ModelType modelType, int count)>> GetModelCountAsync(string eventId)
+    private async Task<IEnumerable<(ModelType modelType, string deploymentName, int count)>> GetModelCountAsync(string eventId)
     {
         if (conn.State != ConnectionState.Open)
             await conn.OpenAsync();
 
         using var modelCountCommand = conn.CreateCommand();
         modelCountCommand.CommandText = """
-        SELECT count(api_key), resource
+        SELECT count(api_key) count, resource
         FROM aoai.metric
         WHERE event_id = @EventId
         GROUP BY resource
+        ORDER BY count DESC
         """;
 
         modelCountCommand.Parameters.Add(new NpgsqlParameter("EventId", eventId));
         using var reader = await modelCountCommand.ExecuteReaderAsync();
-        List<(ModelType modelType, int count)> modelCounts = [];
+        List<(ModelType modelType, string deploymentName, int count)> modelCounts = [];
         if (reader.HasRows)
         {
             while (await reader.ReadAsync())
@@ -114,7 +115,7 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
 
                 var parts = resource.Split(" | ");
                 var modelType = ModelTypeExtensions.ParsePostgresValue(parts[0]);
-                modelCounts.Add((modelType, count));
+                modelCounts.Add((modelType, string.Join(" | ", parts[1..]), count));
             }
         }
 
