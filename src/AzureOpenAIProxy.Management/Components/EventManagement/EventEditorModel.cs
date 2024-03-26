@@ -49,4 +49,16 @@ public class EventEditorModel
 
     [Required(ErrorMessage = "Time zone is required")]
     public TimeZoneInfo? SelectedTimeZone { get; set; }
+
+    public DateTime StartUtc()
+    {
+        DateTimeOffset s = new(Start!.Value, SelectedTimeZone!.GetUtcOffset(Start!.Value));
+        return new DateTime(s.UtcDateTime.Ticks, DateTimeKind.Unspecified);
+    }
+
+    public DateTime EndUtc()
+    {
+        DateTimeOffset e = new(End!.Value, SelectedTimeZone!.GetUtcOffset(End!.Value));
+        return new DateTime(e.UtcDateTime.Ticks, DateTimeKind.Unspecified);
+    }
 }

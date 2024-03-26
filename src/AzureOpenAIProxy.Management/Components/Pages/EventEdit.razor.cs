@@ -62,6 +62,11 @@ public partial class EventEdit : ComponentBase
         Model.MaxTokenCap = evt.MaxTokenCap;
         Model.DailyRequestCap = evt.DailyRequestCap;
         Model.SelectedTimeZone = TimeZoneInfo.FindSystemTimeZoneById(evt.TimeZoneLabel);
+
+        DateTimeOffset start = TimeZoneInfo.ConvertTimeFromUtc(evt.StartTimestamp, Model.SelectedTimeZone);
+        DateTimeOffset end = TimeZoneInfo.ConvertTimeFromUtc(evt.EndTimestamp, Model.SelectedTimeZone);
+        Model.Start = start.DateTime;
+        Model.End = end.DateTime;
     }
 
     private async Task OnValidSubmit(EventEditorModel model)
