@@ -79,7 +79,7 @@ class ImagesGenerations(RequestManager):
 
             return completion
 
-        @self.router.get("/{deployment_name}/openai/operations/images/{image_id}")
+        @self.router.get("/{deployment_name}/{end_point}/openai/operations/images/{image_id}")
         async def oai_images_get(
             deployment_name: str,
             image_id: str,
