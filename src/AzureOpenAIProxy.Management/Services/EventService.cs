@@ -72,6 +72,64 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
 
     public Task<Event?> GetEventAsync(string id) => db.Events.Include(e => e.Catalogs).FirstOrDefaultAsync(e => e.EventId == id);
 
+    public async Task<EventMetric> GetEventMetricsAsync(string eventId)
+    {
+        using DbConnection conn = db.Database.GetDbConnection();
+        await conn.OpenAsync();
+        using DbCommand eventAttendeeCommand = conn.CreateCommand();
+
+        eventAttendeeCommand.CommandText = """
+        SELECT
+            count(user_id) as user_count,
+            (SELECT count(api_key) FROM aoai.metric WHERE event_id = @EventId) as request_count
+        FROM aoai.event_attendee
+        FROM event_id = @EventId
+        """;
+
+        eventAttendeeCommand.Parameters.Add(new NpgsqlParameter("EventId", eventId));
+
+        var reader = await eventAttendeeCommand.ExecuteReaderAsync();
+
+        var metric = new EventMetric() { EventId = eventId };
+
+        if (reader.HasRows)
+        {
+            while (await reader.ReadAsync())
+            {
+                metric.AttendeeCount = reader.GetInt32(0);
+                metric.RequestCount = reader.GetInt32(1);
+            }
+        }
+
+        using DbCommand modelCountCommand = conn.CreateCommand();
+        modelCountCommand.CommandText = """
+        SELECT count(api_key), resource
+        FROM aoai.metric
+        WHERE event_id = @EventId
+        GROUP BY resource
+        """;
+
+        modelCountCommand.Parameters.Add(new NpgsqlParameter("EventId", eventId));
+        reader = await modelCountCommand.ExecuteReaderAsync();
+
+        if (reader.HasRows)
+        {
+            List<(ModelType modelType, int count)> modelCounts = [];
+            while (await reader.ReadAsync())
+            {
+                var count = reader.GetInt32(0);
+                var resource = reader.GetString(1);
+
+                var parts = resource.Split(" | ");
+                var modelType = ModelTypeExtensions.ParsePostgresValue(parts[0]);
+                modelCounts.Add((modelType, count));
+            }
+            metric.ModelCounts = modelCounts;
+        }
+
+        return metric;
+    }
+
     public async Task<IEnumerable<Event>> GetOwnerEventsAsync()
     {
         string entraId = await authService.GetCurrentUserEntraIdAsync();
