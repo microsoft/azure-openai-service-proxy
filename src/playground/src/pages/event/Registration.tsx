@@ -202,6 +202,10 @@ export const Registration = () => {
                 />
               </div>
             </Field>
+
+            <Field>
+              <Button>Deregister from event.</Button>
+            </Field>
           </div>
         </>
       )}
