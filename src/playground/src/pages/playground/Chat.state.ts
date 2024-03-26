@@ -1,22 +1,26 @@
-import { ChatMessage, GetChatCompletionsOptions } from "@azure/openai";
+import {
+  ChatRequestSystemMessage,
+  ChatResponseMessage,
+  GetChatCompletionsOptions,
+} from "@azure/openai";
 import { UsageData } from "../../interfaces/UsageData";
 
-const defaultSysPrompt: ChatMessageExtended = {
+const defaultSysPrompt: ChatRequestSystemMessage = {
   role: "system",
   content: "You are an AI assistant that helps people find information.",
-  isError: false,
 };
 
-export type ChatMessageExtended = ChatMessage & {
+export type ChatResponseMessageExtended = ChatResponseMessage & {
   isError: boolean;
-}
+};
 
 export type ChatState = {
   isLoading: boolean;
   params: GetChatCompletionsOptions;
   usageData: UsageData;
   model?: string;
-  messages: ChatMessageExtended[];
+  messages: ChatResponseMessageExtended[];
+  systemPrompt: ChatRequestSystemMessage;
 };
 
 export const INITIAL_STATE: ChatState = {
@@ -36,5 +40,6 @@ export const INITIAL_STATE: ChatState = {
     total_tokens: 0,
     response_time: 0,
   },
-  messages: [defaultSysPrompt],
+  messages: [],
+  systemPrompt: defaultSysPrompt,
 };

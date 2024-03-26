@@ -7,18 +7,17 @@ import {
   Textarea,
   Spinner,
 } from "@fluentui/react-components";
-import { useEffect, useRef, useState } from "react";
+import { Dispatch, useEffect, useRef, useState } from "react";
 import { Delete24Regular, SendRegular } from "@fluentui/react-icons";
 import { Message } from "./Message";
 import { Response } from "./Response";
 import { useEventDataContext } from "../../providers/EventDataProvider";
-import type { ChatMessage } from "@azure/openai";
 import { Card } from "./Card";
-import { ChatMessageExtended } from "../../pages/playground/Chat.state";
+import { ChatResponseMessageExtended } from "../../pages/playground/Chat.state";
 
 interface CardProps {
-  onPromptEntered: (messages: ChatMessage[]) => void;
-  messageList: ChatMessageExtended[];
+  onPromptEntered: Dispatch<string>;
+  messageList: ChatResponseMessageExtended[];
   onClear: () => void;
   isLoading: boolean;
   canChat: boolean;
@@ -94,12 +93,7 @@ export const ChatCard = ({
       {isLoading && <Spinner />}
       {isAuthorized && (
         <ChatInput
-          promptSubmitted={(userPrompt) => {
-            onPromptEntered([
-              ...messageList.filter((m) => !m.isError),
-              { role: "user", content: userPrompt },
-            ]);
-          }}
+          promptSubmitted={onPromptEntered}
           onClear={onClear}
           canChat={canChat}
         />
@@ -115,12 +109,17 @@ export const ChatCard = ({
   );
 };
 
+const hasPrompt = (prompt: string) => {
+  const regex = /^\s*$/;
+  return !regex.test(prompt);
+};
+
 function ChatInput({
   promptSubmitted,
   onClear,
   canChat,
 }: {
-  promptSubmitted: (userPrompt: string) => void;
+  promptSubmitted: Dispatch<string>;
   onClear: () => void;
   canChat: boolean;
 }) {
@@ -131,14 +130,15 @@ function ChatInput({
     <CardFooter style={{ height: "10vh" }}>
       <Field className="user-query" style={{ width: "100%" }}>
         <Textarea
-          style={{}}
           value={userPrompt}
           placeholder="Type user query here (Shift + Enter for new line)"
-          onChange={(event) => {
-            setPrompt(event.target.value);
-          }}
+          onChange={(event) => setPrompt(event.target.value)}
           onKeyDown={(event) => {
-            if (event.key === "Enter" && !event.shiftKey) {
+            if (
+              event.key === "Enter" &&
+              !event.shiftKey &&
+              hasPrompt(userPrompt)
+            ) {
               promptSubmitted(userPrompt);
               setPrompt("");
               event.preventDefault();
@@ -156,7 +156,7 @@ function ChatInput({
             promptSubmitted(userPrompt);
             setPrompt("");
           }}
-          disabled={!canChat || !userPrompt}
+          disabled={!canChat || !hasPrompt(userPrompt)}
         >
           Send
         </Button>

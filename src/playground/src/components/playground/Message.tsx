@@ -1,8 +1,8 @@
-import { ChatMessage } from "@azure/openai";
+import { ChatResponseMessage } from "@azure/openai";
 import { makeStyles, shorthands } from "@fluentui/react-components";
 
 interface Props {
-  message: ChatMessage;
+  message: ChatResponseMessage;
 }
 
 const useStyles = makeStyles({

@@ -3,7 +3,6 @@ import {
   Button,
   Input,
   Label,
-  Spinner,
   makeStyles,
   shorthands,
   useId,
@@ -11,14 +10,7 @@ import {
 import { useEventDataContext } from "../../providers/EventDataProvider";
 import { Card } from "./Card";
 import { Dispatch, useState } from "react";
-import { ImageGenerations, ImageLocation } from "@azure/openai";
-
-export type ImageDetails = {
-  id: number;
-  prompt: string;
-  loaded: boolean;
-  generation?: ImageGenerations;
-};
+import { ExtendedImageGenerations } from "../../pages/playground/Image.state";
 
 const useStyles = makeStyles({
   startCard: {
@@ -38,15 +30,48 @@ const useStyles = makeStyles({
     textAlign: "left",
   },
 
+  container: {
+    display: "grid",
+    gridTemplateRows: "1fr 1fr 5fr",
+  },
+
   imageList: {
+    ...shorthands.border("1px", "solid", "#ccc"),
+    display: "flex",
+  },
+
+  image: {
+    display: "flex",
+    flexDirection: "column",
+    ...shorthands.padding("15px"),
+    ...shorthands.margin("10px"),
+    ...shorthands.border("1px", "solid", "#333"),
+    maxHeight: "320px",
+  },
+
+  imageContainer: {
     display: "flex",
     ...shorthands.gap("2px"),
-    width: "200px",
-    height: "200px",
+    width: "300px",
+    height: "300px",
+    flexDirection: "column",
+    ...shorthands.overflow("hidden"),
+
+    "& img": {
+      width: "100%",
+      height: "100%",
+      objectFit: "cover",
+    },
   },
 });
 
-const Search = ({ generateImage }: { generateImage: Dispatch<string> }) => {
+const ImagePrompt = ({
+  generateImage,
+  canGenerate,
+}: {
+  generateImage: Dispatch<string>;
+  canGenerate: boolean;
+}) => {
   const styles = useStyles();
   const promptId = useId();
   const [prompt, setPrompt] = useState("");
@@ -66,60 +91,60 @@ const Search = ({ generateImage }: { generateImage: Dispatch<string> }) => {
         onChange={(e) => setPrompt(e.target.value)}
         placeholder="Enter a prompt. Eg: cute picture of an cat"
       />
-      <Button onClick={() => generateImage(prompt)} disabled={!prompt}>
+      <Button
+        onClick={() => generateImage(prompt)}
+        disabled={!prompt || !canGenerate}
+      >
         Generate
       </Button>
     </div>
   );
 };
 
-const ImageList = ({ images }: { images: ImageDetails[] }) => {
+const ImageList = ({ images }: { images: ExtendedImageGenerations[] }) => {
   const styles = useStyles();
   return (
-    <>
+    <div className={styles.imageList}>
       {images.map((image) => (
-        <div
-          key={image.id}
-          style={{
-            border: "1px solid #ccc",
-            padding: "3px",
-            flexGrow: "unset",
-            borderRadius: "5px",
-          }}
-        >
-          <div className={styles.imageList}>
-            {image.loaded &&
-              image.generation?.data.map((i) => {
-                const url = (i as ImageLocation).url;
+        <div key={image.id} className={styles.image}>
+          <div className={styles.imageContainer}>
+            {!image.loaded && <p>Processing...</p>}
+            {image.generations &&
+              image.generations.data.map((i) => {
+                const url = i.url;
                 return (
-                  <img
-                    src={url}
-                    key={url}
-                    onClick={() => window.open(url)}
-                    style={{ cursor: "pointer" }}
-                  />
+                  <>
+                    <img
+                      src={url}
+                      key={url}
+                      onClick={() => window.open(url)}
+                      style={{ cursor: "pointer" }}
+                    />
+                  </>
                 );
               })}
+            {image.isError && <p>Error: {image.errorInfo?.message}</p>}
           </div>
-          {!image.loaded && <Spinner />}
           <p>{image.prompt}</p>
         </div>
       ))}
-    </>
+    </div>
   );
 };
 
 export const ImageCard = ({
   generateImage,
   images,
+  canGenerate,
 }: {
   generateImage: Dispatch<string>;
-  images: ImageDetails[];
+  images: ExtendedImageGenerations[];
+  canGenerate: boolean;
 }) => {
   const { isAuthorized } = useEventDataContext();
   const styles = useStyles();
   return (
-    <Card header="DALL·E playground">
+    <Card header="DALL·E playground" className={styles.container}>
       {!isAuthorized && (
         <Card className={styles.startCard}>
           <Body1 style={{ textAlign: "center" }}>
@@ -128,7 +153,9 @@ export const ImageCard = ({
         </Card>
       )}
 
-      {isAuthorized && <Search generateImage={generateImage} />}
+      {isAuthorized && (
+        <ImagePrompt generateImage={generateImage} canGenerate={canGenerate} />
+      )}
       {isAuthorized && <ImageList images={images} />}
     </Card>
   );

@@ -4,7 +4,8 @@ import { SystemCard } from "../../components/playground/SystemCard";
 import { ChatParamsCard } from "../../components/playground/ChatParamsCard";
 import { useOpenAIClientContext } from "../../providers/OpenAIProvider";
 import type {
-  ChatMessage,
+  ChatRequestMessage,
+  ChatResponseMessage,
   FunctionDefinition,
   GetChatCompletionsOptions,
 } from "@azure/openai";
@@ -21,44 +22,86 @@ const useStyles = makeStyles({
   },
 });
 
+function mapMessage(message: ChatResponseMessage): ChatRequestMessage {
+  const { role, content, toolCalls, functionCall } = message;
+  switch (role) {
+    case "system":
+    case "user":
+      return {
+        role,
+        content: content ?? "",
+      };
+
+    case "assistant":
+      return {
+        role,
+        content,
+      };
+
+    case "tool":
+      return {
+        role,
+        content,
+        toolCallId: toolCalls[0]?.id,
+      };
+
+    case "function":
+      return {
+        role,
+        content,
+        name: functionCall?.name ?? "auto",
+      };
+    default:
+      throw new Error("Unknown message role");
+  }
+}
+
 export const Chat = () => {
   const [state, dispatch] = useReducer(reducer, INITIAL_STATE);
 
   const { client } = useOpenAIClientContext();
 
-  const onPromptEntered = async (messages: ChatMessage[]) => {
-    if (client && state.model) {
-      dispatch({ type: "chatStart", payload: messages[messages.length - 1] });
-      try {
-        const start = Date.now();
+  const onPromptEntered = async (prompt: string) => {
+    if (!client || !state.model) {
+      return;
+    }
 
-        const chatCompletions = await client.getChatCompletions(
-          state.model,
-          messages.filter((m) => m.content),
-          {
-            ...state.params,
-            functions: state.params.functions?.filter((f) => f.name),
-          }
-        );
-        const end = Date.now();
+    dispatch({ type: "chatStart", payload: prompt });
+    try {
+      const start = Date.now();
 
-        dispatch({
-          type: "chatComplete",
-          payload: {
-            choices: chatCompletions.choices,
-            totalTime: end - start,
-            completionTokens: chatCompletions.usage?.completionTokens,
-            promptTokens: chatCompletions.usage?.promptTokens,
-            totalTokens: chatCompletions.usage?.totalTokens,
-          },
-        });
-      } catch (error) {
-        dispatch({ type: "chatError", payload: error as unknown });
-      }
+      const messages: ChatRequestMessage[] = [
+        state.systemPrompt,
+        ...state.messages.filter((m) => !m.isError).map(mapMessage),
+        { role: "user", content: prompt },
+      ];
+
+      const chatCompletions = await client.getChatCompletions(
+        state.model,
+        messages,
+        {
+          ...state.params,
+          functions: state.params.functions?.filter((f) => f.name),
+        }
+      );
+      const end = Date.now();
+
+      dispatch({
+        type: "chatComplete",
+        payload: {
+          choices: chatCompletions.choices,
+          totalTime: end - start,
+          completionTokens: chatCompletions.usage?.completionTokens,
+          promptTokens: chatCompletions.usage?.promptTokens,
+          totalTokens: chatCompletions.usage?.totalTokens,
+        },
+      });
+    } catch (error) {
+      dispatch({ type: "chatError", payload: error as unknown });
     }
   };
 
-  const onPromptChange = (newPrompt: ChatMessage) => {
+  const systemPromptChange = (newPrompt: string) => {
     dispatch({ type: "updateSystemMessage", payload: newPrompt });
   };
 
@@ -67,7 +110,7 @@ export const Chat = () => {
   };
 
   const tokenUpdate = (
-    name: keyof GetChatCompletionsOptions,
+    name: keyof GetChatCompletionsOptions | "model",
     value: number | string
   ) => {
     if (name === "functionCall") {
@@ -87,8 +130,8 @@ export const Chat = () => {
   return (
     <section className={styles.container}>
       <SystemCard
-        defaultPrompt={state.messages[0]}
-        onPromptChange={onPromptChange}
+        defaultPrompt={state.systemPrompt}
+        systemPromptChange={systemPromptChange}
         functionsChange={functionsChange}
       />
 

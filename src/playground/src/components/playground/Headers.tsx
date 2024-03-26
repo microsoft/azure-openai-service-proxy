@@ -51,7 +51,7 @@ export const Header = () => {
           {hasCapability(eventData, "openai-chat") && (
             <Tab value="chat">Chat</Tab>
           )}
-          {hasCapability(eventData, "openai-image") && (
+          {hasCapability(eventData, "openai-dalle3") && (
             <Tab value="images">Image</Tab>
           )}
         </TabList>

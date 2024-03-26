@@ -1,8 +1,8 @@
 import {
-  ChatMessage,
   ChatChoice,
   FunctionDefinition,
   GetChatCompletionsOptions,
+  ChatResponseMessage,
 } from "@azure/openai";
 import { ChatState, INITIAL_STATE } from "./Chat.state";
 
@@ -53,7 +53,7 @@ const createErrorMessage = (error: any): string => {
 type ChatAction =
   | {
       type: "chatStart";
-      payload: ChatMessage;
+      payload: string;
     }
   | {
       type: "chatComplete";
@@ -71,7 +71,7 @@ type ChatAction =
     }
   | {
       type: "updateSystemMessage";
-      payload: ChatMessage;
+      payload: string;
     }
   | {
       type: "clearMessages";
@@ -102,7 +102,15 @@ export function reducer(state: ChatState, action: ChatAction): ChatState {
       return {
         ...state,
         isLoading: true,
-        messages: [...state.messages, { ...action.payload, isError: false }],
+        messages: [
+          ...state.messages,
+          {
+            role: "user",
+            content: action.payload,
+            toolCalls: [],
+            isError: false,
+          },
+        ],
       };
 
     case "chatComplete": {
@@ -140,9 +148,10 @@ export function reducer(state: ChatState, action: ChatAction): ChatState {
 
     case "chatError": {
       const error = action.payload;
-      const errorMessage: ChatMessage = {
+      const errorMessage: ChatResponseMessage = {
         role: "assistant",
         content: createErrorMessage(error),
+        toolCalls: [],
       };
       return {
         ...state,
@@ -152,15 +161,14 @@ export function reducer(state: ChatState, action: ChatAction): ChatState {
     }
 
     case "updateSystemMessage": {
-      const messages = state.messages;
-      messages[0] = { ...action.payload, isError: false };
-      return { ...state, messages: [...messages] };
+      const systemPrompt = { ...state.systemPrompt, content: action.payload };
+      return { ...state, systemPrompt };
     }
 
     case "clearMessages": {
       return {
         ...state,
-        messages: [state.messages[0]],
+        messages: [],
         usageData: INITIAL_STATE.usageData,
       };
     }
@@ -185,16 +193,24 @@ export function reducer(state: ChatState, action: ChatAction): ChatState {
       };
     }
 
-    case "updateFunctionCall":
+    case "updateFunctionCall": {
+      if (action.payload === "auto" || action.payload === "none") {
+        return {
+          ...state,
+          params: {
+            ...state.params,
+            functionCall: action.payload,
+          },
+        };
+      }
       return {
         ...state,
         params: {
           ...state.params,
-          functionCall: ["auto", "none"].includes(action.payload)
-            ? action.payload
-            : { name: action.payload },
+          functionCall: { name: action.payload },
         },
       };
+    }
 
     case "updateModel":
       return {
