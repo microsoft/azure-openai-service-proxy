@@ -79,9 +79,10 @@ class ImagesGenerations(RequestManager):
 
             return completion
 
-        @self.router.get("/{deployment_name}/{end_point}/openai/operations/images/{image_id}")
+        @self.router.get("/{deployment_name}/{endpoint_url}/openai/operations/images/{image_id}")
         async def oai_images_get(
             deployment_name: str,
+            endpoint_url: str,
             image_id: str,
             request: Request,
             response: Response,
@@ -92,10 +93,9 @@ class ImagesGenerations(RequestManager):
                 deployment_name=deployment_name, request=request
             )
 
-            (
-                completion_response,
-                status_code,
-            ) = await self.call_openai_images_get(deployment_name, image_id, authorize_response)
+            (completion_response, status_code,) = await self.call_openai_images_get(
+                deployment_name, endpoint_url, image_id, authorize_response
+            )
 
             response.status_code = status_code
             return completion_response
@@ -152,7 +152,11 @@ class ImagesGenerations(RequestManager):
         return dalle_response.json(), dalle_response.status_code
 
     async def call_openai_images_get(
-        self, deployment_name: str, image_id: str, authorize_response: AuthorizeResponse
+        self,
+        deployment_name: str,
+        endpoint_url: str,
+        image_id: str,
+        authorize_response: AuthorizeResponse,
     ):
         """call openai with retry"""
 
@@ -164,7 +168,7 @@ class ImagesGenerations(RequestManager):
             return self.report_exception("Oops, failed to find service to generate image.", 404)
 
         url = (
-            f"{deployment.endpoint_url}"
+            f"https://{endpoint_url}"
             f"/openai/operations/images/{image_id}"
             f"?api-version={self.api_version}"
         )
