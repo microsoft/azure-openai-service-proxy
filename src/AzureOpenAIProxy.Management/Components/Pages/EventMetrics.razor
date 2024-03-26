@@ -16,7 +16,7 @@
                 <MudTh>
                     <MudTableSortLabel
                         SortBy="new Func<(ModelType modelType, string deploymentName, int count), object>(x => x.deploymentName)">
-                        Deployment Name</MudTableSortLabel>
+                        Resource Name (Deployment or Index Name)</MudTableSortLabel>
                 </MudTh>
                 <MudTh>
                     <MudTableSortLabel
@@ -31,7 +31,7 @@
             </HeaderContent>
 
             <RowTemplate>
-                <MudTd DataLabel="Deployment Name">@context.deploymentName</MudTd>
+                <MudTd DataLabel="Resource Name (Deployment or Index Name)">@context.deploymentName</MudTd>
                 <MudTd DataLabel="Resource Type">@context.modelType</MudTd>
                 <MudTd DataLabel="Request Count">@context.count</MudTd>
             </RowTemplate>
