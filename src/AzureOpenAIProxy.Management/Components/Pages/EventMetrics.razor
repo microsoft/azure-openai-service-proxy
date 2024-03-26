@@ -1,0 +1,25 @@
+@page "/event/{eventId}/metrics"
+
+@namespace AzureOpenAIProxy.Management.Components.Pages
+
+@if (Event is not null && EventMetric is not null)
+{
+    <MudStack>
+        <h3>Event Name: @Event.EventUrlText</h3>
+
+        <MudText Typo="Typo.body1">Attendee count: <strong>@EventMetric.AttendeeCount</strong></MudText>
+        <MudText Typo="Typo.body1">Total Request count: <strong>@EventMetric.RequestCount</strong></MudText>
+
+        <MudTable Items="@EventMetric.ModelCounts">
+            <HeaderContent>
+                <MudTh>Model Type</MudTh>
+                <MudTh>Request Count</MudTh>
+            </HeaderContent>
+
+            <RowTemplate>
+                <MudTd>@context.modelType</MudTd>
+                <MudTd>@context.count</MudTd>
+            </RowTemplate>
+        </MudTable>
+    </MudStack>
+}

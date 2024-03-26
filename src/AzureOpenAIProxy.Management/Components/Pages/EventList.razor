@@ -15,12 +15,13 @@
             <MudTh>Active</MudTh>
             <MudTh></MudTh>
             <MudTh></MudTh>
+            <MudTh></MudTh>
         </HeaderContent>
         <RowTemplate>
             <MudTd DataLabel="Event">@context.EventCode</MudTd>
-            <MudTd DataLabel="OrganiserName">@context.OrganizerName<br/>@context.OrganizerEmail</MudTd>
+            <MudTd DataLabel="OrganiserName">@context.OrganizerName<br />@context.OrganizerEmail</MudTd>
             <MudTd DataLabel="Duration">@context.StartTimestamp.ToString("dd/MM/yyyy HH:mm") -
-                @context.EndTimestamp.ToString("dd/MM/yyyy HH:mm")<br/>
+                @context.EndTimestamp.ToString("dd/MM/yyyy HH:mm")<br />
                 @{
                     var timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById(@context.TimeZoneLabel);
                     var displayName = timeZoneInfo.DisplayName;
@@ -35,6 +36,10 @@
             <MudTd>
                 <MudButton Variant="Variant.Filled" Color="Color.Secondary" Target="=_blank"
                     Href="@($"{Configuration["PlaygroundUrl"]}/event/{context.EventId}")">Attendee</MudButton>
+            </MudTd>
+            <MudTd>
+                <MudButton Variant="Variant.Filled" Color="Color.Secondary" Target="=_blank"
+                    Href="@($"/event/{context.EventId}/metrics")">Metrics</MudButton>
             </MudTd>
         </RowTemplate>
     </MudTable>
