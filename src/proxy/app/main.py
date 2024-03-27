@@ -124,6 +124,7 @@ async def custom_http_exception_handler(request: Request, exc: HTTPException):
     """custom http exception handler - formats in the style of OpenAI API"""
 
     content = {"error": {"code": exc.status_code, "message": exc.detail}}
+    logger.error(msg=f"HTTPException: {content}")
     return JSONResponse(status_code=exc.status_code, content=content)
 
 
