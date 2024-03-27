@@ -27,7 +27,7 @@ public partial class AoaiProxyContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder
-            .HasPostgresEnum("aoai", "model_type", new[] { "openai-chat", "openai-embedding", "openai-dalle2", "openai-dalle3", "openai-whisper", "openai-completion", "openai-instruct", "azure-ai-search" })
+            .HasPostgresEnum("aoai", "model_type", new[] { "openai-chat", "openai-embedding", "openai-dalle3", "openai-whisper", "openai-completion", "openai-instruct", "azure-ai-search" })
             .HasPostgresExtension("aoai", "pgcrypto");
 
         modelBuilder.Entity<Event>(entity =>
