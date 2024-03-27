@@ -68,22 +68,19 @@ export const Header = () => {
         {loaded && clientPrincipal && (
           <>
             Welcome {clientPrincipal.userDetails}&nbsp;
-            <UserPurge
-              provider={clientPrincipal.identityProvider}
-              label="Delete account"
-              customRenderer={({ href, label }) => (
-                <>
-                  <Form method="delete">
-                    <input type="hidden" value={href} name="redirectUrl" />
-                    <Button
-                      type="submit"
-                      as="button"
-                      className={styles.warningButton}
-                    >
-                      {label}
-                    </Button>
-                  </Form>
-                </>
+            <Logout
+              postLogoutRedirect={window.location.href}
+              customRenderer={({ href }) => (
+                <Form method="delete">
+                  <input type="hidden" value={href} name="redirectUrl" />
+                  <Button
+                    type="submit"
+                    as="button"
+                    className={styles.warningButton}
+                  >
+                    Delete Account
+                  </Button>
+                </Form>
               )}
             />
             &nbsp;
