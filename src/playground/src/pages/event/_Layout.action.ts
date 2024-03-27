@@ -1,4 +1,4 @@
-import { ActionFunction, redirect } from "react-router-dom";
+import { ActionFunction, redirectDocument } from "react-router-dom";
 import { API_VERSION } from "../../constants";
 
 export const action: ActionFunction = async ({ request }) => {
@@ -14,7 +14,7 @@ export const action: ActionFunction = async ({ request }) => {
     const formData = await request.formData();
     const redirectUrl = formData.get("redirectUrl") as string;
 
-    return redirect(redirectUrl);
+    return redirectDocument(redirectUrl);
   }
 
   return null;
