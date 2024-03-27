@@ -20,11 +20,12 @@ import {
   EyeRegular,
 } from "@fluentui/react-icons";
 import { tokens } from "@fluentui/react-theme";
-import { useEffect, useReducer } from "react";
+import { Dispatch, useEffect, useReducer } from "react";
 import ReactMarkdown from "react-markdown";
 import { Form, useLoaderData } from "react-router-dom";
-import { reducer } from "./Registration.reducers";
+import { RegistrationAction, reducer } from "./Registration.reducers";
 import type { AttendeeRegistration, EventDetails } from "./Registration.state";
+import { adjustedLocalTime } from "../../adjustedLocalTime";
 
 const useStyles = makeStyles({
   container: {
@@ -82,76 +83,11 @@ export const Registration = () => {
       { position: "top", intent: "success" }
     );
 
-  const copyToClipboard = async (value: string) => {
-    await navigator.clipboard.writeText(value);
-    notify();
-  };
-
-  const adjustedLocalTime = (
-    timestamp: Date,
-    utcOffsetInMinutes: number
-  ): string => {
-    // returns time zone adjusted date/time
-    const date = new Date(timestamp);
-    // get the timezone offset component that was added as no tz supplied in date time
-    const tz = date.getTimezoneOffset();
-    // remove the browser based timezone offset
-    date.setMinutes(date.getMinutes() - tz);
-    // add the event timezone offset
-    date.setMinutes(date.getMinutes() - utcOffsetInMinutes);
-
-    // Get the browser locale
-    const locale = navigator.language || navigator.languages[0];
-
-    // Specify the formatting options
-    const options: Intl.DateTimeFormatOptions = {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      hour: "numeric",
-      minute: "numeric",
-    };
-
-    // Create an Intl.DateTimeFormat object
-    const formatter = new Intl.DateTimeFormat(locale, options);
-    // Format the date
-    const formattedDate = formatter.format(date);
-    return formattedDate;
-  };
-
   return (
     <section className={styles.container}>
       <h1>{event?.eventCode}</h1>
       {event?.startTimestamp && event?.endTimestamp && event?.timeZoneLabel && (
-        <div>
-          <table>
-            <tbody>
-              <tr>
-                <td>
-                  <strong>Starts:</strong>
-                </td>
-                <td>
-                  {adjustedLocalTime(
-                    event?.startTimestamp,
-                    event?.timeZoneOffset
-                  )}
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <strong>Ends:</strong>
-                </td>
-                <td>
-                  {adjustedLocalTime(
-                    event?.endTimestamp,
-                    event?.timeZoneOffset
-                  )}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+        <EventTimeInfo event={event} />
       )}
       <div style={{ textAlign: "center", padding: "40px" }}>
         <ReactMarkdown>{event?.eventMarkdown}</ReactMarkdown>
@@ -164,67 +100,13 @@ export const Registration = () => {
         </div>
       )}
       {state.profileLoaded && state.profile && attendee && (
-        <>
-          <div>
-            <Field label="API Key" size="large">
-              <div className={styles.apiKeyDisplay}>
-                <Input
-                  name="apiKey"
-                  id="apiKey"
-                  type={state.showApiKey ? "text" : "password"}
-                  readOnly={true}
-                  value={attendee.apiKey}
-                  disabled={true}
-                />
-                <Button
-                  icon={state.showApiKey ? <EyeRegular /> : <EyeOffRegular />}
-                  onClick={() =>
-                    dispatch({ type: "TOGGLE_API_KEY_VISIBILITY" })
-                  }
-                />
-                <Button
-                  icon={<CopyRegular />}
-                  onClick={() => copyToClipboard(attendee.apiKey)}
-                />
-              </div>
-            </Field>
-            <div>
-              <p>
-                Copy the API Key, then navigate to the{" "}
-                <Link href={`${window.location.origin}`}>Playground</Link>.
-              </p>
-            </div>
-            <Field label="Endpoint" size="large">
-              <div className={styles.apiKeyDisplay}>
-                <Input
-                  name="endpoint"
-                  id="endpoint"
-                  type="text"
-                  readOnly={true}
-                  value={`${window.location.origin}/api/v1`}
-                  disabled={true}
-                />
-                <Button
-                  icon={<CopyRegular />}
-                  onClick={() =>
-                    copyToClipboard(`${window.location.origin}/api/v1`)
-                  }
-                />
-              </div>
-            </Field>
-
-            <Field>
-              <p>
-                <Button
-                  icon={<DeleteFilled />}
-                  className={styles.warningButton}
-                >
-                  Deregister from event.
-                </Button>
-              </p>
-            </Field>
-          </div>
-        </>
+        <AttendeeDetails
+          attendee={attendee}
+          styles={styles}
+          dispatch={dispatch}
+          showApiKey={state.showApiKey}
+          notify={notify}
+        />
       )}
 
       {state.profileLoaded && !state.profile && (
@@ -233,5 +115,110 @@ export const Registration = () => {
 
       <Toaster toasterId={toasterId} />
     </section>
+  );
+};
+
+const AttendeeDetails = ({
+  attendee,
+  styles,
+  dispatch,
+  showApiKey,
+  notify,
+}: {
+  attendee: AttendeeRegistration;
+  styles: ReturnType<typeof useStyles>;
+  dispatch: Dispatch<RegistrationAction>;
+  showApiKey: boolean;
+  notify: () => void;
+}) => {
+  const copyToClipboard = async (value: string) => {
+    await navigator.clipboard.writeText(value);
+    notify();
+  };
+
+  return (
+    <>
+      <div>
+        <Field label="API Key" size="large">
+          <div className={styles.apiKeyDisplay}>
+            <Input
+              name="apiKey"
+              id="apiKey"
+              type={showApiKey ? "text" : "password"}
+              readOnly={true}
+              value={attendee.apiKey}
+              disabled={true}
+            />
+            <Button
+              icon={showApiKey ? <EyeRegular /> : <EyeOffRegular />}
+              onClick={() => dispatch({ type: "TOGGLE_API_KEY_VISIBILITY" })}
+            />
+            <Button
+              icon={<CopyRegular />}
+              onClick={() => copyToClipboard(attendee.apiKey)}
+            />
+          </div>
+        </Field>
+        <div>
+          <p>
+            Copy the API Key, then navigate to the{" "}
+            <Link href={`${window.location.origin}`}>Playground</Link>.
+          </p>
+        </div>
+        <Field label="Endpoint" size="large">
+          <div className={styles.apiKeyDisplay}>
+            <Input
+              name="endpoint"
+              id="endpoint"
+              type="text"
+              readOnly={true}
+              value={`${window.location.origin}/api/v1`}
+              disabled={true}
+            />
+            <Button
+              icon={<CopyRegular />}
+              onClick={() =>
+                copyToClipboard(`${window.location.origin}/api/v1`)
+              }
+            />
+          </div>
+        </Field>
+
+        <Field>
+          <p>
+            <Button icon={<DeleteFilled />} className={styles.warningButton}>
+              Deregister from event.
+            </Button>
+          </p>
+        </Field>
+      </div>
+    </>
+  );
+};
+
+const EventTimeInfo = ({ event }: { event: EventDetails }) => {
+  return (
+    <div>
+      <table>
+        <tbody>
+          <tr>
+            <td>
+              <strong>Starts:</strong>
+            </td>
+            <td>
+              {adjustedLocalTime(event?.startTimestamp, event?.timeZoneOffset)}
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <strong>Ends:</strong>
+            </td>
+            <td>
+              {adjustedLocalTime(event?.endTimestamp, event?.timeZoneOffset)}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   );
 };
