@@ -184,13 +184,17 @@ const AttendeeDetails = ({
           </div>
         </Field>
 
-        <Field>
-          <p>
-            <Button icon={<DeleteFilled />} className={styles.warningButton}>
+        <div style={{ marginTop: "10px" }}>
+          <Form method="DELETE">
+            <Button
+              icon={<DeleteFilled />}
+              className={styles.warningButton}
+              type="submit"
+            >
               Deregister from event.
             </Button>
-          </p>
-        </Field>
+          </Form>
+        </div>
       </div>
     </>
   );
