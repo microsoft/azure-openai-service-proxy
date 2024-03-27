@@ -1,0 +1,40 @@
+@page "/event/{eventId}/metrics"
+@using AzureOpenAIProxy.Management.Database
+
+@namespace AzureOpenAIProxy.Management.Components.Pages
+
+@if (Event is not null && EventMetric is not null)
+{
+    <MudStack>
+        <h3>Event Name: @Event.EventUrlText</h3>
+
+        <MudText Typo="Typo.body1">Attendee count: <strong>@EventMetric.AttendeeCount</strong></MudText>
+        <MudText Typo="Typo.body1">Total Request count: <strong>@EventMetric.RequestCount</strong></MudText>
+
+        <MudTable Items="@EventMetric.ModelCounts" SortLabel="Sort By" Hover="true">
+            <HeaderContent>
+                <MudTh>
+                    <MudTableSortLabel
+                        SortBy="new Func<(ModelType modelType, string deploymentName, int count), object>(x => x.deploymentName)">
+                        Resource Name (Deployment or Index Name)</MudTableSortLabel>
+                </MudTh>
+                <MudTh>
+                    <MudTableSortLabel
+                        SortBy="new Func<(ModelType modelType, string deploymentName, int count), object>(x => x.modelType)">
+                        Resource Type</MudTableSortLabel>
+                </MudTh>
+                <MudTh>
+                    <MudTableSortLabel InitialDirection="SortDirection.Descending"
+                        SortBy="new Func<(ModelType modelType, string deploymentName, int count), object>(x => x.count)">
+                        Request Count</MudTableSortLabel>
+                </MudTh>
+            </HeaderContent>
+
+            <RowTemplate>
+                <MudTd DataLabel="Resource Name (Deployment or Index Name)">@context.deploymentName</MudTd>
+                <MudTd DataLabel="Resource Type">@context.modelType</MudTd>
+                <MudTd DataLabel="Request Count">@context.count</MudTd>
+            </RowTemplate>
+        </MudTable>
+    </MudStack>
+}

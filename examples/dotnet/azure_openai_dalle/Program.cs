@@ -14,25 +14,7 @@ if (key == null || endpoint == null)
     return;
 }
 
-await GenerateWithDalle2(key, endpoint);
 await GenerateWithDalle3(key, endpoint);
-
-static async Task GenerateWithDalle2(string key, string endpoint)
-{
-    Console.WriteLine("Generating with DALL-E v2");
-    var client = new OpenAIClient(new Uri(endpoint), new Azure.AzureKeyCredential(key));
-
-    var response = await client.GetImageGenerationsAsync(new()
-    {
-        Prompt = "cute picture of an cat",
-        ImageCount = 1,
-    });
-
-    foreach (ImageLocation image in response.Value.Data)
-    {
-        Console.WriteLine($"Image: {image.Url}");
-    }
-}
 
 static async Task GenerateWithDalle3(string key, string endpoint)
 {

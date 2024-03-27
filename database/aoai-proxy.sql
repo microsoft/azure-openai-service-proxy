@@ -46,7 +46,6 @@ COMMENT ON EXTENSION pgcrypto IS 'cryptographic functions';
 CREATE TYPE aoai.model_type AS ENUM (
     'openai-chat',
     'openai-embedding',
-    'openai-dalle2',
     'openai-dalle3',
     'openai-whisper',
     'openai-completion',

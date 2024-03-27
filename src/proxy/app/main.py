@@ -22,7 +22,6 @@ from .routes.embeddings import Embeddings as embeddings_router
 from .routes.event_info import EventInfo as eventinfo_router
 from .routes.event_registration import EventRegistrationInfo as event_registration_router
 from .routes.images import Images as images_router
-from .routes.images_generations import ImagesGenerations as images_generations_router
 
 DEFAULT_COMPLETIONS_API_VERSION = "2023-09-01-preview"
 DEFAULT_CHAT_COMPLETIONS_API_VERSION = "2023-09-01-preview"
@@ -82,12 +81,6 @@ event_info_route = eventinfo_router(
     api_version=None,
 )
 
-images_generations_route = images_generations_router(
-    authorize=authorize,
-    config=config,
-    api_version=DEFAULT_IMAGES_GENERATIONS_API_VERSION,
-)
-
 images_route = images_router(
     authorize=authorize,
     config=config,
@@ -108,9 +101,6 @@ app.include_router(completion_router.include_router(), prefix="/api/v1", tags=["
 app.include_router(chat_route.include_router(), prefix="/api/v1", tags=["chat-completions"])
 app.include_router(embeddings_route.include_router(), prefix="/api/v1", tags=["embeddings"])
 app.include_router(event_info_route.include_router(), prefix="/api/v1", tags=["eventinfo"])
-app.include_router(
-    images_generations_route.include_router(), prefix="/api/v1", tags=["images-generations"]
-)
 app.include_router(images_route.include_router(), prefix="/api/v1", tags=["images"])
 app.include_router(
     event_registration_route.include_router(), prefix="/api/v1", tags=["event-registration"]
@@ -124,6 +114,7 @@ async def custom_http_exception_handler(request: Request, exc: HTTPException):
     """custom http exception handler - formats in the style of OpenAI API"""
 
     content = {"error": {"code": exc.status_code, "message": exc.detail}}
+    logger.error(msg=f"HTTPException: {content}")
     return JSONResponse(status_code=exc.status_code, content=content)
 
 
