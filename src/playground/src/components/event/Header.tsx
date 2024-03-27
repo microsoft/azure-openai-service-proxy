@@ -12,6 +12,7 @@ import {
   tokens,
 } from "@fluentui/react-components";
 import {} from "@fluentui/react-icons";
+import { Form } from "react-router-dom";
 
 const useStyles = makeStyles({
   container: {
@@ -71,9 +72,18 @@ export const Header = () => {
               provider={clientPrincipal.identityProvider}
               label="Delete account"
               customRenderer={({ href, label }) => (
-                <Button href={href} as="a" className={styles.warningButton}>
-                  {label}
-                </Button>
+                <>
+                  <Form method="delete">
+                    <input type="hidden" value={href} name="redirectUrl" />
+                    <Button
+                      type="submit"
+                      as="button"
+                      className={styles.warningButton}
+                    >
+                      {label}
+                    </Button>
+                  </Form>
+                </>
               )}
             />
             &nbsp;

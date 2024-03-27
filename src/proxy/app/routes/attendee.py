@@ -124,4 +124,24 @@ class AttendeeApi:
                 logging.error(error)
                 raise error
 
+        @self.router.delete("/attendee", status_code=204)
+        async def delete_account(request: Request):
+            """Delete account and all registrations"""
+            logging.info("Delete account and all registrations")
+
+            try:
+                user_id = self.get_user_id(request=request)
+
+                pool = await self.db_manager.get_connection()
+
+                async with pool.acquire() as conn:
+                    await conn.fetch(
+                        "delete from aoai.event_attendee where user_id = $1",
+                        user_id,
+                    )
+
+            except Exception as error:
+                logging.error(error)
+                raise error
+
         return self.router

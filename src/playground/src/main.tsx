@@ -5,9 +5,10 @@ import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import "./index.css";
 import {
   Registration,
-  loader as registrationLoader,
+  registrationLoader,
   Layout as EventLayout,
-  action as registrationAction,
+  registrationAction,
+  layoutAction,
 } from "./pages/event";
 import { Chat } from "./pages/playground/Chat";
 import { Image } from "./pages/playground/Image";
@@ -32,6 +33,7 @@ const router = createBrowserRouter([
   {
     path: "/event",
     element: <EventLayout />,
+    action: layoutAction,
     children: [
       {
         path: ":id",
