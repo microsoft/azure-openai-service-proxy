@@ -13,7 +13,13 @@ import {
   useId,
   useToastController,
 } from "@fluentui/react-components";
-import { CopyRegular, EyeOffRegular, EyeRegular } from "@fluentui/react-icons";
+import {
+  CopyRegular,
+  DeleteFilled,
+  EyeOffRegular,
+  EyeRegular,
+} from "@fluentui/react-icons";
+import { tokens } from "@fluentui/react-theme";
 import { useEffect, useReducer } from "react";
 import ReactMarkdown from "react-markdown";
 import { Form, useLoaderData } from "react-router-dom";
@@ -30,6 +36,10 @@ const useStyles = makeStyles({
     ...shorthands.padding("0", "var(--global-margin)"),
   },
   apiKeyDisplay: { display: "flex", alignItems: "center", columnGap: "4px" },
+  warningButton: {
+    color: tokens.colorStatusDangerForeground1,
+    backgroundColor: tokens.colorStatusDangerBackground1,
+  },
 });
 
 export const Registration = () => {
@@ -204,7 +214,14 @@ export const Registration = () => {
             </Field>
 
             <Field>
-              <Button>Deregister from event.</Button>
+              <p>
+                <Button
+                  icon={<DeleteFilled />}
+                  className={styles.warningButton}
+                >
+                  Deregister from event.
+                </Button>
+              </p>
             </Field>
           </div>
         </>

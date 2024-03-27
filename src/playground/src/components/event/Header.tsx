@@ -2,12 +2,14 @@ import {
   Logout,
   StaticWebAuthLogins,
   useClientPrincipal,
+  UserPurge,
 } from "@aaronpowell/react-static-web-apps-auth";
 import {
   Button,
   Link,
   makeStyles,
   shorthands,
+  tokens,
 } from "@fluentui/react-components";
 import {} from "@fluentui/react-icons";
 
@@ -33,6 +35,10 @@ const useStyles = makeStyles({
   },
   logo: {
     height: "24px",
+  },
+  warningButton: {
+    color: tokens.colorStatusDangerForeground1,
+    backgroundColor: tokens.colorStatusDangerBackground1,
   },
 });
 
@@ -61,6 +67,16 @@ export const Header = () => {
         {loaded && clientPrincipal && (
           <>
             Welcome {clientPrincipal.userDetails}&nbsp;
+            <UserPurge
+              provider={clientPrincipal.identityProvider}
+              label="Delete account"
+              customRenderer={({ href, label }) => (
+                <Button href={href} as="a" className={styles.warningButton}>
+                  {label}
+                </Button>
+              )}
+            />
+            &nbsp;
             <Logout
               postLogoutRedirect={window.location.href}
               customRenderer={({ href }) => (
