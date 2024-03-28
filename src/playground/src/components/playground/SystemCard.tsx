@@ -69,7 +69,7 @@ export const SystemCard = ({
           value={sysPrompt}
           textarea={{ rows: 10 }}
           resize="vertical"
-          onChange={(event) => setPrompt(event.target.value)}
+          onChange={(event) => setPrompt(event.currentTarget.value)}
           onKeyDown={(event) => {
             if (event.key === "Enter" && !event.shiftKey) {
               systemPromptChange(sysPrompt);
@@ -98,6 +98,7 @@ export const SystemCard = ({
             style={{ marginLeft: "12px" }}
             onClick={() => {
               setPrompt("You are an AI assistant that helps people find information.");
+              systemPromptChange(sysPrompt);
               setSaved(true);
             }}
           >
