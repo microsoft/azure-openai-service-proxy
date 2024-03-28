@@ -10,20 +10,29 @@ import {
 
 const useStyles = makeStyles({
   card: {
-    marginTop: "10px",
-    marginRight: "10px",
-    marginBottom: "10px",
-    marginLeft: "10px",
+    paddingTop: "0px",
+    paddingBottom: "24px",
+    paddingRight: "24px",
+    paddingLeft: "24px",
+    marginTop: "24px",
+    textAlign: "left"
   },
   header: {
-    height: "10vh",
-    alignItems: "start",
+    marginTop: "0px",
+    marginBottom: "12px",
+    marginRight: "0px",
+    marginLeft: "0px",
+    paddingBottom: "0px",
+    paddingTop: "0px",
+    textAlign: "left",
+    fontWeight: "bold",
+    borderBottomColor: "#306ab7",
+    borderBottomStyle: "solid",
+    borderBottomWidth: "2px",
+    color: "#111"
   },
   maxWidth: {
     maxWidth: "100%",
-  },
-  text: {
-    fontSize: "large",
   },
 });
 
@@ -38,7 +47,7 @@ export const CardHeader = ({
       className={styles.header}
       header={
         <div className={styles.maxWidth}>
-          <Body1 className={styles.text}>
+          <Body1>
             <h2>{header}</h2>
           </Body1>
         </div>

@@ -1,18 +1,16 @@
 import {
   Body1,
   Button,
-  Divider,
   Textarea,
   makeStyles,
 } from "@fluentui/react-components";
 import { Dispatch, useEffect, useState } from "react";
-import { Save24Regular } from "@fluentui/react-icons";
+import { Save24Regular, ArrowReset24Regular } from "@fluentui/react-icons";
 import type {
   ChatRequestSystemMessage,
   FunctionDefinition,
 } from "@azure/openai";
-import { Card, CardHeader } from "./Card";
-import { DividerBlock } from "./DividerBlock";
+import { Card } from "./Card";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { solarizedlight } from "react-syntax-highlighter/dist/esm/styles/prism";
 
@@ -24,10 +22,21 @@ interface SystemProps {
 
 const useStyles = makeStyles({
   wrapper: {
-    display: "flex",
-    flexDirection: "column",
-    rowGap: "15px",
+    width: "100%",
+    marginBottom: "12px",
+    paddingTop: "15px",
+    paddingRight: "15px",
+    paddingBottom: "15px",
+    paddingLeft: "15px"
   },
+  body: {
+    paddingLeft: "15px",
+    paddingRight: "15px",
+    marginTop: "0px",
+    marginRight: "0px",
+    marginBottom: "0px",
+    marginLeft: "0px",
+  }
 });
 
 export const SystemCard = ({
@@ -52,11 +61,11 @@ export const SystemCard = ({
   }, [isSaved]);
 
   return (
-    <Card header="System Message">
-      <div>
+    <div className={styles.body}>
+      <Card header="System Message">
+
         <Textarea
-          className="test"
-          style={{ width: "100%" }}
+          style={{ width: "100%", marginBottom: "12px" }}
           value={sysPrompt}
           textarea={{ rows: 10 }}
           resize="vertical"
@@ -68,36 +77,51 @@ export const SystemCard = ({
             }
           }}
         />
-        <div className={styles.wrapper} style={{ padding: "15px" }}>
+
+        <div style={{ marginBottom: "0px", textAlign: "left", padding: "" }}>
           <Button
             icon={<Save24Regular />}
-            iconPosition="after"
+            iconPosition="before"
+            appearance="primary"
             onClick={() => {
               systemPromptChange(sysPrompt);
               setSaved(true);
             }}
           >
-            Save Changes
+            Update system message
           </Button>
+
+          <Button
+            icon={<ArrowReset24Regular />}
+            iconPosition="before"
+            appearance="secondary"
+            style={{ marginLeft: "12px" }}
+            onClick={() => {
+              setPrompt("You are an AI assistant that helps people find information.");
+              setSaved(true);
+            }}
+          >
+            Reset to default
+          </Button>
+
           {isSaved && (
-            <Body1
-              style={{
-                color: "GrayText",
-                transition: "opacity 1s",
-                opacity: 1,
-                textAlign: "center",
-              }}
-            >
-              System Message updated
-            </Body1>
+            <div style={{ paddingTop: "12px" }}>
+              <Body1
+                style={{
+                  color: "#333",
+                  transition: "opacity 1s",
+                  opacity: 1,
+                  textAlign: "center",
+                }}
+              >
+                <strong>System message updated</strong>
+              </Body1>
+            </div>
           )}
         </div>
-      </div>
-      <div>
-        <Divider></Divider>
-      </div>
-      <DividerBlock>
-        <CardHeader header="OpenAI Functions" />
+      </Card>
+
+      <Card header="OpenAI Functions">
         {!editFunctions && (
           <div onClick={() => setEditFunctions(true)}>
             <SyntaxHighlighter language="json" style={solarizedlight}>
@@ -110,18 +134,20 @@ export const SystemCard = ({
         {editFunctions && (
           <div>
             <Textarea
-              style={{ width: "100%" }}
+              style={{ width: "100%", marginBottom: "24px" }}
               resize="vertical"
-              textarea={{ rows: 25, style: { maxHeight: "fit-content" } }}
+              textarea={{ rows: 10, style: { maxHeight: "fit-content" } }}
               value={functions || `[]`}
               onChange={(_, data) => {
                 setFunctions(data.value);
               }}
             />
-            <div className={styles.wrapper} style={{ padding: "15px" }}>
+
+            <div style={{ marginBottom: "0px", textAlign: "left", padding: "" }}>
               <Button
                 icon={<Save24Regular />}
-                iconPosition="after"
+                iconPosition="before"
+                appearance="primary"
                 onClick={() => {
                   try {
                     const j = JSON.parse(functions);
@@ -153,7 +179,7 @@ export const SystemCard = ({
             </div>
           </div>
         )}
-      </DividerBlock>
-    </Card>
+      </Card>
+    </div>
   );
 };
