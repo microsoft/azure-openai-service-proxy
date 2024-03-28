@@ -5,11 +5,19 @@ import {
 } from "@aaronpowell/react-static-web-apps-auth";
 import {
   Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogSurface,
+  DialogTitle,
+  DialogTrigger,
   Link,
   makeStyles,
   shorthands,
+  tokens,
 } from "@fluentui/react-components";
-import {} from "@fluentui/react-icons";
+import { DeleteFilled, SignOutFilled } from "@fluentui/react-icons";
+import { Form } from "react-router-dom";
 
 const useStyles = makeStyles({
   container: {
@@ -33,6 +41,10 @@ const useStyles = makeStyles({
   },
   logo: {
     height: "24px",
+  },
+  warningButton: {
+    color: tokens.colorStatusDangerForeground1,
+    backgroundColor: tokens.colorStatusDangerBackground1,
   },
 });
 
@@ -61,10 +73,12 @@ export const Header = () => {
         {loaded && clientPrincipal && (
           <>
             Welcome {clientPrincipal.userDetails}&nbsp;
+            <DeleteAccount styles={styles} />
+            &nbsp;
             <Logout
               postLogoutRedirect={window.location.href}
               customRenderer={({ href }) => (
-                <Button href={href} as="a">
+                <Button href={href} as="a" icon={<SignOutFilled />}>
                   Logout
                 </Button>
               )}
@@ -88,5 +102,49 @@ export const Header = () => {
         )}
       </div>
     </div>
+  );
+};
+
+const DeleteAccount = ({
+  styles,
+}: {
+  styles: ReturnType<typeof useStyles>;
+}) => {
+  return (
+    <Dialog>
+      <DialogTrigger>
+        <Button as="a" icon={<DeleteFilled />} className={styles.warningButton}>
+          Delete Account
+        </Button>
+      </DialogTrigger>
+      <DialogSurface>
+        <DialogTitle>Delete Account</DialogTitle>
+        <DialogContent>
+          Do you want to delete your account? This will render your API Key
+          unusable and log you out.
+        </DialogContent>
+        <DialogActions>
+          <DialogTrigger disableButtonEnhancement>
+            <Button appearance="primary">Cancel</Button>
+          </DialogTrigger>
+          <Logout
+            postLogoutRedirect={window.location.href}
+            customRenderer={({ href }) => (
+              <Form method="delete">
+                <input type="hidden" value={href} name="redirectUrl" />
+                <Button
+                  icon={<DeleteFilled />}
+                  type="submit"
+                  as="button"
+                  className={styles.warningButton}
+                >
+                  Delete Account
+                </Button>
+              </Form>
+            )}
+          />
+        </DialogActions>
+      </DialogSurface>
+    </Dialog>
   );
 };
