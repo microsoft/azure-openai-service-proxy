@@ -24,26 +24,24 @@ interface CardProps {
 }
 
 const useStyles = makeStyles({
-  card: {
-    display: "flex",
-    height: "calc(100vh - 70px)",
-  },
   dialog: {
     display: "block",
   },
   smallButton: {
     width: "100%",
-    height: "50%",
+    height: "40%",
     maxWidth: "none",
   },
   startCard: {
     display: "flex",
     maxWidth: "80%",
     marginTop: "35%",
+    marginBottom: "35%",
     marginLeft: "20%",
     marginRight: "20%",
-    marginBottom: "35%",
-  },
+    paddingTop: "20px",
+    paddingBottom: "20px",
+  }
 });
 
 export const ChatCard = ({
@@ -65,12 +63,14 @@ export const ChatCard = ({
   }, [messageList]);
 
   return (
-    <Card className={chat.card} header="Chat Session">
+    <Card header="Chat session" style={{ height: "calc(100vh - 70px)", display: "flex" }}>
+
       <div
         id={"chatContainer"}
         style={{ overflowY: "auto" }}
         ref={chatContainerRef}
       >
+
         {messageList.length > 1 ? (
           messageList.map((message, index) => {
             if (message.role === "system") {
@@ -84,7 +84,7 @@ export const ChatCard = ({
           })
         ) : (
           <Card className={chat.startCard}>
-            <Body1 style={{ textAlign: "center" }}>
+            <Body1 style={{ textAlign: "center"}}>
               <h2>Start Chatting</h2>
             </Body1>
           </Card>
@@ -151,7 +151,9 @@ function ChatInput({
           className={chat.smallButton}
           id={"send-button"}
           icon={<SendRegular />}
-          iconPosition="after"
+          iconPosition="before"
+          appearance="primary"
+          style={{ textAlign: "left", marginBottom: "12px" }}
           onClick={() => {
             promptSubmitted(userPrompt);
             setPrompt("");
@@ -164,7 +166,7 @@ function ChatInput({
           className={chat.smallButton}
           id="clear-button"
           icon={<Delete24Regular />}
-          iconPosition="after"
+          iconPosition="before"
           onClick={onClear}
         >
           Clear Chat

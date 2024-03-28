@@ -55,6 +55,7 @@ export const ImageParamsCard = ({
           defaultValue={settings.n || 1}
           onUpdate={(value) => updateSettings("n", value)}
           disabled={!isAuthorized}
+          explain="Number of images to generate. Maximum 1."
         />
       </DividerBlock>
 
