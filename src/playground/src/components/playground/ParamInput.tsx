@@ -7,18 +7,18 @@ interface InputProps {
   defaultValue: number;
   onUpdate: (newValue: number) => void;
   type:
-    | "text"
-    | "number"
-    | "password"
-    | "search"
-    | "time"
-    | "email"
-    | "tel"
-    | "url"
-    | "date"
-    | "datetime-local"
-    | "month"
-    | "week";
+  | "text"
+  | "number"
+  | "password"
+  | "search"
+  | "time"
+  | "email"
+  | "tel"
+  | "url"
+  | "date"
+  | "datetime-local"
+  | "month"
+  | "week";
   min: number;
   max: number;
   disabled: boolean;
@@ -28,27 +28,30 @@ interface InputProps {
 const useStyles = makeStyles({
   input: {
     fontSize: "14px",
-    marginLeft:"0px",
-    width:"100%",
+    marginLeft: "0px",
+    marginBottom: "0px",
+    marginTop: "10px",
+    width: "100%",
     textAlign: "left",
-    paddingLeft:"6px",
-    paddingRight:"6px",
-    paddingTop:"6px",
-    paddingBottom:"6px",
-    height:"auto",
+    paddingLeft: "10px",
+    paddingRight: "6px",
+    paddingTop: "1px",
+    paddingBottom: "6px",
+    height: "auto",
   },
-  container:{
-    marginTop:"0px",
+  container: {
+    marginTop: "0px",
   },
   label: {
     fontSize: "medium",
-    marginBottom: "0.5rem",
+    marginTop: "0px",
+    marginBottom: "0px",
     textAlign: "justify",
     display: "block",
     fontWeight: "bold",
   },
-  tooltip:{
-    marginLeft:"6px",
+  tooltip: {
+    marginLeft: "6px",
   },
 });
 
@@ -68,15 +71,18 @@ export const ParamInput = (props: InputProps) => {
       <Label className={styles.label} htmlFor={id}>
         {label}
         <Tooltip content={explain} relationship="description" >
-          <Info16Filled className={styles.tooltip}/>
+          <Info16Filled className={styles.tooltip} />
         </Tooltip>
       </Label>
 
-        <Input
-          className={styles.input}
-          id={id}
-          onChange={(e) => {
+      <Input
+        className={styles.input}
+        id={id}
+        onChange={(e) => {
             const newValue = e.currentTarget.value;
+          if (newValue === "" || newValue === undefined) {
+            setValue(0);
+          } else {
             if (
               newValue &&
               parseFloat(newValue) >= min &&
@@ -84,20 +90,21 @@ export const ParamInput = (props: InputProps) => {
             ) {
               setValue(parseFloat(newValue));
             }
-          }}
-          onBlur={() => {
-            if (!value) {
-              onUpdate(min);
-            } else {
-              onUpdate(value);
-            }
-          }}
-          min={min}
-          max={max}
-          value={value.toString()}
-          {...rest}
-        />
-      <div style={{ color: "GrayText", fontSize: "small", textAlign: "left",margin:"0px" }} >
+          }
+        }}
+        onBlur={() => {
+          if (!value) {
+            onUpdate(min);
+          } else {
+            onUpdate(value);
+          }
+        }}
+        min={min}
+        max={max}
+        value={value.toString()}
+        {...rest}
+      />
+      <div style={{ color: "GrayText", fontSize: "small", textAlign: "left", margin: "0px" }} >
         Accepted Value: {min} - {max}
       </div>
     </div>

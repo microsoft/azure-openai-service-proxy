@@ -23,7 +23,6 @@ const useStyles = makeStyles({
     marginLeft: "0px",
     width: "100%",
     textAlign: "left",
-
     height: "auto",
   },
   container: {
@@ -32,11 +31,11 @@ const useStyles = makeStyles({
   },
   label: {
     fontSize: "medium",
-    marginBottom: "0.5rem",
+    marginBottom: "0px",
+    marginTop: "0px",
     textAlign: "justify",
     display: "block",
     fontWeight: "bold",
-    marginTop: "12px",
   },
   tooltip: {
     marginLeft: "6px",
@@ -74,9 +73,18 @@ export const ChatParamsCard = ({
     <div className={styles.body}>
       <Card header="Configuration">
 
-        <ParamInputLabel label="Model" id="capabilities" />
+        <Label className={styles.label} htmlFor="ModelLabel" style={{ marginBottom: "0px", paddingBottom: "0px" }}>
+        Model
+          <Tooltip content="Select the model to use for the AI chat. The model determines the type of responses the AI will generate. Different models have different capabilities and are trained on different types of data."
+            relationship="description" >
+            <Info16Filled className={styles.tooltip} />
+          </Tooltip>
+        </Label>
+
         <Select
-          id="capabilities"
+          id="model"
+          className={styles.input}
+          style={{ marginTop: "0px", marginBottom: "0px" }}
           disabled={!isAuthorized}
           onChange={(e) => {
             const newValue = e.currentTarget.value;
@@ -117,7 +125,7 @@ export const ChatParamsCard = ({
           className={styles.input}
           style={{ marginTop: "0px" }}
           onChange={(e) => {
-            const newValue = e.target.value;
+            const newValue = e.currentTarget.value;
             if (newValue) {
               tokenUpdate("temperature", newValue);
             }
@@ -151,7 +159,7 @@ export const ChatParamsCard = ({
           className={styles.input}
           style={{ marginTop: "0px" }}
           onChange={(e) => {
-            const newValue = e.target.value;
+            const newValue = e.currentTarget.value;
             if (newValue) {
               tokenUpdate("topP", newValue);
             }
