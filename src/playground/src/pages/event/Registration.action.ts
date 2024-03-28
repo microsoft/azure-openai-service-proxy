@@ -8,37 +8,36 @@ export const action: ActionFunction = async ({ params, request }) => {
     throw new Response("Invalid event id", { status: 404 });
   }
 
-  if (request.method === "POST") {
-    await registerUser(id);
-  } else if (request.method === "DELETE") {
-    await deregisterUser(id);
+  switch (request.method) {
+    case "POST":
+      await registerUser(id);
+      break;
+    case "DELETE":
+      await deregisterUser(id);
+      break;
+    case "PATCH":
+      await activateUser(id);
+      break;
+    default:
+      throw new Response("Invalid request method", { status: 405 });
   }
 
   return null;
 };
 
-async function registerUser(id: string) {
+const registerUser = (id: string) => executeRequest(id, "POST");
+const deregisterUser = (id: string) => executeRequest(id, "DELETE");
+const activateUser = (id: string) => executeRequest(id, "PATCH");
+
+async function executeRequest(id: string, method: "POST" | "DELETE" | "PATCH") {
   const response = await fetch(
     `/api/${API_VERSION}/attendee/event/${id}/register`,
     {
-      method: "POST",
+      method,
     }
   );
 
   if (!response.ok) {
-    throw new Response("Failed to register", { status: 500 });
-  }
-}
-
-async function deregisterUser(id: string) {
-  const response = await fetch(
-    `/api/${API_VERSION}/attendee/event/${id}/register`,
-    {
-      method: "DELETE",
-    }
-  );
-
-  if (!response.ok) {
-    throw new Response("Failed to deregister", { status: 500 });
+    throw new Response(`Failed to ${method}`, { status: 500 });
   }
 }

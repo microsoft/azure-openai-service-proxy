@@ -2,7 +2,6 @@ import {
   Logout,
   StaticWebAuthLogins,
   useClientPrincipal,
-  UserPurge,
 } from "@aaronpowell/react-static-web-apps-auth";
 import {
   Button,

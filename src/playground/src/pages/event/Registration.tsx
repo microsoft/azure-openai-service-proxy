@@ -18,6 +18,7 @@ import {
   DeleteFilled,
   EyeOffRegular,
   EyeRegular,
+  CheckmarkCircleFilled,
 } from "@fluentui/react-icons";
 import { tokens } from "@fluentui/react-theme";
 import { Dispatch, useEffect, useReducer } from "react";
@@ -40,6 +41,10 @@ const useStyles = makeStyles({
   warningButton: {
     color: tokens.colorStatusDangerForeground1,
     backgroundColor: tokens.colorStatusDangerBackground1,
+  },
+  actionButton: {
+    color: tokens.colorStatusSuccessForeground1,
+    backgroundColor: tokens.colorStatusSuccessBackground1,
   },
 });
 
@@ -95,7 +100,9 @@ export const Registration = () => {
       {state.profileLoaded && state.profile && !attendee && (
         <div>
           <Form method="post">
-            <Button type="submit">Register</Button>
+            <Button type="submit" className={styles.actionButton}>
+              Register
+            </Button>
           </Form>
         </div>
       )}
@@ -184,17 +191,33 @@ const AttendeeDetails = ({
           </div>
         </Field>
 
-        <div style={{ marginTop: "10px" }}>
-          <Form method="DELETE">
-            <Button
-              icon={<DeleteFilled />}
-              className={styles.warningButton}
-              type="submit"
-            >
-              Deregister from event.
-            </Button>
-          </Form>
-        </div>
+        {attendee.active && (
+          <div style={{ marginTop: "10px" }}>
+            <Form method="DELETE">
+              <Button
+                icon={<DeleteFilled />}
+                className={styles.warningButton}
+                type="submit"
+              >
+                Deactivate Registration.
+              </Button>
+            </Form>
+          </div>
+        )}
+
+        {!attendee.active && (
+          <div style={{ marginTop: "10px" }}>
+            <Form method="PATCH">
+              <Button
+                icon={<CheckmarkCircleFilled />}
+                className={styles.actionButton}
+                type="submit"
+              >
+                Reactivate Registration.
+              </Button>
+            </Form>
+          </div>
+        )}
       </div>
     </>
   );
