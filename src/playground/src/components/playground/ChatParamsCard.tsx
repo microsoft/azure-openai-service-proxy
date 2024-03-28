@@ -5,7 +5,7 @@ import { UsageData } from "../../interfaces/UsageData";
 import { useEventDataContext } from "../../providers/EventDataProvider";
 import type { GetChatCompletionsOptions } from "@azure/openai";
 import { Card } from "./Card";
-import { ParamInputLabel } from "./ParamInputLabel";
+// import { ParamInputLabel } from "./ParamInputLabel";
 import { Info16Filled } from "@fluentui/react-icons";
 
 interface ChatParamsCardProps {
