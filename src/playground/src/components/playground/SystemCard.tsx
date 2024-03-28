@@ -98,7 +98,7 @@ export const SystemCard = ({
             style={{ marginLeft: "12px" }}
             onClick={() => {
               setPrompt("You are an AI assistant that helps people find information.");
-              systemPromptChange(sysPrompt);
+              systemPromptChange("You are an AI assistant that helps people find information.");
               setSaved(true);
             }}
           >
