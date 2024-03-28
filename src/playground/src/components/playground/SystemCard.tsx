@@ -67,7 +67,7 @@ export const SystemCard = ({
         <Textarea
           style={{ width: "100%", marginBottom: "12px" }}
           value={sysPrompt}
-          textarea={{ rows: 10 }}
+          textarea={{ rows: 8 }}
           resize="vertical"
           onChange={(event) => setPrompt(event.currentTarget.value)}
           onKeyDown={(event) => {

@@ -169,7 +169,7 @@ function ChatInput({
           iconPosition="before"
           onClick={onClear}
         >
-          Clear Chat
+          Clear
         </Button>
       </div>
     </CardFooter>
