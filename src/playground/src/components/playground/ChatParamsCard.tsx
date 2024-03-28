@@ -74,7 +74,7 @@ export const ChatParamsCard = ({
       <Card header="Configuration">
 
         <Label className={styles.label} htmlFor="ModelLabel" style={{ marginBottom: "0px", paddingBottom: "0px" }}>
-        Model
+          Model
           <Tooltip content="Select the model to use for the AI chat. The model determines the type of responses the AI will generate. Different models have different capabilities and are trained on different types of data."
             relationship="description" >
             <Info16Filled className={styles.tooltip} />
