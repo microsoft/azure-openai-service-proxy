@@ -100,7 +100,11 @@ export const Registration = () => {
       {state.profileLoaded && state.profile && !attendee && (
         <div>
           <Form method="post">
-            <Button type="submit" className={styles.actionButton}>
+            <Button
+              type="submit"
+              className={styles.actionButton}
+              icon={<CheckmarkCircleFilled />}
+            >
               Register
             </Button>
           </Form>
