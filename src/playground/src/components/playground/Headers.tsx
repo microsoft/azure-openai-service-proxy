@@ -47,7 +47,7 @@ export const Header = () => {
           {isAuthorized && (
             <>
 
-              <img src={eventData?.imageUrl} style={{ height: "24px" }} />
+              <img src={eventData?.imageUrl ? eventData?.imageUrl : "/logo.png"} style={{ height: "24px" }} />
               <br />
               {eventData!.url.length !== 0 && (
                 <a
