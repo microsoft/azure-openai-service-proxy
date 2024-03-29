@@ -66,6 +66,12 @@ public partial class EventEdit : ComponentBase
 
     private async Task OnValidSubmit(EventEditorModel model)
     {
+
+        if (string.IsNullOrEmpty(model.EventImageUrl))
+        {
+            model.EventImageUrl = null;
+        }
+
         Event? evt = await EventService.UpdateEventAsync(Id, model);
 
         if (evt is null)
