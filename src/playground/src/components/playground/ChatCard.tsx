@@ -63,7 +63,7 @@ export const ChatCard = ({
   }, [messageList]);
 
   return (
-    <Card header="Chat session" style={{ height: "calc(100vh - 70px)", display: "flex" }}>
+    <Card header="Chat session" style={{ height: "calc(100vh - 92px)", display: "flex" }}>
 
       <div
         id={"chatContainer"}
