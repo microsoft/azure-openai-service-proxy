@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 
 namespace AzureOpenAIProxy.Management.Components.EventManagement;
@@ -18,9 +19,9 @@ public class EventEditorModel
     [Url]
     public string? Url { get; set; }
 
-    [StringLength(256)]
+    [StringLength(256), AllowNull]
     [Url]
-    public string? EventImageUrl { get; set; }
+    public string? EventImageUrl { get; set; } = null;
 
     [Required]
     public string? Description { get; set; }
