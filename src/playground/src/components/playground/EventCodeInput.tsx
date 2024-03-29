@@ -52,24 +52,6 @@ export const ApiKeyInput = () => {
       )}
       {isAuthorized && (
         <>
-          <Label
-            style={{
-              color: "GrayText",
-              fontSize: "small",
-              textAlign: "justify",
-            }}
-          >
-            <div>{eventData!.name}</div>
-            <div>
-              <a
-                href={eventData!.url}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {eventData!.urlText}
-              </a>
-            </div>
-          </Label>
           <Button
             onClick={(e) => {
               e.preventDefault();

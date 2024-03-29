@@ -37,28 +37,62 @@ export const Header = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const styles = useStyles();
-  const { eventData } = useEventDataContext();
+  const { eventData, isAuthorized } = useEventDataContext();
 
   return (
-    <>
-      <div className={styles.container}>
+    <div className={styles.container}>
+      <div>
+        <div style={{ height: "48px", float: "left", marginRight: "24px", paddingLeft: "15px", paddingTop: "14px" }}>
+
+          {isAuthorized && (
+            <>
+
+              <img src={eventData?.imageUrl} style={{ height: "24px" }} />
+              <br />
+              {eventData!.url.length !== 0 && (
+                <a
+                  href={eventData!.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {eventData!.name}
+                </a>)}
+
+              {eventData!.url.length === 0 && (
+                eventData!.name
+              )}
+
+            </>
+          )}
+          {!isAuthorized && (
+            <>
+              <img src={"/logo.png"} style={{ height: "36px" }} />
+            </>)}
+        </div>
+
         <TabList
           selectedValue={location.pathname === "/" ? "chat" : "images"}
           onTabSelect={(_, data) => {
             data.value === "chat" ? navigate("/") : navigate(`/${data.value}`);
           }}
         >
-          {hasCapability(eventData, "openai-chat") && (
-            <Tab value="chat">Chat</Tab>
+
+          {isAuthorized && (
+            <>
+              {hasCapability(eventData, "openai-chat") && (
+                <Tab value="chat">Chat</Tab>
+              )}
+              {hasCapability(eventData, "openai-dalle3") && (
+                <Tab value="images">Image</Tab>
+              )}
+            </>
           )}
-          {hasCapability(eventData, "openai-dalle3") && (
-            <Tab value="images">Image</Tab>
-          )}
+
         </TabList>
-        <div className={styles.right}>
-          <ApiKeyInput />
-        </div>
       </div>
-    </>
+      <div className={styles.right}>
+        <ApiKeyInput />
+      </div>
+    </div>
   );
 };
