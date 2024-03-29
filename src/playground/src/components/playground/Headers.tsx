@@ -66,7 +66,7 @@ export const Header = () => {
           )}
           {!isAuthorized && (
             <>
-              <img src={"/logo.png"} style={{ height: "36px" }} />
+              <img src={"/logo.png"} style={{ height: "24px" }} />
             </>)}
         </div>
 
