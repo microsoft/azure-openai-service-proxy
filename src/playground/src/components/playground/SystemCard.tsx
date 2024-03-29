@@ -65,7 +65,7 @@ export const SystemCard = ({
       <Card header="System Message">
 
         <Textarea
-          style={{ width: "100%", marginBottom: "12px" }}
+          style={{ width: "100%", marginBottom: "6px" }}
           value={sysPrompt}
           textarea={{ rows: 8 }}
           resize="vertical"
@@ -78,11 +78,12 @@ export const SystemCard = ({
           }}
         />
 
-        <div style={{ marginBottom: "0px", textAlign: "left", padding: "" }}>
+        <div style={{ textAlign: "center", margin: "0px" }}>
           <Button
             icon={<Save24Regular />}
             iconPosition="before"
             appearance="primary"
+            style={{ margin: "6px" }}
             onClick={() => {
               systemPromptChange(sysPrompt);
               setSaved(true);
@@ -95,7 +96,7 @@ export const SystemCard = ({
             icon={<ArrowReset24Regular />}
             iconPosition="before"
             appearance="secondary"
-            style={{ marginLeft: "12px" }}
+            style={{ margin: "6px" }}
             onClick={() => {
               setPrompt("You are an AI assistant that helps people find information.");
               systemPromptChange("You are an AI assistant that helps people find information.");
