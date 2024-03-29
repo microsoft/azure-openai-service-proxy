@@ -21,7 +21,7 @@ const useStyles = makeStyles({
 
 export const ApiKeyInput = () => {
   const [code, setCode] = useState("");
-  const { eventData, isAuthorized, setEventCode } = useEventDataContext();
+  const { isAuthorized, setEventCode } = useEventDataContext();
   const inputId = useId();
   const styles = useStyles();
 
