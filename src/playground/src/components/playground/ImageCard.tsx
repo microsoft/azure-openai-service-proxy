@@ -3,14 +3,18 @@ import {
   Button,
   Input,
   Label,
+  Textarea,
   makeStyles,
   shorthands,
   useId,
+  Tooltip
 } from "@fluentui/react-components";
 import { useEventDataContext } from "../../providers/EventDataProvider";
 import { Card } from "./Card";
 import { Dispatch, useState } from "react";
 import { ExtendedImageGenerations } from "../../pages/playground/Image.state";
+import { Info16Filled, SendRegular } from "@fluentui/react-icons";
+
 
 const useStyles = makeStyles({
   startCard: {
@@ -72,47 +76,63 @@ const useStyles = makeStyles({
       objectFit: "cover",
     },
   },
+  tooltip: {
+    marginLeft: "6px",
+  },
 });
 
-const ImagePrompt = ({
-  generateImage,
-  canGenerate,
-}: {
-  generateImage: Dispatch<string>;
-  canGenerate: boolean;
-}) => {
+const ImagePrompt = ({ generateImage, isGenerating, setGenerating }: { generateImage: Dispatch<string>, isGenerating: boolean, setGenerating: Dispatch<React.SetStateAction<boolean>> }) => {
   const styles = useStyles();
   const promptId = useId();
   const [prompt, setPrompt] = useState("");
-  const { isAuthorized } = useEventDataContext();
+  // const { isAuthorized } = useEventDataContext();
   return (
     <div className={styles.searchRoot}>
+
       <Label
         style={{ fontSize: "medium", marginBottom: "0.5rem" }}
         htmlFor={promptId}
       >
         <strong>Prompt</strong>
+        <Tooltip content="Describe the image you want to create. For example, 'watercolor painting of the Seattle skyline'" relationship="description" >
+          <Info16Filled className={styles.tooltip} />
+        </Tooltip>
       </Label>
-      <Input
-        type="text"
-        size="medium"
+
+      <Textarea
+        style={{ width: "100%", maxWidth: "800px" }}
         id={promptId}
         value={prompt}
-        disabled={!isAuthorized}
-        onChange={(e) => setPrompt(e.target.value)}
-        placeholder="Enter a prompt. Eg: cute picture of an cat"
+        disabled={isGenerating}
+        placeholder="Enter a prompt. Eg: cute picture of an ca (Shift + Enter for new line)"
+        onChange={(e) => {
+          setPrompt(e.currentTarget.value);
+        }}
       />
-      <Button
-        onClick={() => generateImage(prompt)}
-        disabled={!prompt || !canGenerate}
-      >
-        Generate
-      </Button>
+      <div>
+        <Button
+          onClick={() => {
+            // generateImage(prompt)
+            // setPrompt("");
+            if(!isGenerating) {
+              generateImage(prompt)
+              setPrompt("");
+              setGenerating(true);
+            }
+          }}
+          disabled={!prompt || isGenerating}
+          icon={<SendRegular />}
+          appearance="primary"
+          style={{ textAlign: "left", marginBottom: "12px", marginTop: "12px" }}
+        >
+          Generate
+        </Button>
+      </div>
     </div>
   );
 };
 
-const ImageList = ({ images }: { images: ExtendedImageGenerations[] }) => {
+const ImageList = ({ images, isGenerating, setGenerating }: { images: ExtendedImageGenerations[], isGenerating: boolean, setGenerating: Dispatch<React.SetStateAction<boolean>> }) => {
   // const styles = useStyles();
   return (
 
@@ -147,6 +167,11 @@ const ImageList = ({ images }: { images: ExtendedImageGenerations[] }) => {
           {image.generations &&
             image.generations.data.map((i) => {
               const url = i.url;
+
+              if(isGenerating) {
+                setGenerating(false);
+              }
+
               return (
                 <>
                   <div key={image.id}>
@@ -184,19 +209,18 @@ const ImageList = ({ images }: { images: ExtendedImageGenerations[] }) => {
 export const ImageCard = ({
   generateImage,
   images,
-  canGenerate,
 }: {
   generateImage: Dispatch<string>;
   images: ExtendedImageGenerations[];
-  canGenerate: boolean;
 }) => {
   const styles = useStyles();
+  const [isGenerating, setGenerating] = useState(false);
   return (
     <div className={styles.body}>
       <Card header="DALL·E playground">
 
-        <ImagePrompt generateImage={generateImage} canGenerate={canGenerate} />
-        <ImageList images={images} />
+        <ImagePrompt generateImage={generateImage} isGenerating={isGenerating} setGenerating={setGenerating} />
+        <ImageList images={images} isGenerating={isGenerating} setGenerating={setGenerating} />
 
       </Card>
     </div>
