@@ -22,6 +22,15 @@ const useStyles = makeStyles({
     marginBottom: "35%",
   },
 
+  body: {
+    paddingLeft: "15px",
+    paddingRight: "15px",
+    marginTop: "0px",
+    marginRight: "0px",
+    marginBottom: "0px",
+    marginLeft: "0px",
+  },
+
   searchRoot: {
     display: "flex",
     flexDirection: "column",
@@ -75,6 +84,7 @@ const ImagePrompt = ({
   const styles = useStyles();
   const promptId = useId();
   const [prompt, setPrompt] = useState("");
+  const { isAuthorized } = useEventDataContext();
   return (
     <div className={styles.searchRoot}>
       <Label
@@ -88,6 +98,7 @@ const ImagePrompt = ({
         size="medium"
         id={promptId}
         value={prompt}
+        disabled={!isAuthorized}
         onChange={(e) => setPrompt(e.target.value)}
         placeholder="Enter a prompt. Eg: cute picture of an cat"
       />
@@ -141,22 +152,15 @@ export const ImageCard = ({
   images: ExtendedImageGenerations[];
   canGenerate: boolean;
 }) => {
-  const { isAuthorized } = useEventDataContext();
   const styles = useStyles();
   return (
-    <Card header="DALL·E playground" className={styles.container}>
-      {!isAuthorized && (
-        <Card className={styles.startCard}>
-          <Body1 style={{ textAlign: "center" }}>
-            <h2>Sign in to generate images.</h2>
-          </Body1>
-        </Card>
-      )}
+    <div className={styles.body}>
+      <Card header="DALL·E playground">
 
-      {isAuthorized && (
         <ImagePrompt generateImage={generateImage} canGenerate={canGenerate} />
-      )}
-      {isAuthorized && <ImageList images={images} />}
-    </Card>
+        <ImageList images={images} />
+
+      </Card>
+    </div>
   );
 };

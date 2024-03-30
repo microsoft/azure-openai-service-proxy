@@ -1,10 +1,44 @@
-import { Label, Select, useId } from "@fluentui/react-components";
+import { Select, makeStyles, Label, Tooltip } from "@fluentui/react-components";
 import { Card } from "./Card";
-import { DividerBlock } from "./DividerBlock";
-import { ParamInput } from "./ParamInput";
+// import { DividerBlock } from "./DividerBlock";
+// import { ParamInput } from "./ParamInput";
 import { GetImagesOptions } from "@azure/openai";
 import { useEventDataContext } from "../../providers/EventDataProvider";
-import { ParamInputLabel } from "./ParamInputLabel";
+// import { ParamInputLabel } from "./ParamInputLabel";
+import { Info16Filled } from "@fluentui/react-icons";
+
+const useStyles = makeStyles({
+  input: {
+    fontSize: "medium",
+    marginLeft: "0px",
+    width: "100%",
+    textAlign: "left",
+    height: "auto",
+  },
+  container: {
+    marginTop: "0px",
+    marginBottom: "24px",
+  },
+  label: {
+    fontSize: "medium",
+    marginBottom: "0px",
+    marginTop: "0px",
+    textAlign: "justify",
+    display: "block",
+    fontWeight: "bold",
+  },
+  tooltip: {
+    marginLeft: "6px",
+  },
+  body: {
+    paddingLeft: "15px",
+    paddingRight: "15px",
+    marginTop: "0px",
+    marginRight: "0px",
+    marginBottom: "0px",
+    marginLeft: "0px",
+  }
+});
 
 type ImageParamsCardProps = {
   updateSettings: (
@@ -17,17 +51,27 @@ type ImageParamsCardProps = {
 
 export const ImageParamsCard = ({
   updateSettings,
-  settings,
+  // settings,
 }: ImageParamsCardProps) => {
-  const selectId = useId("size");
+  // const selectId = useId("size");
   const { eventData, isAuthorized } = useEventDataContext();
+  const styles = useStyles();
+
   return (
-    <Card header="Configuration">
-      <DividerBlock>
-      <>
-          <ParamInputLabel label="Model deployment" id="capabilities" />
+    <div className={styles.body}>
+      <Card header="Configuration">
+
+          <Label className={styles.label} htmlFor="ModelLabel" style={{ marginBottom: "0px", paddingBottom: "0px" }}>
+            Model
+            <Tooltip content="Select the model to use for the AI chat. The model determines the type of responses the AI will generate. Different models have different capabilities and are trained on different types of data."
+              relationship="description" >
+              <Info16Filled className={styles.tooltip} />
+            </Tooltip>
+          </Label>
+
           <Select
             id="capabilities"
+            style={{ marginTop: "0px", marginBottom: "0px" }}
             disabled={!isAuthorized}
             onChange={(e) => {
               const newValue = e.currentTarget.value;
@@ -43,44 +87,8 @@ export const ImageParamsCard = ({
                 </option>
               ))}
           </Select>
-        </>
-      </DividerBlock>
 
-      <DividerBlock>
-        <ParamInput
-          label="Number of images"
-          type="number"
-          min={1}
-          max={10}
-          defaultValue={settings.n || 1}
-          onUpdate={(value) => updateSettings("n", value)}
-          disabled={!isAuthorized}
-          explain="Number of images to generate. Maximum 1."
-        />
-      </DividerBlock>
-
-      <DividerBlock>
-        <Label
-          style={{
-            fontSize: "medium",
-            marginBottom: "0.5rem",
-            textAlign: "justify",
-          }}
-          htmlFor={selectId}
-        >
-          <strong>Image size</strong>
-        </Label>
-        <Select
-          onChange={(_, data) => updateSettings("size", data.value)}
-          id={selectId}
-          value={settings.size}
-          disabled={!isAuthorized}
-        >
-          <option value="1024x1024">1024x1024</option>
-          <option value="1792x1024">1792x1024</option>
-          <option value="1024x1792">1792</option>
-        </Select>
-      </DividerBlock>
-    </Card>
+      </Card>
+    </div>
   );
 };
