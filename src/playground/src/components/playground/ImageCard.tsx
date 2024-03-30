@@ -9,7 +9,7 @@ import {
   useId,
   Tooltip
 } from "@fluentui/react-components";
-import { useEventDataContext } from "../../providers/EventDataProvider";
+// import { useEventDataContext } from "../../providers/EventDataProvider";
 import { Card } from "./Card";
 import { Dispatch, useState } from "react";
 import { ExtendedImageGenerations } from "../../pages/playground/Image.state";
