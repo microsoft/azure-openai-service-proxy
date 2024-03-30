@@ -17,14 +17,6 @@ import { GetImagesOptions } from "@azure/openai";
 
 
 const useStyles = makeStyles({
-  startCard: {
-    display: "flex",
-    maxWidth: "80%",
-    marginTop: "35%",
-    marginLeft: "20%",
-    marginRight: "20%",
-    marginBottom: "35%",
-  },
 
   body: {
     paddingLeft: "15px",
@@ -52,51 +44,60 @@ const useStyles = makeStyles({
     fontWeight: "bold",
   },
 
-  container: {
-    display: "grid",
-    gridTemplateRows: "1fr 1fr 5fr",
-  },
-
-  imageList: {
-    ...shorthands.border("1px", "solid", "#ccc"),
-    display: "flex",
-  },
-
-  image: {
-    display: "flex",
-    flexDirection: "column",
-    ...shorthands.padding("15px"),
-    ...shorthands.margin("10px"),
-    ...shorthands.border("1px", "solid", "#333"),
-    maxHeight: "320px",
-  },
-
-  imageContainer: {
-    display: "flex",
-    ...shorthands.gap("2px"),
-    width: "300px",
-    height: "300px",
-    flexDirection: "column",
-    ...shorthands.overflow("hidden"),
-
-    "& img": {
-      width: "100%",
-      height: "100%",
-      objectFit: "cover",
-    },
-  },
   tooltip: {
     marginLeft: "6px",
   },
+
 });
 
-const ImagePrompt = ({ generateImage, isGenerating, setGenerating }: { generateImage: Dispatch<string>, isGenerating: boolean, setGenerating: Dispatch<React.SetStateAction<boolean>> }) => {
+const ImagePrompt = ({ generateImage, isGenerating, setGenerating, updateSettings }: {
+  generateImage: Dispatch<string>, isGenerating: boolean, setGenerating: Dispatch<React.SetStateAction<boolean>>, updateSettings: (
+    label: keyof GetImagesOptions | "model",
+    newValue: number | string
+  ) => void;
+}) => {
   const styles = useStyles();
   const promptId = useId();
   const [prompt, setPrompt] = useState("");
+  const { eventData, isAuthorized } = useEventDataContext();
 
   return (
+
     <div className={styles.searchRoot}>
+
+      <Label className={styles.label} htmlFor="ModelLabel" style={{ marginBottom: "0px", paddingBottom: "0px" }}>
+        Model
+        <Tooltip content="Select the model to use for the AI chat. The model determines the type of responses the AI will generate. Different models have different capabilities and are trained on different types of data."
+          relationship="description" >
+          <Info16Filled className={styles.tooltip} />
+        </Tooltip>
+      </Label>
+
+      <Select
+        id="capabilities"
+        style={{ marginTop: "0px", marginBottom: "0px", maxWidth: "200px" }}
+        disabled={!isAuthorized}
+        onChange={(e) => {
+          const newValue = e.currentTarget.value;
+          updateSettings("model", newValue);
+          // check if the model is selected
+          if (newValue) {
+            setGenerating(false);
+          } else {
+            setGenerating(true);
+          }
+          setPrompt("");
+        }}
+      >
+        <option value="">Select a model</option>
+        {eventData &&
+          eventData.capabilities["openai-dalle3"] &&
+          eventData.capabilities["openai-dalle3"].map((model) => (
+            <option key={model} value={model}>
+              {model}
+            </option>
+          ))}
+      </Select>
 
       <Label
         style={{ fontSize: "medium", marginBottom: "0.5rem" }}
@@ -109,7 +110,7 @@ const ImagePrompt = ({ generateImage, isGenerating, setGenerating }: { generateI
       </Label>
 
       <Textarea
-        style={{ width: "90%"}}
+        style={{ width: "90%" }}
         id={promptId}
         value={prompt}
         disabled={isGenerating}
@@ -121,8 +122,6 @@ const ImagePrompt = ({ generateImage, isGenerating, setGenerating }: { generateI
       <div>
         <Button
           onClick={() => {
-            // generateImage(prompt)
-            // setPrompt("");
             if (!isGenerating) {
               generateImage(prompt)
               setPrompt("");
@@ -216,6 +215,7 @@ const ImageList = ({ images, isGenerating, setGenerating }: { images: ExtendedIm
   );
 };
 
+
 export const ImageCard = ({
   generateImage,
   images,
@@ -230,40 +230,13 @@ export const ImageCard = ({
 
 }) => {
   const styles = useStyles();
-  const [isGenerating, setGenerating] = useState(false);
-  const { eventData, isAuthorized } = useEventDataContext();
+  const [isGenerating, setGenerating] = useState(true);
+
   return (
     <div className={styles.body}>
       <Card header="DALL·E playground">
 
-        <Label className={styles.label} htmlFor="ModelLabel" style={{ marginBottom: "0px", paddingBottom: "0px" }}>
-          Model
-          <Tooltip content="Select the model to use for the AI chat. The model determines the type of responses the AI will generate. Different models have different capabilities and are trained on different types of data."
-            relationship="description" >
-            <Info16Filled className={styles.tooltip} />
-          </Tooltip>
-        </Label>
-
-        <Select
-          id="capabilities"
-          style={{ marginTop: "0px", marginBottom: "0px", maxWidth: "200px" }}
-          disabled={!isAuthorized}
-          onChange={(e) => {
-            const newValue = e.currentTarget.value;
-            updateSettings("model", newValue);
-          }}
-        >
-          <option value="">Select a model</option>
-          {eventData &&
-            eventData.capabilities["openai-dalle3"] &&
-            eventData.capabilities["openai-dalle3"].map((model) => (
-              <option key={model} value={model}>
-                {model}
-              </option>
-            ))}
-        </Select>
-
-        <ImagePrompt generateImage={generateImage} isGenerating={isGenerating} setGenerating={setGenerating} />
+        <ImagePrompt generateImage={generateImage} isGenerating={isGenerating} setGenerating={setGenerating} updateSettings={updateSettings} />
         <ImageList images={images} isGenerating={isGenerating} setGenerating={setGenerating} />
 
       </Card>
