@@ -176,6 +176,7 @@ const ImageList = ({ images, isGenerating, setGenerating }: { images: ExtendedIm
           {image.generations &&
             image.generations.data.map((i) => {
               const url = i.url;
+              const revisedPrompt = i.revisedPrompt;
 
               if (isGenerating) {
                 setGenerating(false);
@@ -199,9 +200,9 @@ const ImageList = ({ images, isGenerating, setGenerating }: { images: ExtendedIm
                       </p>
 
                       <strong>Revised prompt</strong>
-                      {/* <p>
-                        {i.revised_prompt}
-                      </p> */}
+                      <p>
+                        {revisedPrompt}
+                      </p>
                     </div>
                   </div>
                 </>
