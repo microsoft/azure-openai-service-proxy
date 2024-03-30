@@ -1,5 +1,5 @@
 import {
-  Body1,
+  // Body1,
   Button,
   Input,
   Label,
@@ -113,30 +113,68 @@ const ImagePrompt = ({
 };
 
 const ImageList = ({ images }: { images: ExtendedImageGenerations[] }) => {
-  const styles = useStyles();
+  // const styles = useStyles();
   return (
-    <div className={styles.imageList}>
+
+    <div style={{
+      border: "0px solid #000",
+      flexDirection: "row-reverse",
+      display: "flex",
+      alignItems: "",
+      justifyContent: "flex-end",
+      flexWrap: "wrap-reverse"
+    }}>
+
       {images.map((image) => (
-        <div key={image.id} className={styles.image}>
-          <div className={styles.imageContainer}>
-            {!image.loaded && <p>Processing...</p>}
-            {image.generations &&
-              image.generations.data.map((i) => {
-                const url = i.url;
-                return (
-                  <>
-                    <img
-                      src={url}
-                      key={url}
-                      onClick={() => window.open(url)}
-                      style={{ cursor: "pointer" }}
-                    />
-                  </>
-                );
-              })}
-            {image.isError && <p>Error: {image.errorInfo?.message}</p>}
-          </div>
-          <p>{image.prompt}</p>
+
+        <div
+          key={image.id}
+          style={{
+            padding: "12px",
+            borderRadius: "5px",
+            width: "100%",
+            maxWidth: "300px",
+            display: "flex",
+            boxShadow:
+              "0px 0px 4px rgba(0, 0, 0, 0.36), 0px 0px 2px rgba(0, 0, 0, 0.24)",
+            marginRight: "24px",
+            marginBottom: "24px",
+            flex: "1 0 30%",
+          }}
+        >
+
+          {!image.loaded && <p>Processing...</p>}
+          {image.generations &&
+            image.generations.data.map((i) => {
+              const url = i.url;
+              return (
+                <>
+                  <div key={image.id}>
+                    <div>
+                      <img
+                        src={url}
+                        key={url}
+                        onClick={() => window.open(url)}
+                        style={{ cursor: "pointer", width: "100%", height: "100%", marginBottom: "12px" }}
+                      />
+                    </div>
+                    <div style={{ float: "left", textAlign: "left" }}>
+                      <strong>Original Prompt</strong>
+                      <p>
+                        {image.prompt}
+                      </p>
+
+                      <strong>Revised prompt</strong>
+                      {/* <p>
+                        {i.revised_prompt}
+                      </p> */}
+                    </div>
+                  </div>
+                </>
+              );
+            })}
+          {image.isError && <p>Error: {image.errorInfo?.message}</p>}
+
         </div>
       ))}
     </div>
