@@ -109,7 +109,7 @@ const ImagePrompt = ({ generateImage, isGenerating, setGenerating }: { generateI
       </Label>
 
       <Textarea
-        style={{ width: "100%"}}
+        style={{ width: "90%"}}
         id={promptId}
         value={prompt}
         disabled={isGenerating}
@@ -245,7 +245,7 @@ export const ImageCard = ({
 
         <Select
           id="capabilities"
-          style={{ marginTop: "0px", marginBottom: "0px" }}
+          style={{ marginTop: "0px", marginBottom: "0px", maxWidth: "200px" }}
           disabled={!isAuthorized}
           onChange={(e) => {
             const newValue = e.currentTarget.value;
