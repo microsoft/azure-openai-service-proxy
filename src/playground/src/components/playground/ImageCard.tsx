@@ -113,7 +113,7 @@ const ImagePrompt = ({ generateImage, isGenerating, setGenerating }: { generateI
         id={promptId}
         value={prompt}
         disabled={isGenerating}
-        placeholder="Enter a prompt. Eg: cute picture of an ca (Shift + Enter for new line)"
+        placeholder="Enter a prompt. Eg: cute picture of an cat (Shift + Enter for new line)"
         onChange={(e) => {
           setPrompt(e.currentTarget.value);
         }}
