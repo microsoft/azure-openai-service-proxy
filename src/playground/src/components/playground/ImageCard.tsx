@@ -1,7 +1,6 @@
 import {
-  // Body1,
   Button,
-  Input,
+  Select,
   Label,
   Textarea,
   makeStyles,
@@ -9,11 +8,12 @@ import {
   useId,
   Tooltip
 } from "@fluentui/react-components";
-// import { useEventDataContext } from "../../providers/EventDataProvider";
 import { Card } from "./Card";
 import { Dispatch, useState } from "react";
 import { ExtendedImageGenerations } from "../../pages/playground/Image.state";
 import { Info16Filled, SendRegular } from "@fluentui/react-icons";
+import { useEventDataContext } from "../../providers/EventDataProvider";
+import { GetImagesOptions } from "@azure/openai";
 
 
 const useStyles = makeStyles({
@@ -41,6 +41,15 @@ const useStyles = makeStyles({
     ...shorthands.gap("2px"),
     maxWidth: "100%",
     textAlign: "left",
+  },
+
+  label: {
+    fontSize: "medium",
+    marginBottom: "0px",
+    marginTop: "0px",
+    textAlign: "justify",
+    display: "block",
+    fontWeight: "bold",
   },
 
   container: {
@@ -85,7 +94,7 @@ const ImagePrompt = ({ generateImage, isGenerating, setGenerating }: { generateI
   const styles = useStyles();
   const promptId = useId();
   const [prompt, setPrompt] = useState("");
-  // const { isAuthorized } = useEventDataContext();
+
   return (
     <div className={styles.searchRoot}>
 
@@ -100,7 +109,7 @@ const ImagePrompt = ({ generateImage, isGenerating, setGenerating }: { generateI
       </Label>
 
       <Textarea
-        style={{ width: "100%", maxWidth: "800px" }}
+        style={{ width: "100%"}}
         id={promptId}
         value={prompt}
         disabled={isGenerating}
@@ -114,7 +123,7 @@ const ImagePrompt = ({ generateImage, isGenerating, setGenerating }: { generateI
           onClick={() => {
             // generateImage(prompt)
             // setPrompt("");
-            if(!isGenerating) {
+            if (!isGenerating) {
               generateImage(prompt)
               setPrompt("");
               setGenerating(true);
@@ -168,7 +177,7 @@ const ImageList = ({ images, isGenerating, setGenerating }: { images: ExtendedIm
             image.generations.data.map((i) => {
               const url = i.url;
 
-              if(isGenerating) {
+              if (isGenerating) {
                 setGenerating(false);
               }
 
@@ -209,15 +218,49 @@ const ImageList = ({ images, isGenerating, setGenerating }: { images: ExtendedIm
 export const ImageCard = ({
   generateImage,
   images,
+  updateSettings,
 }: {
   generateImage: Dispatch<string>;
   images: ExtendedImageGenerations[];
+  updateSettings: (
+    label: keyof GetImagesOptions | "model",
+    newValue: number | string
+  ) => void;
+
 }) => {
   const styles = useStyles();
   const [isGenerating, setGenerating] = useState(false);
+  const { eventData, isAuthorized } = useEventDataContext();
   return (
     <div className={styles.body}>
       <Card header="DALL·E playground">
+
+        <Label className={styles.label} htmlFor="ModelLabel" style={{ marginBottom: "0px", paddingBottom: "0px" }}>
+          Model
+          <Tooltip content="Select the model to use for the AI chat. The model determines the type of responses the AI will generate. Different models have different capabilities and are trained on different types of data."
+            relationship="description" >
+            <Info16Filled className={styles.tooltip} />
+          </Tooltip>
+        </Label>
+
+        <Select
+          id="capabilities"
+          style={{ marginTop: "0px", marginBottom: "0px" }}
+          disabled={!isAuthorized}
+          onChange={(e) => {
+            const newValue = e.currentTarget.value;
+            updateSettings("model", newValue);
+          }}
+        >
+          <option value="">Select a model</option>
+          {eventData &&
+            eventData.capabilities["openai-dalle3"] &&
+            eventData.capabilities["openai-dalle3"].map((model) => (
+              <option key={model} value={model}>
+                {model}
+              </option>
+            ))}
+        </Select>
 
         <ImagePrompt generateImage={generateImage} isGenerating={isGenerating} setGenerating={setGenerating} />
         <ImageList images={images} isGenerating={isGenerating} setGenerating={setGenerating} />

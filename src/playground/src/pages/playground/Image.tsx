@@ -1,5 +1,5 @@
 import { makeStyles } from "@fluentui/react-components";
-import { ImageParamsCard } from "../../components/playground/ImageParamsCard";
+// import { ImageParamsCard } from "../../components/playground/ImageParamsCard";
 import { GetImagesOptions } from "@azure/openai";
 import { useReducer } from "react";
 import { ImageCard } from "../../components/playground/ImageCard";
@@ -11,7 +11,8 @@ const useStyles = makeStyles({
   container: {
     textAlign: "center",
     display: "grid",
-    gridTemplateColumns: "2.5fr 1fr",
+    // gridTemplateColumns: "2.5fr 1fr",
+    gridTemplateColumns: "1fr",
     gridGap: "1px",
   },
 });
@@ -69,12 +70,14 @@ export const Image = () => {
       <ImageCard
         generateImage={generateImage}
         images={state.images}
+        updateSettings={updateSettings}
+        // settings={state.parameters}
         // canGenerate={client !== undefined && state.model !== undefined}
       />
-      <ImageParamsCard
+      {/* <ImageParamsCard
         updateSettings={updateSettings}
         settings={state.parameters}
-      />
+      /> */}
     </section>
   );
 };
