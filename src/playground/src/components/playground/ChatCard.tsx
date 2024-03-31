@@ -86,7 +86,7 @@ export const ChatCard = ({
           <Card className={chat.startCard}>
             <Body1 style={{ textAlign: "center"}}>
               {!canChat && (<h2>Select a model</h2>)}
-              {canChat && (<h2>Start Chatting</h2>)}
+              {canChat && (<h2>Start chatting</h2>)}
             </Body1>
           </Card>
         )}
