@@ -258,13 +258,18 @@ export const ImageCard = ({
 }) => {
   const styles = useStyles();
   const [isGenerating, setGenerating] = useState(true);
+  const { isAuthorized } = useEventDataContext();
 
   return (
     <div className={styles.body}>
       <Card header="DALL·E playground">
 
-        <ImagePrompt generateImage={generateImage} isGenerating={isGenerating} setGenerating={setGenerating} updateSettings={updateSettings} />
-        <ImageList images={images} isGenerating={isGenerating} setGenerating={setGenerating} />
+        {isAuthorized && (
+          <>
+            <ImagePrompt generateImage={generateImage} isGenerating={isGenerating} setGenerating={setGenerating} updateSettings={updateSettings} />
+            <ImageList images={images} isGenerating={isGenerating} setGenerating={setGenerating} />
+          </>
+        )}
 
       </Card>
     </div>
