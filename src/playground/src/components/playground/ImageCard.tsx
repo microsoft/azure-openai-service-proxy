@@ -11,7 +11,7 @@ import {
 import { Card } from "./Card";
 import { Dispatch, useState } from "react";
 import { ExtendedImageGenerations } from "../../pages/playground/Image.state";
-import { Info16Filled, SendRegular } from "@fluentui/react-icons";
+import { Info16Filled, SendRegular, Delete24Regular } from "@fluentui/react-icons";
 import { useEventDataContext } from "../../providers/EventDataProvider";
 import { GetImagesOptions } from "@azure/openai";
 
@@ -46,6 +46,12 @@ const useStyles = makeStyles({
 
   tooltip: {
     marginLeft: "6px",
+  },
+
+  smallButton: {
+    marginTop: "12px",
+    marginBottom: "12px",
+    marginRight: "12px",
   },
 
 });
@@ -118,25 +124,46 @@ const ImagePrompt = ({ generateImage, isGenerating, setGenerating, updateSetting
         onChange={(e) => {
           setPrompt(e.currentTarget.value);
         }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" && !e.shiftKey && prompt) {
+            generateImage(prompt);
+            setGenerating(true);
+            e.preventDefault();
+          }
+        }}
       />
       <div>
         <Button
           onClick={() => {
             if (!isGenerating) {
               generateImage(prompt)
-              setPrompt("");
               setGenerating(true);
             }
           }}
           disabled={!prompt || isGenerating}
+          className={styles.smallButton}
           icon={<SendRegular />}
           appearance="primary"
           style={{ textAlign: "left", marginBottom: "12px", marginTop: "12px" }}
         >
           Generate
         </Button>
+        <Button
+          onClick={() => {
+            if (!isGenerating) {
+              setPrompt("");
+            }
+          }}
+          disabled={!prompt || isGenerating}
+          className={styles.smallButton}
+          id="clear-button"
+          icon={<Delete24Regular />}
+          iconPosition="before"
+        >
+          Clear
+        </Button>
       </div>
-    </div>
+    </div >
   );
 };
 
