@@ -132,6 +132,7 @@ function ChatInput({
         <Textarea
           value={userPrompt}
           placeholder="Type user query here (Shift + Enter for new line)"
+          disabled={!canChat}
           onChange={(event) => setPrompt(event.target.value)}
           onKeyDown={(event) => {
             if (
@@ -165,6 +166,7 @@ function ChatInput({
         <Button
           className={chat.smallButton}
           id="clear-button"
+          disabled={!canChat}
           icon={<Delete24Regular />}
           iconPosition="before"
           onClick={onClear}

@@ -160,7 +160,7 @@ const ImagePrompt = ({ generateImage, isGenerating, setGenerating, updateSetting
           icon={<Delete24Regular />}
           iconPosition="before"
         >
-          Clear
+          Clear prompt
         </Button>
       </div>
     </div >
