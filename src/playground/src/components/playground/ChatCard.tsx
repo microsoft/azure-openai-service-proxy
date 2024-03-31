@@ -65,45 +65,54 @@ export const ChatCard = ({
   return (
     <Card header="Chat session" style={{ height: "calc(100vh - 92px)", display: "flex" }}>
 
-      <div
-        id={"chatContainer"}
-        style={{ overflowY: "auto" }}
-        ref={chatContainerRef}
-      >
-
-        {messageList.length > 1 ? (
-          messageList.map((message, index) => {
-            if (message.role === "system") {
-              return null;
-            }
-            return message.role === "user" ? (
-              <Message key={index} message={message} />
-            ) : (
-              <Response key={index} message={message} />
-            );
-          })
-        ) : (
-          <Card className={chat.startCard}>
-            <Body1 style={{ textAlign: "center"}}>
-              {!canChat && (<h2>Select a model</h2>)}
-              {canChat && (<h2>Start chatting</h2>)}
-            </Body1>
-          </Card>
-        )}
-      </div>
-      {isLoading && <Spinner />}
       {isAuthorized && (
-        <ChatInput
-          promptSubmitted={onPromptEntered}
-          onClear={onClear}
-          canChat={canChat}
-        />
-      )}
-      {!isAuthorized && (
         <>
-          <CardFooter style={{ height: "10vh" }}>
-            <p>Please enter your event code to start the chat session.</p>
-          </CardFooter>
+          <div
+            id={"chatContainer"}
+            style={{ overflowY: "auto" }}
+            ref={chatContainerRef}
+          >
+
+            {messageList.length > 1 ? (
+              messageList.map((message, index) => {
+                if (message.role === "system") {
+                  return null;
+                }
+                return message.role === "user" ? (
+                  <Message key={index} message={message} />
+                ) : (
+                  <Response key={index} message={message} />
+                );
+              })
+            ) : (
+              <Card className={chat.startCard}>
+                <Body1 style={{ textAlign: "center" }}>
+                  {!canChat && (<h2>Select a model</h2>)}
+                  {canChat && (
+                    <>
+                      <h2>Start chatting</h2>
+                      Test your assistant by sending queries below. Then adjust your assistant setup to improve the assistant's responses.
+                    </>
+                  )}
+                </Body1>
+              </Card>
+            )}
+          </div>
+          {isLoading && <Spinner />}
+          {isAuthorized && (
+            <ChatInput
+              promptSubmitted={onPromptEntered}
+              onClear={onClear}
+              canChat={canChat}
+            />
+          )}
+          {!isAuthorized && (
+            <>
+              <CardFooter style={{ height: "10vh" }}>
+                <p>Please enter your event code to start the chat session.</p>
+              </CardFooter>
+            </>
+          )}
         </>
       )}
     </Card>
