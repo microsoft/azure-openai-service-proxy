@@ -228,13 +228,23 @@ BEGIN
 		INTO v_request_count;
 
 --  Check for shared code request in the format of event-id@event-shared-id/user-id
-	IF p_api_key ~ '^[a-zA-Z0-9-]+@[a-zA-Z0-9]+/.*$' THEN
+--  Regex explained
+--  ^ asserts the start of the line.
+--  [a-zA-Z0-9-]{9} matches exactly 9 characters that can be any lowercase letter (a-z), uppercase letter (A-Z), digit (0-9), or hyphen (-).
+--  @{1} matches exactly one "@" character.
+--  [a-zA-Z0-9]{4,} matches at least 4 characters that can be any lowercase letter (a-z), uppercase letter (A-Z), or digit (0-9).
+--  / matches exactly one "/" character.
+--  .{8,} matches at least 8 of any character except newline.
+--  $ asserts the end of the line.
+
+	IF p_api_key ~ '^[a-zA-Z0-9-]{9}@{1}[a-zA-Z0-9]{4,}/.{8,}$' THEN
 
 		v_event_id := substring(p_api_key from '([a-zA-Z0-9-]+)');
 		v_event_shared_code := substring(p_api_key from '@([a-zA-Z0-9]+)');
 
 		v_hash := aoai.digest(p_api_key, 'sha256');
         v_hash_string := encode(v_hash, 'hex');
+
 -- Create a UUID from the v_hash_string. Uses the first 32 characters
 		v_api_key :=
 			substring(v_hash_string, 1, 8) || '-' ||
