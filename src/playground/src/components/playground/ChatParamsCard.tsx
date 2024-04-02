@@ -1,12 +1,12 @@
-import { Select, Tooltip, makeStyles, Label } from "@fluentui/react-components";
+import { Select, makeStyles } from "@fluentui/react-components";
 import { ParamInput } from "./ParamInput";
 import { useCallback } from "react";
 import { UsageData } from "../../interfaces/UsageData";
 import { useEventDataContext } from "../../providers/EventDataProvider";
 import type { GetChatCompletionsOptions } from "@azure/openai";
 import { Card } from "./Card";
-// import { ParamInputLabel } from "./ParamInputLabel";
-import { Info16Filled } from "@fluentui/react-icons";
+import { ParamSelect } from "./ParamSelect";
+import { LabelWithTooltip } from "./LabelWithTooltip";
 
 interface ChatParamsCardProps {
   startValues: GetChatCompletionsOptions;
@@ -18,27 +18,9 @@ interface ChatParamsCardProps {
 }
 
 const useStyles = makeStyles({
-  input: {
-    fontSize: "medium",
-    marginLeft: "0px",
-    width: "100%",
-    textAlign: "left",
-    height: "auto",
-  },
   container: {
     marginTop: "0px",
     marginBottom: "24px",
-  },
-  label: {
-    fontSize: "medium",
-    marginBottom: "0px",
-    marginTop: "0px",
-    textAlign: "justify",
-    display: "block",
-    fontWeight: "bold",
-  },
-  tooltip: {
-    marginLeft: "6px",
   },
   body: {
     paddingLeft: "15px",
@@ -47,7 +29,7 @@ const useStyles = makeStyles({
     marginRight: "0px",
     marginBottom: "0px",
     marginLeft: "0px",
-  }
+  },
 });
 
 export const ChatParamsCard = ({
@@ -72,34 +54,19 @@ export const ChatParamsCard = ({
   return (
     <div className={styles.body}>
       <Card header="Configuration">
-
-        <Label className={styles.label} htmlFor="ModelLabel" style={{ marginBottom: "0px", paddingBottom: "0px" }}>
-          Model
-          <Tooltip content="Select the model to use for the AI chat. The model determines the type of responses the AI will generate. Different models have different capabilities and are trained on different types of data."
-            relationship="description" >
-            <Info16Filled className={styles.tooltip} />
-          </Tooltip>
-        </Label>
-
-        <Select
-          id="model"
-          className={styles.input}
-          style={{ marginTop: "0px", marginBottom: "0px" }}
+        <ParamSelect
+          label="Model"
+          explain="Select the model to use for the AI chat. The model determines the type of responses the AI will generate. Different models have different capabilities and are trained on different types of data."
           disabled={!isAuthorized}
-          onChange={(e) => {
-            const newValue = e.currentTarget.value;
-            tokenUpdate("model", newValue);
-          }}
-        >
-          <option value="">Select a model</option>
-          {eventData &&
-            eventData.capabilities["openai-chat"] &&
-            eventData.capabilities["openai-chat"].map((model) => (
-              <option key={model} value={model}>
-                {model}
-              </option>
-            ))}
-        </Select>
+          defaultOption="Select a model"
+          options={
+            (eventData &&
+              eventData.capabilities["openai-chat"] &&
+              eventData.capabilities["openai-chat"]) ||
+            []
+          }
+          onUpdate={(newValue) => tokenUpdate("model", newValue)}
+        />
 
         <ParamInput
           label="Max response"
@@ -112,77 +79,53 @@ export const ChatParamsCard = ({
           explain="Set a limit on the number of tokens per model response. The API supports a maximum of tokens shared between the prompt and the model's response."
         />
 
-        <Label className={styles.label} htmlFor="Temperature" style={{ marginBottom: "0px", paddingBottom: "0px" }}>
-          Temperature
-          <Tooltip content="Controls randomness. Lowering the temperature means that the model will produce more repetitive and deterministic responses. Increasing the temperature will result in more unexpected or creative responses. Try adjusting temperature or Top P but not both."
-            relationship="description" >
-            <Info16Filled className={styles.tooltip} />
-          </Tooltip>
-        </Label>
-
-        <Select
-          id="temperature"
-          className={styles.input}
-          style={{ marginTop: "0px" }}
-          onChange={(e) => {
-            const newValue = e.currentTarget.value;
-            if (newValue) {
-              tokenUpdate("temperature", newValue);
-            }
-          }}
+        <ParamSelect
+          label="Temperature"
+          explain="Controls randomness. Lowering the temperature means that the model will produce more repetitive and deterministic responses. Increasing the temperature will result in more unexpected or creative responses. Try adjusting temperature or Top P but not both."
+          onUpdate={(newValue) => tokenUpdate("temperature", newValue)}
           disabled={!isAuthorized}
-          defaultValue={startValues.temperature || 0}
-        >
-          <option value="0">0</option>
-          <option value="0.1">0.1</option>
-          <option value="0.2">0.2</option>
-          <option value="0.3">0.3</option>
-          <option value="0.4">0.4</option>
-          <option value="0.5">0.5</option>
-          <option value="0.6">0.6</option>
-          <option value="0.7">0.7</option>
-          <option value="0.8">0.8</option>
-          <option value="0.9">0.9</option>
-          <option value="1">1</option>
-        </Select>
+          options={[
+            "0",
+            "0.1",
+            "0.2",
+            "0.3",
+            "0.4",
+            "0.5",
+            "0.6",
+            "0.7",
+            "0.8",
+            "0.9",
+            "1",
+          ]}
+          defaultValue={startValues.temperature || "0"}
+        />
 
-        <Label className={styles.label} htmlFor="topP" style={{ marginBottom: "0px", paddingBottom: "0px" }}>
-          Top P
-          <Tooltip content="Similar to temperature, this controls randomness but uses a different method. Lowering Top P will narrow the model’s token selection to likelier tokens. Increasing Top P will let the model choose from tokens with both high and low likelihood. Try adjusting temperature or Top P but not both."
-            relationship="description" >
-            <Info16Filled className={styles.tooltip} />
-          </Tooltip>
-        </Label>
-
-        <Select
-          id="topP"
-          className={styles.input}
-          style={{ marginTop: "0px" }}
-          onChange={(e) => {
-            const newValue = e.currentTarget.value;
-            if (newValue) {
-              tokenUpdate("topP", newValue);
-            }
-          }}
+        <ParamSelect
+          label="Top P"
+          explain="Similar to temperature, this controls randomness but uses a different method. Lowering Top P will narrow the model's token selection to likelier tokens. Increasing Top P will let the model choose from tokens with both high and low likelihood. Try adjusting temperature or Top P but not both."
+          onUpdate={(newValue) => tokenUpdate("topP", newValue)}
           disabled={!isAuthorized}
-          defaultValue={startValues.topP || 0}
-        >
-          <option value="0">0</option>
-          <option value="0.1">0.1</option>
-          <option value="0.2">0.2</option>
-          <option value="0.3">0.3</option>
-          <option value="0.4">0.4</option>
-          <option value="0.5">0.5</option>
-          <option value="0.6">0.6</option>
-          <option value="0.7">0.7</option>
-          <option value="0.8">0.8</option>
-          <option value="0.9">0.9</option>
-          <option value="1">1</option>
-        </Select>
+          options={[
+            "0",
+            "0.1",
+            "0.2",
+            "0.3",
+            "0.4",
+            "0.5",
+            "0.6",
+            "0.7",
+            "0.8",
+            "0.9",
+            "1",
+          ]}
+          defaultValue={startValues.topP || "0"}
+        />
 
-        <Label className={styles.label} htmlFor="functions" style={{ marginBottom: "0px", paddingBottom: "0px" }}>
-          OpenAI Functions
-        </Label>
+        <LabelWithTooltip
+          label="OpenAI Functions"
+          id="functions"
+          explain="OpenAI Functions are custom functions that can be used to process the AI response. They can be used to filter, modify, or enhance the AI output. Select 'auto' to use the default function or 'none' to disable functions."
+        />
 
         <Select
           id="functions"
@@ -214,25 +157,30 @@ export const ChatParamsCard = ({
       </Card>
 
       <Card header="API Response">
-
         <div style={{ padding: "0px", margin: "0px", marginTop: "0px" }}>
-
-          <Label className={styles.label} htmlFor="topP" style={{ marginBottom: "6px", paddingBottom: "6px", borderBottom: "1px solid #306ab7" }}>
-            Tokens
-            <Tooltip content="Input/output tokens in AI processing are pieces of text, like words or punctuation, that AI models like GPT-3 use to understand and generate language. They're counted to measure usage for processing and billing."
-              relationship="description" >
-              <Info16Filled className={styles.tooltip} />
-            </Tooltip>
-          </Label>
-
-          <strong>Finish Reason:</strong> {usageData.finish_reason}<br />
-          <strong>Completion Tokens:</strong> {usageData.completion_tokens}<br />
-          <strong>Prompt Tokens:</strong> {usageData.prompt_tokens}<br />
-          <strong>Total Tokens:</strong> {usageData.total_tokens}<br />
-
+          <p
+            style={{
+              marginBottom: "6px",
+              paddingBottom: "6px",
+              borderBottom: "1px solid #306ab7",
+            }}
+          >
+            <LabelWithTooltip
+              label="Tokens"
+              id="topP"
+              explain="Input/output tokens in AI processing are pieces of text, like words or punctuation, that AI models like GPT-3 use to understand and generate language. They're counted to measure usage for processing and billing."
+            />
+          </p>
+          <strong>Finish Reason:</strong> {usageData.finish_reason}
+          <br />
+          <strong>Completion Tokens:</strong> {usageData.completion_tokens}
+          <br />
+          <strong>Prompt Tokens:</strong> {usageData.prompt_tokens}
+          <br />
+          <strong>Total Tokens:</strong> {usageData.total_tokens}
+          <br />
           <br />
           <strong>Response Time:</strong> {usageData.response_time} ms
-
         </div>
       </Card>
     </div>

@@ -1,24 +1,24 @@
 import { useEffect, useState } from "react";
-import { Input, Label, useId, makeStyles, Tooltip } from "@fluentui/react-components";
-import { Info16Filled } from "@fluentui/react-icons";
+import { Input, useId, makeStyles } from "@fluentui/react-components";
+import { LabelWithTooltip } from "./LabelWithTooltip";
 
 interface InputProps {
   label: string;
   defaultValue: number;
   onUpdate: (newValue: number) => void;
   type:
-  | "text"
-  | "number"
-  | "password"
-  | "search"
-  | "time"
-  | "email"
-  | "tel"
-  | "url"
-  | "date"
-  | "datetime-local"
-  | "month"
-  | "week";
+    | "text"
+    | "number"
+    | "password"
+    | "search"
+    | "time"
+    | "email"
+    | "tel"
+    | "url"
+    | "date"
+    | "datetime-local"
+    | "month"
+    | "week";
   min: number;
   max: number;
   disabled: boolean;
@@ -42,19 +42,7 @@ const useStyles = makeStyles({
   container: {
     marginTop: "0px",
   },
-  label: {
-    fontSize: "medium",
-    marginTop: "0px",
-    marginBottom: "0px",
-    textAlign: "justify",
-    display: "block",
-    fontWeight: "bold",
-  },
-  tooltip: {
-    marginLeft: "6px",
-  },
 });
-
 
 export const ParamInput = (props: InputProps) => {
   const { label, explain, defaultValue, onUpdate, min, max, ...rest } = props;
@@ -68,18 +56,13 @@ export const ParamInput = (props: InputProps) => {
 
   return (
     <div className={styles.container}>
-      <Label className={styles.label} htmlFor={id}>
-        {label}
-        <Tooltip content={explain} relationship="description" >
-          <Info16Filled className={styles.tooltip} />
-        </Tooltip>
-      </Label>
+      <LabelWithTooltip label={label} explain={explain} id={id} />
 
       <Input
         className={styles.input}
         id={id}
         onChange={(e) => {
-            const newValue = e.currentTarget.value;
+          const newValue = e.currentTarget.value;
           if (newValue === "" || newValue === undefined) {
             setValue(0);
           } else {
@@ -104,7 +87,14 @@ export const ParamInput = (props: InputProps) => {
         value={value.toString()}
         {...rest}
       />
-      <div style={{ color: "GrayText", fontSize: "small", textAlign: "left", margin: "0px" }} >
+      <div
+        style={{
+          color: "GrayText",
+          fontSize: "small",
+          textAlign: "left",
+          margin: "0px",
+        }}
+      >
         Accepted Value: {min} - {max}
       </div>
     </div>
