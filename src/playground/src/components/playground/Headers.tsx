@@ -5,7 +5,7 @@ import {
   shorthands,
 } from "@fluentui/react-components";
 import { useLocation, useNavigate } from "react-router-dom";
-import { ApiKeyInput } from "./EventCodeInput";
+import { ApiKeyInput } from "./controls/EventCodeInput";
 import {
   EventData,
   useEventDataContext,
@@ -42,12 +42,21 @@ export const Header = () => {
   return (
     <div className={styles.container}>
       <div>
-        <div style={{ height: "48px", float: "left", marginRight: "24px", paddingLeft: "15px", paddingTop: "14px" }}>
-
+        <div
+          style={{
+            height: "48px",
+            float: "left",
+            marginRight: "24px",
+            paddingLeft: "15px",
+            paddingTop: "14px",
+          }}
+        >
           {isAuthorized && (
             <>
-
-              <img src={eventData?.imageUrl ? eventData?.imageUrl : "/logo.png"} style={{ height: "24px" }} />
+              <img
+                src={eventData?.imageUrl ? eventData?.imageUrl : "/logo.png"}
+                style={{ height: "24px" }}
+              />
               <br />
               {/* {eventData!.url.length !== 0 && (
                 <a
@@ -59,13 +68,13 @@ export const Header = () => {
                 </a>)} */}
 
               {eventData!.name}
-
             </>
           )}
           {!isAuthorized && (
             <>
               <img src={"/logo.png"} style={{ height: "24px" }} />
-            </>)}
+            </>
+          )}
         </div>
 
         <TabList
@@ -74,7 +83,6 @@ export const Header = () => {
             data.value === "chat" ? navigate("/") : navigate(`/${data.value}`);
           }}
         >
-
           {isAuthorized && (
             <>
               {hasCapability(eventData, "openai-chat") && (
@@ -85,7 +93,6 @@ export const Header = () => {
               )}
             </>
           )}
-
         </TabList>
       </div>
       <div className={styles.right}>

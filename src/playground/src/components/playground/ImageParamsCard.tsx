@@ -2,7 +2,7 @@ import { makeStyles } from "@fluentui/react-components";
 import { Card } from "./Card";
 import { GetImagesOptions } from "@azure/openai";
 import { useEventDataContext } from "../../providers/EventDataProvider";
-import { ParamSelect } from "./ParamSelect";
+import { ParamSelect } from "./controls/ParamSelect";
 
 const useStyles = makeStyles({
   container: {

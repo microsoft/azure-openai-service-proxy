@@ -7,7 +7,7 @@ import {
   useId,
 } from "@fluentui/react-components";
 import { useState } from "react";
-import { useEventDataContext } from "../../providers/EventDataProvider";
+import { useEventDataContext } from "../../../providers/EventDataProvider";
 
 const useStyles = makeStyles({
   container: {
