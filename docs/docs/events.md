@@ -24,7 +24,10 @@ From the AI Proxy Admin portal, you can create and manage events. An event is a 
 
         - Note, no PII is stored, the API KEY is one way hashed (sha256) and stored in the database for per user usage tracking.
 
-    1. **Event Image URL**: In most cases, you can leave this field blank. The URL of the event image used to provide some branding for the event on the AI Playground. The image should be rectangular, approximately 24 pixels high, and approximately 200 pixels wide. If the image bigger or smaller, it will be resized to fit the space in the top left hand side of the Playground.
+    1. **Event Image URL**: In most cases, you can leave this field blank.
+
+        - The URL of the event image used to provide some branding for the event on the AI Playground. The image should be rectangular, approximately 24 pixels high, and approximately 200 pixels wide. If the image bigger or smaller, it will be resized to fit the space in the top left hand side of the Playground.
+
     1. **Organizer Name**: The name of the event organizer.
     1. **Organizer Email**: The email of the event organizer.
     1. **Start Date**: The start date/time of the event. You can set the date/time using the date picker or by typing the date/time in the format `YYYY-MM-DDTHH:MM:SS`.
