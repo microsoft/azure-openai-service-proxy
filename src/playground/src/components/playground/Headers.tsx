@@ -49,18 +49,16 @@ export const Header = () => {
 
               <img src={eventData?.imageUrl ? eventData?.imageUrl : "/logo.png"} style={{ height: "24px" }} />
               <br />
-              {eventData!.url.length !== 0 && (
+              {/* {eventData!.url.length !== 0 && (
                 <a
                   href={eventData!.url}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
                   {eventData!.name}
-                </a>)}
+                </a>)} */}
 
-              {eventData!.url.length === 0 && (
-                eventData!.name
-              )}
+              {eventData!.name}
 
             </>
           )}

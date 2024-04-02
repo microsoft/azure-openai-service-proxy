@@ -11,8 +11,6 @@ import { eventInfo } from "../api/eventInfo";
 
 export type EventData = {
   name: string;
-  url: string;
-  urlText: string;
   maxTokenCap: number;
   capabilities: Record<string, string[]>;
   imageUrl?: string;
@@ -60,8 +58,6 @@ const EventDataProvider: React.FC<PropsWithChildren> = ({ children }) => {
         const data = await eventInfo(eventCode, abortController);
         setEventData(() => ({
           name: data.event_code,
-          url: data.event_url,
-          urlText: data.event_url_text,
           maxTokenCap: data.max_token_cap,
           capabilities: data.capabilities || [],
           imageUrl: data.event_image_url,
