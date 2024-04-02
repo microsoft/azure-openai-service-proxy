@@ -50,11 +50,10 @@ public partial class EventEdit : ComponentBase
         SelectedModels = CurrentModels.Select(oc => oc.CatalogId.ToString());
 
         Model.Name = evt.EventCode;
+        Model.EventSharedCode = evt.EventSharedCode;
         Model.Description = evt.EventMarkdown;
         Model.Start = evt.StartTimestamp;
         Model.End = evt.EndTimestamp;
-        Model.Url = evt.EventUrl;
-        Model.UrlText = evt.EventUrlText;
         Model.EventImageUrl = evt.EventImageUrl;
         Model.OrganizerEmail = evt.OrganizerEmail;
         Model.OrganizerName = evt.OrganizerName;

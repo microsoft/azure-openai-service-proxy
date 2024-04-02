@@ -10,16 +10,12 @@ public class EventEditorModel
     [StringLength(64)]
     public string? Name { get; set; }
 
-    [Required(ErrorMessage = "Url text is required")]
-    [StringLength(256)]
-    public string? UrlText { get; set; }
-    [Required(ErrorMessage = "Url is required")]
-    [StringLength(256)]
-    [Url]
-    public string? Url { get; set; }
+
+    [StringLength(64)]
+    [RegularExpression(@"^[a-zA-Z0-9]*$", ErrorMessage = "Event shared code must be alphanumeric")]
+    public string? EventSharedCode { get; set; }
 
     [StringLength(256)]
-    [Url]
     public string? EventImageUrl { get; set; }
 
     [Required]

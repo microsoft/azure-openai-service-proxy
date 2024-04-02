@@ -27,8 +27,6 @@ export type EventInfo = {
   capabilities: Record<string, string[]>;
   event_code: string;
   event_image_url: string;
-  event_url: string;
-  event_url_text: string;
   max_token_cap: number;
   is_authorized: boolean;
   organizer_name: string;

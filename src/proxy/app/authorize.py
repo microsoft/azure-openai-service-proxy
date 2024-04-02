@@ -54,7 +54,6 @@ class Authorize:
             result_dict = dict(result)
             result_dict["is_authorized"] = True
             result_dict["deployment_name"] = deployment_name
-            result_dict["api_key"] = api_key
             del result_dict["rate_limit_exceed"]
 
             return AuthorizeResponse(**result_dict)

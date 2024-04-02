@@ -2,11 +2,11 @@
 
 import json
 import logging
+from typing import Any
 from uuid import UUID
 
 import asyncpg
 from fastapi import HTTPException
-from typing import Any
 from pydantic import BaseModel, Json
 
 from .db_manager import DBManager
@@ -23,15 +23,13 @@ class MonitorEntity(BaseModel):
     user_id: str
     event_id: str
     event_code: str
-    event_url: str
-    event_url_text: str
     event_image_url: str | None = None
     organizer_name: str
     organizer_email: str
     deployment_name: str
     api_key: str
     catalog_id: UUID | None = None
-    usage: Json[Any] | None = '{}'
+    usage: Json[Any] | None = "{}"
 
     def __init__(
         self,
@@ -41,15 +39,13 @@ class MonitorEntity(BaseModel):
         user_id: str,
         event_id: str,
         event_code: str,
-        event_url: str,
-        event_url_text: str,
         event_image_url: str,
         organizer_name: str,
         organizer_email: str,
         deployment_name: str,
         api_key: str,
         catalog_id: UUID | None = None,
-        usage: Json[Any] | None = '{}'
+        usage: Json[Any] | None = "{}",
     ) -> None:
         super().__init__(
             is_authorized=is_authorized,
@@ -58,8 +54,6 @@ class MonitorEntity(BaseModel):
             user_id=user_id,
             event_id=event_id,
             event_code=event_code,
-            event_url=event_url,
-            event_url_text=event_url_text,
             event_image_url=event_image_url,
             organizer_name=organizer_name,
             organizer_email=organizer_email,
