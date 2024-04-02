@@ -245,13 +245,13 @@ BEGIN
 		v_hash := aoai.digest(p_api_key, 'sha256');
         v_hash_string := encode(v_hash, 'hex');
 
--- Create a UUID from the v_hash_string. Uses the first 32 characters
+-- Create a UUID from the v_hash_string. v_hash_string is 64 chars create a uuid from chars across the hash string
 		v_api_key :=
 			substring(v_hash_string, 1, 8) || '-' ||
-			substring(v_hash_string, 9, 4) || '-' ||
-			substring(v_hash_string, 13, 4) || '-' ||
-			substring(v_hash_string, 17, 4) || '-' ||
-			substring(v_hash_string, 21, 12);
+			substring(v_hash_string, 10, 4) || '-' ||
+			substring(v_hash_string, 20, 4) || '-' ||
+			substring(v_hash_string, 30, 4) || '-' ||
+			substring(v_hash_string, 40, 12);
 
 --  Create an attendee record if this is a shared id event request
 		INSERT INTO aoai.event_attendee(user_id, event_id, active, api_key)
