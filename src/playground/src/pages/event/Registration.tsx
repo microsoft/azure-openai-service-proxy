@@ -181,7 +181,7 @@ export const Registration = () => {
             <div>
               <p>
                 Copy the API Key, then navigate to the{" "}
-                <Link href={`${window.location.origin}`}>Playground</Link>.
+                <Link href={`${window.location.origin}`} target="_blank" rel="noopener noreferrer">Playground</Link>.
               </p>
             </div>
             <Field label="Endpoint" size="large">
