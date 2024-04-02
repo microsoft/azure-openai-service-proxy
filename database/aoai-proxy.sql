@@ -227,7 +227,7 @@ BEGIN
 	    WHERE EAR.api_key = p_api_key AND date_stamp = CURRENT_DATE), 0)
 		INTO v_request_count;
 
---  Check for shared code request in the format of event-id@event-shared-id/user-id
+--  Check for shared code request in the format of event-id@event-shared-code/email-address
 --  Regex explained
 --  ^ asserts the start of the line.
 --  [a-zA-Z0-9-]{9} matches exactly 9 characters that can be any lowercase letter (a-z), uppercase letter (A-Z), digit (0-9), or hyphen (-).
