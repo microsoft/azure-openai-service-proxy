@@ -232,7 +232,7 @@ BEGIN
 --  ^ asserts the start of the line.
 --  [a-zA-Z0-9-]{9} matches exactly 9 characters that can be any lowercase letter (a-z), uppercase letter (A-Z), digit (0-9), or hyphen (-).
 --  @{1} matches exactly one "@" character.
---  [a-zA-Z0-9]{4,} matches at least 4 characters that can be any lowercase letter (a-z), uppercase letter (A-Z), or digit (0-9).
+--  [a-zA-Z0-9]{5,} matches at least 5 characters that can be any lowercase letter (a-z), uppercase letter (A-Z), or digit (0-9).
 --  / matches exactly one "/" character.
 --  .{8,} matches at least 8 of any character except newline.
 --  $ asserts the end of the line.
