@@ -3,6 +3,7 @@ import {
   Button,
   Textarea,
   makeStyles,
+  shorthands
 } from "@fluentui/react-components";
 import { Dispatch, useEffect, useState } from "react";
 import { Save24Regular, ArrowReset24Regular } from "@fluentui/react-icons";
@@ -24,18 +25,11 @@ const useStyles = makeStyles({
   wrapper: {
     width: "100%",
     marginBottom: "12px",
-    paddingTop: "15px",
-    paddingRight: "15px",
-    paddingBottom: "15px",
-    paddingLeft: "15px"
+    ...shorthands.padding("15px"),
   },
   body: {
-    paddingLeft: "15px",
-    paddingRight: "15px",
-    marginTop: "0px",
-    marginRight: "0px",
-    marginBottom: "0px",
-    marginLeft: "0px",
+    ...shorthands.padding("0px", "15px"),
+    ...shorthands.margin("0px"),
   }
 });
 

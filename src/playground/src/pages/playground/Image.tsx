@@ -1,5 +1,4 @@
 import { makeStyles } from "@fluentui/react-components";
-// import { ImageParamsCard } from "../../components/playground/ImageParamsCard";
 import { GetImagesOptions } from "@azure/openai";
 import { useReducer } from "react";
 import { ImageCard } from "../../components/playground/ImageCard";
@@ -71,10 +70,6 @@ export const Image = () => {
         images={state.images}
         updateSettings={updateSettings}
       />
-      {/* <ImageParamsCard
-        updateSettings={updateSettings}
-        settings={state.parameters}
-      /> */}
     </section>
   );
 };

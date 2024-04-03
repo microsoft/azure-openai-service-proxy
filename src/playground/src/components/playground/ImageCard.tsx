@@ -19,12 +19,8 @@ import { GetImagesOptions } from "@azure/openai";
 const useStyles = makeStyles({
 
   body: {
-    paddingLeft: "15px",
-    paddingRight: "15px",
-    marginTop: "0px",
-    marginRight: "0px",
-    marginBottom: "0px",
-    marginLeft: "0px",
+    ...shorthands.padding("0px", "15px"),
+    ...shorthands.margin("0px"),
   },
 
   searchRoot: {
@@ -37,8 +33,7 @@ const useStyles = makeStyles({
 
   label: {
     fontSize: "medium",
-    marginBottom: "0px",
-    marginTop: "0px",
+    ...shorthands.margin("0px", "0"),
     textAlign: "justify",
     display: "block",
     fontWeight: "bold",
@@ -49,10 +44,35 @@ const useStyles = makeStyles({
   },
 
   smallButton: {
-    marginTop: "12px",
-    marginBottom: "12px",
-    marginRight: "12px",
+    ...shorthands.margin("12px", "12px", "12px"),
   },
+
+  modelSelect: {
+    ...shorthands.margin("0px", "0px"),
+    maxWidth: "200px"
+  },
+
+  imageContainer: {
+    ...shorthands.border("0px", "solid", "#000"),
+    flexDirection: "row-reverse",
+    display: "flex",
+    alignItems: "",
+    justifyContent: "flex-end",
+    flexWrap: "wrap-reverse",
+  },
+
+  imageItem: {
+      ...shorthands.padding("12px"),
+      ...shorthands.borderRadius("5px"),
+      width: "100%",
+      maxWidth: "300px",
+      display: "flex",
+      boxShadow:
+        "0px 0px 4px rgba(0, 0, 0, 0.36), 0px 0px 2px rgba(0, 0, 0, 0.24)",
+      marginRight: "24px",
+      marginBottom: "24px",
+      ...shorthands.flex("1", "0", "30%"),
+  }
 
 });
 
@@ -81,7 +101,7 @@ const ImagePrompt = ({ generateImage, isGenerating, setGenerating, updateSetting
 
       <Select
         id="capabilities"
-        style={{ marginTop: "0px", marginBottom: "0px", maxWidth: "200px" }}
+        className={styles.modelSelect}
         disabled={!isAuthorized}
         onChange={(e) => {
           const newValue = e.currentTarget.value;
@@ -168,35 +188,14 @@ const ImagePrompt = ({ generateImage, isGenerating, setGenerating, updateSetting
 };
 
 const ImageList = ({ images, isGenerating, setGenerating }: { images: ExtendedImageGenerations[], isGenerating: boolean, setGenerating: Dispatch<React.SetStateAction<boolean>> }) => {
-  // const styles = useStyles();
+  const styles = useStyles();
   return (
 
-    <div style={{
-      border: "0px solid #000",
-      flexDirection: "row-reverse",
-      display: "flex",
-      alignItems: "",
-      justifyContent: "flex-end",
-      flexWrap: "wrap-reverse"
-    }}>
+    <div className={styles.imageContainer}>
 
       {images.map((image) => (
 
-        <div
-          key={image.id}
-          style={{
-            padding: "12px",
-            borderRadius: "5px",
-            width: "100%",
-            maxWidth: "300px",
-            display: "flex",
-            boxShadow:
-              "0px 0px 4px rgba(0, 0, 0, 0.36), 0px 0px 2px rgba(0, 0, 0, 0.24)",
-            marginRight: "24px",
-            marginBottom: "24px",
-            flex: "1 0 30%",
-          }}
-        >
+        <div key={image.id} className={styles.imageItem}>
 
           {!image.loaded && <p>Processing...</p>}
           {image.generations &&

@@ -1,4 +1,4 @@
-import { makeStyles } from "@fluentui/react-components";
+import { makeStyles, shorthands } from "@fluentui/react-components";
 import { Card } from "./Card";
 import { GetImagesOptions } from "@azure/openai";
 import { useEventDataContext } from "../../providers/EventDataProvider";
@@ -6,17 +6,12 @@ import { ParamSelect } from "./controls/ParamSelect";
 
 const useStyles = makeStyles({
   container: {
-    marginTop: "0px",
-    marginBottom: "24px",
+    ...shorthands.margin("0px", "0px", "24px"),
   },
 
   body: {
-    paddingLeft: "15px",
-    paddingRight: "15px",
-    marginTop: "0px",
-    marginRight: "0px",
-    marginBottom: "0px",
-    marginLeft: "0px",
+    ...shorthands.padding("0px", "15px"),
+    ...shorthands.margin("0px"),
   },
 });
 

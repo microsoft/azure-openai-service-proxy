@@ -20,6 +20,12 @@ const useStyles = makeStyles({
     justifySelf: "right",
     ...shorthands.padding("0px", "20px", "0px", "0px"),
   },
+  header: {
+    height: "48px",
+    float: "left",
+    marginRight: "24px",
+    ...shorthands.padding("14px", "0px", "0px", "15px"),
+  },
 });
 
 const hasCapability = (
@@ -42,15 +48,7 @@ export const Header = () => {
   return (
     <div className={styles.container}>
       <div>
-        <div
-          style={{
-            height: "48px",
-            float: "left",
-            marginRight: "24px",
-            paddingLeft: "15px",
-            paddingTop: "14px",
-          }}
-        >
+        <div className={styles.header}>
           {isAuthorized && (
             <>
               <img

@@ -22,10 +22,8 @@ const useStyles = makeStyles({
     boxShadow:
       "0px 0px 4px rgba(0, 0, 0, 0.36), 0px 0px 2px rgba(0, 0, 0, 0.24)",
     backgroundColor: "#fff",
-    ...shorthands.padding("12px"),
+    ...shorthands.padding("12px", "24px"),
     ...shorthands.borderRadius("2px"),
-    paddingLeft: "24px",
-    paddingRight: "24px",
   },
   icon: {
     minWidth:"24px",

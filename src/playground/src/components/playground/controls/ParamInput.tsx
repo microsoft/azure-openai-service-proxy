@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Input, useId, makeStyles } from "@fluentui/react-components";
+import { Input, useId, makeStyles, shorthands } from "@fluentui/react-components";
 import { LabelWithTooltip } from "./LabelWithTooltip";
 
 interface InputProps {
@@ -28,15 +28,10 @@ interface InputProps {
 const useStyles = makeStyles({
   input: {
     fontSize: "14px",
-    marginLeft: "0px",
-    marginBottom: "0px",
-    marginTop: "10px",
+    ...shorthands.margin("10px", "0px", "0px"),
     width: "100%",
     textAlign: "left",
-    paddingLeft: "10px",
-    paddingRight: "6px",
-    paddingTop: "1px",
-    paddingBottom: "6px",
+    ...shorthands.padding("1px", "6px", "6px", "10px"),
     height: "auto",
   },
   container: {

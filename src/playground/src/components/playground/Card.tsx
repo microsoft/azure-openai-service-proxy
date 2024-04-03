@@ -6,26 +6,21 @@ import {
   Card as FluentUICard,
   makeStyles,
   mergeClasses,
+  shorthands,
 } from "@fluentui/react-components";
 
 const useStyles = makeStyles({
   card: {
-    ...shorthand.padding("0px", "24px", "24px"),
+    ...shorthands.padding("0px", "24px", "24px"),
     marginTop: "24px",
     textAlign: "left"
   },
   header: {
-    marginTop: "0px",
-    marginBottom: "12px",
-    marginRight: "0px",
-    marginLeft: "0px",
-    paddingBottom: "0px",
-    paddingTop: "0px",
+    ...shorthands.margin("0px", "0px", "12px"),
+    ...shorthands.padding("0px"),
     textAlign: "left",
     fontWeight: "bold",
-    borderBottomColor: "#306ab7",
-    borderBottomStyle: "solid",
-    borderBottomWidth: "2px",
+    ...shorthands.borderBottom("2px", "solid", "#306ab7"),
     color: "#111"
   },
   maxWidth: {

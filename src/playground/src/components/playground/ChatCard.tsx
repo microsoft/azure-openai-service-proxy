@@ -6,6 +6,7 @@ import {
   Field,
   Textarea,
   Spinner,
+  shorthands
 } from "@fluentui/react-components";
 import { Dispatch, useEffect, useRef, useState } from "react";
 import { Delete24Regular, SendRegular } from "@fluentui/react-icons";
@@ -31,17 +32,19 @@ const useStyles = makeStyles({
     width: "100%",
     height: "40%",
     maxWidth: "none",
+    textAlign: "left",
+    marginBottom: "12px"
   },
   startCard: {
     display: "flex",
     maxWidth: "80%",
-    marginTop: "35%",
-    marginBottom: "35%",
-    marginLeft: "20%",
-    marginRight: "20%",
-    paddingTop: "20px",
-    paddingBottom: "20px",
-  }
+    ...shorthands.margin("35%", "20%"),
+    ...shorthands.padding("20px", "0px"),
+  },
+  chatCard: {
+    display: "flex",
+    height: "calc(100vh - 92px)",
+  },
 });
 
 export const ChatCard = ({
@@ -63,7 +66,7 @@ export const ChatCard = ({
   }, [messageList]);
 
   return (
-    <Card header="Chat session" style={{ height: "calc(100vh - 92px)", display: "flex" }}>
+    <Card header="Chat session" className={chat.chatCard} >
 
       {isAuthorized && (
         <>
@@ -164,7 +167,6 @@ function ChatInput({
           icon={<SendRegular />}
           iconPosition="before"
           appearance="primary"
-          style={{ textAlign: "left", marginBottom: "12px" }}
           onClick={() => {
             promptSubmitted(userPrompt);
             setPrompt("");

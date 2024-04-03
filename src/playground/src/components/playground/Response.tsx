@@ -23,11 +23,9 @@ const useStyles = makeStyles({
     marginLeft: "12px",
     backgroundColor: "#fff",
     boxShadow: "0px 0px 4px rgba(0, 0, 0, 0.36), 0px 0px 2px rgba(0, 0, 0, 0.24)",
-    ...shorthands.padding("0px"),
+    ...shorthands.padding("0px", "24px"),
     ...shorthands.borderRadius("2px"),
     ...shorthands.outline("transparent solid 1px"),
-    paddingLeft: "24px",
-    paddingRight: "24px",
   },
   markdown: {
     paddingTop: "0px",
