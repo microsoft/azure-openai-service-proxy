@@ -6,18 +6,20 @@ import {
   makeStyles,
   shorthands,
   useId,
-  Tooltip
+  Tooltip,
 } from "@fluentui/react-components";
 import { Card } from "./Card";
 import { Dispatch, useState } from "react";
 import { ExtendedImageGenerations } from "../../pages/playground/Image.state";
-import { Info16Filled, SendRegular, Delete24Regular } from "@fluentui/react-icons";
+import {
+  Info16Filled,
+  SendRegular,
+  Delete24Regular,
+} from "@fluentui/react-icons";
 import { useEventDataContext } from "../../providers/EventDataProvider";
 import { GetImagesOptions } from "@azure/openai";
 
-
 const useStyles = makeStyles({
-
   body: {
     ...shorthands.padding("0px", "15px"),
     ...shorthands.margin("0px"),
@@ -49,7 +51,7 @@ const useStyles = makeStyles({
 
   modelSelect: {
     ...shorthands.margin("0px", "0px"),
-    maxWidth: "200px"
+    maxWidth: "200px",
   },
 
   imageContainer: {
@@ -62,22 +64,29 @@ const useStyles = makeStyles({
   },
 
   imageItem: {
-      ...shorthands.padding("12px"),
-      ...shorthands.borderRadius("5px"),
-      width: "100%",
-      maxWidth: "300px",
-      display: "flex",
-      boxShadow:
-        "0px 0px 4px rgba(0, 0, 0, 0.36), 0px 0px 2px rgba(0, 0, 0, 0.24)",
-      marginRight: "24px",
-      marginBottom: "24px",
-      ...shorthands.flex("1", "0", "30%"),
-  }
-
+    ...shorthands.padding("12px"),
+    ...shorthands.borderRadius("5px"),
+    width: "100%",
+    maxWidth: "300px",
+    display: "flex",
+    boxShadow:
+      "0px 0px 4px rgba(0, 0, 0, 0.36), 0px 0px 2px rgba(0, 0, 0, 0.24)",
+    marginRight: "24px",
+    marginBottom: "24px",
+    ...shorthands.flex("1", "0", "30%"),
+  },
 });
 
-const ImagePrompt = ({ generateImage, isGenerating, setGenerating, updateSettings }: {
-  generateImage: Dispatch<string>, isGenerating: boolean, setGenerating: Dispatch<React.SetStateAction<boolean>>, updateSettings: (
+const ImagePrompt = ({
+  generateImage,
+  isGenerating,
+  setGenerating,
+  updateSettings,
+}: {
+  generateImage: Dispatch<string>;
+  isGenerating: boolean;
+  setGenerating: Dispatch<React.SetStateAction<boolean>>;
+  updateSettings: (
     label: keyof GetImagesOptions | "model",
     newValue: number | string
   ) => void;
@@ -88,13 +97,17 @@ const ImagePrompt = ({ generateImage, isGenerating, setGenerating, updateSetting
   const { eventData, isAuthorized } = useEventDataContext();
 
   return (
-
     <div className={styles.searchRoot}>
-
-      <Label className={styles.label} htmlFor="ModelLabel" style={{ marginBottom: "0px", paddingBottom: "0px" }}>
+      <Label
+        className={styles.label}
+        htmlFor="ModelLabel"
+        style={{ marginBottom: "0px", paddingBottom: "0px" }}
+      >
         Model
-        <Tooltip content="Select the model to use for the AI chat. The model determines the type of responses the AI will generate. Different models have different capabilities and are trained on different types of data."
-          relationship="description" >
+        <Tooltip
+          content="Select the model to use for the AI chat. The model determines the type of responses the AI will generate. Different models have different capabilities and are trained on different types of data."
+          relationship="description"
+        >
           <Info16Filled className={styles.tooltip} />
         </Tooltip>
       </Label>
@@ -130,7 +143,10 @@ const ImagePrompt = ({ generateImage, isGenerating, setGenerating, updateSetting
         htmlFor={promptId}
       >
         <strong>Prompt</strong>
-        <Tooltip content="Describe the image you want to create. For example, 'watercolor painting of the Seattle skyline'" relationship="description" >
+        <Tooltip
+          content="Describe the image you want to create. For example, 'watercolor painting of the Seattle skyline'"
+          relationship="description"
+        >
           <Info16Filled className={styles.tooltip} />
         </Tooltip>
       </Label>
@@ -156,7 +172,7 @@ const ImagePrompt = ({ generateImage, isGenerating, setGenerating, updateSetting
         <Button
           onClick={() => {
             if (!isGenerating) {
-              generateImage(prompt)
+              generateImage(prompt);
               setGenerating(true);
             }
           }}
@@ -183,20 +199,22 @@ const ImagePrompt = ({ generateImage, isGenerating, setGenerating, updateSetting
           Clear prompt
         </Button>
       </div>
-    </div >
+    </div>
   );
 };
 
-const ImageList = ({ images, isGenerating, setGenerating }: { images: ExtendedImageGenerations[], isGenerating: boolean, setGenerating: Dispatch<React.SetStateAction<boolean>> }) => {
+type ImageListProps = {
+  images: ExtendedImageGenerations[];
+  isGenerating: boolean;
+  setGenerating: Dispatch<React.SetStateAction<boolean>>;
+};
+
+const ImageList = ({ images, isGenerating, setGenerating }: ImageListProps) => {
   const styles = useStyles();
   return (
-
     <div className={styles.imageContainer}>
-
       {images.map((image) => (
-
         <div key={image.id} className={styles.imageItem}>
-
           {!image.loaded && <p>Processing...</p>}
           {image.generations &&
             image.generations.data.map((i) => {
@@ -215,32 +233,31 @@ const ImageList = ({ images, isGenerating, setGenerating }: { images: ExtendedIm
                         src={url}
                         key={url}
                         onClick={() => window.open(url)}
-                        style={{ cursor: "pointer", width: "100%", height: "100%", marginBottom: "12px" }}
+                        style={{
+                          cursor: "pointer",
+                          width: "100%",
+                          height: "100%",
+                          marginBottom: "12px",
+                        }}
                       />
                     </div>
                     <div style={{ float: "left", textAlign: "left" }}>
                       <strong>Original Prompt</strong>
-                      <p>
-                        {image.prompt}
-                      </p>
+                      <p>{image.prompt}</p>
 
                       <strong>Revised prompt</strong>
-                      <p>
-                        {revisedPrompt}
-                      </p>
+                      <p>{revisedPrompt}</p>
                     </div>
                   </div>
                 </>
               );
             })}
           {image.isError && <p>Error: {image.errorInfo?.message}</p>}
-
         </div>
       ))}
     </div>
   );
 };
-
 
 export const ImageCard = ({
   generateImage,
@@ -253,7 +270,6 @@ export const ImageCard = ({
     label: keyof GetImagesOptions | "model",
     newValue: number | string
   ) => void;
-
 }) => {
   const styles = useStyles();
   const [isGenerating, setGenerating] = useState(true);
@@ -262,14 +278,21 @@ export const ImageCard = ({
   return (
     <div className={styles.body}>
       <Card header="DALL·E playground">
-
         {isAuthorized && (
           <>
-            <ImagePrompt generateImage={generateImage} isGenerating={isGenerating} setGenerating={setGenerating} updateSettings={updateSettings} />
-            <ImageList images={images} isGenerating={isGenerating} setGenerating={setGenerating} />
+            <ImagePrompt
+              generateImage={generateImage}
+              isGenerating={isGenerating}
+              setGenerating={setGenerating}
+              updateSettings={updateSettings}
+            />
+            <ImageList
+              images={images}
+              isGenerating={isGenerating}
+              setGenerating={setGenerating}
+            />
           </>
         )}
-
       </Card>
     </div>
   );
