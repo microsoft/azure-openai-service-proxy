@@ -11,7 +11,6 @@ const useStyles = makeStyles({
   container: {
     textAlign: "center",
     display: "grid",
-    // gridTemplateColumns: "2.5fr 1fr",
     gridTemplateColumns: "1fr",
     gridGap: "1px",
   },
