@@ -70,8 +70,6 @@ export const Image = () => {
         generateImage={generateImage}
         images={state.images}
         updateSettings={updateSettings}
-        // settings={state.parameters}
-        // canGenerate={client !== undefined && state.model !== undefined}
       />
       {/* <ImageParamsCard
         updateSettings={updateSettings}
