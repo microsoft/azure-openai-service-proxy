@@ -17,7 +17,7 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
         Event newEvent = new()
         {
             EventCode = model.Name!,
-            EventSharedCode = model.EventSharedCode!,
+            EventSharedCode = model.EventSharedCode,
             EventImageUrl = model.EventImageUrl!,
             EventMarkdown = model.Description!,
             StartTimestamp = model.Start!.Value,
