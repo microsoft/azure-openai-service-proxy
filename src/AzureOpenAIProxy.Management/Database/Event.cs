@@ -30,7 +30,8 @@ public partial class Event
 
     public string TimeZoneLabel { get; set; } = null!;
 
-    public string EventSharedCode { get; set; } = null!;
+    public string? EventSharedCode { get; set; }
+
 
     public virtual ICollection<EventAttendee> EventAttendees { get; set; } = new List<EventAttendee>();
 
