@@ -7,32 +7,34 @@
 
     <MudCard>
         <MudCardContent>
-            <MudTextField Label="Friendly Name" @bind-Value="Model.FriendlyName" For="@(() => Model.FriendlyName)" />
+            @if (Model != null)
+            {
+                <MudTextField Label="Friendly Name" @bind-Value="Model.FriendlyName" For="@(() => Model.FriendlyName)" />
 
-            <MudTextField Label="Endpoint Key" @bind-Value="Model.EndpointKey" For="@(() => Model.EndpointKey)"
-                InputType="@(maskKey ? InputType.Password : InputType.Text)" Adornment="Adornment.End"
-                AdornmentIcon="@(maskKey ? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility)"
-                AdornmentAriaLabel="Show Password" OnAdornmentClick="ToggleMaskKey" />
+                <MudTextField Label="Endpoint Key" @bind-Value="Model.EndpointKey" For="@(() => Model.EndpointKey)"
+                    InputType="@(maskKey ? InputType.Password : InputType.Text)" Adornment="Adornment.End"
+                    AdornmentIcon="@(maskKey ? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility)"
+                    AdornmentAriaLabel="Show Password" OnAdornmentClick="ToggleMaskKey" />
 
-            <MudTextField Label="Endpoint URL" @bind-Value="Model.EndpointUrl" For="@(() => Model.EndpointUrl)"
-                Adornment="Adornment.End" AdornmentText="https://my-ai-resource.azure.com" />
+                <MudTextField Label="Endpoint URL" @bind-Value="Model.EndpointUrl" For="@(() => Model.EndpointUrl)"
+                    Adornment="Adornment.End" AdornmentText="https://my-ai-resource.azure.com" />
 
-            <MudTextField Label="Location" @bind-Value="Model.Location" For="@(() => Model.Location)" />
+                <MudTextField Label="Location" @bind-Value="Model.Location" For="@(() => Model.Location)" />
 
-            <MudTextField Label="Resource Name (Deployment or Index Name)" @bind-Value="Model.DeploymentName"
-                For="@(() => Model.DeploymentName)" />
+                <MudTextField Label="Resource Name (Deployment or Index Name)" @bind-Value="Model.DeploymentName"
+                    For="@(() => Model.DeploymentName)" />
 
-            <MudSelect Label="Resource Type" @bind-Value="Model.ModelType" Placeholder="Please Select"
-                For="@(() => Model.ModelType)">
-                @foreach (ModelType modelType in Enum.GetValues(typeof(ModelType)))
-                {
-                    <MudSelectItem Value="@((ModelType?)modelType)">@modelType.ToString().Replace("_", " ")
-                    </MudSelectItem>
-                }
-            </MudSelect>
+                <MudSelect Label="Resource Type" @bind-Value="Model.ModelType" Placeholder="Please Select"
+                    For="@(() => Model.ModelType)">
+                    @foreach (ModelType modelType in Enum.GetValues(typeof(ModelType)))
+                    {
+                        <MudSelectItem Value="@((ModelType?)modelType)">@modelType.ToString().Replace("_", " ")
+                        </MudSelectItem>
+                    }
+                </MudSelect>
 
-            <MudSwitch @bind-Value="Model.Active" Label="Active" Color="Color.Primary" />
-
+                <MudSwitch @bind-Value="Model.Active" Label="Active" Color="Color.Primary" />
+            }
         </MudCardContent>
         <MudCardActions>
             <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled"
