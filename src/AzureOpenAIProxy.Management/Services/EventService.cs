@@ -181,7 +181,7 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
         }
 
         evt.EventCode = model.Name!;
-        evt.EventSharedCode = model.EventSharedCode!;
+        evt.EventSharedCode = model.EventSharedCode;
         evt.EventMarkdown = model.Description!;
         evt.StartTimestamp = model.Start!.Value;
         evt.EndTimestamp = model.End!.Value;
