@@ -10,10 +10,7 @@ import {
 
 const useStyles = makeStyles({
   card: {
-    paddingTop: "0px",
-    paddingBottom: "24px",
-    paddingRight: "24px",
-    paddingLeft: "24px",
+    ...shorthand.padding("0px", "24px", "24px"),
     marginTop: "24px",
     textAlign: "left"
   },
