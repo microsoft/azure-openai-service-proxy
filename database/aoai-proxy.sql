@@ -237,7 +237,7 @@ BEGIN
 --  .{8,} matches at least 8 of any character except newline.
 --  $ asserts the end of the line.
 
-	IF p_api_key ~ '^[a-zA-Z0-9-]{9}@{1}[a-zA-Z0-9]{4,}/.{8,}$' THEN
+	IF p_api_key ~ '^[a-zA-Z0-9-]{9}@{1}[a-zA-Z0-9]{5,}/.{8,}$' THEN
 
 		v_event_id := substring(p_api_key from '([a-zA-Z0-9-]+)');
 		v_event_shared_code := substring(p_api_key from '@([a-zA-Z0-9]+)');

@@ -14,6 +14,16 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
 
     public async Task<Event?> CreateEventAsync(EventEditorModel model)
     {
+        if (string.IsNullOrEmpty(model.EventSharedCode))
+        {
+            model.EventSharedCode = null;
+        }
+
+        if (string.IsNullOrEmpty(model.EventImageUrl))
+        {
+            model.EventImageUrl = null;
+        }
+
         Event newEvent = new()
         {
             EventCode = model.Name!,
