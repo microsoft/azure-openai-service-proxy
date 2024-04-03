@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using System.Runtime.InteropServices;
 
 namespace AzureOpenAIProxy.Management.Components.EventManagement;
 
