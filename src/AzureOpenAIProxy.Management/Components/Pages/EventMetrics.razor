@@ -6,7 +6,7 @@
 @if (Event is not null && EventMetric is not null)
 {
     <MudStack>
-        <h3>Event Name: @Event.EventUrlText</h3>
+        <h3>Event Name: @Event.EventCode</h3>
 
         <MudText Typo="Typo.body1">Attendee count: <strong>@EventMetric.AttendeeCount</strong></MudText>
         <MudText Typo="Typo.body1">Total Request count: <strong>@EventMetric.RequestCount</strong></MudText>

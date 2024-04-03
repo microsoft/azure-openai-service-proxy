@@ -17,9 +17,7 @@
 
         <MudCardContent>
             <MudTextField Label="Event Name" @bind-Value="Model.Name" For="@(() => Model.Name)" />
-            <MudTextField Label="Event URL text" @bind-Value="Model.UrlText" For="@(() => Model.UrlText)" />
-            <MudTextField Label="Event URL" @bind-Value="Model.Url" InputType="InputType.Url"
-                For="@(() => Model.Url)" />
+            <MudTextField Label="Event Shared Code (Optional)" @bind-Value="Model.EventSharedCode" For="@(() => Model.EventSharedCode)" />
             <MudTextField Label="Event Image URL (Optional)" @bind-Value="Model.EventImageUrl" InputType="InputType.Url"
                 For="@(() => Model.EventImageUrl)" />
             <MudTextField Label="Organiser Name" @bind-Value="Model.OrganizerName" For="@(() => Model.OrganizerName)" />

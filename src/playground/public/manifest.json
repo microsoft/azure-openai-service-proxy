@@ -1,6 +1,6 @@
 {
-  "short_name": "Azure OpenAI Workshop Playground",
-  "name": "Azure OpenAI Workshop Playground",
+  "short_name": "Azure AI Proxy Playground",
+  "name": "Azure AI Proxy Playground",
   "icons": [
     {
       "src": "favicon.ico",

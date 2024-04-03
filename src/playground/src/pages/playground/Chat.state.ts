@@ -28,7 +28,7 @@ export const INITIAL_STATE: ChatState = {
   params: {
     maxTokens: 512,
     temperature: 0.7,
-    topP: 0.95,
+    topP: 0.9,
     stop: ["Stop sequences"],
     frequencyPenalty: 0,
     presencePenalty: 0,

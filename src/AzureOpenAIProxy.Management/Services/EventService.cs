@@ -14,11 +14,20 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
 
     public async Task<Event?> CreateEventAsync(EventEditorModel model)
     {
+        if (string.IsNullOrEmpty(model.EventSharedCode))
+        {
+            model.EventSharedCode = null;
+        }
+
+        if (string.IsNullOrEmpty(model.EventImageUrl))
+        {
+            model.EventImageUrl = null;
+        }
+
         Event newEvent = new()
         {
             EventCode = model.Name!,
-            EventUrlText = model.UrlText!,
-            EventUrl = model.Url!,
+            EventSharedCode = model.EventSharedCode,
             EventImageUrl = model.EventImageUrl!,
             EventMarkdown = model.Description!,
             StartTimestamp = model.Start!.Value,
@@ -39,7 +48,7 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
 
         using DbCommand cmd = conn.CreateCommand();
 
-        cmd.CommandText = $"SELECT * FROM aoai.add_event(@OwnerId, @EventCode, @EventMarkdown, @StartTimestamp, @EndTimestamp, @TimeZoneOffset, @TimeZoneLabel,  @OrganizerName, @OrganizerEmail, @EventUrl, @EventUrlText, @MaxTokenCap, @DailyRequestCap, @Active, @EventImageUrl)";
+        cmd.CommandText = $"SELECT * FROM aoai.add_event(@OwnerId, @EventCode, @EventSharedCode, @EventMarkdown, @StartTimestamp, @EndTimestamp, @TimeZoneOffset, @TimeZoneLabel,  @OrganizerName, @OrganizerEmail, @MaxTokenCap, @DailyRequestCap, @Active, @EventImageUrl)";
 
         cmd.Parameters.Add(new NpgsqlParameter("OwnerId", entraId));
         cmd.Parameters.Add(new NpgsqlParameter("EventCode", newEvent.EventCode));
@@ -50,11 +59,13 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
         cmd.Parameters.Add(new NpgsqlParameter("TimeZoneLabel", newEvent.TimeZoneLabel));
         cmd.Parameters.Add(new NpgsqlParameter("OrganizerName", newEvent.OrganizerName));
         cmd.Parameters.Add(new NpgsqlParameter("OrganizerEmail", newEvent.OrganizerEmail));
-        cmd.Parameters.Add(new NpgsqlParameter("EventUrl", newEvent.EventUrl));
-        cmd.Parameters.Add(new NpgsqlParameter("EventUrlText", newEvent.EventUrlText));
         cmd.Parameters.Add(new NpgsqlParameter("MaxTokenCap", newEvent.MaxTokenCap));
         cmd.Parameters.Add(new NpgsqlParameter("DailyRequestCap", newEvent.DailyRequestCap));
         cmd.Parameters.Add(new NpgsqlParameter("Active", newEvent.Active));
+
+        var parameter_event_shared_code = new NpgsqlParameter("@EventSharedCode", NpgsqlDbType.Text);
+        parameter_event_shared_code.Value = newEvent.EventSharedCode ?? (object)DBNull.Value;
+        cmd.Parameters.Add(parameter_event_shared_code);
 
         var parameter = new NpgsqlParameter("@EventImageUrl", NpgsqlDbType.Text);
         parameter.Value = newEvent.EventImageUrl ?? (object)DBNull.Value;
@@ -169,12 +180,21 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
             return null;
         }
 
+        if (string.IsNullOrEmpty(model.EventSharedCode))
+        {
+            model.EventSharedCode = null;
+        }
+
+        if (string.IsNullOrEmpty(model.EventImageUrl))
+        {
+            model.EventImageUrl = null;
+        }
+
         evt.EventCode = model.Name!;
+        evt.EventSharedCode = model.EventSharedCode;
         evt.EventMarkdown = model.Description!;
         evt.StartTimestamp = model.Start!.Value;
         evt.EndTimestamp = model.End!.Value;
-        evt.EventUrl = model.Url!;
-        evt.EventUrlText = model.UrlText!;
         evt.EventImageUrl = model.EventImageUrl!;
         evt.OrganizerEmail = model.OrganizerEmail!;
         evt.OrganizerName = model.OrganizerName!;

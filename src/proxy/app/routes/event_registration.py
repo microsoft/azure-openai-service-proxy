@@ -15,8 +15,6 @@ class EventRegistrationResponse(BaseModel):
 
     event_id: str
     event_code: str
-    event_url: str
-    event_url_text: str
     event_image_url: str | None = None
     organizer_name: str
     organizer_email: str
@@ -30,8 +28,6 @@ class EventRegistrationResponse(BaseModel):
         self,
         event_id: str,
         event_code: str,
-        event_url: str,
-        event_url_text: str,
         event_image_url: str | None,
         organizer_name: str,
         organizer_email: str,
@@ -44,8 +40,6 @@ class EventRegistrationResponse(BaseModel):
         super().__init__(
             event_id=event_id,
             event_code=event_code,
-            event_url=event_url,
-            event_url_text=event_url_text,
             event_image_url=event_image_url,
             organizer_name=organizer_name,
             organizer_email=organizer_email,
