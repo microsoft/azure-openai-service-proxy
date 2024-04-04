@@ -39,7 +39,7 @@ module app 'core/host/container-app-upsert.bicep' = {
         value: 'postgresql://${postgresUser}:${postgresPassword}@${postgresServer}/${postgresDatabase}'
       }
       {
-        name: 'postgresEncryptionKey'
+        name: 'postgres-encryption-key'
         value: postgresEncryptionKey
       }
     ]
@@ -50,7 +50,7 @@ module app 'core/host/container-app-upsert.bicep' = {
       }
       {
         name: 'POSTGRES_ENCRYPTION_KEY'
-        secretRef: 'postgresEncryptionKey'
+        secretRef: 'postgres-encryption-key'
       }
     ]
   }
