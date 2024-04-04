@@ -508,8 +508,6 @@ CREATE TABLE aoai.owner_catalog (
     owner_id character varying(128) NOT NULL,
     catalog_id uuid DEFAULT gen_random_uuid() NOT NULL,
     deployment_name character varying(64) NOT NULL,
-    endpoint_url character varying(256) NOT NULL,
-    endpoint_key character varying(128) NOT NULL,
     active boolean NOT NULL,
     model_type aoai.model_type NOT NULL,
     location character varying(64) DEFAULT ''::character varying NOT NULL,
