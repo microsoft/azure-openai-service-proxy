@@ -11,9 +11,10 @@ logging.basicConfig(level=logging.WARNING)
 class DBManager:
     """Database manager"""
 
-    def __init__(self, app: FastAPI) -> None:
+    def __init__(self, app: FastAPI, postgres_encryption_key: str) -> None:
         self.logging = logging.getLogger(__name__)
         self.app = app
+        self.postgres_encryption_key = postgres_encryption_key
 
     async def create_pool(self, connection_string: str):
         """create database pool"""
@@ -54,3 +55,7 @@ class DBManager:
     async def get_connection(self):
         """connect to database"""
         return self.app.pool
+
+    def get_postgres_encryption_key(self):
+        """get postgres encryption key"""
+        return self.postgres_encryption_key

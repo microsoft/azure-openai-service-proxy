@@ -40,6 +40,15 @@ except KeyError as key_error:
         detail="Please set the environment variable POSTGRES_CONNECTION_STRING",
     ) from key_error
 
+try:
+    postgres_encryption_key = os.environ["POSTGRES_ENCRYPTION_KEY"]
+except KeyError as key_error:
+    print("Please set the environment variable POSTGRES_ENCRYPTION_KEY")
+    raise HTTPException(
+        status_code=500,
+        detail="Please set the environment variable POSTGRES_ENCRYPTION_KEY",
+    ) from key_error
+
 
 logging.basicConfig(level=logging.WARNING)
 logger = logging.getLogger(__name__)
@@ -50,7 +59,7 @@ app = FastAPI(
 )
 
 
-db_manager = DBManager(app=app)
+db_manager = DBManager(app=app, postgres_encryption_key=postgres_encryption_key)
 monitor = Monitor(db_manager=db_manager)
 authorize = Authorize(db_manager=db_manager)
 config = Config(db_manager=db_manager, monitor=monitor)

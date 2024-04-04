@@ -65,9 +65,10 @@ class Config:
                     )
                 else:
                     result = await conn.fetch(
-                        "SELECT * FROM aoai.get_models_by_deployment_name($1, $2)",
+                        "SELECT * FROM aoai.get_models_by_deployment_name($1, $2, $3)",
                         event_id,
                         deployment_name,
+                        self.db_manager.postgres_encryption_key,
                     )
 
             for row in result:
