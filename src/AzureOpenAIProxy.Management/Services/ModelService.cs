@@ -10,7 +10,7 @@ namespace AzureOpenAIProxy.Management.Services;
 public class ModelService(IAuthService authService, AoaiProxyContext db, IConfiguration configuration) : IModelService
 {
 
-    private const string PostgresEncryptionKey = "PostgressEncryptionKey";
+    private const string PostgresEncryptionKey = "PostgresEncryptionKey";
     private readonly NpgsqlConnection connection = (NpgsqlConnection)db.Database.GetDbConnection();
 
     private async Task<byte[]?> PostgresEncryptValue(string value)
