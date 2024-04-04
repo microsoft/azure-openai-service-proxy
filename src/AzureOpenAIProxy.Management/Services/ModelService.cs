@@ -13,6 +13,7 @@ namespace AzureOpenAIProxy.Management.Services;
 
 public class ModelService(IAuthService authService, AoaiProxyContext db, IConfiguration configuration) : IModelService
 {
+    private const string PostgressEncryptionKey = "PostgressEncryptionKey";
 
     private readonly NpgsqlConnection connection = (NpgsqlConnection)db.Database.GetDbConnection();
 
@@ -21,7 +22,7 @@ public class ModelService(IAuthService authService, AoaiProxyContext db, IConfig
 
         Owner owner = await authService.GetCurrentOwnerAsync();
 
-        var postgressEncryptionKey = configuration.GetValue<string>("PostgressEncryptionKey");
+        var postgressEncryptionKey = configuration.GetValue<string>(PostgressEncryptionKey);
 
         if (connection.State != ConnectionState.Open)
             await connection.OpenAsync();
@@ -89,7 +90,7 @@ public class ModelService(IAuthService authService, AoaiProxyContext db, IConfig
 
     public async Task<OwnerCatalog> GetOwnerCatalogAsync(Guid catalogId)
     {
-        var postgressEncryptionKey = configuration.GetValue<string>("PostgressEncryptionKey");
+        var postgressEncryptionKey = configuration.GetValue<string>(PostgressEncryptionKey);
 
         if (connection.State != ConnectionState.Open)
             await connection.OpenAsync();
@@ -135,7 +136,7 @@ public class ModelService(IAuthService authService, AoaiProxyContext db, IConfig
     public async Task UpdateOwnerCatalogAsync(Guid catalogId, OwnerCatalog ownerCatalog)
     {
 
-        var postgressEncryptionKey = configuration.GetValue<string>("PostgressEncryptionKey");
+        var postgressEncryptionKey = configuration.GetValue<string>(PostgressEncryptionKey);
 
         if (connection.State != ConnectionState.Open)
             await connection.OpenAsync();
