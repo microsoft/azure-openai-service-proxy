@@ -12,6 +12,7 @@ param postgresUser string
 param postgresPassword string
 param postgresDatabase string
 param postgresServer string
+@secure()
 param postgresEncryptionKey string
 
 resource proxyIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {

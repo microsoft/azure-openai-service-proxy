@@ -22,11 +22,11 @@ param adminAppExists bool = false
 param swaLocation string
 
 @secure()
-@description('PostGreSQL Server administrator password')
+@description('PostgreSQL Server administrator password')
 param postgresAdminPassword string
 
 @secure()
-@description('PostGreSQL Encryption Key')
+@description('PostgreSQL Encryption Key')
 param postgresEncryptionKey string
 
 param authTenantId string = subscription().tenantId

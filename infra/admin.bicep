@@ -12,6 +12,7 @@ param postgresUser string
 param postgresPassword string
 param postgresDatabase string
 param postgresServer string
+@secure()
 param postgresEncryptionKey string
 param clientId string
 param tenantId string
