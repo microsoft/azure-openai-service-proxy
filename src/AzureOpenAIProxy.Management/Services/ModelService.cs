@@ -113,7 +113,15 @@ public class ModelService(IAuthService authService, AoaiProxyContext db, IConfig
     public async Task<IEnumerable<OwnerCatalog>> GetOwnerCatalogsAsync()
     {
         string entraId = await authService.GetCurrentUserEntraIdAsync();
-        return await db.OwnerCatalogs.Where(oc => oc.Owner.OwnerId == entraId).OrderBy(oc => oc.FriendlyName).ToListAsync();
+        var catalogItems = await db.OwnerCatalogs.Where(oc => oc.Owner.OwnerId == entraId).OrderBy(oc => oc.FriendlyName).ToListAsync();
+
+        foreach (var catalog in catalogItems)
+        {
+            string? endpointUrl = await PostgresDecryptValue(catalog.EndpointUrlEncrypted);
+            catalog.EndpointUrl = endpointUrl!;
+        }
+
+        return catalogItems;
     }
 
 
