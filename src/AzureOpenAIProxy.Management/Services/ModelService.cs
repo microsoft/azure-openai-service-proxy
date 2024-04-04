@@ -1,4 +1,5 @@
 using System.Data;
+using System.Data.Common;
 using AzureOpenAIProxy.Management.Components.ModelManagement;
 using AzureOpenAIProxy.Management.Database;
 using Microsoft.EntityFrameworkCore;
@@ -11,7 +12,7 @@ public class ModelService(IAuthService authService, AoaiProxyContext db, IConfig
 {
 
     private const string PostgresEncryptionKey = "PostgresEncryptionKey";
-    private readonly NpgsqlConnection connection = (NpgsqlConnection)db.Database.GetDbConnection();
+    private readonly DbConnection connection = db.Database.GetDbConnection();
 
     private async Task<byte[]?> PostgresEncryptValue(string value)
     {
@@ -20,7 +21,11 @@ public class ModelService(IAuthService authService, AoaiProxyContext db, IConfig
 
         string? postgresEncryptionKey = configuration[PostgresEncryptionKey];
 
-        using var command = new NpgsqlCommand($"SELECT aoai.pgp_sym_encrypt('{value}', '{postgresEncryptionKey}');", connection);
+        using DbCommand command = connection.CreateCommand();
+        command.CommandText = $"SELECT aoai.pgp_sym_encrypt(@value, @postgresEncryptionKey);";
+        command.Parameters.Add(new NpgsqlParameter("value", NpgsqlDbType.Text) { Value = value });
+        command.Parameters.Add(new NpgsqlParameter("postgresEncryptionKey", NpgsqlDbType.Text) { Value = postgresEncryptionKey });
+
         using var reader = await command.ExecuteReaderAsync();
         await reader.ReadAsync();
         return reader[0] as byte[];
@@ -33,8 +38,11 @@ public class ModelService(IAuthService authService, AoaiProxyContext db, IConfig
 
         string? postgresEncryptionKey = configuration[PostgresEncryptionKey];
 
-        using var command = new NpgsqlCommand($"SELECT aoai.pgp_sym_decrypt(@value, '{postgresEncryptionKey}')", connection);
-        command.Parameters.AddWithValue("value", NpgsqlDbType.Bytea, value);
+        using DbCommand command = connection.CreateCommand();
+        command.CommandText = $"SELECT aoai.pgp_sym_decrypt(@value, @postgresEncryptionKey)";
+        command.Parameters.Add(new NpgsqlParameter("value", NpgsqlDbType.Bytea) { Value = value });
+        command.Parameters.Add(new NpgsqlParameter("postgresEncryptionKey", NpgsqlDbType.Text) { Value = postgresEncryptionKey });
+
         using var reader = await command.ExecuteReaderAsync();
         await reader.ReadAsync();
         return reader[0] as string;
@@ -96,13 +104,8 @@ public class ModelService(IAuthService authService, AoaiProxyContext db, IConfig
     {
         var result = await db.OwnerCatalogs.FindAsync(catalogId);
 
-        if (result is null)
-        {
-            return null!;
-        }
-
-        string? endpointKey = await PostgresDecryptValue(result.EndpointKeyEncrypted);
-        string? endpointUrl = await PostgresDecryptValue(result.EndpointUrlEncrypted);
+        string? endpointKey = await PostgresDecryptValue(result!.EndpointKeyEncrypted);
+        string? endpointUrl = await PostgresDecryptValue(result!.EndpointUrlEncrypted);
 
         result.EndpointKey = endpointKey!;
         result.EndpointUrl = endpointUrl!;
@@ -114,20 +117,12 @@ public class ModelService(IAuthService authService, AoaiProxyContext db, IConfig
     {
         string entraId = await authService.GetCurrentUserEntraIdAsync();
         var catalogItems = await db.OwnerCatalogs.Where(oc => oc.Owner.OwnerId == entraId).OrderBy(oc => oc.FriendlyName).ToListAsync();
-
-        foreach (var catalog in catalogItems)
-        {
-            string? endpointUrl = await PostgresDecryptValue(catalog.EndpointUrlEncrypted);
-            catalog.EndpointUrl = endpointUrl!;
-        }
-
         return catalogItems;
     }
 
-
-    public async Task UpdateOwnerCatalogAsync(Guid catalogId, OwnerCatalog ownerCatalog)
+    public async Task UpdateOwnerCatalogAsync(OwnerCatalog ownerCatalog)
     {
-        OwnerCatalog? existingCatalog = await db.OwnerCatalogs.FindAsync(catalogId);
+        OwnerCatalog? existingCatalog = await db.OwnerCatalogs.FindAsync(ownerCatalog.CatalogId);
 
         if (existingCatalog is null)
         {

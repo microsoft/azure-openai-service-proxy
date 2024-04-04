@@ -1,12 +1,8 @@
 using System.Data;
-using System.Data.Common;
 using AzureOpenAIProxy.Management.Components.ModelManagement;
 using AzureOpenAIProxy.Management.Database;
 using AzureOpenAIProxy.Management.Services;
 using Microsoft.AspNetCore.Components;
-using Microsoft.EntityFrameworkCore;
-using Npgsql;
-using NpgsqlTypes;
 
 namespace AzureOpenAIProxy.Management.Components.Pages;
 
@@ -56,7 +52,6 @@ public partial class ModelEdit : ComponentBase
 
     private async Task OnValidSubmit(ModelEditorModel model)
     {
-
         OwnerCatalog? m = await DbContext.OwnerCatalogs.FindAsync(Guid.Parse(Id));
 
         if (m is null)
@@ -73,7 +68,7 @@ public partial class ModelEdit : ComponentBase
         m.Location = model.Location!;
         m.Active = model.Active;
 
-        await ModelService.UpdateOwnerCatalogAsync(m.CatalogId, m);
+        await ModelService.UpdateOwnerCatalogAsync(m);
 
         NavigationManager.NavigateTo("/models");
     }
