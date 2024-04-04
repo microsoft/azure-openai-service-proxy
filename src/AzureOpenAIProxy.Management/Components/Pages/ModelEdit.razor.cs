@@ -46,9 +46,9 @@ public partial class ModelEdit : ComponentBase
         {
             FriendlyName = m.FriendlyName,
             DeploymentName = m.DeploymentName,
-            EndpointKey = m.EndpointKey,
+            // EndpointKey = m.EndpointKey,
+            // EndpointUrl = m.EndpointUrl,
             ModelType = m.ModelType,
-            EndpointUrl = m.EndpointUrl,
             Location = m.Location,
             Active = m.Active,
         };
@@ -56,21 +56,18 @@ public partial class ModelEdit : ComponentBase
 
     private async Task OnValidSubmit(ModelEditorModel model)
     {
-        OwnerCatalog? m = await DbContext.OwnerCatalogs.FindAsync(Guid.Parse(Id));
 
-        if (m is null)
+        OwnerCatalog m = new()
         {
-            NavigationManager.NavigateTo("/models");
-            return;
-        }
-
-        m.FriendlyName = model.FriendlyName!;
-        m.DeploymentName = model.DeploymentName!;
-        m.EndpointKey = model.EndpointKey!;
-        m.ModelType = model.ModelType!.Value;
-        m.EndpointUrl = model.EndpointUrl!;
-        m.Location = model.Location!;
-        m.Active = model.Active;
+            CatalogId = Guid.Parse(Id),
+            FriendlyName = model.FriendlyName!,
+            DeploymentName = model.DeploymentName!,
+            // EndpointKey = model.EndpointKey!,
+            // EndpointUrl = model.EndpointUrl!,
+            ModelType = model.ModelType!.Value,
+            Location = model.Location!,
+            Active = model.Active,
+        };
 
         await ModelService.UpdateOwnerCatalogAsync(m.CatalogId, m);
 

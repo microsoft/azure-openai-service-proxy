@@ -49,10 +49,10 @@ public class ModelService(IAuthService authService, AoaiProxyContext db, IConfig
             Active = model.Active,
             FriendlyName = model.FriendlyName!,
             DeploymentName = model.DeploymentName!,
-            EndpointKey = model.EndpointKey!,
+            // EndpointKey = model.EndpointKey!,
+            // EndpointUrl = model.EndpointUrl!,
             Location = model.Location!,
             ModelType = model.ModelType!.Value,
-            EndpointUrl = model.EndpointUrl!
         };
 
         // await db.OwnerCatalogs.AddAsync(catalog);
@@ -115,8 +115,8 @@ public class ModelService(IAuthService authService, AoaiProxyContext db, IConfig
                 OwnerId = reader.GetString(0),
                 CatalogId = reader.GetGuid(1),
                 DeploymentName = reader.GetString(2),
-                EndpointUrl = reader.GetString(3),
-                EndpointKey = reader.GetString(4),
+                // EndpointUrl = reader.GetString(3),
+                // EndpointKey = reader.GetString(4),
                 Active = reader.GetBoolean(5),
                 ModelType = ModelTypeExtensions.ParsePostgresValue(reader.GetString(6)),
                 Location = reader.GetString(7),
@@ -130,7 +130,41 @@ public class ModelService(IAuthService authService, AoaiProxyContext db, IConfig
     public async Task<IEnumerable<OwnerCatalog>> GetOwnerCatalogsAsync()
     {
         string entraId = await authService.GetCurrentUserEntraIdAsync();
-        return await db.OwnerCatalogs.Where(oc => oc.Owner.OwnerId == entraId).OrderBy(oc => oc.FriendlyName).ToListAsync();
+
+        if (connection.State != ConnectionState.Open)
+            await connection.OpenAsync();
+
+        using DbCommand command = connection.CreateCommand();
+
+        command.CommandText = "SELECT owner_id, catalog_id, deployment_name, active, model_type, location, friendly_name FROM aoai.owner_catalog WHERE owner_id = @owner_id ORDER BY friendly_name;";
+        command.Parameters.Add(new NpgsqlParameter("owner_id", NpgsqlDbType.Text) { Value = entraId });
+
+        using NpgsqlDataReader reader = (NpgsqlDataReader)await command.ExecuteReaderAsync();
+
+        List<OwnerCatalog> ownerCatalogs = new();
+
+        if (reader.HasRows)
+        {
+            while (await reader.ReadAsync())
+            {
+                OwnerCatalog ownerCatalog = new()
+                {
+                    OwnerId = reader.GetString(0),
+                    CatalogId = reader.GetGuid(1),
+                    DeploymentName = reader.GetString(2),
+                    Active = reader.GetBoolean(3),
+                    ModelType = ModelTypeExtensions.ParsePostgresValue(reader.GetString(4)),
+                    Location = reader.GetString(5),
+                    FriendlyName = reader.GetString(6)
+                };
+
+                ownerCatalogs.Add(ownerCatalog);
+            }
+        }
+
+        return ownerCatalogs;
+
+        // return await db.OwnerCatalogs.Where(oc => oc.Owner.OwnerId == entraId).OrderBy(oc => oc.FriendlyName).ToListAsync();
     }
 
     public async Task UpdateOwnerCatalogAsync(Guid catalogId, OwnerCatalog ownerCatalog)
