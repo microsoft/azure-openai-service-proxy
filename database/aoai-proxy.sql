@@ -342,18 +342,18 @@ $$;
 ALTER FUNCTION aoai.get_event_registration_by_event_id(p_event_id character varying) OWNER TO azure_pg_admin;
 
 --
--- Name: get_models_by_deployment_name(character varying, character varying); Type: FUNCTION; Schema: aoai; Owner: azure_pg_admin
+-- Name: get_models_by_deployment_name(character varying, character varying, character varying); Type: FUNCTION; Schema: aoai; Owner: azure_pg_admin
 --
 
-CREATE FUNCTION aoai.get_models_by_deployment_name(p_event_id character varying, p_deployment_id character varying) RETURNS TABLE(deployment_name character varying, endpoint_url character varying, endpoint_key character varying, model_type aoai.model_type, catalog_id uuid, location character varying)
+CREATE FUNCTION aoai.get_models_by_deployment_name(p_event_id character varying, p_deployment_id character varying, p_postgres_encryption_key character varying) RETURNS TABLE(deployment_name character varying, endpoint_url character varying, endpoint_key character varying, model_type aoai.model_type, catalog_id uuid, location character varying)
     LANGUAGE plpgsql
     AS $$
 BEGIN
     RETURN QUERY
     SELECT
         OC.deployment_name,
-        OC.endpoint_url,
-        OC.endpoint_key,
+        aoai.pgp_sym_decrypt(OC.endpoint_url_encrypted, p_postgres_encryption_key)::character varying  AS endpoint_url,
+		aoai.pgp_sym_decrypt(OC.endpoint_key_encrypted, p_postgres_encryption_key)::character varying  AS endpoint_key,
         OC.model_type,
         OC.catalog_id,
 		OC.location
@@ -369,7 +369,7 @@ END;
 $$;
 
 
-ALTER FUNCTION aoai.get_models_by_deployment_name(p_event_id character varying, p_deployment_id character varying) OWNER TO azure_pg_admin;
+ALTER FUNCTION aoai.get_models_by_deployment_name(p_event_id character varying, p_deployment_id character varying, p_postgres_encryption_key character varying) OWNER TO azure_pg_admin;
 
 --
 -- Name: get_models_by_event(character varying); Type: FUNCTION; Schema: aoai; Owner: azure_pg_admin
@@ -382,8 +382,8 @@ BEGIN
     RETURN QUERY
     SELECT
         OC.deployment_name,
-        OC.endpoint_url,
-        OC.endpoint_key,
+		''::character varying AS endpoint_url, -- blank to maintain compatibility with the Deployment structure in the proxy
+		''::character varying AS endpoint_key, -- blank to maintain compatibility with the Deployment structure in the proxy
         OC.model_type,
         OC.catalog_id,
 		OC.location
@@ -513,7 +513,9 @@ CREATE TABLE aoai.owner_catalog (
     active boolean NOT NULL,
     model_type aoai.model_type NOT NULL,
     location character varying(64) DEFAULT ''::character varying NOT NULL,
-    friendly_name character varying(64) NOT NULL
+    friendly_name character varying(64) NOT NULL,
+    endpoint_url_encrypted bytea,
+    endpoint_key_encrypted bytea
 );
 
 
