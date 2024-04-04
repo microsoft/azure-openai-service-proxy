@@ -12,6 +12,7 @@ param postgresUser string
 param postgresPassword string
 param postgresDatabase string
 param postgresServer string
+param postgresEncryptionKey string
 param clientId string
 param tenantId string
 param playgroundUrl string
@@ -50,6 +51,10 @@ module app 'core/host/container-app-upsert.bicep' = {
         name: 'app-insights-connection-string'
         value: appInsightsConnectionString
       }
+      {
+        name: 'postgresEncryptionKey'
+        value: postgresEncryptionKey
+      }
     ]
     env: [
       {
@@ -75,6 +80,10 @@ module app 'core/host/container-app-upsert.bicep' = {
       {
         name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
         secretRef: 'app-insights-connection-string'
+      }
+      {
+        name: 'POSTGRES_ENCRYPTION_KEY'
+        secretRef: 'PostgressEncryptionKey'
       }
     ]
   }

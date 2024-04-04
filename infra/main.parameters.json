@@ -14,6 +14,9 @@
     "postgresAdminPassword": {
       "value": "$(secretOrRandomPassword ${AZURE_KEY_VAULT_NAME} postgresAdminPassword)"
     },
+    "postgresEncryptionKey":{
+      "value": "$(secretOrRandomPassword ${AZURE_KEY_VAULT_NAME} postgressEncryptionKey)"
+    },
     "authTenantId": {
       "value": "${AUTH_TENANT_ID}"
     },
