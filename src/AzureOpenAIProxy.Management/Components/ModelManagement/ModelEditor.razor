@@ -11,12 +11,12 @@
             {
                 <MudTextField Label="Friendly Name" @bind-Value="Model.FriendlyName" For="@(() => Model.FriendlyName)" />
 
-                <MudTextField Label="Endpoint Key" @bind-Value="Model.EndpointKey" For="@(() => Model.EndpointKey)"
+                <MudTextField Label="Endpoint Key (Stored encrypted)" @bind-Value="Model.EndpointKey" For="@(() => Model.EndpointKey)"
                     InputType="@(maskKey ? InputType.Password : InputType.Text)" Adornment="Adornment.End"
                     AdornmentIcon="@(maskKey ? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility)"
                     AdornmentAriaLabel="Show Password" OnAdornmentClick="ToggleMaskKey" />
 
-                <MudTextField Label="Endpoint URL" @bind-Value="Model.EndpointUrl" For="@(() => Model.EndpointUrl)"
+                <MudTextField Label="Endpoint URL (Stored encrypted)" @bind-Value="Model.EndpointUrl" For="@(() => Model.EndpointUrl)"
                     Adornment="Adornment.End" AdornmentText="https://my-ai-resource.azure.com" />
 
                 <MudTextField Label="Location" @bind-Value="Model.Location" For="@(() => Model.Location)" />
