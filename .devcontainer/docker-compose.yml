@@ -12,6 +12,7 @@ services:
       POSTGRES_ENCRYPTION_KEY: myencryptionkey123
       # Connection string for Postgres in the management app
       ConnectionStrings__AoaiProxyContext: Host=db:5432;Username=admin;Password=mypassword123;Database=aoai-proxy
+      PostgressEncryptionKey: myencryptionkey123
 
   db:
     image: postgres:16.1-alpine
