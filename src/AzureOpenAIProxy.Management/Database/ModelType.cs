@@ -33,4 +33,18 @@ public static class ModelTypeExtensions
             _ => throw new ArgumentOutOfRangeException(nameof(value), value, null)
         };
     }
+
+    public static string ToPostgresValue(this ModelType modelType)
+    {
+        return modelType switch
+        {
+            ModelType.OpenAI_Chat => "openai-chat",
+            ModelType.OpenAI_Embedding => "openai-embedding",
+            ModelType.OpenAI_Dalle3 => "openai-dalle3",
+            ModelType.OpenAI_Whisper => "openai-whisper",
+            ModelType.OpenAI_Completion => "openai-completion",
+            ModelType.Azure_AI_Search => "azure-ai-search",
+            _ => throw new ArgumentOutOfRangeException(nameof(modelType), modelType, null)
+        };
+    }
 }
