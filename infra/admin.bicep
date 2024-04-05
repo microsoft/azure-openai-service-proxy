@@ -83,7 +83,7 @@ module app 'core/host/container-app-upsert.bicep' = {
         secretRef: 'app-insights-connection-string'
       }
       {
-        name: 'POSTGRES_ENCRYPTION_KEY'
+        name: 'PostgresEncryptionKey'
         secretRef: 'postgres-encryption-key'
       }
     ]
