@@ -151,12 +151,12 @@ public partial class AoaiProxyContext : DbContext
             entity.Property(e => e.DeploymentName)
                 .HasMaxLength(64)
                 .HasColumnName("deployment_name");
-            entity.Property(e => e.EndpointKey)
-                .HasMaxLength(128)
-                .HasColumnName("endpoint_key");
-            entity.Property(e => e.EndpointUrl)
-                .HasMaxLength(256)
-                .HasColumnName("endpoint_url");
+            entity.Property(e => e.EndpointUrlEncrypted)
+                .HasColumnType("bytea")
+                .HasColumnName("endpoint_url_encrypted");
+            entity.Property(e => e.EndpointKeyEncrypted)
+                .HasColumnType("bytea")
+                .HasColumnName("endpoint_key_encrypted");
             entity.Property(e => e.FriendlyName)
                 .HasMaxLength(64)
                 .HasColumnName("friendly_name");

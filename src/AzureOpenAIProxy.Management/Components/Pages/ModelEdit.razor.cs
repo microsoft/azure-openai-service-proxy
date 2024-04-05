@@ -1,5 +1,7 @@
+using System.Data;
 using AzureOpenAIProxy.Management.Components.ModelManagement;
 using AzureOpenAIProxy.Management.Database;
+using AzureOpenAIProxy.Management.Services;
 using Microsoft.AspNetCore.Components;
 
 namespace AzureOpenAIProxy.Management.Components.Pages;
@@ -8,6 +10,9 @@ public partial class ModelEdit : ComponentBase
 {
     [Parameter]
     public required string Id { get; set; }
+
+    [Inject]
+    public IModelService ModelService { get; set; } = null!;
 
     [Inject]
     public AoaiProxyContext DbContext { get; set; } = null!;
@@ -24,7 +29,8 @@ public partial class ModelEdit : ComponentBase
             NavigationManager.NavigateTo("/models");
             return;
         }
-        OwnerCatalog? m = await DbContext.OwnerCatalogs.FindAsync(Guid.Parse(Id));
+
+        OwnerCatalog? m = await ModelService.GetOwnerCatalogAsync(Guid.Parse(Id));
 
         if (m is null)
         {
@@ -37,8 +43,8 @@ public partial class ModelEdit : ComponentBase
             FriendlyName = m.FriendlyName,
             DeploymentName = m.DeploymentName,
             EndpointKey = m.EndpointKey,
-            ModelType = m.ModelType,
             EndpointUrl = m.EndpointUrl,
+            ModelType = m.ModelType,
             Location = m.Location,
             Active = m.Active,
         };
@@ -62,7 +68,7 @@ public partial class ModelEdit : ComponentBase
         m.Location = model.Location!;
         m.Active = model.Active;
 
-        await DbContext.SaveChangesAsync();
+        await ModelService.UpdateOwnerCatalogAsync(m);
 
         NavigationManager.NavigateTo("/models");
     }

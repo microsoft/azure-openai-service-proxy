@@ -22,8 +22,12 @@ param adminAppExists bool = false
 param swaLocation string
 
 @secure()
-@description('PostGreSQL Server administrator password')
+@description('PostgreSQL Server administrator password')
 param postgresAdminPassword string
+
+@secure()
+@description('PostgreSQL Encryption Key')
+param postgresEncryptionKey string
 
 param authTenantId string = subscription().tenantId
 param authClientId string
@@ -85,6 +89,7 @@ module proxy 'proxy.bicep' = {
     postgresDatabase: postgresDatabaseName
     postgresUser: postgresAdminUser
     postgresPassword: postgresAdminPassword
+    postgresEncryptionKey: postgresEncryptionKey
   }
 }
 
@@ -137,6 +142,7 @@ module admin 'admin.bicep' = {
     postgresDatabase: postgresDatabaseName
     postgresUser: postgresAdminUser
     postgresPassword: postgresAdminPassword
+    postgresEncryptionKey: postgresEncryptionKey
     tenantId: authTenantId
     clientId: authClientId
     playgroundUrl: playground.outputs.SERVICE_WEB_URI

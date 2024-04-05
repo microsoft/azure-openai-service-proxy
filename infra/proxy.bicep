@@ -12,6 +12,8 @@ param postgresUser string
 param postgresPassword string
 param postgresDatabase string
 param postgresServer string
+@secure()
+param postgresEncryptionKey string
 
 resource proxyIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
   name: identityName
@@ -37,11 +39,19 @@ module app 'core/host/container-app-upsert.bicep' = {
         name: 'postconstr'
         value: 'postgresql://${postgresUser}:${postgresPassword}@${postgresServer}/${postgresDatabase}'
       }
+      {
+        name: 'postgres-encryption-key'
+        value: postgresEncryptionKey
+      }
     ]
     env: [
       {
         name: 'POSTGRES_CONNECTION_STRING'
         secretRef: 'postconstr'
+      }
+      {
+        name: 'POSTGRES_ENCRYPTION_KEY'
+        secretRef: 'postgres-encryption-key'
       }
     ]
   }

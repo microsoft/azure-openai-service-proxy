@@ -12,7 +12,6 @@
         <HeaderContent>
             <MudTh>Friendly Name</MudTh>
             <MudTh>Resource Name</MudTh>
-            <MudTh>Endpoint URL</MudTh>
             <MudTh>Resource Type</MudTh>
             <MudTh>Location</MudTh>
             <MudTh>Active</MudTh>
@@ -22,7 +21,6 @@
         <RowTemplate>
             <MudTd DataLabel="FriendlyName">@context.FriendlyName</MudTd>
             <MudTd DataLabel="DeploymentName">@context.DeploymentName</MudTd>
-            <MudTd DataLabel="EndpointUrl">@context.EndpointUrl</MudTd>
             <MudTd DataLabel="ModelType">@(context.ModelType!.Value.ToString().Replace("_", " "))</MudTd>
             <MudTd DataLabel="Location">@(context.Location)</MudTd>
             <MudTd DataLabel="Active">@(context.Active ? "Yes" : "No")</MudTd>
