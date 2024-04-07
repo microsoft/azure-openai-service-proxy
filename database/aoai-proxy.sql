@@ -254,7 +254,7 @@ BEGIN
 			substring(v_hash_string, 40, 12);
 
 -- Check if the v_event_id exists in the event table
-		IF (SELECT EXISTS(SELECT 1 FROM aoai.event E WHERE E.event_id = v_event_id)) THEN
+		IF (SELECT COUNT(*) FROM aoai.event E WHERE E.event_id = v_event_id AND E.event_shared_code = v_event_shared_code) > 0 THEN
 
 --  Create an attendee record if this is a shared id event request
 			INSERT INTO aoai.event_attendee(user_id, event_id, active, api_key)
