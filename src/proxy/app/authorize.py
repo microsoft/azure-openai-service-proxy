@@ -62,17 +62,17 @@ class Authorize:
             raise
 
         except asyncpg.exceptions.PostgresError as error:
-            self.logging.error("Postgres error: %s", str(error))
+            self.logging.error("Postgres error in __is_user_authorized: %s", str(error))
             raise HTTPException(
                 status_code=503,
-                detail=f"Error reading model catalog. {str(error)}",
+                detail="Authentication failed.",
             ) from error
 
         except Exception as exception:
-            self.logging.error("General exception in user_authorized: %s", str(exception))
+            self.logging.error("General exception in __is_user_authorized: %s", str(exception))
             raise HTTPException(
                 status_code=401,
-                detail=f"Authentication failed. General exception. {str(exception)}",
+                detail="Authentication failed.",
             ) from exception
 
     # @lru_cache_with_expiry(maxsize=128, ttl=180)
