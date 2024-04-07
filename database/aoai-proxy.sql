@@ -253,36 +253,40 @@ BEGIN
 			substring(v_hash_string, 30, 4) || '-' ||
 			substring(v_hash_string, 40, 12);
 
---  Create an attendee record if this is a shared id event request
-		INSERT INTO aoai.event_attendee(user_id, event_id, active, api_key)
-		SELECT 'shared:' || v_hash_string, v_event_id, true, v_api_key
-		WHERE NOT EXISTS (
-		    SELECT 1 FROM aoai.event_attendee EA
-			WHERE EA.event_id = v_event_id and EA.api_key = v_api_key
-		);
+-- Check if the v_event_id exists in the event table
+		IF (SELECT EXISTS(SELECT 1 FROM aoai.event E WHERE E.event_id = v_event_id)) THEN
 
-		RETURN QUERY
-	    SELECT
-			EA.api_key,
-	        EA.user_id,
-	        EA.event_id,
-	        E.event_code,
-	        E.organizer_name,
-	        E.organizer_email,
-			E.event_image_url,
-	        E.max_token_cap,
-	        E.daily_request_cap,
-			(CASE WHEN v_request_count > E.daily_request_cap THEN true ELSE false END) AS rate_limit_exceed
-	    FROM
-	        aoai.event E
-	    INNER JOIN
-	        aoai.event_attendee EA ON E.event_id = EA.event_id
-	    WHERE
-	        EA.api_key = v_api_key AND
-			E.event_shared_code = v_event_shared_code AND
-	        EA.active = true AND
-	        E.active = true AND
-	        current_utc + interval '1 minute' * E.time_zone_offset between E.start_timestamp AND E.end_timestamp;
+--  Create an attendee record if this is a shared id event request
+			INSERT INTO aoai.event_attendee(user_id, event_id, active, api_key)
+			SELECT 'shared:' || v_hash_string, v_event_id, true, v_api_key
+			WHERE NOT EXISTS (
+			    SELECT 1 FROM aoai.event_attendee EA
+				WHERE EA.event_id = v_event_id and EA.api_key = v_api_key
+			);
+
+			RETURN QUERY
+		    SELECT
+				EA.api_key,
+		        EA.user_id,
+		        EA.event_id,
+		        E.event_code,
+		        E.organizer_name,
+		        E.organizer_email,
+				E.event_image_url,
+		        E.max_token_cap,
+		        E.daily_request_cap,
+				(CASE WHEN v_request_count > E.daily_request_cap THEN true ELSE false END) AS rate_limit_exceed
+		    FROM
+		        aoai.event E
+		    INNER JOIN
+		        aoai.event_attendee EA ON E.event_id = EA.event_id
+		    WHERE
+		        EA.api_key = v_api_key AND
+				E.event_shared_code = v_event_shared_code AND
+		        EA.active = true AND
+		        E.active = true AND
+		        current_utc + interval '1 minute' * E.time_zone_offset between E.start_timestamp AND E.end_timestamp;
+		END IF;
 
 	END IF;
 
