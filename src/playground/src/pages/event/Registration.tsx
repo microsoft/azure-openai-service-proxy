@@ -183,7 +183,7 @@ export const Registration = () => {
                 <li>Copy the API Key.</li>
                 <li>Navigate to the{" "}
                 <Link href={`${window.location.origin}`} target="_blank" rel="noopener noreferrer">Playground</Link>.</li>
-                <li>Paste in the API Key and select <strong>Authorise</strong>.</li>
+                <li>Paste in the API Key and select <strong>Authorize</strong>.</li>
                 </ol>
             </div>
             <Field label="Endpoint" size="large">
