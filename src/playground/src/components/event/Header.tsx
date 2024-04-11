@@ -64,7 +64,7 @@ export const Header = () => {
             <Logout
               postLogoutRedirect={window.location.href}
               customRenderer={({ href }) => (
-                <Button href={href} as="a">
+                <Button href={href} as="a" appearance="primary">
                   Logout
                 </Button>
               )}
@@ -79,7 +79,7 @@ export const Header = () => {
             postLoginRedirect={window.location.href}
             customRenderer={(props) => {
               return (
-                <Button href={props.href} as="a">
+                <Button href={props.href} as="a" appearance="primary">
                   Login with {props.name}
                 </Button>
               );
