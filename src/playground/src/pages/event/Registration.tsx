@@ -24,10 +24,8 @@ const useStyles = makeStyles({
   container: {
     display: "flex",
     flexDirection: "column",
-    justifyContent: "start",
-    alignItems: "center",
-    height: "100vh",
-    ...shorthands.padding("0", "var(--global-margin)"),
+    ...shorthands.margin("0px", "140px"),
+    fontSize: "medium",
   },
   apiKeyDisplay: { display: "flex", alignItems: "center", columnGap: "4px" },
 });
@@ -111,7 +109,7 @@ export const Registration = () => {
   };
 
   return (
-    <section className={styles.container}>
+    <section className={styles.container} >
       <h1>{event?.eventCode}</h1>
       {event?.startTimestamp && event?.endTimestamp && event?.timeZoneLabel && (
         <div>
@@ -143,26 +141,28 @@ export const Registration = () => {
           </table>
         </div>
       )}
-      <div style={{ textAlign: "center", padding: "40px" }}>
+      <div style={{ textAlign: "left", padding: "0px" }}>
         <ReactMarkdown>{event?.eventMarkdown}</ReactMarkdown>
       </div>
       {state.profileLoaded && state.profile && !attendee && (
         <div>
           <Form method="post">
-            <Button type="submit">Register</Button>
+            <Button type="submit" style={{ fontSize: "medium" }} appearance="primary">
+              Register
+            </Button>
           </Form>
         </div>
       )}
       {state.profileLoaded && state.profile && attendee && (
         <>
+          <h2>Registration Details</h2>
+          <p>Here is your API Key and Endpoint. Keep your API Key safe.</p>
           <div>
             <Field label="API Key" size="large">
               <div className={styles.apiKeyDisplay}>
                 <Input
                   name="apiKey"
                   id="apiKey"
-                  type={state.showApiKey ? "text" : "password"}
-                  readOnly={true}
                   value={attendee.apiKey}
                   disabled={true}
                 />
@@ -179,10 +179,12 @@ export const Registration = () => {
               </div>
             </Field>
             <div>
-              <p>
-                Copy the API Key, then navigate to the{" "}
-                <Link href={`${window.location.origin}`} target="_blank" rel="noopener noreferrer">Playground</Link>.
-              </p>
+                <ol>
+                <li>Copy the API Key.</li>
+                <li>Navigate to the{" "}
+                <Link href={`${window.location.origin}`} target="_blank" rel="noopener noreferrer">Playground</Link>.</li>
+                <li>Paste in the API Key and select <strong>Authorise</strong>.</li>
+                </ol>
             </div>
             <Field label="Endpoint" size="large">
               <div className={styles.apiKeyDisplay}>
@@ -201,13 +203,16 @@ export const Registration = () => {
                   }
                 />
               </div>
+              <p>
+                If you are using an SDK like the OpenAI Python SDK, you'll need both the API Key and Endpoint.
+              </p>
             </Field>
           </div>
         </>
       )}
 
       {state.profileLoaded && !state.profile && (
-        <p>Please login to register.</p>
+        <h2>Please login to register.</h2>
       )}
 
       <Toaster toasterId={toasterId} />
