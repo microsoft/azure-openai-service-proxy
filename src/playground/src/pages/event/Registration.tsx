@@ -212,7 +212,7 @@ export const Registration = () => {
       )}
 
       {state.profileLoaded && !state.profile && (
-        <p>Please login to register.</p>
+        <h2>Please login to register.</h2>
       )}
 
       <Toaster toasterId={toasterId} />
