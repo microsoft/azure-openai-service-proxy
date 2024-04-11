@@ -137,10 +137,10 @@ class Config:
         deployments = await self.get_event_catalog(authorize_response.event_id, None)
         event_model_types = {}
 
-        # create a dictionary with a key of deployment.model_type with a list of deployment names
+        # create a dictionary with a key of deployment.model_type with a set of deployment names
         for deployment in deployments:
             if deployment.model_type not in event_model_types:
-                event_model_types[deployment.model_type] = []
-            event_model_types[deployment.model_type].append(deployment.deployment_name)
+                event_model_types[deployment.model_type] = set()
+            event_model_types[deployment.model_type].add(deployment.deployment_name)
 
         return event_model_types
