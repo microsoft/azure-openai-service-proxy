@@ -16,7 +16,7 @@ from .request_manager import RequestManager
 class ChatCompletionsRequest(BaseModel):
     """OpenAI Chat Request"""
 
-    messages: list[dict[Any, Any]]
+    messages: list[Any] | None = None
     dataSources: list[Any] | None = None
     enhancements: list[Any] | None = None
     max_tokens: int | None = None
