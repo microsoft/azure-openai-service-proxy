@@ -65,9 +65,6 @@ class ChatCompletions(RequestManager):
         ) -> Any:
             """OpenAI chat completion response"""
 
-            if "extension" in request.url.path:
-                self.is_extension = True
-
             completion, status_code = await self.process_request(
                 deployment_name=deployment_name,
                 request=request,
@@ -84,10 +81,15 @@ class ChatCompletions(RequestManager):
 
         return self.router
 
-    async def call_openai_chat(self, model: object, deployment: Deployment) -> Any:
+    async def call_openai_chat(
+        self,
+        model: object,
+        deployment: Deployment,
+        request: Request,
+    ) -> Any:
         """call openai with retry"""
 
-        if self.is_extension:
+        if "extension" in request.url.path:
             url = (
                 f"{deployment.endpoint_url}/openai/deployments/"
                 f"{deployment.deployment_name}/extensions/chat/completions"

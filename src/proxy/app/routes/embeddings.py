@@ -54,6 +54,7 @@ class Embeddings(RequestManager):
         self,
         model: object,
         deployment: Deployment,
+        request: Request,
     ) -> Any:
         """call openai with retry"""
 
