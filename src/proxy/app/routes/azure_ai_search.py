@@ -61,6 +61,7 @@ class AzureAISearch(RequestManager):
         self,
         search: object,
         deployment: Deployment,
+        request: Request,
     ) -> Any:
         """call openai with retry"""
 
