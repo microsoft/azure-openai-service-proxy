@@ -16,8 +16,9 @@ from .request_manager import RequestManager
 class ChatCompletionsRequest(BaseModel):
     """OpenAI Chat Request"""
 
-    messages: list[dict[str, str]]
+    messages: list[Any] | None = None
     dataSources: list[Any] | None = None
+    enhancements: list[Any] | None = None
     max_tokens: int | None = None
     temperature: float | None = None
     n: int | None = None
@@ -64,9 +65,6 @@ class ChatCompletions(RequestManager):
         ) -> Any:
             """OpenAI chat completion response"""
 
-            if "extension" in request.url.path:
-                self.is_extension = True
-
             completion, status_code = await self.process_request(
                 deployment_name=deployment_name,
                 request=request,
@@ -83,10 +81,15 @@ class ChatCompletions(RequestManager):
 
         return self.router
 
-    async def call_openai_chat(self, model: object, deployment: Deployment) -> Any:
+    async def call_openai_chat(
+        self,
+        model: object,
+        deployment: Deployment,
+        request: Request,
+    ) -> Any:
         """call openai with retry"""
 
-        if self.is_extension:
+        if "extension" in request.url.path:
             url = (
                 f"{deployment.endpoint_url}/openai/deployments/"
                 f"{deployment.deployment_name}/extensions/chat/completions"
@@ -111,10 +114,6 @@ class ChatCompletions(RequestManager):
 
     def __validate_chat_completion_request(self, model: ChatCompletionsRequest):
         """validate input"""
-
-        # check the max_tokens is between 1 and 4000
-        if model.max_tokens is not None and not 1 <= model.max_tokens <= 4000:
-            self.report_exception("Oops, max_tokens must be between 1 and 4000.", 400)
 
         if model.n is not None and not 1 <= model.n <= 10:
             self.throw_validation_error("Oops, n must be between 1 and 10.", 400)

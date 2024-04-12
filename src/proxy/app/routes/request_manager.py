@@ -23,20 +23,6 @@ class RequestManager:
 
         self.router = APIRouter()
         self.logger = logging.getLogger(__name__)
-        self._is_extension = False
-
-    @property
-    def is_extension(self):
-        """Getter for is_extension"""
-        return self._is_extension
-
-    @is_extension.setter
-    def is_extension(self, value):
-        """Setter for is_extension"""
-        if isinstance(value, bool):
-            self._is_extension = value
-        else:
-            raise ValueError("is_extension must be a boolean")
 
     async def authorize_request(self, deployment_name: str, request: Request) -> AuthorizeResponse:
         """authorize request"""
@@ -76,7 +62,7 @@ class RequestManager:
                 model.max_tokens = authorize_response.max_token_cap
 
         deployment = await self.config.get_catalog_by_deployment_name(authorize_response)
-        response, http_status_code = await call_method(model, deployment)
+        response, http_status_code = await call_method(model, deployment, request)
 
         if not isinstance(response, AsyncGenerator) and "model" in response:
             response = self.model_to_dict(response)

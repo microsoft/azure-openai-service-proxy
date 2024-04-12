@@ -56,11 +56,7 @@ class Completions(RequestManager):
 
         return self.router
 
-    async def call_openai(
-        self,
-        model: object,
-        deployment: Deployment,
-    ) -> Any:
+    async def call_openai(self, model: object, deployment: Deployment, request: Request) -> Any:
         """call openai with retry"""
 
         url = (
