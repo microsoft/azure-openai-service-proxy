@@ -156,7 +156,6 @@ export const Registration = () => {
       {state.profileLoaded && state.profile && attendee && (
         <>
           <h2>Registration Details</h2>
-
           <h3>AI Proxy Playground Access</h3>
           <p>
           You'll need the API Key to access the AI Proxy Playground.
@@ -194,7 +193,7 @@ export const Registration = () => {
             </div>
             <h3>SDK Access</h3>
             <p>
-            You'll need both the API Key and Endpoint to access the AI Proxy Playground using an SDK.
+            You'll need both the API Key and Endpoint to access AI resources using an SDK or making REST calls.
             </p>
             <Field label="Endpoint" size="large">
               <div className={styles.apiKeyDisplay}>
