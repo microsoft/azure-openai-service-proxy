@@ -194,7 +194,7 @@ export const Registration = () => {
             </div>
             <h3>SDK Access</h3>
             <p>
-            You'll need both the API Key and Endpoint to access the AI Proxy Playground using an SDK.
+            You'll need both the API Key and Endpoint to access the AI Proxy using an SDK.
             </p>
             <Field label="Endpoint" size="large">
               <div className={styles.apiKeyDisplay}>
