@@ -156,7 +156,11 @@ export const Registration = () => {
       {state.profileLoaded && state.profile && attendee && (
         <>
           <h2>Registration Details</h2>
-          <p>Here is your API Key and Endpoint. Keep your API Key safe.</p>
+
+          <h3>AI Proxy Playground Access</h3>
+          <p>
+          You'll need the API Key to access the AI Proxy Playground.
+          </p>
           <div>
             <Field label="API Key" size="large">
               <div className={styles.apiKeyDisplay}>
@@ -188,6 +192,10 @@ export const Registration = () => {
                   <Link href={`${window.location.origin}`} target="_blank" rel="noopener noreferrer">AI Proxy Playground</Link>.</li>
               </ol>
             </div>
+            <h3>SDK Access</h3>
+            <p>
+            You'll need both the API Key and Endpoint to access the AI Proxy Playground using an SDK.
+            </p>
             <Field label="Endpoint" size="large">
               <div className={styles.apiKeyDisplay}>
                 <Input
@@ -205,9 +213,6 @@ export const Registration = () => {
                   }
                 />
               </div>
-              <p>
-                If you are using an SDK like the OpenAI Python SDK, you'll need both the API Key and Endpoint.
-              </p>
               <h3>Python example using the OpenAI Python SDK</h3>
               <pre >
                 <code>
