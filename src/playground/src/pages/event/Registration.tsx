@@ -156,7 +156,6 @@ export const Registration = () => {
       {state.profileLoaded && state.profile && attendee && (
         <>
           <h2>Registration Details</h2>
-
           <h3>AI Proxy Playground Access</h3>
           <p>
           You'll need the API Key to access the AI Proxy Playground.
