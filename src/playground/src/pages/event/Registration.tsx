@@ -193,7 +193,7 @@ export const Registration = () => {
             </div>
             <h3>SDK Access</h3>
             <p>
-            You'll need both the API Key and Endpoint to access AI resources using an SDK or when REST calls.
+            You'll need both the API Key and Endpoint to access AI resources using an SDK or when making REST calls.
             </p>
             <Field label="Endpoint" size="large">
               <div className={styles.apiKeyDisplay}>
