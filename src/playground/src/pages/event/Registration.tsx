@@ -165,6 +165,7 @@ export const Registration = () => {
                   id="apiKey"
                   value={attendee.apiKey}
                   disabled={true}
+                  type={state.showApiKey ? "text" : "password"}
                 />
                 <Button
                   icon={state.showApiKey ? <EyeRegular /> : <EyeOffRegular />}
@@ -179,12 +180,13 @@ export const Registration = () => {
               </div>
             </Field>
             <div>
-                <ol>
-                <li>Copy the API Key.</li>
+              <ol>
+                <li>Copy the API Key. </li>
+                <li>When you navigate to the AI Proxy Playground, paste the API Key and Authorize.
+                </li>
                 <li>Navigate to the{" "}
-                <Link href={`${window.location.origin}`} target="_blank" rel="noopener noreferrer">Playground</Link>.</li>
-                <li>Paste in the API Key and select <strong>Authorize</strong>.</li>
-                </ol>
+                  <Link href={`${window.location.origin}`} target="_blank" rel="noopener noreferrer">AI Proxy Playground</Link>.</li>
+              </ol>
             </div>
             <Field label="Endpoint" size="large">
               <div className={styles.apiKeyDisplay}>
@@ -206,6 +208,66 @@ export const Registration = () => {
               <p>
                 If you are using an SDK like the OpenAI Python SDK, you'll need both the API Key and Endpoint.
               </p>
+              <h3>Python example using the OpenAI Python SDK</h3>
+              <pre >
+                <code>
+                  {`# pip install openai
+
+from openai import AzureOpenAI
+
+ENDPOINT = "${window.location.origin}/api/v1"
+API_KEY = "<YOUR_API_KEY>"
+
+API_VERSION = "2024-02-01"
+MODEL_NAME = "gpt-35-turbo"
+
+client = AzureOpenAI(
+    azure_endpoint=ENDPOINT,
+    api_key=API_KEY,
+    api_version=API_VERSION,
+)
+
+MESSAGES = [
+    {"role": "system", "content": "You are a helpful assistant."},
+    {"role": "user", "content": "Who won the world series in 2020?"},
+    {
+        "role": "assistant",
+        "content": "The Los Angeles Dodgers won the World Series in 2020.",
+    },
+    {"role": "user", "content": "Where was it played?"},
+]
+
+completion = client.chat.completions.create(
+    model=MODEL_NAME,
+    messages=MESSAGES,
+)
+
+print(completion.model_dump_json(indent=2))
+                  `}
+                </code>
+              </pre>
+              <h3>More examples</h3>
+              <ul>
+                <li>
+                  <Link
+                    href="https://learn.microsoft.com/azure/ai-services/openai/quickstart"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Quickstart: Get started generating text using Azure OpenAI Service
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="https://github.com/microsoft/azure-openai-service-proxy/tree/main/examples"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Azure OpenAI Service Proxy Examples
+                  </Link>
+                </li>
+              </ul>
+              <br />
             </Field>
           </div>
         </>
