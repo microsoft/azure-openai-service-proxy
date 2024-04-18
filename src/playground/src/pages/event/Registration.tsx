@@ -109,9 +109,11 @@ export const Registration = () => {
     return formattedDate;
   };
 
+  const trimmedEventCode = event?.eventCode?.trim();
+
   return (
     <section className={styles.container} >
-      <h1>{event?.eventCode}</h1>
+      <h1>{trimmedEventCode}</h1>
       {event?.startTimestamp && event?.endTimestamp && event?.timeZoneLabel && (
         <div>
           <table>
@@ -147,7 +149,7 @@ export const Registration = () => {
       </div>
       <h3>Terms of use</h3>
       <div>
-        By registering for this event and gaining limited access to Azure OpenAI for the sole purpose of participating in the "{event?.eventCode}", users acknowledge and agree to use the provided service responsibly and in accordance with the outlined terms. This privilege of limited access to Azure OpenAI is extended with the expectation that participants will refrain from any form of abuse, including but not limited to, malicious activities, unauthorized access, or any other actions that may disrupt the functionality of the service or compromise the experience for others. We reserve the right to revoke access to the free service in the event of any misuse or violation of these terms. Users are encouraged to engage with the service in a manner that fosters a positive and collaborative community environment.
+        By registering for this event and gaining limited access to Azure OpenAI for the sole purpose of participating in the "{trimmedEventCode}", users acknowledge and agree to use the provided service responsibly and in accordance with the outlined terms. This privilege of limited access to Azure OpenAI is extended with the expectation that participants will refrain from any form of abuse, including but not limited to, malicious activities, unauthorized access, or any other actions that may disrupt the functionality of the service or compromise the experience for others. We reserve the right to revoke access to the free service in the event of any misuse or violation of these terms. Users are encouraged to engage with the service in a manner that fosters a positive and collaborative community environment.
       </div>
       <br />
       {state.profileLoaded && state.profile && !attendee && (
