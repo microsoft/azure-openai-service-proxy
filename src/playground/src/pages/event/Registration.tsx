@@ -28,6 +28,7 @@ const useStyles = makeStyles({
     fontSize: "medium",
   },
   apiKeyDisplay: { display: "flex", alignItems: "center", columnGap: "4px" },
+  mediumFontSize: { fontSize: "medium" },
 });
 
 export const Registration = () => {
@@ -144,6 +145,11 @@ export const Registration = () => {
       <div style={{ textAlign: "left", padding: "0px" }}>
         <ReactMarkdown>{event?.eventMarkdown}</ReactMarkdown>
       </div>
+      <h3>Terms of use</h3>
+      <div>
+        By registering for this event and gaining limited access to Azure OpenAI for the sole purpose of participating in the "{event?.eventCode}", users acknowledge and agree to use the provided service responsibly and in accordance with the outlined terms. This privilege of limited access to Azure OpenAI is extended with the expectation that participants will refrain from any form of abuse, including but not limited to, malicious activities, unauthorized access, or any other actions that may disrupt the functionality of the service or compromise the experience for others. We reserve the right to revoke access to the free service in the event of any misuse or violation of these terms. Users are encouraged to engage with the service in a manner that fosters a positive and collaborative community environment.
+      </div>
+      <br />
       {state.profileLoaded && state.profile && !attendee && (
         <div>
           <Form method="post">
@@ -158,7 +164,7 @@ export const Registration = () => {
           <h2>Registration Details</h2>
           <h3>AI Proxy Playground Access</h3>
           <p>
-          You'll need the API Key to access the AI Proxy Playground.
+            You'll need the API Key to access the AI Proxy Playground.
           </p>
           <div>
             <Field label="API Key" size="large">
@@ -193,7 +199,7 @@ export const Registration = () => {
             </div>
             <h3>SDK Access</h3>
             <p>
-            You'll need both the API Key and Endpoint to access AI resources using an SDK or making REST calls.
+              You'll need both the API Key and Endpoint to access AI resources using an SDK or making REST calls.
             </p>
             <Field label="Endpoint" size="large">
               <div className={styles.apiKeyDisplay}>
