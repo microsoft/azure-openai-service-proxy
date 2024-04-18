@@ -24,11 +24,12 @@ const useStyles = makeStyles({
   container: {
     display: "flex",
     flexDirection: "column",
-    ...shorthands.margin("0px", "140px"),
-    fontSize: "medium",
+    ...shorthands.margin("0px", "80px"),
+    fontSize: "20px",
+    fontFamily: "Arial, Verdana, sans-serif",
+    lineHeight: "1.5",
   },
   apiKeyDisplay: { display: "flex", alignItems: "center", columnGap: "4px" },
-  mediumFontSize: { fontSize: "medium" },
 });
 
 export const Registration = () => {
@@ -222,7 +223,7 @@ export const Registration = () => {
               </div>
               <h3>Python example using the OpenAI Python SDK</h3>
               <pre >
-                <code>
+                <code style={{lineHeight: "1", fontSize: "medium"}}>
                   {`# pip install openai
 
 from openai import AzureOpenAI
