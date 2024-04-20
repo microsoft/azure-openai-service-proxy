@@ -59,7 +59,7 @@ class AttendeeApi:
 
                 if not result:
                     raise HTTPException(
-                        status_code=404, detail=f"Event with id {event_id} not found"
+                        status_code=404, detail=f"Event with id {event_id} not found 1."
                     )
 
                 return AttendeeRegistrationResponse()
@@ -89,12 +89,14 @@ class AttendeeApi:
 
                 if not result:
                     raise HTTPException(
-                        status_code=404, detail=f"Event with id {event_id} not found"
+                        status_code=404,
+                        detail=f"Event with id {event_id} not found 2.",
                     )
 
                 if len(result) == 0:
                     raise HTTPException(
-                        status_code=404, detail=f"Event with id {event_id} not found"
+                        status_code=404,
+                        detail=f"Event with id {event_id} not found 3.",
                     )
 
                 return result[0]
