@@ -156,7 +156,7 @@ export const Registration = () => {
       {state.profileLoaded && state.profile && !attendee && (
         <div>
           <Form method="post">
-            <Button type="submit" style={{ fontSize: "medium" }} appearance="primary">
+            <Button type="submit" style={{ fontSize: "medium", marginBottom: "40px" }} appearance="primary">
               Register
             </Button>
           </Form>
