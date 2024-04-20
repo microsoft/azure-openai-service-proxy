@@ -89,8 +89,8 @@ class AttendeeApi:
 
                 if not result:
 
-                    self.logger.error(msg=f"Event with id {event_id} not found")
-                    self.logger.error(msg=f"User id {user_id}")
+                    self.logger.error(msg=f"Event with id '{event_id}' not found")
+                    self.logger.error(msg=f"User id '{user_id}'")
 
                     raise HTTPException(
                         status_code=404,
@@ -106,7 +106,7 @@ class AttendeeApi:
                 return result[0]
 
             except Exception as error:
-                logging.error(error)
+                self.logger.error(error, exc_info=True)
                 raise error
 
         return self.router
