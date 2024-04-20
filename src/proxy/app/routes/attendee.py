@@ -59,12 +59,17 @@ class AttendeeApi:
 
                 if not result:
                     raise HTTPException(
-                        status_code=404, detail=f"Event with id {event_id} not found"
+                        status_code=404,
+                        detail=f"Error registering user for event with id {event_id}.",
                     )
 
                 return AttendeeRegistrationResponse()
+
+            except HTTPException:
+                raise
+
             except Exception as error:
-                logging.error(error)
+                self.logger.error(error)
                 raise error
 
         @self.router.get("/attendee/event/{event_id}", status_code=200)
@@ -87,20 +92,19 @@ class AttendeeApi:
                         user_id,
                     )
 
-                if not result:
+                if not result or len(result) == 0:
                     raise HTTPException(
-                        status_code=404, detail=f"Event with id {event_id} not found"
-                    )
-
-                if len(result) == 0:
-                    raise HTTPException(
-                        status_code=404, detail=f"Event with id {event_id} not found"
+                        status_code=404,
+                        detail=f"The user is not yet registered for event id: {event_id}.",
                     )
 
                 return result[0]
 
+            except HTTPException:
+                raise
+
             except Exception as error:
-                logging.error(error)
+                self.logger.error(error, exc_info=True)
                 raise error
 
         return self.router
