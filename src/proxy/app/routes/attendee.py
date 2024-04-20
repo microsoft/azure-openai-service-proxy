@@ -95,7 +95,7 @@ class AttendeeApi:
                 if not result or len(result) == 0:
                     raise HTTPException(
                         status_code=404,
-                        detail=f"Event with id {event_id} for user not found.",
+                        detail=f"The user is not yet registered for event id: {event_id}.",
                     )
 
                 return result[0]
