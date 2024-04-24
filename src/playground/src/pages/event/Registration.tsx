@@ -1,7 +1,6 @@
 import { useClientPrincipal } from "@aaronpowell/react-static-web-apps-auth";
 import {
   Button,
-  Field,
   Input,
   Link,
   Toast,
@@ -145,14 +144,23 @@ export const Registration = () => {
           </table>
         </div>
       )}
+      <h3>Generate your API Key</h3>
+      Follow these steps to register and generate your API Key for this event:
+      <ol>
+        <li>Click <strong>Login with GitHub</strong> in the top right corner.</li>
+        <li>Read the event description including the <strong>Terms of use</strong>.</li>
+        <li>Scroll to the bottom of the page and click <strong>Register</strong>.</li>
+        <li>Next, scroll down to the <strong>Registration Details</strong> section for your API Key and Endpoint.</li>
+        <li>Then explore the <strong>Playground</strong> and <strong>SDK</strong> support.</li>
+        <li>Forgotten your API Key? Just <strong>revisit</strong> this page.</li>
+      </ol>
       <div style={{ textAlign: "left", padding: "0px" }}>
         <ReactMarkdown>{event?.eventMarkdown}</ReactMarkdown>
       </div>
-      <h3>Terms of use</h3>
+      <h2>Terms of use</h2>
       <div>
         By registering for this event and gaining limited access to Azure AI services for the sole purpose of participating in the "{trimmedEventCode}" event, users acknowledge and agree to use the provided service responsibly and in accordance with the outlined terms. This privilege of limited access to Azure AI services is extended with the expectation that participants will refrain from any form of abuse, including but not limited to, malicious activities, unauthorized access, or any other actions that may disrupt the functionality of the services or compromise the experience for others. We reserve the right to revoke access to the free service in the event of any misuse or violation of these terms. Users are encouraged to engage with the service in a manner that fosters a positive and collaborative community environment.
       </div>
-      <br />
       {state.profileLoaded && state.profile && !attendee && (
         <div>
           <Form method="post">
@@ -165,66 +173,77 @@ export const Registration = () => {
       {state.profileLoaded && state.profile && attendee && (
         <>
           <h2>Registration Details</h2>
-          <h3>AI Proxy Playground Access</h3>
-          <p>
-            You'll need the API Key to access the AI Proxy Playground.
-          </p>
           <div>
-            <Field label="API Key" size="large">
-              <div className={styles.apiKeyDisplay}>
-                <Input
-                  name="apiKey"
-                  id="apiKey"
-                  value={attendee.apiKey}
-                  disabled={true}
-                  type={state.showApiKey ? "text" : "password"}
-                />
-                <Button
-                  icon={state.showApiKey ? <EyeRegular /> : <EyeOffRegular />}
-                  onClick={() =>
-                    dispatch({ type: "TOGGLE_API_KEY_VISIBILITY" })
-                  }
-                />
-                <Button
-                  icon={<CopyRegular />}
-                  onClick={() => copyToClipboard(attendee.apiKey)}
-                />
-              </div>
-            </Field>
-            <div>
-              <ol>
-                <li>Copy the API Key. </li>
-                <li>When you navigate to the AI Proxy Playground, paste the API Key and Authorize.
-                </li>
-                <li>Navigate to the{" "}
-                  <Link href={`${window.location.origin}`} target="_blank" rel="noopener noreferrer">AI Proxy Playground</Link>.</li>
-              </ol>
-            </div>
-            <h3>SDK Access</h3>
-            <p>
-              You'll need both the API Key and Endpoint to access AI resources using an SDK or making REST calls.
-            </p>
-            <Field label="Endpoint" size="large">
-              <div className={styles.apiKeyDisplay}>
-                <Input
-                  name="endpoint"
-                  id="endpoint"
-                  type="text"
-                  readOnly={true}
-                  value={`${window.location.origin}/api/v1`}
-                  disabled={true}
-                />
-                <Button
-                  icon={<CopyRegular />}
-                  onClick={() =>
-                    copyToClipboard(`${window.location.origin}/api/v1`)
-                  }
-                />
-              </div>
-              <h3>Python example using the OpenAI Python SDK</h3>
-              <pre >
-                <code style={{lineHeight: "1", fontSize: "medium"}}>
-                  {`# pip install openai
+            <table>
+              <tbody>
+                <tr>
+                  <td>
+                    <strong>Your API Key:</strong>
+                  </td>
+                  <td>
+                    <div className={styles.apiKeyDisplay}>
+                      <Input
+                        name="apiKey"
+                        id="apiKey"
+                        value={attendee.apiKey}
+                        disabled={true}
+                        type={state.showApiKey ? "text" : "password"}
+                      />
+                      <Button
+                        icon={state.showApiKey ? <EyeRegular /> : <EyeOffRegular />}
+                        onClick={() =>
+                          dispatch({ type: "TOGGLE_API_KEY_VISIBILITY" })
+                        }
+                      />
+                      <Button
+                        icon={<CopyRegular />}
+                        onClick={() => copyToClipboard(attendee.apiKey)}
+                      />
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <strong>Proxy Endpoint:</strong>
+                  </td>
+                  <td>
+                    <div className={styles.apiKeyDisplay}>
+                      <Input
+                        name="endpoint"
+                        id="endpoint"
+                        type="text"
+                        readOnly={true}
+                        value={`${window.location.origin}/api/v1`}
+                        disabled={true}
+                      />
+                      <Button
+                        icon={<CopyRegular />}
+                        onClick={() =>
+                          copyToClipboard(`${window.location.origin}/api/v1`)
+                        }
+                      />
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <h3>Playground Access</h3>
+          The playground allows you to experiment with generative AI prompts.
+          <ol>
+            <li>Copy your API Key. </li>
+            <li>When you navigate to the AI Proxy Playground, paste the API Key and Authorize.
+            </li>
+            <li>Navigate to the{" "}
+              <Link href={`${window.location.origin}`} target="_blank" rel="noopener noreferrer">AI Proxy Playground</Link>.</li>
+          </ol>
+          <h3>SDK Access</h3>
+          The real power of the Azure OpenAI Service is in the SDKs that allow you to integrate AI capabilities into your applications. You'll need your API Key and the proxy Endpoint to access AI resources using an SDK such as the OpenAI SDK or making REST calls.
+          <h4>Python example using the OpenAI Python SDK</h4>
+          The following Python code demonstrates how to use the OpenAI Python SDK to interact with the Azure OpenAI Service.
+          <pre >
+            <code style={{ lineHeight: "1", fontSize: "medium" }}>
+              {`# pip install openai
 
 from openai import AzureOpenAI
 
@@ -255,39 +274,37 @@ completion = client.chat.completions.create(
     messages=MESSAGES,
 )
 
-print(completion.model_dump_json(indent=2))
-                  `}
-                </code>
-              </pre>
-              <h3>More examples</h3>
-              <ul>
-                <li>
-                  <Link
-                    href="https://learn.microsoft.com/azure/ai-services/openai/quickstart"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Quickstart: Get started generating text using Azure OpenAI Service
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="https://github.com/microsoft/azure-openai-service-proxy/tree/main/examples"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Azure OpenAI Service Proxy Examples
-                  </Link>
-                </li>
-              </ul>
-              <br />
-            </Field>
-          </div>
+print(completion.model_dump_json(indent=2))`}
+            </code>
+          </pre>
+          <h3 style={{ "marginBottom": "10px" }}>More examples</h3>
+          <ul>
+            <li>
+              <Link
+                href="https://learn.microsoft.com/azure/ai-services/openai/quickstart"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Quickstart: Get started generating text using Azure OpenAI Service
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="https://github.com/microsoft/azure-openai-service-proxy/tree/main/examples"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Azure OpenAI Service Proxy Examples
+              </Link>
+            </li>
+          </ul>
+          <br />
+          {/* </div> */}
         </>
       )}
 
       {state.profileLoaded && !state.profile && (
-        <h2>Please login to register.</h2>
+        <h3>Login with GitHub to register.</h3>
       )}
 
       <Toaster toasterId={toasterId} />
