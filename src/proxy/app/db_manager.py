@@ -3,6 +3,7 @@
 import logging
 
 import asyncpg
+from azure.identity import DefaultAzureCredential
 from fastapi import FastAPI, HTTPException
 
 logging.basicConfig(level=logging.WARNING)
@@ -20,9 +21,21 @@ class DBManager:
         """create database pool"""
         print("Creating connection pool")
         try:
+
+            azure_credential = DefaultAzureCredential()
+            dbuser = "aiproxy02-c23phfkaxpzai-id-proxy"
+            dbpass = azure_credential.get_token(
+                "https://ossrdbms-aad.database.windows.net/.default"
+            )
+            dbhost = "aiproxy02-c23phfkaxpzai-postgresql.postgres.database.azure.com"
+            dbname = "aoai-proxy"
+
+            connection_string = f"postgresql://{dbuser}:{dbpass}@{dbhost}/{dbname}"
+
             self.app.pool = await asyncpg.create_pool(
                 connection_string, max_size=30, max_inactive_connection_lifetime=180
             )
+
         except asyncpg.exceptions.PostgresError as error:
             self.logging.error("Postgres error: %s", str(error))
             raise HTTPException(
