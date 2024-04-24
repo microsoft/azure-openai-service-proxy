@@ -145,13 +145,14 @@ export const Registration = () => {
         </div>
       )}
       <h3>Generate your API Key</h3>
-      Follow these steps to register and generate your API Key for the event:
+      Follow these steps to register and generate your API Key for this event:
       <ol>
         <li>Click <strong>Login with GitHub</strong> in the top right corner.</li>
         <li>Read the event description including the <strong>Terms of use</strong>.</li>
         <li>Scroll to the bottom of the page and click <strong>Register</strong>.</li>
         <li>Next, scroll down to the <strong>Registration Details</strong> section for your API Key and Endpoint.</li>
         <li>Then explore the <strong>Playground</strong> and <strong>SDK</strong> support.</li>
+        <li>Forgotten your API Key? Just <strong>revisit</strong> this page.</li>
       </ol>
       <div style={{ textAlign: "left", padding: "0px" }}>
         <ReactMarkdown>{event?.eventMarkdown}</ReactMarkdown>
