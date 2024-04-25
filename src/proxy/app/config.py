@@ -68,7 +68,7 @@ class Config:
                         "SELECT * FROM aoai.get_models_by_deployment_name($1, $2, $3)",
                         event_id,
                         deployment_name,
-                        self.db_manager.postgres_encryption_key,
+                        self.db_manager.get_postgres_encryption_key(),
                     )
 
             for row in result:
