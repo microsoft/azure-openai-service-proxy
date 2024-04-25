@@ -52,9 +52,14 @@ class DBConfig:
             azure_credential = DefaultAzureCredential()
             self.password = azure_credential.get_token(
                 "https://ossrdbms-aad.database.windows.net/.default"
-            )
+            ).token
 
-        return f"postgresql://{self.user}:{self.password}@{self.host}:{self.port}/{self.database}"
+        connection_string = (
+            f"postgresql://{self.user}:{self.password}@{self.host}:{self.port}/{self.database}"
+        )
+
+        logging.info("Connection string: %s", connection_string)
+        return connection_string
 
 
 class DBManager:
