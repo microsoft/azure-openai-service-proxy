@@ -58,7 +58,6 @@ class DBConfig:
             f"postgresql://{self.user}:{self.password}@{self.host}:{self.port}/{self.database}"
         )
 
-        logging.info("Connection string: %s", connection_string)
         return connection_string
 
 
