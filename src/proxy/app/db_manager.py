@@ -19,16 +19,16 @@ class DBConfig:
         database: str,
         user: str,
         password: str,
-        postgres_encryption_key: str,
+        encryption_key: str,
         connection_string: str,
     ) -> None:
-        self.host = host
+        self.host = host.strip() if host else None
         self.port = port
-        self.database = database
-        self.user = user
-        self.password = password
-        self.postgres_encryption_key = postgres_encryption_key
-        self.connection_string = connection_string
+        self.database = database.strip() if database else None
+        self.user = user.strip() if user else None
+        self.password = password.strip() if password else None
+        self.encryption_key = encryption_key.strip() if encryption_key else None
+        self.connection_string = connection_string.strip() if connection_string else None
 
         if not connection_string:
             if not host or not user:
@@ -37,7 +37,7 @@ class DBConfig:
                     detail=("Please set the environment variables " "POSTGRES_HOST, POSTGRES_USER"),
                 )
 
-        if not postgres_encryption_key:
+        if not encryption_key:
             raise HTTPException(
                 status_code=500,
                 detail="Please set the environment variable POSTGRES_ENCRYPTION_KEY",
@@ -114,4 +114,4 @@ class DBManager:
 
     def get_postgres_encryption_key(self):
         """get postgres encryption key"""
-        return self.db_config.postgres_encryption_key
+        return self.db_config.encryption_key

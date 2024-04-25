@@ -46,7 +46,7 @@ db_config = DBConfig(
     database=os.environ.get("POSTGRES_DATABASE", "aoai-proxy"),
     user=os.environ.get("POSTGRES_USER"),
     password=os.environ.get("POSTGRES_PASSWORD"),
-    postgres_encryption_key=os.environ.get("POSTGRES_ENCRYPTION_KEY"),
+    encryption_key=os.environ.get("POSTGRES_ENCRYPTION_KEY"),
     connection_string=os.environ.get("POSTGRES_CONNECTION_STRING"),
 )
 
