@@ -12,7 +12,7 @@ from .authorize import Authorize
 from .config import Config
 
 # pylint: disable=E0402
-from .db_manager import DBManager
+from .db_manager import DBConfig, DBManager
 from .monitor import Monitor
 from .routes.attendee import AttendeeApi as attendee_router
 from .routes.azure_ai_search import AzureAISearch as azure_ai_search_router
@@ -31,24 +31,6 @@ DEFAULT_IMAGES_GENERATIONS_API_VERSION = "2023-06-01-preview"
 DEFAULT_SEARCH_API_VERSION = "2023-11-01"
 OPENAI_IMAGES_API_VERSION = "2023-12-01-preview"
 
-try:
-    sql_connection_string = os.environ["POSTGRES_CONNECTION_STRING"]
-except KeyError as key_error:
-    print("Please set the environment variable POSTGRES_CONNECTION_STRING")
-    raise HTTPException(
-        status_code=500,
-        detail="Please set the environment variable POSTGRES_CONNECTION_STRING",
-    ) from key_error
-
-try:
-    postgres_encryption_key = os.environ["POSTGRES_ENCRYPTION_KEY"]
-except KeyError as key_error:
-    print("Please set the environment variable POSTGRES_ENCRYPTION_KEY")
-    raise HTTPException(
-        status_code=500,
-        detail="Please set the environment variable POSTGRES_ENCRYPTION_KEY",
-    ) from key_error
-
 
 logging.basicConfig(level=logging.WARNING)
 logger = logging.getLogger(__name__)
@@ -58,8 +40,18 @@ app = FastAPI(
     # redoc_url=None,  # Disable redoc
 )
 
+db_config = DBConfig(
+    host=os.environ.get("POSTGRES_HOST"),
+    port=os.environ.get("POSTGRES_PORT", 5432),
+    database=os.environ.get("POSTGRES_DATABASE", "aoai-proxy"),
+    user=os.environ.get("POSTGRES_USER"),
+    password=os.environ.get("POSTGRES_PASSWORD"),
+    postgres_encryption_key=os.environ.get("POSTGRES_ENCRYPTION_KEY"),
+    connection_string=os.environ.get("POSTGRES_CONNECTION_STRING"),
+)
 
-db_manager = DBManager(app=app, postgres_encryption_key=postgres_encryption_key)
+
+db_manager = DBManager(db_config=db_config)
 monitor = Monitor(db_manager=db_manager)
 authorize = Authorize(db_manager=db_manager)
 config = Config(db_manager=db_manager, monitor=monitor)
@@ -139,7 +131,7 @@ async def validation_exception_handler(request, exc):
 @app.on_event("startup")
 async def startup_event():
     """startup event"""
-    await db_manager.create_pool(connection_string=sql_connection_string)
+    await db_manager.create_pool()
 
 
 @app.on_event("shutdown")
