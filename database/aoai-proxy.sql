@@ -712,70 +712,70 @@ ALTER TABLE ONLY aoai.owner_event_map
 -- Name: SCHEMA aoai; Type: ACL; Schema: -; Owner: azure_pg_admin
 --
 
-GRANT USAGE ON SCHEMA aoai TO "aoai-proxy-app";
+GRANT USAGE ON SCHEMA aoai TO "aoai_proxy_app";
 
 
 --
 -- Name: TYPE model_type; Type: ACL; Schema: aoai; Owner: azure_pg_admin
 --
 
-GRANT ALL ON TYPE aoai.model_type TO "aoai-proxy-app";
+GRANT ALL ON TYPE aoai.model_type TO "aoai_proxy_app";
 
 
 --
 -- Name: TABLE event_attendee; Type: ACL; Schema: aoai; Owner: azure_pg_admin
 --
 
-GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE aoai.event_attendee TO "aoai-proxy-app";
+GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE aoai.event_attendee TO "aoai_proxy_app";
 
 
 --
 -- Name: TABLE event_attendee_request; Type: ACL; Schema: aoai; Owner: azure_pg_admin
 --
 
-GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE aoai.event_attendee_request TO "aoai-proxy-app";
+GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE aoai.event_attendee_request TO "aoai_proxy_app";
 
 
 --
 -- Name: TABLE event; Type: ACL; Schema: aoai; Owner: azure_pg_admin
 --
 
-GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE aoai.event TO "aoai-proxy-app";
+GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE aoai.event TO "aoai_proxy_app";
 
 
 --
 -- Name: TABLE event_catalog_map; Type: ACL; Schema: aoai; Owner: azure_pg_admin
 --
 
-GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE aoai.event_catalog_map TO "aoai-proxy-app";
+GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE aoai.event_catalog_map TO "aoai_proxy_app";
 
 
 --
 -- Name: TABLE metric; Type: ACL; Schema: aoai; Owner: azure_pg_admin
 --
 
-GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE aoai.metric TO "aoai-proxy-app";
+GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE aoai.metric TO "aoai_proxy_app";
 
 
 --
 -- Name: TABLE owner; Type: ACL; Schema: aoai; Owner: azure_pg_admin
 --
 
-GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE aoai.owner TO "aoai-proxy-app";
+GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE aoai.owner TO "aoai_proxy_app";
 
 
 --
 -- Name: TABLE owner_catalog; Type: ACL; Schema: aoai; Owner: azure_pg_admin
 --
 
-GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE aoai.owner_catalog TO "aoai-proxy-app";
+GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE aoai.owner_catalog TO "aoai_proxy_app";
 
 
 --
 -- Name: TABLE owner_event_map; Type: ACL; Schema: aoai; Owner: azure_pg_admin
 --
 
-GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE aoai.owner_event_map TO "aoai-proxy-app";
+GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE aoai.owner_event_map TO "aoai_proxy_app";
 
 
 --
