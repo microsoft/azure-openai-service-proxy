@@ -78,7 +78,12 @@ resource sqlDeploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' 
     scriptContent: '''
       apk add postgresql-client
 
-      psql -U ${PG_USER} -d ${PG_DB} -h ${PG_HOST} -w -c 'CREATE ROLE azure_pg_admin WITH NOLOGIN NOSUPERUSER INHERIT NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS;'
+      psql -U ${PG_USER} -d ${PG_DB} -h ${PG_HOST} -w -c 'CREATE ROLE aoai-proxy-app WITH NOLOGIN NOSUPERUSER INHERIT NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS;'
+
+      psql -U ${PG_USER} -d ${PG_DB} -h ${PG_HOST} -w -c 'CREATE ROLE aoai-proxy-reporting WITH NOLOGIN NOSUPERUSER INHERIT NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS;'
+
+      psql -U ${PG_USER} -d ${PG_DB} -h ${PG_HOST} -w -c 'GRANT aoai-proxy-app TO ${PG_USER};'
+      psql -U ${PG_USER} -d ${PG_DB} -h ${PG_HOST} -w -c 'GRANT aoai-proxy-reporting TO ${PG_USER};'
 
       psql -U ${PG_USER} -d ${PG_DB} -h ${PG_HOST} -w <<EOF
       \x
