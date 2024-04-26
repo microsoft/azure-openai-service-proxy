@@ -78,6 +78,8 @@ resource sqlDeploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' 
     scriptContent: '''
       apk add postgresql-client
 
+      psql -U ${PG_USER} -d ${PG_DB} -h ${PG_HOST} -w -c 'CREATE ROLE azure_pg_admin WITH NOLOGIN NOSUPERUSER INHERIT NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS;'
+
       psql -U ${PG_USER} -d ${PG_DB} -h ${PG_HOST} -w <<EOF
       \x
       ${SQL_SCRIPT}
