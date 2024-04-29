@@ -128,14 +128,13 @@ resource sqlDeploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' 
       psql -U ${PG_USER} -d postgres -h ${PG_HOST} -w -c 'GRANT aoai_proxy_app TO ${ADMIN_SYSTEM_ASSIGNED_IDENTITY};'
       psql -U ${PG_USER} -d postgres -h ${PG_HOST} -w -c 'GRANT aoai_proxy_app TO ${PROXY_SYSTEM_ASSIGNED_IDENTITY};'
 
+      echo -e "<<EOF\n\x\n${SQL_SCRIPT}\n\qEOF" > ./script.sql
 
-      psql -U ${PG_USER} -d ${PG_DB} -h ${PG_HOST} -w <<EOF
-      \x
-      ${SQL_SCRIPT}
-      EOF
+      cat ./script.sql
+
+      psql -U ${PG_USER} -d ${PG_DB} -h ${PG_HOST} -w -f ./script.sql
     '''
   }
 }
-
 
 output DOMAIN_NAME string = postgresServer.outputs.POSTGRES_DOMAIN_NAME
