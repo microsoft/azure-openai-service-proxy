@@ -25,8 +25,6 @@ param entraAdministratorObjectId string = ''
 ])
 param entraAdministratorType string = 'User'
 
-
-
 // Create PostgreSQL database
 module postgresServer 'core/database/postgresql/flexibleserver.bicep' = {
   name: 'postgresql'
@@ -64,19 +62,19 @@ resource postgresConfig 'Microsoft.DBforPostgreSQL/flexibleServers/configuration
   }
 }
 
-resource sqlDeploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
-  name: '${name}-deployment-script'
+resource sqlDeploymentScriptSetup 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
+  name: '${name}-deployment-script-setup'
   dependsOn: [
     postgresConfig
   ]
   location: location
   kind: 'AzureCLI'
   properties: {
-    azCliVersion: '2.37.0'
+    azCliVersion: '2.9.1'
     retentionInterval: 'PT1H' // Retain the script resource for 1 hour after it ends running
     timeout: 'PT5M' // Five minutes
     cleanupPreference: 'OnSuccess'
-    environmentVariables: [ 
+    environmentVariables: [
       {
         name: 'SQL_SETUP_SCRIPT'
         value: loadTextContent('../database/setup.sql')
@@ -112,28 +110,74 @@ resource sqlDeploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' 
     ]
 
     scriptContent: '''
+      #!/bin/bash
+
       apk add postgresql-client
 
-      psql -U ${PG_USER} -d postgres -h ${PG_HOST} -w -c 'CREATE DATABASE "aoai-proxy";'
+      echo "$SQL_SETUP_SCRIPT" > ./setup.sql
+      cat ./setup.sql
+      echo "Executing setup script"
 
-      psql -U ${PG_USER} -d postgres -h ${PG_HOST} -w -c 'CREATE ROLE aoai_proxy_app WITH NOLOGIN NOSUPERUSER INHERIT NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS;'
-      psql -U ${PG_USER} -d postgres -h ${PG_HOST} -w -c 'CREATE ROLE aoai_proxy_reporting WITH NOLOGIN NOSUPERUSER INHERIT NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS;'
+      psql -a -U "$PG_USER" -d "postgres" -h "$PG_HOST" -v PG_USER="$PG_USER" -v ADMIN_SYSTEM_ASSIGNED_IDENTITY="$ADMIN_SYSTEM_ASSIGNED_IDENTITY" -v PROXY_SYSTEM_ASSIGNED_IDENTITY="$PROXY_SYSTEM_ASSIGNED_IDENTITY" -w -f ./setup.sql
 
-      psql -U ${PG_USER} -d postgres -h ${PG_HOST} -w -c 'GRANT aoai_proxy_app TO ${PG_USER};'
-      psql -U ${PG_USER} -d postgres -h ${PG_HOST} -w -c 'GRANT aoai_proxy_reporting TO ${PG_USER};'
-
-      psql -U ${PG_USER} -d postgres -h ${PG_HOST} -w -c "select * from pgaadauth_create_principal('${ADMIN_SYSTEM_ASSIGNED_IDENTITY}', false, false);"
-      psql -U ${PG_USER} -d postgres -h ${PG_HOST} -w -c "select * from pgaadauth_create_principal('${PROXY_SYSTEM_ASSIGNED_IDENTITY}', false, false);"
-
-      psql -U ${PG_USER} -d postgres -h ${PG_HOST} -w -c 'GRANT aoai_proxy_app TO ${ADMIN_SYSTEM_ASSIGNED_IDENTITY};'
-      psql -U ${PG_USER} -d postgres -h ${PG_HOST} -w -c 'GRANT aoai_proxy_app TO ${PROXY_SYSTEM_ASSIGNED_IDENTITY};'
-
-      echo -e "<<EOF\n\x\n${SQL_SCRIPT}\n\qEOF" > ./script.sql
-
-      cat ./script.sql
-
-      psql -U ${PG_USER} -d ${PG_DB} -h ${PG_HOST} -w -f ./script.sql
     '''
+  }
+}
+
+resource sqlDeploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
+  name: '${name}-deployment-script'
+  dependsOn: [
+    sqlDeploymentScriptSetup
+  ]
+  location: location
+  kind: 'AzureCLI'
+  properties: {
+    azCliVersion: '2.9.1'
+    retentionInterval: 'PT1H' // Retain the script resource for 1 hour after it ends running
+    timeout: 'PT5M' // Five minutes
+    cleanupPreference: 'OnSuccess'
+    environmentVariables: [
+      {
+        name: 'SQL_SETUP_SCRIPT'
+        value: loadTextContent('../database/setup.sql')
+      }
+      {
+        name: 'SQL_SCRIPT'
+        value: loadTextContent('../database/aoai-proxy.sql')
+      }
+      {
+        name: 'PG_USER'
+        value: entraAdministratorName
+      }
+      {
+        name: 'PG_DB'
+        value: postgresDatabaseName
+      }
+      {
+        name: 'PG_HOST'
+        value: postgresServer.outputs.POSTGRES_DOMAIN_NAME
+      }
+      {
+        name: 'PGPASSWORD'
+        value: entraAuthorizationToken
+      }
+      {
+        name: 'ADMIN_SYSTEM_ASSIGNED_IDENTITY'
+        value: adminSystemAssignedIdentity
+      }
+      {
+        name: 'PROXY_SYSTEM_ASSIGNED_IDENTITY'
+        value: proxySystemAssignedIdentity
+      }
+    ]
+
+    scriptContent: '''
+        #!/bin/bash
+        apk add postgresql-client
+  
+        echo -e "<<EOF\n\x\n${SQL_SCRIPT}\nexit\nEOF" > ./script.sql
+        psql -U ${PG_USER} -d "aoai-proxy" -h ${PG_HOST} -w -f ./script.sql
+      '''
   }
 }
 
