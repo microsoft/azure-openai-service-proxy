@@ -8,8 +8,6 @@ param containerRegistryName string
 param serviceName string = 'proxy'
 param exists bool
 param postgresUser string
-@secure()
-param postgresPassword string
 param postgresDatabase string
 param postgresServer string
 @secure()
@@ -36,22 +34,38 @@ module app 'core/host/container-app-upsert.bicep' = {
     containerMaxReplicas: 2
     secrets: [
       {
-        name: 'postconstr'
-        value: 'postgresql://${postgresUser}:${postgresPassword}@${postgresServer}/${postgresDatabase}'
-      }
-      {
         name: 'postgres-encryption-key'
         value: postgresEncryptionKey
+      }
+      {
+        name: 'postgres-user'
+        value: postgresUser
+      }
+      {
+        name: 'postgres-database'
+        value: postgresDatabase
+      }
+      {
+        name: 'postgres-server'
+        value: postgresServer
       }
     ]
     env: [
       {
-        name: 'POSTGRES_CONNECTION_STRING'
-        secretRef: 'postconstr'
-      }
-      {
         name: 'POSTGRES_ENCRYPTION_KEY'
         secretRef: 'postgres-encryption-key'
+      }
+      {
+        name: 'POSTGRES_USER'
+        secretRef: 'postgres-user'
+      }
+      {
+        name: 'POSTGRES_DATABASE'
+        secretRef: 'postgres-database'
+      }
+      {
+        name: 'POSTGRES_HOST'
+        secretRef: 'postgres-server'
       }
     ]
   }

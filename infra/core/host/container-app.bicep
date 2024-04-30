@@ -62,7 +62,7 @@ resource app 'Microsoft.App/containerapps@2023-05-02-preview' = {
   // provide the system assigned identity with the ACR pull access before the app is created
   dependsOn: [ containerRegistryAccess ]
   identity: {
-    type: 'UserAssigned'
+    type: 'SystemAssigned, UserAssigned'
     userAssignedIdentities: { '${userIdentity.id}': {} }
   }
   properties: {
