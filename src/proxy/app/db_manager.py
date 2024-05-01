@@ -54,7 +54,7 @@ class DBConfig:
                 "https://ossrdbms-aad.database.windows.net/.default"
             ).token
 
-            logger.info("Using Postgres Entra Authorisation")
+            logger.info("Using Postgres Entra Authorization")
 
         connection_string = (
             f"postgresql://{self.user}:{self.password}@{self.host}:{self.port}/{self.database}"
