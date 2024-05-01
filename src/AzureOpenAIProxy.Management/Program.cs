@@ -35,6 +35,7 @@ if (string.IsNullOrEmpty(connection_string))
             string accessToken = (await sqlServerTokenProvider.GetTokenAsync(
                  new Azure.Core.TokenRequestContext(scopes: new string[] { "https://ossrdbms-aad.database.windows.net/.default" }) { })).Token;
             connection_string = $"Host={db_host};Port={db_port};Database={db_name};Username={db_user};Password={accessToken}";
+            Console.WriteLine("Using Postgres Entra Authorization");
         }
         else
         {
