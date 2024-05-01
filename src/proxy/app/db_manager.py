@@ -43,7 +43,7 @@ class DBConfig:
                 detail="Please set the environment variable POSTGRES_ENCRYPTION_KEY",
             )
 
-    def get_connection_string(self):
+    def get_connection_string(self, logger):
         """get connection string"""
         if self.connection_string:
             return self.connection_string
@@ -53,6 +53,8 @@ class DBConfig:
             self.password = azure_credential.get_token(
                 "https://ossrdbms-aad.database.windows.net/.default"
             ).token
+
+            logger.info("Using Postgres Entra Authorisation")
 
         connection_string = (
             f"postgresql://{self.user}:{self.password}@{self.host}:{self.port}/{self.database}"
@@ -74,7 +76,7 @@ class DBManager:
         print("Creating connection pool")
         try:
             self.db_pool = await asyncpg.create_pool(
-                self.db_config.get_connection_string(),
+                self.db_config.get_connection_string(self.logging),
                 max_size=30,
                 max_inactive_connection_lifetime=180,
             )
