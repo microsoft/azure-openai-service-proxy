@@ -25,7 +25,7 @@ if (string.IsNullOrEmpty(connection_string))
 
     if (string.IsNullOrEmpty(db_host) || string.IsNullOrEmpty(db_user))
     {
-        throw new Exception("Database connection string not found and DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASSWORD not set");
+        throw new Exception("Database connection string not found and POSTGRES_SERVER, POSTGRES_USER not set");
     }
     else
     {
