@@ -14,7 +14,7 @@ string? connection_string = builder.Configuration.GetConnectionString("AoaiProxy
 if (string.IsNullOrEmpty(connection_string))
 {
     int db_port = 5432;
-    string? db_host = builder.Configuration["POSTGRES_HOST"];
+    string? db_host = builder.Configuration["POSTGRES_SERVER"];
     string? db_name = builder.Configuration["POSTGRES_DATABASE"];
     if (string.IsNullOrEmpty(db_name))
     {

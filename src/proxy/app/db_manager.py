@@ -34,7 +34,9 @@ class DBConfig:
             if not host or not user:
                 raise HTTPException(
                     status_code=500,
-                    detail=("Please set the environment variables " "POSTGRES_HOST, POSTGRES_USER"),
+                    detail=(
+                        "Please set the environment variables " "POSTGRES_SERVER, POSTGRES_USER"
+                    ),
                 )
 
         if not encryption_key:

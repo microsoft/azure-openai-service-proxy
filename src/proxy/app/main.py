@@ -41,7 +41,7 @@ app = FastAPI(
 )
 
 db_config = DBConfig(
-    host=os.environ.get("POSTGRES_HOST"),
+    host=os.environ.get("POSTGRES_SERVER"),
     port=os.environ.get("POSTGRES_PORT", 5432),
     database=os.environ.get("POSTGRES_DATABASE", "aoai-proxy"),
     user=os.environ.get("POSTGRES_USER"),

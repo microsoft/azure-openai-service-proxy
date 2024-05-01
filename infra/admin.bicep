@@ -97,7 +97,7 @@ module app 'core/host/container-app-upsert.bicep' = {
         secretRef: 'postgres-database'
       }
       {
-        name: 'POSTGRES_HOST'
+        name: 'POSTGRES_SERVER'
         secretRef: 'postgres-server'
       }
     ]
