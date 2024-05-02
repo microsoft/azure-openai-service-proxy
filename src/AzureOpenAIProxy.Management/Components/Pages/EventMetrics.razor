@@ -1,5 +1,6 @@
 @page "/event/{eventId}/metrics"
 @using AzureOpenAIProxy.Management.Database
+@using AzureOpenAIProxy.Management.Services;
 
 @namespace AzureOpenAIProxy.Management.Components.Pages
 
@@ -15,37 +16,37 @@
             <HeaderContent>
                 <MudTh>
                     <MudTableSortLabel
-                        SortBy="new Func<(string resource, int count, long prompt_tokens, long completion_tokens, long total_tokens), object>(x => x.resource)">
+                        SortBy="new Func<ModelCounts, object>(x => x.Resource)">
                         Resource Name (Deployment or Index Name)</MudTableSortLabel>
                 </MudTh>
                 <MudTh>
                     <MudTableSortLabel
-                        SortBy="new Func<(string resource, int count, long prompt_tokens, long completion_tokens, long total_tokens), object>(x => x.prompt_tokens)">
+                        SortBy="new Func<ModelCounts, object>(x => x.PromptTokens)">
                         Prompt tokens</MudTableSortLabel>
                 </MudTh>
                 <MudTh>
                     <MudTableSortLabel
-                        SortBy="new Func<(string resource, int count, long prompt_tokens, long completion_tokens, long total_tokens), object>(x => x.completion_tokens)">
+                        SortBy="new Func<ModelCounts, object>(x => x.CompletionTokens)">
                         Completion tokens</MudTableSortLabel>
                 </MudTh>
                 <MudTh>
                     <MudTableSortLabel
-                        SortBy="new Func<(string resource, int count, long prompt_tokens, long completion_tokens, long total_tokens), object>(x => x.total_tokens)">
+                        SortBy="new Func<ModelCounts, object>(x => x.TotalTokens)">
                         Total tokens</MudTableSortLabel>
                 </MudTh>
-                                <MudTh>
+                <MudTh>
                     <MudTableSortLabel InitialDirection="SortDirection.Descending"
-                        SortBy="new Func<(string resource, int count, long prompt_tokens, long completion_tokens, long total_tokens), object>(x => x.count)">
+                        SortBy="new Func<ModelCounts, object>(x => x.Count)">
                         Requests</MudTableSortLabel>
                 </MudTh>
             </HeaderContent>
 
             <RowTemplate>
-                <MudTd DataLabel="Resource Name (Deployment or Index Name)">@context.resource</MudTd>
-                <MudTd DataLabel="Prompt tokens">@context.prompt_tokens</MudTd>
-                <MudTd DataLabel="Completion tokens">@context.completion_tokens</MudTd>
-                <MudTd DataLabel="Total tokens">@context.total_tokens</MudTd>
-                <MudTd DataLabel="Request Count">@context.count</MudTd>
+                <MudTd DataLabel="Resource Name (Deployment or Index Name)">@context.Resource</MudTd>
+                <MudTd DataLabel="Prompt tokens">@context.PromptTokens</MudTd>
+                <MudTd DataLabel="Completion tokens">@context.CompletionTokens</MudTd>
+                <MudTd DataLabel="Total tokens">@context.TotalTokens</MudTd>
+                <MudTd DataLabel="Request Count">@context.Count</MudTd>
             </RowTemplate>
         </MudTable>
     </MudStack>

@@ -9,6 +9,15 @@ using NpgsqlTypes;
 
 namespace AzureOpenAIProxy.Management.Services;
 
+public class ModelCounts
+{
+    public string Resource { get; set; }
+    public int Count { get; set; }
+    public long PromptTokens { get; set; }
+    public long CompletionTokens { get; set; }
+    public long TotalTokens { get; set; }
+}
+
 public class EventService(IAuthService authService, AoaiProxyContext db) : IEventService, IDisposable
 {
     private readonly DbConnection conn = db.Database.GetDbConnection();
@@ -90,7 +99,7 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
     public async Task<EventMetric> GetEventMetricsAsync(string eventId)
     {
         (int attendeeCount, int requestCount) = await GetAttendeeMetricsAsync(eventId);
-        IEnumerable<(string resource, int count, long prompt_tokens, long completion_tokens, long total_tokens)> modelCount = await GetModelCountAsync(eventId);
+        IEnumerable<ModelCounts> modelCount = await GetModelCountAsync(eventId);
 
         return new()
         {
@@ -101,7 +110,7 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
         };
     }
 
-    private async Task<IEnumerable<(string resource, int count, long prompt_tokens, long completion_tokens, long total_tokens)>> GetModelCountAsync(string eventId)
+    private async Task<IEnumerable<ModelCounts>> GetModelCountAsync(string eventId)
     {
         if (conn.State != ConnectionState.Open)
             await conn.OpenAsync();
@@ -140,12 +149,14 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
             })
             .OrderByDescending(x => x.Requests);
 
-        List<(string resourse, int, long PromptTokens, long CompletionTokens, long TotalTokens)> modelCounts = summary.Select(item =>
-                {
-                    string resource = item.Resource.ToString();
-                    return (resource, (int)item.Requests, item.PromptTokens, item.CompletionTokens, item.TotalTokens);
-
-                }).ToList();
+        List<ModelCounts> modelCounts = summary.Select(item => new ModelCounts
+        {
+            Resource = item.Resource,
+            Count = (int)item.Requests,
+            PromptTokens = item.PromptTokens,
+            CompletionTokens = item.CompletionTokens,
+            TotalTokens = item.TotalTokens
+        }).ToList();
 
         return modelCounts;
 

@@ -1,3 +1,5 @@
+using AzureOpenAIProxy.Management.Services;
+
 namespace AzureOpenAIProxy.Management.Database;
 public class EventMetric
 {
@@ -7,5 +9,5 @@ public class EventMetric
 
     public int RequestCount { get; set; }
 
-    public IEnumerable<(string resource, int count, long prompt_tokens, long completion_tokens, long total_tokens)> ModelCounts { get; set; } = [];
+    public IEnumerable<ModelCounts> ModelCounts { get; set; } = [];
 }
