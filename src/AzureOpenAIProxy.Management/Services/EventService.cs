@@ -1,5 +1,6 @@
 using System.Data;
 using System.Data.Common;
+using System.Dynamic;
 using AzureOpenAIProxy.Management.Components.EventManagement;
 using AzureOpenAIProxy.Management.Database;
 using Microsoft.EntityFrameworkCore;
@@ -89,7 +90,7 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
     public async Task<EventMetric> GetEventMetricsAsync(string eventId)
     {
         (int attendeeCount, int requestCount) = await GetAttendeeMetricsAsync(eventId);
-        IEnumerable<(ModelType modelType, string deploymentName, int count, long prompt_tokens, long completion_tokens, long total_tokens)> modelCount = await GetModelCountAsync(eventId);
+        IEnumerable<(string resource, int count, long prompt_tokens, long completion_tokens, long total_tokens)> modelCount = await GetModelCountAsync(eventId);
 
         return new()
         {
@@ -100,42 +101,54 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
         };
     }
 
-    private async Task<IEnumerable<(ModelType modelType, string deploymentName, int count, long prompt_tokens, long completion_tokens, long total_tokens)>> GetModelCountAsync(string eventId)
+    private async Task<IEnumerable<(string resource, int count, long prompt_tokens, long completion_tokens, long total_tokens)>> GetModelCountAsync(string eventId)
     {
         if (conn.State != ConnectionState.Open)
             await conn.OpenAsync();
 
         using var modelCountCommand = conn.CreateCommand();
         modelCountCommand.CommandText = """
-        SELECT COUNT(*) AS requests, resource, SUM(prompt_tokens) AS prompt_tokens, SUM(completion_tokens) AS completion_tokens, SUM(total_tokens) AS total_tokens
+        SELECT event_id, date_stamp, resource, SUM(prompt_tokens) AS prompt_tokens, SUM(completion_tokens) AS completion_tokens, SUM(total_tokens) AS total_tokens, COUNT(*) AS requests
         FROM aoai.metric_view where event_id = @EventId
-        GROUP BY event_id, resource
+        GROUP BY date_stamp, event_id, resource
         ORDER BY requests DESC
         """;
 
         modelCountCommand.Parameters.Add(new NpgsqlParameter("EventId", eventId));
         using var reader = await modelCountCommand.ExecuteReaderAsync();
 
-
-
-        List<(ModelType modelType, string deploymentName, int count, long prompt_tokens, long completion_tokens, long total_tokens)> modelCounts = [];
-        if (reader.HasRows)
+        var results = new List<dynamic>();
+        while (reader.Read())
         {
-            while (await reader.ReadAsync())
+            var record = new ExpandoObject() as IDictionary<string, Object>;
+            for (var fieldCount = 0; fieldCount < reader.FieldCount; fieldCount++)
             {
-                var count = reader.GetInt32(0);
-                var resource = reader.GetString(1);
-                var prompt_tokens = reader.IsDBNull(2) ? 0 : reader.GetInt64(2);
-                var completion_tokens = reader.IsDBNull(3) ? 0 : reader.GetInt64(3);
-                var total_tokens = reader.IsDBNull(4) ? 0 : reader.GetInt64(4);
-
-                var parts = resource.Split(" | ");
-                var modelType = ModelTypeExtensions.ParsePostgresValue(parts[0]);
-                modelCounts.Add((modelType, string.Join(" | ", parts[1..]), count, prompt_tokens, completion_tokens, total_tokens));
+                record.Add(reader.GetName(fieldCount), reader[fieldCount]);
             }
-        }
+            results.Add(record);
+        };
+
+        var summary = results
+            .GroupBy(r => new { EventId = r.event_id, Resource = r.resource })
+            .Select(g => new
+            {
+                g.Key.Resource,
+                PromptTokens = g.Sum(x => x.prompt_tokens is DBNull ? 0 : (long)x.prompt_tokens),
+                CompletionTokens = g.Sum(x => x.completion_tokens is DBNull ? 0 : (long)x.completion_tokens),
+                TotalTokens = g.Sum(x => x.total_tokens is DBNull ? 0 : (long)x.total_tokens),
+                Requests = g.Sum(x => (long)x.requests)
+            })
+            .OrderByDescending(x => x.Requests);
+
+        List<(string resourse, int, long PromptTokens, long CompletionTokens, long TotalTokens)> modelCounts = summary.Select(item =>
+                {
+                    string resource = item.Resource.ToString();
+                    return (resource, (int)item.Requests, item.PromptTokens, item.CompletionTokens, item.TotalTokens);
+
+                }).ToList();
 
         return modelCounts;
+
     }
 
     private async Task<(int attendeeCount, int requestCount)> GetAttendeeMetricsAsync(string eventId)
