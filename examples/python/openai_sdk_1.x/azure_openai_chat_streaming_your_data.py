@@ -15,16 +15,16 @@ load_dotenv()
 
 ENDPOINT_URL = os.environ.get("ENDPOINT_URL")
 API_KEY = os.environ.get("API_KEY")
-AZURE_SEARCH_SERVICE_ENDPOINT = os.environ.get("AZURE_SEARCH_SERVICE_ENDPOINT")
-AZURE_SEARCH_API_KEY = os.environ.get("AZURE_SEARCH_API_KEY")
-AZURE_SEARCH_INDEX_NAME = os.environ.get("AZURE_SEARCH_INDEX_NAME")
+AZURE_AI_SEARCH_ENDPOINT = os.environ.get("AZURE_AI_SEARCH_ENDPOINT")
+AZURE_AI_SEARCH_KEY = os.environ.get("AZURE_AI_SEARCH_KEY")
+AZURE_AI_SEARCH_INDEX_NAME = os.environ.get("AZURE_AI_SEARCH_INDEX_NAME")
 
 API_VERSION = "2023-09-01-preview"
 MODEL_NAME = "gpt-35-turbo"
 
 
 client = AzureOpenAI(
-    base_url=f"{ENDPOINT_URL}/openai/deployments/{MODEL_NAME}/extensions",
+    base_url=f"{ENDPOINT_URL}/openai/deployments/gpt-35-turbo/extensions",
     api_key=API_KEY,
     api_version=API_VERSION,
 )
@@ -43,9 +43,9 @@ body = {
         {
             "type": "AzureCognitiveSearch",
             "parameters": {
-                "endpoint": AZURE_SEARCH_SERVICE_ENDPOINT,
-                "key": AZURE_SEARCH_API_KEY,
-                "indexName": AZURE_SEARCH_INDEX_NAME,
+                "endpoint": AZURE_AI_SEARCH_ENDPOINT,
+                "key": AZURE_AI_SEARCH_KEY,
+                "indexName": AZURE_AI_SEARCH_INDEX_NAME,
             },
         }
     ]
@@ -59,6 +59,9 @@ response = client.chat.completions.create(
     max_tokens=250,
     temperature=0.0,
 )
+
+# turn off print buffering
+# https://stackoverflow.com/questions/107705/disable-output-buffering
 
 
 for chunk in response:
