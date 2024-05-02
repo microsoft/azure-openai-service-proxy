@@ -15,18 +15,33 @@
             <HeaderContent>
                 <MudTh>
                     <MudTableSortLabel
-                        SortBy="new Func<(ModelType modelType, string deploymentName, int count), object>(x => x.deploymentName)">
+                        SortBy="new Func<(ModelType modelType, string deploymentName, int count, long prompt_tokens, long completion_tokens, long total_tokens), object>(x => x.deploymentName)">
                         Resource Name (Deployment or Index Name)</MudTableSortLabel>
                 </MudTh>
                 <MudTh>
                     <MudTableSortLabel
-                        SortBy="new Func<(ModelType modelType, string deploymentName, int count), object>(x => x.modelType)">
+                        SortBy="new Func<(ModelType modelType, string deploymentName, int count, long prompt_tokens, long completion_tokens, long total_tokens), object>(x => x.modelType)">
                         Resource Type</MudTableSortLabel>
                 </MudTh>
                 <MudTh>
                     <MudTableSortLabel InitialDirection="SortDirection.Descending"
-                        SortBy="new Func<(ModelType modelType, string deploymentName, int count), object>(x => x.count)">
-                        Request Count</MudTableSortLabel>
+                        SortBy="new Func<(ModelType modelType, string deploymentName, int count, long prompt_tokens, long completion_tokens, long total_tokens), object>(x => x.count)">
+                        Requests</MudTableSortLabel>
+                </MudTh>
+                <MudTh>
+                    <MudTableSortLabel InitialDirection="SortDirection.Descending"
+                        SortBy="new Func<(ModelType modelType, string deploymentName, int count, long prompt_tokens, long completion_tokens, long total_tokens), object>(x => x.prompt_tokens)">
+                        Prompt tokens</MudTableSortLabel>
+                </MudTh>
+                <MudTh>
+                    <MudTableSortLabel InitialDirection="SortDirection.Descending"
+                        SortBy="new Func<(ModelType modelType, string deploymentName, int count, long prompt_tokens, long completion_tokens, long total_tokens), object>(x => x.completion_tokens)">
+                        Completion tokens</MudTableSortLabel>
+                </MudTh>
+                <MudTh>
+                    <MudTableSortLabel InitialDirection="SortDirection.Descending"
+                        SortBy="new Func<(ModelType modelType, string deploymentName, int count, long prompt_tokens, long completion_tokens, long total_tokens), object>(x => x.total_tokens)">
+                        Total tokens</MudTableSortLabel>
                 </MudTh>
             </HeaderContent>
 
@@ -34,6 +49,9 @@
                 <MudTd DataLabel="Resource Name (Deployment or Index Name)">@context.deploymentName</MudTd>
                 <MudTd DataLabel="Resource Type">@context.modelType</MudTd>
                 <MudTd DataLabel="Request Count">@context.count</MudTd>
+                <MudTd DataLabel="Prompt tokens">@context.prompt_tokens</MudTd>
+                <MudTd DataLabel="Completion tokens">@context.completion_tokens</MudTd>
+                <MudTd DataLabel="Total tokens">@context.total_tokens</MudTd>
             </RowTemplate>
         </MudTable>
     </MudStack>

@@ -89,7 +89,7 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
     public async Task<EventMetric> GetEventMetricsAsync(string eventId)
     {
         (int attendeeCount, int requestCount) = await GetAttendeeMetricsAsync(eventId);
-        IEnumerable<(ModelType modelType, string deploymentName, int count)> modelCount = await GetModelCountAsync(eventId);
+        IEnumerable<(ModelType modelType, string deploymentName, int count, long prompt_tokens, long completion_tokens, long total_tokens)> modelCount = await GetModelCountAsync(eventId);
 
         return new()
         {
@@ -100,33 +100,38 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
         };
     }
 
-    private async Task<IEnumerable<(ModelType modelType, string deploymentName, int count)>> GetModelCountAsync(string eventId)
+    private async Task<IEnumerable<(ModelType modelType, string deploymentName, int count, long prompt_tokens, long completion_tokens, long total_tokens)>> GetModelCountAsync(string eventId)
     {
         if (conn.State != ConnectionState.Open)
             await conn.OpenAsync();
 
         using var modelCountCommand = conn.CreateCommand();
         modelCountCommand.CommandText = """
-        SELECT count(api_key) count, resource
-        FROM aoai.metric
-        WHERE event_id = @EventId
-        GROUP BY resource
-        ORDER BY count DESC
+        SELECT COUNT(*) AS requests, resource, SUM(prompt_tokens) AS prompt_tokens, SUM(completion_tokens) AS completion_tokens, SUM(total_tokens) AS total_tokens
+        FROM aoai.metric_view where event_id = @EventId
+        GROUP BY event_id, resource
+        ORDER BY requests DESC
         """;
 
         modelCountCommand.Parameters.Add(new NpgsqlParameter("EventId", eventId));
         using var reader = await modelCountCommand.ExecuteReaderAsync();
-        List<(ModelType modelType, string deploymentName, int count)> modelCounts = [];
+
+
+
+        List<(ModelType modelType, string deploymentName, int count, long prompt_tokens, long completion_tokens, long total_tokens)> modelCounts = [];
         if (reader.HasRows)
         {
             while (await reader.ReadAsync())
             {
                 var count = reader.GetInt32(0);
                 var resource = reader.GetString(1);
+                var prompt_tokens = reader.IsDBNull(2) ? 0 : reader.GetInt64(2);
+                var completion_tokens = reader.IsDBNull(3) ? 0 : reader.GetInt64(3);
+                var total_tokens = reader.IsDBNull(4) ? 0 : reader.GetInt64(4);
 
                 var parts = resource.Split(" | ");
                 var modelType = ModelTypeExtensions.ParsePostgresValue(parts[0]);
-                modelCounts.Add((modelType, string.Join(" | ", parts[1..]), count));
+                modelCounts.Add((modelType, string.Join(" | ", parts[1..]), count, prompt_tokens, completion_tokens, total_tokens));
             }
         }
 
