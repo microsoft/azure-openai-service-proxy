@@ -32,7 +32,7 @@ public class ChartData
 public class ModelData
 {
     public IEnumerable<ModelCounts> ModelCounts { get; set; } = [];
-    public IEnumerable<ChartData> Results { get; set; } = [];
+    public IEnumerable<ChartData> ChartData { get; set; } = [];
 }
 
 public class EventService(IAuthService authService, AoaiProxyContext db) : IEventService, IDisposable
@@ -143,32 +143,31 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
         modelCountCommand.Parameters.Add(new NpgsqlParameter("EventId", eventId));
         using var reader = await modelCountCommand.ExecuteReaderAsync();
 
-        var results = new List<ChartData>();
+        var chartData = new List<ChartData>();
         while (reader.Read())
         {
-            var event_id = reader.GetString(0);
-            DateTime date_stamp = reader.GetDateTime(1);
+            DateTime dateStamp = reader.GetDateTime(1);
             var resource = reader.GetString(2);
-            var prompt_tokens = reader.IsDBNull(3) ? 0 : reader.GetInt64(3);
-            var completion_tokens = reader.IsDBNull(4) ? 0 : reader.GetInt64(4);
-            var total_tokens = reader.IsDBNull(5) ? 0 : reader.GetInt64(5);
+            var promptTokens = reader.IsDBNull(3) ? 0 : reader.GetInt64(3);
+            var completionTokens = reader.IsDBNull(4) ? 0 : reader.GetInt64(4);
+            var totalTokens = reader.IsDBNull(5) ? 0 : reader.GetInt64(5);
             var requests = reader.GetInt64(6);
 
-            var chartData = new ChartData
+            var item = new ChartData
             {
-                EventId = event_id,
-                DateStamp = date_stamp,
+                EventId = eventId,
+                DateStamp = dateStamp,
                 Resource = resource,
-                PromptTokens = prompt_tokens,
-                CompletionTokens = completion_tokens,
-                TotalTokens = total_tokens,
+                PromptTokens = promptTokens,
+                CompletionTokens = completionTokens,
+                TotalTokens = totalTokens,
                 Requests = requests
             };
 
-            results.Add(chartData);
+            chartData.Add(item);
         };
 
-        var summary = results
+        var summary = chartData
             .GroupBy(r => new { EventId = r.EventId, Resource = r.Resource })
             .Select(g => new
             {
@@ -192,7 +191,7 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
         ModelData md = new()
         {
             ModelCounts = modelCounts,
-            Results = results
+            ChartData = chartData
         };
 
         return md;
