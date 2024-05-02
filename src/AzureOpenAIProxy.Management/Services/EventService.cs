@@ -18,6 +18,23 @@ public class ModelCounts
     public long TotalTokens { get; set; }
 }
 
+public class ChartData
+{
+    public string EventId { get; set; } = null!;
+    public DateTime DateStamp { get; set; }
+    public string Resource { get; set; } = null!;
+    public long PromptTokens { get; set; }
+    public long CompletionTokens { get; set; }
+    public long TotalTokens { get; set; }
+    public long Requests { get; set; }
+}
+
+public class ModelData
+{
+    public IEnumerable<ModelCounts> ModelCounts { get; set; } = [];
+    public IEnumerable<ChartData> Results { get; set; } = [];
+}
+
 public class EventService(IAuthService authService, AoaiProxyContext db) : IEventService, IDisposable
 {
     private readonly DbConnection conn = db.Database.GetDbConnection();
@@ -99,18 +116,18 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
     public async Task<EventMetric> GetEventMetricsAsync(string eventId)
     {
         (int attendeeCount, int requestCount) = await GetAttendeeMetricsAsync(eventId);
-        IEnumerable<ModelCounts> modelCount = await GetModelCountAsync(eventId);
+        ModelData modeldata = await GetModelCountAsync(eventId);
 
         return new()
         {
             EventId = eventId,
             AttendeeCount = attendeeCount,
             RequestCount = requestCount,
-            ModelCounts = modelCount
+            ModelData = modeldata
         };
     }
 
-    private async Task<IEnumerable<ModelCounts>> GetModelCountAsync(string eventId)
+    private async Task<ModelData> GetModelCountAsync(string eventId)
     {
         if (conn.State != ConnectionState.Open)
             await conn.OpenAsync();
@@ -126,26 +143,40 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
         modelCountCommand.Parameters.Add(new NpgsqlParameter("EventId", eventId));
         using var reader = await modelCountCommand.ExecuteReaderAsync();
 
-        var results = new List<dynamic>();
+        var results = new List<ChartData>();
         while (reader.Read())
         {
-            var record = new ExpandoObject() as IDictionary<string, Object>;
-            for (var fieldCount = 0; fieldCount < reader.FieldCount; fieldCount++)
+            var event_id = reader.GetString(0);
+            DateTime date_stamp = reader.GetDateTime(1);
+            var resource = reader.GetString(2);
+            var prompt_tokens = reader.IsDBNull(3) ? 0 : reader.GetInt64(3);
+            var completion_tokens = reader.IsDBNull(4) ? 0 : reader.GetInt64(4);
+            var total_tokens = reader.IsDBNull(5) ? 0 : reader.GetInt64(5);
+            var requests = reader.GetInt64(6);
+
+            var chartData = new ChartData
             {
-                record.Add(reader.GetName(fieldCount), reader[fieldCount]);
-            }
-            results.Add(record);
+                EventId = event_id,
+                DateStamp = date_stamp,
+                Resource = resource,
+                PromptTokens = prompt_tokens,
+                CompletionTokens = completion_tokens,
+                TotalTokens = total_tokens,
+                Requests = requests
+            };
+
+            results.Add(chartData);
         };
 
         var summary = results
-            .GroupBy(r => new { EventId = r.event_id, Resource = r.resource })
+            .GroupBy(r => new { EventId = r.EventId, Resource = r.Resource })
             .Select(g => new
             {
                 g.Key.Resource,
-                PromptTokens = g.Sum(x => x.prompt_tokens is DBNull ? 0 : (long)x.prompt_tokens),
-                CompletionTokens = g.Sum(x => x.completion_tokens is DBNull ? 0 : (long)x.completion_tokens),
-                TotalTokens = g.Sum(x => x.total_tokens is DBNull ? 0 : (long)x.total_tokens),
-                Requests = g.Sum(x => (long)x.requests)
+                PromptTokens = g.Sum(x => x.PromptTokens is DBNull ? 0 : (long)x.PromptTokens),
+                CompletionTokens = g.Sum(x => x.CompletionTokens is DBNull ? 0 : (long)x.CompletionTokens),
+                TotalTokens = g.Sum(x => x.TotalTokens is DBNull ? 0 : (long)x.TotalTokens),
+                Requests = g.Sum(x => (long)x.Requests)
             })
             .OrderByDescending(x => x.Requests);
 
@@ -158,7 +189,13 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
             TotalTokens = item.TotalTokens
         }).ToList();
 
-        return modelCounts;
+        ModelData md = new()
+        {
+            ModelCounts = modelCounts,
+            Results = results
+        };
+
+        return md;
 
     }
 

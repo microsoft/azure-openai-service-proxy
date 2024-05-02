@@ -7,47 +7,66 @@
 @if (Event is not null && EventMetric is not null)
 {
     <MudStack>
-        <h3>Event Name: @Event.EventCode</h3>
+    <h3>Event Name: @Event.EventCode</h3>
 
-        <MudText Typo="Typo.body1">Attendee count: <strong>@EventMetric.AttendeeCount</strong></MudText>
-        <MudText Typo="Typo.body1">Total Request count: <strong>@EventMetric.RequestCount</strong></MudText>
+    <MudText Typo="Typo.body1">Attendee count: <strong>@EventMetric.AttendeeCount</strong></MudText>
+    <MudText Typo="Typo.body1">Total Request count: <strong>@EventMetric.RequestCount</strong></MudText>
 
-        <MudTable Items="@EventMetric.ModelCounts" SortLabel="Sort By" Hover="true">
-            <HeaderContent>
-                <MudTh>
-                    <MudTableSortLabel
-                        SortBy="new Func<ModelCounts, object>(x => x.Resource)">
-                        Resource Name (Deployment or Index Name)</MudTableSortLabel>
-                </MudTh>
-                <MudTh>
-                    <MudTableSortLabel
-                        SortBy="new Func<ModelCounts, object>(x => x.PromptTokens)">
-                        Prompt tokens</MudTableSortLabel>
-                </MudTh>
-                <MudTh>
-                    <MudTableSortLabel
-                        SortBy="new Func<ModelCounts, object>(x => x.CompletionTokens)">
-                        Completion tokens</MudTableSortLabel>
-                </MudTh>
-                <MudTh>
-                    <MudTableSortLabel
-                        SortBy="new Func<ModelCounts, object>(x => x.TotalTokens)">
-                        Total tokens</MudTableSortLabel>
-                </MudTh>
-                <MudTh>
-                    <MudTableSortLabel InitialDirection="SortDirection.Descending"
-                        SortBy="new Func<ModelCounts, object>(x => x.Count)">
-                        Requests</MudTableSortLabel>
-                </MudTh>
-            </HeaderContent>
+    <MudTable Items="@EventMetric.ModelData.ModelCounts" SortLabel="Sort By" Hover="true">
+        <HeaderContent>
+            <MudTh>
+                <MudTableSortLabel SortBy="new Func<ModelCounts, object>(x => x.Resource)">
+                    Resource Name (Deployment or Index Name)</MudTableSortLabel>
+            </MudTh>
+            <MudTh>
+                <MudTableSortLabel SortBy="new Func<ModelCounts, object>(x => x.PromptTokens)">
+                    Prompt tokens</MudTableSortLabel>
+            </MudTh>
+            <MudTh>
+                <MudTableSortLabel SortBy="new Func<ModelCounts, object>(x => x.CompletionTokens)">
+                    Completion tokens</MudTableSortLabel>
+            </MudTh>
+            <MudTh>
+                <MudTableSortLabel SortBy="new Func<ModelCounts, object>(x => x.TotalTokens)">
+                    Total tokens</MudTableSortLabel>
+            </MudTh>
+            <MudTh>
+                <MudTableSortLabel InitialDirection="SortDirection.Descending"
+                    SortBy="new Func<ModelCounts, object>(x => x.Count)">
+                    Requests</MudTableSortLabel>
+            </MudTh>
+        </HeaderContent>
 
-            <RowTemplate>
-                <MudTd DataLabel="Resource Name (Deployment or Index Name)">@context.Resource</MudTd>
-                <MudTd DataLabel="Prompt tokens">@context.PromptTokens</MudTd>
-                <MudTd DataLabel="Completion tokens">@context.CompletionTokens</MudTd>
-                <MudTd DataLabel="Total tokens">@context.TotalTokens</MudTd>
-                <MudTd DataLabel="Request Count">@context.Count</MudTd>
-            </RowTemplate>
-        </MudTable>
-    </MudStack>
+        <RowTemplate>
+            <MudTd DataLabel="Resource Name (Deployment or Index Name)">@context.Resource</MudTd>
+            <MudTd DataLabel="Prompt tokens">@context.PromptTokens</MudTd>
+            <MudTd DataLabel="Completion tokens">@context.CompletionTokens</MudTd>
+            <MudTd DataLabel="Total tokens">@context.TotalTokens</MudTd>
+            <MudTd DataLabel="Request Count">@context.Count</MudTd>
+        </RowTemplate>
+    </MudTable>
+
+    Hello world
+
+    @* <MudChart ChartType="ChartType.Line">
+        <ChartOptions Responsive="true" Title="Requests over time">
+            <XAxes>
+                <Axis Type="AxisType.Time" LabelString="Date">
+                    <AxisTicks Source="EventMetric.ModelData.Results.Select(r => r.DateStamp)" />
+                </Axis>
+            </XAxes>
+            <YAxes>
+                <Axis Type="AxisType.Linear" LabelString="Requests">
+                    <AxisTicks Source="EventMetric.ModelData.Results.Select(r => r.Requests)" />
+                </Axis>
+            </YAxes>
+        </ChartOptions>
+        <ChartData>
+            <ChartDataset Data="EventMetric.ModelData.Results.Select(r => new object[] { r.DateStamp, r.Requests })"
+                Label="Requests" Fill="false" />
+        </ChartData>
+    </MudChart> *@
+    hello world
+</MudStack>
+
 }

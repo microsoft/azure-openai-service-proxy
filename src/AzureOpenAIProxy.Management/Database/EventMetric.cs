@@ -9,5 +9,5 @@ public class EventMetric
 
     public int RequestCount { get; set; }
 
-    public IEnumerable<ModelCounts> ModelCounts { get; set; } = [];
+    public ModelData ModelData { get; set; }
 }
