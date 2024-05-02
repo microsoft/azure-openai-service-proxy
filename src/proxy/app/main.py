@@ -3,6 +3,7 @@
 import logging
 import os
 
+from azure.monitor.opentelemetry import configure_azure_monitor
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import ResponseValidationError
 from fastapi.middleware.cors import CORSMiddleware
@@ -131,7 +132,9 @@ async def validation_exception_handler(request, exc):
 @app.on_event("startup")
 async def startup_event():
     """startup event"""
+    configure_azure_monitor()
     await db_manager.create_pool()
+
 
 
 @app.on_event("shutdown")
