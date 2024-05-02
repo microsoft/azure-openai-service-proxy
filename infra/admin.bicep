@@ -15,6 +15,7 @@ param postgresEncryptionKey string
 param clientId string
 param tenantId string
 param playgroundUrl string
+@secure()
 param appInsightsConnectionString string
 
 resource adminIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {

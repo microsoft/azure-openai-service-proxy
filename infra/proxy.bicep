@@ -12,6 +12,8 @@ param postgresDatabase string
 param postgresServer string
 @secure()
 param postgresEncryptionKey string
+@secure()
+param appInsightsConnectionString string
 
 resource proxyIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
   name: identityName
@@ -49,6 +51,10 @@ module app 'core/host/container-app-upsert.bicep' = {
         name: 'postgres-server'
         value: postgresServer
       }
+      {
+        name: 'app-insights-connection-string'
+        value: appInsightsConnectionString
+      }
     ]
     env: [
       {
@@ -66,6 +72,10 @@ module app 'core/host/container-app-upsert.bicep' = {
       {
         name: 'POSTGRES_SERVER'
         secretRef: 'postgres-server'
+      }
+      {
+        name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
+        secretRef: 'app-insights-connection-string'
       }
     ]
   }

@@ -8,3 +8,4 @@ asyncpg>=0.29.0, <0.30.0
 Black
 ruff
 azure-identity>=1.16.0, <1.17.0
+azure-monitor-opentelemetry
