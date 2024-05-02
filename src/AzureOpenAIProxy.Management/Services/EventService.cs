@@ -18,7 +18,7 @@ public class ModelCounts
     public long TotalTokens { get; set; }
 }
 
-public class ChartData
+public class MetricsData
 {
     public string EventId { get; set; } = null!;
     public DateTime DateStamp { get; set; }
@@ -26,6 +26,12 @@ public class ChartData
     public long PromptTokens { get; set; }
     public long CompletionTokens { get; set; }
     public long TotalTokens { get; set; }
+    public long Requests { get; set; }
+}
+
+public class ChartData
+{
+    public DateTime DateStamp { get; set; }
     public long Requests { get; set; }
 }
 
@@ -143,7 +149,7 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
         modelCountCommand.Parameters.Add(new NpgsqlParameter("EventId", eventId));
         using var reader = await modelCountCommand.ExecuteReaderAsync();
 
-        var chartData = new List<ChartData>();
+        var metricsData = new List<MetricsData>();
         while (reader.Read())
         {
             DateTime dateStamp = reader.GetDateTime(1);
@@ -153,7 +159,7 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
             var totalTokens = reader.IsDBNull(5) ? 0 : reader.GetInt64(5);
             var requests = reader.GetInt64(6);
 
-            var item = new ChartData
+            var item = new MetricsData
             {
                 EventId = eventId,
                 DateStamp = dateStamp,
@@ -164,10 +170,10 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
                 Requests = requests
             };
 
-            chartData.Add(item);
+            metricsData.Add(item);
         };
 
-        var summary = chartData
+        var summary = metricsData
             .GroupBy(r => new { EventId = r.EventId, Resource = r.Resource })
             .Select(g => new
             {
@@ -188,6 +194,17 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
             TotalTokens = item.TotalTokens
         }).ToList();
 
+        // Create Line Chart Data X axis is DateStamp and Y axis is Requests
+        List<ChartData> chartData = metricsData
+            .GroupBy(r => r.DateStamp)
+            .Select(g => new ChartData
+            {
+                DateStamp = g.Key,
+                Requests = g.Sum(x => x.Requests)
+            })
+            .OrderBy(x => x.DateStamp)
+            .ToList();
+
         ModelData md = new()
         {
             ModelCounts = modelCounts,
@@ -195,7 +212,6 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
         };
 
         return md;
-
     }
 
     private async Task<(int attendeeCount, int requestCount)> GetAttendeeMetricsAsync(string eventId)

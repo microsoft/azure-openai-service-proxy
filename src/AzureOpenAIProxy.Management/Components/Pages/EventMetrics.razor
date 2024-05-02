@@ -4,8 +4,25 @@
 
 @namespace AzureOpenAIProxy.Management.Components.Pages
 
+
 @if (Event is not null && EventMetric is not null)
 {
+
+    @code {
+
+        private int Index = -1; //default value cannot be 0 -> first selectedindex is 0.
+        public ChartOptions Options = new ChartOptions();
+
+        public List<ChartSeries> Series = new List<ChartSeries>()
+        {
+            new ChartSeries() { Name = "Requests", Data = new double[] { 90, 79, 72, 69, 62, 62, 55, 65, 70 } },
+        };
+        public string[] XAxisLabels = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep" };
+
+
+    }
+
+
     <MudStack>
     <h3>Event Name: @Event.EventCode</h3>
 
@@ -48,25 +65,19 @@
 
     Hello world
 
-    @* <MudChart ChartType="ChartType.Line">
-        <ChartOptions Responsive="true" Title="Requests over time">
-            <XAxes>
-                <Axis Type="AxisType.Time" LabelString="Date">
-                    <AxisTicks Source="EventMetric.ModelData.Results.Select(r => r.DateStamp)" />
-                </Axis>
-            </XAxes>
-            <YAxes>
-                <Axis Type="AxisType.Linear" LabelString="Requests">
-                    <AxisTicks Source="EventMetric.ModelData.Results.Select(r => r.Requests)" />
-                </Axis>
-            </YAxes>
-        </ChartOptions>
-        <ChartData>
-            <ChartDataset Data="EventMetric.ModelData.Results.Select(r => new object[] { r.DateStamp, r.Requests })"
-                Label="Requests" Fill="false" />
-        </ChartData>
-    </MudChart> *@
-    hello world
-</MudStack>
+    <div>
+        <MudChart ChartType="ChartType.Line" ChartSeries="@Series" @bind-SelectedIndex="Index" XAxisLabels="@XAxisLabels" Width="100%" Height="350px" ChartOptions="@Options"/>
+        <MudGrid>
+            <MudItem xs="6">
+                <MudText Typo="Typo.body1" Class="py-3">Selected: @(Index < 0 ? "None" : Series[Index].Name)</MudText>
+            </MudItem>
+            <MudItem xs="6">
+                <MudSlider @bind-Value="Options.LineStrokeWidth" Min="1" Max="10" Color="Color.Info">Line Width: @Options.LineStrokeWidth.ToString()</MudSlider>
+            </MudItem>
+        </MudGrid>
+    </div>
+
+
+    </MudStack>
 
 }
