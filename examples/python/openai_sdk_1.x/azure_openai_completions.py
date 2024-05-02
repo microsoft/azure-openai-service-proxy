@@ -1,4 +1,4 @@
-""" Test completions with azure openai """
+"""Test completions with azure openai"""
 
 # See documentation at https://gloveboxes.github.io/azure-openai-service-proxy/category/developer-endpoints/
 
@@ -12,7 +12,7 @@ load_dotenv()
 ENDPOINT_URL = os.environ.get("ENDPOINT_URL")
 API_KEY = os.environ.get("API_KEY")
 API_VERSION = "2023-09-01-preview"
-MODEL_NAME = "davinci-002"
+MODEL_NAME = "gpt-35-turbo-instruct"
 
 
 client = AzureOpenAI(
@@ -21,6 +21,8 @@ client = AzureOpenAI(
     api_version=API_VERSION,
 )
 
-response = client.completions.create(model=MODEL_NAME, prompt="write a 50 word poem about elephants", max_tokens=512)
+response = client.completions.create(
+    model=MODEL_NAME, prompt="write a 50 word poem about elephants", max_tokens=512
+)
 
 print(response)
