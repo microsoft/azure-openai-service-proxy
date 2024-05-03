@@ -3,11 +3,15 @@
 import logging
 import os
 
-from azure.monitor.opentelemetry import configure_azure_monitor
+from azure.monitor.opentelemetry.exporter import AzureMonitorTraceExporter
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import ResponseValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from opentelemetry import trace
+from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
 
 from .authorize import Authorize
 from .config import Config
@@ -32,14 +36,31 @@ DEFAULT_IMAGES_GENERATIONS_API_VERSION = "2023-06-01-preview"
 DEFAULT_SEARCH_API_VERSION = "2023-11-01"
 OPENAI_IMAGES_API_VERSION = "2023-12-01-preview"
 
+# Set the tracer provider
+trace.set_tracer_provider(TracerProvider())
 
-logging.basicConfig(level=logging.WARNING)
-logger = logging.getLogger(__name__)
+# Configure Azure Monitor
+exporter = AzureMonitorTraceExporter(
+    connection_string=os.environ.get("APPLICATIONINSIGHTS_CONNECTION_STRING")
+)
+
+# add to the tracer provider
+trace.get_tracer_provider().add_span_processor(BatchSpanProcessor(exporter))
 
 app = FastAPI(
     # docs_url=None,  # Disable docs (Swagger UI)
     # redoc_url=None,  # Disable redoc
 )
+
+FastAPIInstrumentor.instrument_app(app)
+
+# Set up logging
+logger = logging.getLogger(__name__)
+handler = AzureMonitorTraceExporter(
+    connection_string=os.environ.get("APPLICATIONINSIGHTS_CONNECTION_STRING")
+)
+logger.addHandler(handler)
+logger.setLevel(logging.INFO)
 
 db_config = DBConfig(
     host=os.environ.get("POSTGRES_SERVER"),
@@ -124,18 +145,18 @@ async def custom_http_exception_handler(request: Request, exc: HTTPException):
 async def validation_exception_handler(request, exc):
     """validation exception handler"""
 
-    print("Caught Validation Error:%s ", str(exc))
+    logger.error("Caught Validation Error:%s ", str(exc))
 
     return JSONResponse(content={"message": "Response validation error"}, status_code=400)
 
 
 @app.on_event("startup")
 async def startup_event():
-    """startup event"""
-    try:
-        configure_azure_monitor()
-    except ValueError as exp:
-        logger.warning("Error configuring Azure Monitor: %s", str(exp))
+    # """startup event"""
+    # try:
+    #     configure_azure_monitor()
+    # except ValueError as exp:
+    #     logger.warning("Error configuring Azure Monitor: %s", str(exp))
     await db_manager.create_pool()
 
 
