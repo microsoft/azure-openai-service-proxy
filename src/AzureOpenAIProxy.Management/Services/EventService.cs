@@ -205,6 +205,9 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
             .OrderBy(x => x.DateStamp)
             .ToList();
 
+        long runningTotal = 0;
+        chartData.ForEach(x => runningTotal = x.Requests += runningTotal);
+
         ModelData md = new()
         {
             ModelCounts = modelCounts,
