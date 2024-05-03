@@ -55,10 +55,8 @@ class Config:
 
         config = []
 
-        pool = await self.db_manager.get_connection()
-
         try:
-            async with pool.acquire() as conn:
+            async with self.db_manager as conn:
                 if deployment_name is None:
                     result = await conn.fetch(
                         "SELECT * FROM aoai.get_models_by_event($1)", event_id

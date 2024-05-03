@@ -75,10 +75,8 @@ class EventRegistrationInfo:
     async def get_event_info(self, event_id: str) -> EventRegistrationResponse:
         """get event info"""
 
-        pool = await self.db_manager.get_connection()
-
         try:
-            async with pool.acquire() as conn:
+            async with self.db_manager as conn:
                 result = await conn.fetch(
                     "SELECT * FROM aoai.get_event_registration_by_event_id($1)", event_id
                 )

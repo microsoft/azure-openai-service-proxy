@@ -132,9 +132,11 @@ async def validation_exception_handler(request, exc):
 @app.on_event("startup")
 async def startup_event():
     """startup event"""
-    configure_azure_monitor()
+    try:
+        configure_azure_monitor()
+    except ValueError as exp:
+        logger.warning("Error configuring Azure Monitor: %s", str(exp))
     await db_manager.create_pool()
-
 
 
 @app.on_event("shutdown")

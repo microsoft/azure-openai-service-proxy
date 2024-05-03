@@ -6,7 +6,7 @@ import asyncpg
 from azure.identity import DefaultAzureCredential
 from fastapi import HTTPException
 
-logging.basicConfig(level=logging.NOTSET)
+logging.basicConfig(level=logging.INFO)
 
 
 class DBConfig:
@@ -70,10 +70,11 @@ class DBManager:
         self.logging = logging.getLogger(__name__)
         self.db_config = db_config
         self.db_pool = None
+        self.conn = None
 
     async def create_pool(self):
         """create database pool"""
-        print("Creating connection pool")
+        self.logging.info("Creating connection pool")
         try:
             self.db_pool = await asyncpg.create_pool(
                 self.db_config.get_connection_string(self.logging),
@@ -84,36 +85,64 @@ class DBManager:
         except asyncpg.exceptions.PostgresError as error:
             self.logging.error("Postgres error: %s", str(error))
             raise HTTPException(
-                status_code=501, detail=f"Postgres error opening pool exp {str(error)}"
+                status_code=503, detail=f"Postgres error opening pool exp {str(error)}"
             ) from error
 
         except Exception as exception:
             self.logging.error("Error: %s", str(exception))
             raise HTTPException(
-                status_code=501, detail=f"Postgres error opening pool exp {str(exception)}"
+                status_code=503, detail=f"Postgres error opening pool exp {str(exception)}"
             ) from exception
 
     async def close_pool(self):
         """close database pool"""
-        print("Closing connection pool")
+        self.logging.info("Closing connection pool")
         try:
             await self.db_pool.close()
         except asyncpg.exceptions.PostgresError as error:
             self.logging.error("Postgres error: %s", str(error))
             raise HTTPException(
-                status_code=501, detail=f"Postgres error closing pool {str(error)}"
+                status_code=503, detail=f"Postgres error closing pool {str(error)}"
             ) from error
 
         except Exception as exception:
             self.logging.error("Error: %s", str(exception))
             raise HTTPException(
-                status_code=501, detail=f"Postgres exception closing pool {str(exception)}"
+                status_code=503, detail=f"Postgres exception closing pool {str(exception)}"
             ) from exception
-
-    async def get_connection(self):
-        """connect to database"""
-        return self.db_pool
 
     def get_postgres_encryption_key(self):
         """get postgres encryption key"""
         return self.db_config.encryption_key
+
+    # https://realpython.com/python-with-statement/
+    async def __aenter__(self):
+        """Get a connection from the pool"""
+        retry = 0
+        while retry < 3:
+            try:
+                self.conn = await self.db_pool.acquire()
+                return self.conn
+            except asyncpg.exceptions.PostgresError as error:
+                retry += 1
+                self.logging.error("Postgres error getting connection from pool: %s", str(error))
+                self.logging.error("Retry: %s", retry)
+                # This will do a graceful close of active connections in the pool
+                # https://github.com/MagicStack/asyncpg/issues/290
+                await self.close_pool()
+                await self.create_pool()
+            except Exception as exception:
+                self.logging.error("General error getting connection from pool: %s", str(exception))
+                raise HTTPException(
+                    status_code=503,
+                    detail="General error getting connection from pool",
+                ) from exception
+        if retry >= 3:
+            raise HTTPException(
+                status_code=503,
+                detail="Postgres error getting connection retry exceeded",
+            )
+
+    async def __aexit__(self, exc_type, exc_value, exc_tb):
+        """Release the connection back to the pool"""
+        await self.db_pool.release(self.conn)
