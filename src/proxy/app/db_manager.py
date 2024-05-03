@@ -120,11 +120,11 @@ class DBManager:
         """Get a connection from the pool"""
         retry = 0
         while retry < 3:
+            retry += 1
             try:
                 self.conn = await self.db_pool.acquire()
                 return self.conn
             except asyncpg.exceptions.PostgresError as error:
-                retry += 1
                 self.logging.error("Postgres error getting connection from pool: %s", str(error))
                 self.logging.error("Retry: %s", retry)
                 # This will do a graceful close of active connections in the pool
