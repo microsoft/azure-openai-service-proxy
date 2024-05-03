@@ -39,7 +39,7 @@ public partial class EventMetrics
                 }
             ];
 
-            ChartLabels = EventMetric.ModelData.ChartData.Select(cd => cd.DateStamp.ToString("dd/MM/yyyy")).ToArray();
+            ChartLabels = EventMetric.ModelData.ChartData.Select(cd => cd.DateStamp.ToString("dd/MM")).ToArray();
         }
     }
 }

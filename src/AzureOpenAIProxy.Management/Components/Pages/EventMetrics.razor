@@ -49,20 +49,12 @@
         </RowTemplate>
     </MudTable>
 
-    Hello world
-
-    <div>
-        <MudChart ChartType="ChartType.Line" ChartSeries="@ChartSeries" @bind-SelectedIndex="Index" XAxisLabels="@ChartLabels" Width="100%" Height="350px" ChartOptions="@ChartOptions"/>
+    <MudChart ChartType="ChartType.Line" ChartSeries="@ChartSeries" @bind-SelectedIndex="Index" XAxisLabels="@ChartLabels" Width="100%" Height="350px" ChartOptions="@ChartOptions"/>
         <MudGrid>
             <MudItem xs="6">
                 <MudText Typo="Typo.body1" Class="py-3">Selected: @(Index < 0 ? "None" : ChartSeries[Index].Name)</MudText>
             </MudItem>
-            <MudItem xs="6">
-                <MudSlider @bind-Value="ChartOptions.LineStrokeWidth" Min="1" Max="10" Color="Color.Info">Line Width: @ChartOptions.LineStrokeWidth.ToString()</MudSlider>
-            </MudItem>
-        </MudGrid>
-    </div>
-
+    </MudGrid>
 
     </MudStack>
 
