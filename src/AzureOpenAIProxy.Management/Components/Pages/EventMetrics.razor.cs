@@ -25,16 +25,20 @@ public partial class EventMetrics
 
     protected override async Task OnInitializedAsync()
     {
-        DateTime? previousDay = null;
-        long previousRequests = 0;
-
         EventMetric = await EventService.GetEventMetricsAsync(EventId);
         Event = await EventService.GetEventAsync(EventId);
+        (ChartSeries, ChartLabels) = BuildChart();
+    }
 
+    private (List<ChartSeries> ChartSeries, string[] ChartLabels) BuildChart()
+    {
         if (EventMetric?.ModelData?.ChartData != null)
         {
+            DateTime? previousDay = null;
+            long previousRequests = 0;
             List<ChartData> cd = [];
 
+            // rebuild chart data to fill in missing days
             foreach (var row in EventMetric.ModelData.ChartData.OrderBy(r => r.DateStamp))
             {
                 if (previousDay != null)
@@ -70,6 +74,9 @@ public partial class EventMetrics
             // Scale the labels so they don't overlap. Allow for 10 labels max.
             int chartLabelInterval = (ChartLabels.Length / 10) + 1;
             ChartLabels = ChartLabels.Select((label, index) => index % chartLabelInterval == 0 ? label : "").ToArray();
+
+            return (ChartSeries, ChartLabels);
         }
+        return (new List<ChartSeries>(), Array.Empty<string>());
     }
 }
