@@ -121,8 +121,11 @@ class DBManager:
     # https://realpython.com/python-with-statement/
     async def __aenter__(self):
         """Get a connection from the pool"""
-
-        if self.pool_timestamp and (datetime.now() - self.pool_timestamp).total_seconds() > 60 * 60:
+        # If the pool is older than 12 hours, recycle it to renew the managed identity token
+        if (
+            self.pool_timestamp
+            and (datetime.now() - self.pool_timestamp).total_seconds() > 60 * 60 * 12
+        ):
             self.logging.info("Connection pool recycled")
             await self.db_pool.close()
             await self.create_pool()
