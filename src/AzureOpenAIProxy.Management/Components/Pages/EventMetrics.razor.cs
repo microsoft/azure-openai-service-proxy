@@ -14,13 +14,10 @@ public partial class EventMetrics
     public string EventId { get; set; } = null!;
 
     private List<ChartSeries> ChartSeries { get; set; } = [];
-
     private string[] ChartLabels { get; set; } = [];
     private int Index { get; set; } = -1;
     private ChartOptions ChartOptions { get; set; } = new ChartOptions();
-
     private EventMetric? EventMetric { get; set; }
-
     private Event? Event { get; set; }
 
     protected override async Task OnInitializedAsync()
@@ -41,23 +38,17 @@ public partial class EventMetrics
             // rebuild chart data to fill in missing days
             foreach (var row in EventMetric.ModelData.ChartData.OrderBy(r => r.DateStamp))
             {
-                if (previousDay != null)
+                if (previousDay != null && previousDay.Value.AddDays(1) < row.DateStamp)
                 {
                     while (previousDay.Value.AddDays(1) < row.DateStamp)
                     {
                         cd.Add(new ChartData { DateStamp = previousDay.Value.AddDays(1), Requests = previousRequests });
                         previousDay = previousDay.Value.AddDays(1);
                     }
-                    cd.Add(row);
-                    previousDay = row.DateStamp;
-                    previousRequests = row.Requests;
                 }
-                else
-                {
-                    previousDay = row.DateStamp;
-                    previousRequests = row.Requests;
-                    cd.Add(row);
-                }
+                cd.Add(row);
+                previousDay = row.DateStamp;
+                previousRequests = row.Requests;
             }
 
             ChartSeries =
@@ -71,7 +62,7 @@ public partial class EventMetrics
 
             ChartLabels = cd.Select(cd => cd.DateStamp.ToString("dd MMM")).ToArray();
 
-            // Scale the labels so they don't overlap. Allow for 10 labels max.
+            // Scale the labels so they don't overlap. Allow for up to 10 labels.
             int chartLabelInterval = (ChartLabels.Length / 10) + 1;
             ChartLabels = ChartLabels.Select((label, index) => index % chartLabelInterval == 0 ? label : "").ToArray();
 
