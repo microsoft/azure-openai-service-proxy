@@ -153,11 +153,11 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
         while (reader.Read())
         {
             DateTime dateStamp = reader.GetDateTime(1);
-            var resource = reader.GetString(2);
+            var resource = reader.IsDBNull(2) ? "Unknown" : reader.GetString(2);
             var promptTokens = reader.IsDBNull(3) ? 0 : reader.GetInt64(3);
             var completionTokens = reader.IsDBNull(4) ? 0 : reader.GetInt64(4);
             var totalTokens = reader.IsDBNull(5) ? 0 : reader.GetInt64(5);
-            var requests = reader.GetInt64(6);
+            var requests = reader.IsDBNull(6) ? 0 : reader.GetInt64(6);
 
             var item = new MetricsData
             {
@@ -178,9 +178,9 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
             .Select(g => new
             {
                 g.Key.Resource,
-                PromptTokens = g.Sum(x => x.PromptTokens is DBNull ? 0 : (long)x.PromptTokens),
-                CompletionTokens = g.Sum(x => x.CompletionTokens is DBNull ? 0 : (long)x.CompletionTokens),
-                TotalTokens = g.Sum(x => x.TotalTokens is DBNull ? 0 : (long)x.TotalTokens),
+                PromptTokens = g.Sum(x => (long)x.PromptTokens),
+                CompletionTokens = g.Sum(x => (long)x.CompletionTokens),
+                TotalTokens = g.Sum(x => (long)x.TotalTokens),
                 Requests = g.Sum(x => (long)x.Requests)
             })
             .OrderByDescending(x => x.Requests);
