@@ -1,6 +1,7 @@
 """ Database manager """
 
 import logging
+from datetime import datetime
 
 import asyncpg
 from azure.identity import DefaultAzureCredential
@@ -71,6 +72,7 @@ class DBManager:
         self.db_config = db_config
         self.db_pool = None
         self.conn = None
+        self.pool_timestamp = None
 
     async def create_pool(self):
         """create database pool"""
@@ -82,6 +84,7 @@ class DBManager:
                 max_inactive_connection_lifetime=180,
             )
             self.logging.info("Connection pool created")
+            self.pool_timestamp = datetime.now()
         except asyncpg.exceptions.PostgresError as error:
             self.logging.error("Postgres error: %s", str(error))
             raise HTTPException(
@@ -118,30 +121,14 @@ class DBManager:
     # https://realpython.com/python-with-statement/
     async def __aenter__(self):
         """Get a connection from the pool"""
-        retry = 0
-        while retry < 3:
-            retry += 1
-            try:
-                self.conn = await self.db_pool.acquire()
-                return self.conn
-            except asyncpg.exceptions.PostgresError as error:
-                self.logging.error("Postgres error getting connection from pool: %s", str(error))
-                self.logging.error("Retry: %s", retry)
-                # This will do a graceful close of active connections in the pool
-                # https://github.com/MagicStack/asyncpg/issues/290
-                await self.close_pool()
-                await self.create_pool()
-            except Exception as exception:
-                self.logging.error("General error getting connection from pool: %s", str(exception))
-                raise HTTPException(
-                    status_code=503,
-                    detail="General error getting connection from pool",
-                ) from exception
-        if retry >= 3:
-            raise HTTPException(
-                status_code=503,
-                detail="Postgres error getting connection retry exceeded",
-            )
+
+        if self.pool_timestamp and (datetime.now() - self.pool_timestamp).total_seconds() > 60 * 60:
+            self.logging.info("Connection pool recycled")
+            await self.db_pool.close()
+            await self.create_pool()
+
+        self.conn = await self.db_pool.acquire()
+        return self.conn
 
     async def __aexit__(self, exc_type, exc_value, exc_tb):
         """Release the connection back to the pool"""

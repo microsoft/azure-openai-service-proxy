@@ -8,6 +8,7 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import ResponseValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from opencensus.ext.azure.log_exporter import AzureLogHandler
 from opentelemetry import trace
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 from opentelemetry.sdk.trace import TracerProvider
@@ -56,9 +57,7 @@ FastAPIInstrumentor.instrument_app(app)
 
 # Set up logging
 logger = logging.getLogger(__name__)
-handler = AzureMonitorTraceExporter(
-    connection_string=os.environ.get("APPLICATIONINSIGHTS_CONNECTION_STRING")
-)
+handler = AzureLogHandler(connection_string=os.environ.get("APPLICATIONINSIGHTS_CONNECTION_STRING"))
 logger.addHandler(handler)
 logger.setLevel(logging.INFO)
 
@@ -152,11 +151,6 @@ async def validation_exception_handler(request, exc):
 
 @app.on_event("startup")
 async def startup_event():
-    # """startup event"""
-    # try:
-    #     configure_azure_monitor()
-    # except ValueError as exp:
-    #     logger.warning("Error configuring Azure Monitor: %s", str(exp))
     await db_manager.create_pool()
 
 
