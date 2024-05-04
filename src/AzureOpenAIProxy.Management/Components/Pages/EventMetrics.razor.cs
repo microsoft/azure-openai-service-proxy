@@ -28,7 +28,7 @@ public partial class EventMetrics
         EventMetric = await EventService.GetEventMetricsAsync(EventId);
         Event = await EventService.GetEventAsync(EventId);
 
-        if (EventMetric != null)
+        if (EventMetric?.ModelData?.ChartData is not null)
         {
             ChartSeries =
             [

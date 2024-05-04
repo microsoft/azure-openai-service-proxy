@@ -9,5 +9,5 @@ public class EventMetric
 
     public int RequestCount { get; set; }
 
-    public ModelData ModelData { get; set; }
+    public ModelData? ModelData { get; set; }
 }

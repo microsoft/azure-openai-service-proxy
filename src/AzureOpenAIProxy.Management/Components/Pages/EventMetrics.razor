@@ -5,10 +5,8 @@
 @namespace AzureOpenAIProxy.Management.Components.Pages
 
 
-@if (Event is not null && EventMetric is not null)
+@if (Event is not null && EventMetric is not null && EventMetric?.ModelData?.ModelCounts is not null)
 {
-
-
     <MudStack>
     <h3>Event Name: @Event.EventCode</h3>
 

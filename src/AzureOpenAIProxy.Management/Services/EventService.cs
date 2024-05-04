@@ -11,7 +11,7 @@ namespace AzureOpenAIProxy.Management.Services;
 
 public class ModelCounts
 {
-    public string Resource { get; set; }
+    public string? Resource { get; set; }
     public int Count { get; set; }
     public long PromptTokens { get; set; }
     public long CompletionTokens { get; set; }
@@ -152,22 +152,15 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
         var metricsData = new List<MetricsData>();
         while (reader.Read())
         {
-            DateTime dateStamp = reader.GetDateTime(1);
-            var resource = reader.IsDBNull(2) ? "Unknown" : reader.GetString(2);
-            var promptTokens = reader.IsDBNull(3) ? 0 : reader.GetInt64(3);
-            var completionTokens = reader.IsDBNull(4) ? 0 : reader.GetInt64(4);
-            var totalTokens = reader.IsDBNull(5) ? 0 : reader.GetInt64(5);
-            var requests = reader.IsDBNull(6) ? 0 : reader.GetInt64(6);
-
             var item = new MetricsData
             {
                 EventId = eventId,
-                DateStamp = dateStamp,
-                Resource = resource,
-                PromptTokens = promptTokens,
-                CompletionTokens = completionTokens,
-                TotalTokens = totalTokens,
-                Requests = requests
+                DateStamp = reader.GetDateTime(1),
+                Resource = reader.IsDBNull(2) ? "Unknown" : reader.GetString(2),
+                PromptTokens = reader.IsDBNull(3) ? 0 : reader.GetInt64(3),
+                CompletionTokens = reader.IsDBNull(4) ? 0 : reader.GetInt64(4),
+                TotalTokens = reader.IsDBNull(5) ? 0 : reader.GetInt64(5),
+                Requests = reader.IsDBNull(6) ? 0 : reader.GetInt64(6)
             };
 
             metricsData.Add(item);
