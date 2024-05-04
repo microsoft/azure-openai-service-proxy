@@ -12,3 +12,6 @@ opentelemetry-api
 opentelemetry-sdk
 azure-monitor-opentelemetry-exporter
 opentelemetry-instrumentation-fastapi
+opencensus-ext-azure
+
+
