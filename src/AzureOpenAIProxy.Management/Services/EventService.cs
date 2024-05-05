@@ -332,42 +332,48 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
         }
     }
 
-    public Task<List<AllEvents>> GetAllEventsAsync()
+    public async Task<List<AllEvents>> GetAllEventsAsync()
     {
         // create an empty list of AllEvents and populate it with dummy data
 
-        var allEvents = new List<AllEvents>
+        if (conn.State != ConnectionState.Open)
+            await conn.OpenAsync();
+
+        using var modelCountCommand = conn.CreateCommand();
+        modelCountCommand.CommandText = """
+        SELECT
+            e.event_id,
+            e.event_code,
+            e.organizer_email,
+            e.start_timestamp,
+            e.end_timestamp,
+            COUNT(a.api_key) AS registration_count
+        FROM
+            aoai.event AS e
+        LEFT JOIN
+            aoai.event_attendee AS a ON e.event_id = a.event_id
+        GROUP BY
+            e.event_id;
+        """;
+
+        using var reader = await modelCountCommand.ExecuteReaderAsync();
+
+        var allEvents = new List<AllEvents>();
+
+        while (reader.Read())
         {
-            new AllEvents
+            var item = new AllEvents
             {
-                OrganizerName = "Dave Glover",
-                EventName = "Microsoft Developers AI Learning Hackathon",
-                StartDate = DateTime.Now,
-                EndDate = DateTime.Now.AddDays(1),
-                Registered = 10,
-                EventId = "6424-f827"
-            },
-            new AllEvents
-            {
-                OrganizerName = "Aaron Powell",
-                EventName = "Microsoft Fabric OpenAI Hackathon",
-                StartDate = DateTime.Now,
-                EndDate = DateTime.Now.AddDays(1),
-                Registered = 20,
-                EventId = "6424-f827"
-            },
-            new AllEvents
-            {
-                OrganizerName = "Scott Hanselman",
-                EventName = "Microsoft Azure AI Hackathon",
-                StartDate = DateTime.Now,
-                EndDate = DateTime.Now.AddDays(1),
-                Registered = 30,
-                EventId = "6424-f827"
-            }
+                EventId = reader.GetString(0),
+                EventName = reader.GetString(1),
+                OrganizerName = reader.GetString(2),
+                StartDate = reader.GetDateTime(3),
+                EndDate = reader.GetDateTime(4),
+                Registered = reader.GetInt32(5),
+
+            };
+            allEvents.Add(item);
         };
-
-        return Task.FromResult(allEvents);
-
+        return allEvents;
     }
 }
