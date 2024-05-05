@@ -8,7 +8,7 @@
 @if (AllEvents?.Count > 0)
 {
     <MudStack>
-    <h3>Event reports</h3>
+    <h3>Events Report</h3>
 
     <h3>Total registrations: @TotalRegistered</h3>
 
@@ -49,7 +49,7 @@
             <MudTd DataLabel="End date">@context.EndDate.ToString("dd/MMM/yyyy")</MudTd>
             <MudTd DataLabel="Attendee Count">@context.Registered</MudTd>
             <MudTd DataLabel="Attendee link">
-                <MudLink Href="@($"{Configuration["PlaygroundUrl"]}/event/{context.EventId}")">
+                <MudLink Target="_blank" Href="@($"{Configuration["PlaygroundUrl"]}/event/{context.EventId}")">
                     <MudIcon Icon="@Icons.Material.Filled.Link" />
                 </MudLink>
             </MudTd>
