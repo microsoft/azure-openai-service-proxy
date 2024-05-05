@@ -20,7 +20,7 @@
             </MudItem>
         </MudGrid>
 
-    <MudTable Items="@EventMetric.ModelData.ModelCounts" SortLabel="Sort By" Hover="true">
+    <MudTable Items="@EventMetric.ModelData.ModelCounts" Dense="true" Striped="true" SortLabel="Sort By" Hover="true">
         <HeaderContent>
             <MudTh>
                 <MudTableSortLabel SortBy="new Func<ModelCounts, object>(x => x.Resource)">
