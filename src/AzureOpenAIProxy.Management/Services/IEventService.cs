@@ -16,4 +16,6 @@ public interface IEventService
     Task<Event?> UpdateModelsForEventAsync(string id, IEnumerable<Guid> modelIds);
 
     Task<EventMetric> GetEventMetricsAsync(string eventId);
+
+    Task<List<AllEvents>> GetAllEventsAsync();
 }

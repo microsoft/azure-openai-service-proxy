@@ -1,0 +1,59 @@
+@page "/reports"
+@using AzureOpenAIProxy.Management.Database
+@using AzureOpenAIProxy.Management.Services;
+
+@namespace AzureOpenAIProxy.Management.Components.Pages
+
+
+@if (AllEvents?.Count > 0)
+{
+    <MudStack>
+    <h3>Event reports</h3>
+
+    <h3>Total registrations: @TotalRegistered</h3>
+
+    <MudTable Items="@AllEvents" Dense="true" Striped="true" SortLabel="Sort By" Hover="true">
+        <HeaderContent>
+            <MudTh>
+                <MudTableSortLabel InitialDirection="SortDirection.Ascending"
+                    SortBy="new Func<AllEvents, object>(x => x.EventName)">
+                    Event name</MudTableSortLabel>
+            </MudTh>
+            <MudTh>
+                <MudTableSortLabel SortBy="new Func<AllEvents, object>(x => x.OrganizerName)">
+                    Organizer name</MudTableSortLabel>
+            </MudTh>
+            <MudTh>
+                <MudTableSortLabel SortBy="new Func<AllEvents, object>(x => x.StartDate)">
+                    Start date</MudTableSortLabel>
+            </MudTh>
+            <MudTh>
+                <MudTableSortLabel SortBy="new Func<AllEvents, object>(x => x.EndDate)">
+                    End date</MudTableSortLabel>
+            </MudTh>
+            <MudTh>
+                <MudTableSortLabel SortBy="new Func<AllEvents, object>(x => x.Registered)">
+                    Registered</MudTableSortLabel>
+            </MudTh>
+            <MudTh>
+                Attendee link
+            </MudTh>
+        </HeaderContent>
+
+        <RowTemplate>
+            <MudTd DataLabel="Event Metrics">
+                <MudLink Href="@($"/event/{context.EventId}/metrics")">@context.EventName</MudLink>
+            </MudTd>
+            <MudTd DataLabel="Organizer name">@context.OrganizerName</MudTd>
+            <MudTd DataLabel="Start date">@context.StartDate.ToString("MMM/dd/yyyy")</MudTd>
+            <MudTd DataLabel="End date">@context.EndDate.ToString("MMM/dd/yyyy")</MudTd>
+            <MudTd DataLabel="Attendee Count">@context.Registered</MudTd>
+            <MudTd DataLabel="Attendee link">
+                <MudLink Href="@($"{Configuration["PlaygroundUrl"]}/event/{context.EventId}")">
+                    <MudIcon Icon="@Icons.Material.Filled.Link" />
+                </MudLink>
+            </MudTd>
+        </RowTemplate>
+    </MudTable>
+</MudStack>
+}

@@ -41,6 +41,16 @@ public class ModelData
     public IEnumerable<ChartData> ChartData { get; set; } = [];
 }
 
+public class AllEvents
+{
+    public string OrganizerName { get; set; } = null!;
+    public string EventName { get; set; } = null!;
+    public DateTime StartDate { get; set; }
+    public DateTime EndDate { get; set; }
+    public int Registered { get; set; }
+    public string EventId { get; set; } = null!;
+}
+
 public class EventService(IAuthService authService, AoaiProxyContext db) : IEventService, IDisposable
 {
     private readonly DbConnection conn = db.Database.GetDbConnection();
@@ -320,5 +330,44 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
         {
             conn.Dispose();
         }
+    }
+
+    public Task<List<AllEvents>> GetAllEventsAsync()
+    {
+        // create an empty list of AllEvents and populate it with dummy data
+
+        var allEvents = new List<AllEvents>
+        {
+            new AllEvents
+            {
+                OrganizerName = "Dave Glover",
+                EventName = "Microsoft Developers AI Learning Hackathon",
+                StartDate = DateTime.Now,
+                EndDate = DateTime.Now.AddDays(1),
+                Registered = 10,
+                EventId = "6424-f827"
+            },
+            new AllEvents
+            {
+                OrganizerName = "Aaron Powell",
+                EventName = "Microsoft Fabric OpenAI Hackathon",
+                StartDate = DateTime.Now,
+                EndDate = DateTime.Now.AddDays(1),
+                Registered = 20,
+                EventId = "6424-f827"
+            },
+            new AllEvents
+            {
+                OrganizerName = "Scott Hanselman",
+                EventName = "Microsoft Azure AI Hackathon",
+                StartDate = DateTime.Now,
+                EndDate = DateTime.Now.AddDays(1),
+                Registered = 30,
+                EventId = "6424-f827"
+            }
+        };
+
+        return Task.FromResult(allEvents);
+
     }
 }
