@@ -15,12 +15,12 @@ public partial class EventReport
 
     private List<AllEvents>? AllEvents { get; set; }
 
-    private int TotalRegistered { get; set; }
+    private int TotalRegistations { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
         AllEvents = await EventService.GetAllEventsAsync();
         // calculate total attendees
-        TotalRegistered = AllEvents.Sum(e => e.Registered);
+        TotalRegistations = AllEvents.Sum(e => e.Registered);
     }
 }
