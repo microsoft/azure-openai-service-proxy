@@ -16,7 +16,7 @@
 
     <MudChart ChartType="ChartType.Line" ChartSeries="@ActiveUsersChartSeries" XAxisLabels="@ActiveUsersChartLabels" Width="100%" Height="450px" ChartOptions="@ChartOptions"/>
 
-    <MudChart ChartType="ChartType.Line" ChartSeries="@ChartSeries" XAxisLabels="@ChartLabels" Width="100%" Height="450px" ChartOptions="@ChartOptions"/>
+    <MudChart ChartType="ChartType.Line" ChartSeries="@RequestChartSeries" XAxisLabels="@RequestChartLabels" Width="100%" Height="450px" ChartOptions="@ChartOptions"/>
 
     <MudTable Items="@EventMetric.ModelData.ModelCounts" Dense="true" Striped="true" SortLabel="Sort By" Hover="true">
         <HeaderContent>

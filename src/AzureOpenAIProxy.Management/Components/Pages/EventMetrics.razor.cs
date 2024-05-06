@@ -16,8 +16,8 @@ public partial class EventMetrics
     [Parameter]
     public string EventId { get; set; } = null!;
 
-    private List<ChartSeries> ChartSeries { get; set; } = [];
-    private string[] ChartLabels { get; set; } = [];
+    private List<ChartSeries> RequestChartSeries { get; set; } = [];
+    private string[] RequestChartLabels { get; set; } = [];
     private int Index { get; set; } = -1;
     private ChartOptions ChartOptions { get; set; } = new ChartOptions();
     private EventMetric? EventMetric { get; set; }
@@ -37,13 +37,12 @@ public partial class EventMetrics
 
         if (EventMetric?.ModelData?.ChartData != null)
         {
-            (ChartSeries, ChartLabels) = BuildRequestsChart(EventMetric?.ModelData?.ChartData);
+            (RequestChartSeries, RequestChartLabels) = BuildRequestsChart(EventMetric?.ModelData?.ChartData);
         }
         else
         {
-            (ChartSeries, ChartLabels) = BuildRequestsChart(new List<ChartData>());
+            (RequestChartSeries, RequestChartLabels) = BuildRequestsChart(new List<ChartData>());
         }
-
 
         ActiveUsers = await MetricService.GetActiveRegistrationsAsync(EventId);
         // get the last value for active registrations
@@ -53,7 +52,6 @@ public partial class EventMetrics
         }
 
         (ActiveUsersChartSeries, ActiveUsersChartLabels) = BuildActiveUsersChart(ActiveUsers);
-
     }
 
     private (List<ChartSeries> ActiveUsersChartSeries, string[] ActiveUsersChartLabels) BuildActiveUsersChart(List<ChartData>? activeUsers)
@@ -86,7 +84,7 @@ public partial class EventMetrics
         {
             List<ChartData> cd = FillMissingDays(chartData).ToList();
 
-            ChartSeries =
+            RequestChartSeries =
             [
                 new ChartSeries
                 {
@@ -95,10 +93,10 @@ public partial class EventMetrics
                 }
             ];
 
-            ChartLabels = cd.Select(cd => cd.DateStamp.ToString("dd MMM")).ToArray();
-            ChartLabels = ScaleLabels(ChartLabels);
+            RequestChartLabels = cd.Select(cd => cd.DateStamp.ToString("dd MMM")).ToArray();
+            RequestChartLabels = ScaleLabels(RequestChartLabels);
 
-            return (ChartSeries, ChartLabels);
+            return (RequestChartSeries, RequestChartLabels);
         }
         return (new List<ChartSeries>(), Array.Empty<string>());
     }
