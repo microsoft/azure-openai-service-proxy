@@ -53,7 +53,6 @@ public partial class EventMetrics
     {
         if (activeUsers != null)
         {
-
             List<ChartData> cd = FillMissingDays(activeUsers);
 
             ActiveUsersChartSeries =
@@ -70,14 +69,14 @@ public partial class EventMetrics
 
             return (ActiveUsersChartSeries, ActiveUsersChartLabels);
         }
-        return (new List<ChartSeries>(), Array.Empty<string>());
+        return ([], []);
     }
 
     private (List<ChartSeries> ChartSeries, string[] ChartLabels) BuildRequestsChart(List<ChartData>? chartData)
     {
         if (chartData != null)
         {
-            List<ChartData> cd = FillMissingDays(chartData).ToList();
+            List<ChartData> cd = FillMissingDays(chartData);
 
             RequestChartSeries =
             [
@@ -93,13 +92,13 @@ public partial class EventMetrics
 
             return (RequestChartSeries, RequestChartLabels);
         }
-        return (new List<ChartSeries>(), Array.Empty<string>());
+        return ([], []);
     }
 
     private string[] ScaleLabels(string[] ChartLabels)
     {
-        // Scale the labels so they don't overlap. Allow for up to 10 labels.
-        int chartLabelInterval = (ChartLabels.Length / 10) + 1;
+        // Scale the labels so they don't overlap. Allow for up to 8 labels.
+        int chartLabelInterval = (ChartLabels.Length / 8) + 1;
         ChartLabels = ChartLabels.Select((label, index) => index % chartLabelInterval == 0 ? label : "").ToArray();
         return ChartLabels;
     }
@@ -108,7 +107,7 @@ public partial class EventMetrics
     {
         DateTime? previousDay = null;
         long previousRequests = 0;
-        List<ChartData> cd = new List<ChartData>();
+        List<ChartData> cd = [];
 
         if (chartData == null)
         {
@@ -130,7 +129,6 @@ public partial class EventMetrics
             previousDay = row.DateStamp;
             previousRequests = row.Count;
         }
-
         return cd;
     }
 }

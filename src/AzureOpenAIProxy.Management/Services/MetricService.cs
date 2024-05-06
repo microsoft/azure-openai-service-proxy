@@ -1,4 +1,3 @@
-
 using System.Data;
 using System.Data.Common;
 using AzureOpenAIProxy.Management.Database;
@@ -35,7 +34,7 @@ public class ChartData
 
 public class ModelData
 {
-    public IEnumerable<ModelCounts> ModelCounts { get; set; } = [];
+    public List<ModelCounts> ModelCounts { get; set; } = [];
     public List<ChartData> ChartData { get; set; } = [];
 }
 
@@ -183,7 +182,6 @@ public class MetricService(AoaiProxyContext db) : IMetricService, IDisposable
                 return (reader.GetInt32(0), reader.GetInt32(1));
             }
         }
-
         return (0, 0);
     }
 
