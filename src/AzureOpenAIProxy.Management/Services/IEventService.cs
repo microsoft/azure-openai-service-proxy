@@ -19,5 +19,5 @@ public interface IEventService
 
     Task<List<AllEvents>> GetAllEventsAsync();
 
-    Task<List<(DateTime TimeStamp, int Attendees)>> GetActiveRegistrationsAsync(string eventId);
+    Task<List<ChartData>> GetActiveRegistrationsAsync(string eventId);
 }

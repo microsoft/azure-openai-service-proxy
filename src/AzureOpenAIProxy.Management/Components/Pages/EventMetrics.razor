@@ -11,6 +11,7 @@
     <h3>Event Name: @Event.EventCode</h3>
 
     <MudText Typo="Typo.body1">Registrations: <strong>@EventMetric.AttendeeCount</strong></MudText>
+    <MudText Typo="Typo.body1">Active Registrations: <strong>@ActiveRegistrations</strong></MudText>
     <MudText Typo="Typo.body1">Total Request count: <strong>@EventMetric.RequestCount</strong></MudText>
 
     <MudChart ChartType="ChartType.Line" ChartSeries="@ActiveUsersChartSeries" @bind-SelectedIndex="Index" XAxisLabels="@ActiveUsersChartLabels" Width="100%" Height="350px" ChartOptions="@ChartOptions"/>

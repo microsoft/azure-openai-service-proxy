@@ -32,13 +32,13 @@ public class MetricsData
 public class ChartData
 {
     public DateTime DateStamp { get; set; }
-    public long Requests { get; set; }
+    public long Count { get; set; }
 }
 
 public class ModelData
 {
     public IEnumerable<ModelCounts> ModelCounts { get; set; } = [];
-    public IEnumerable<ChartData> ChartData { get; set; } = [];
+    public List<ChartData> ChartData { get; set; } = [];
 }
 
 public class AllEvents
@@ -203,13 +203,13 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
             .Select(g => new ChartData
             {
                 DateStamp = g.Key,
-                Requests = g.Sum(x => x.Requests)
+                Count = g.Sum(x => x.Requests)
             })
             .OrderBy(x => x.DateStamp)
             .ToList();
 
         long runningTotal = 0;
-        chartData.ForEach(x => runningTotal = x.Requests += runningTotal);
+        chartData.ForEach(x => runningTotal = x.Count += runningTotal);
 
         ModelData md = new()
         {
@@ -377,7 +377,7 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
         return allEvents;
     }
 
-    public async Task<List<(DateTime TimeStamp, int Attendees)>> GetActiveRegistrationsAsync(string eventId)
+    public async Task<List<ChartData>> GetActiveRegistrationsAsync(string eventId)
     {
         // call the Postgres view active_attendee_growth_view, read all the rows and return them as a list of tuples
 
@@ -399,12 +399,11 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
 
         using var reader = await activeRegistrationsCountCommand.ExecuteReaderAsync();
 
-        var activeRegistrations = new List<(DateTime TimeStamp, int Count)>();
+        var activeRegistrations = new List<ChartData>();
 
         while (reader.Read())
         {
-            var item = (reader.GetDateTime(0), reader.GetInt32(1));
-            activeRegistrations.Add(item);
+            activeRegistrations.Add(new ChartData { DateStamp = reader.GetDateTime(0), Count = reader.GetInt32(1) });
         };
 
         return activeRegistrations;
