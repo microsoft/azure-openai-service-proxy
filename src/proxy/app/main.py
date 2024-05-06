@@ -37,29 +37,39 @@ DEFAULT_IMAGES_GENERATIONS_API_VERSION = "2023-06-01-preview"
 DEFAULT_SEARCH_API_VERSION = "2023-11-01"
 OPENAI_IMAGES_API_VERSION = "2023-12-01-preview"
 
-# Set the tracer provider
-trace.set_tracer_provider(TracerProvider())
-
-# Configure Azure Monitor
-exporter = AzureMonitorTraceExporter(
-    connection_string=os.environ.get("APPLICATIONINSIGHTS_CONNECTION_STRING")
-)
-
-# add to the tracer provider
-trace.get_tracer_provider().add_span_processor(BatchSpanProcessor(exporter))
-
 app = FastAPI(
     # docs_url=None,  # Disable docs (Swagger UI)
     # redoc_url=None,  # Disable redoc
 )
 
-FastAPIInstrumentor.instrument_app(app)
-
-# Set up logging
 logger = logging.getLogger(__name__)
-handler = AzureLogHandler(connection_string=os.environ.get("APPLICATIONINSIGHTS_CONNECTION_STRING"))
-logger.addHandler(handler)
 logger.setLevel(logging.INFO)
+
+APPLICATIONINSIGHTS_CONNECTION_STRING = os.environ.get("APPLICATIONINSIGHTS_CONNECTION_STRING")
+
+if APPLICATIONINSIGHTS_CONNECTION_STRING is not None:
+
+    logger.info("Setting up Azure Application Insights for logging and tracing.")
+
+    # Set the tracer provider
+    trace.set_tracer_provider(TracerProvider())
+
+    # Configure Azure Monitor
+    exporter = AzureMonitorTraceExporter(
+        connection_string=os.environ.get("APPLICATIONINSIGHTS_CONNECTION_STRING")
+    )
+
+    # add to the tracer provider
+    trace.get_tracer_provider().add_span_processor(BatchSpanProcessor(exporter))
+
+    FastAPIInstrumentor.instrument_app(app)
+
+    # Set up logging
+    handler = AzureLogHandler(
+        connection_string=os.environ.get("APPLICATIONINSIGHTS_CONNECTION_STRING")
+    )
+    logger.addHandler(handler)
+
 
 db_config = DBConfig(
     host=os.environ.get("POSTGRES_SERVER"),
