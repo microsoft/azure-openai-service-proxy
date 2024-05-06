@@ -45,7 +45,6 @@ public partial class EventMetrics
         }
 
 
-
         ActiveUsers = await MetricService.GetActiveRegistrationsAsync(EventId);
         // get the last value for active registrations
         if (ActiveUsers != null && ActiveUsers.Count > 0)
