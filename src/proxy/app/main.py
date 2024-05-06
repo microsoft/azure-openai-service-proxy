@@ -48,16 +48,13 @@ logger.setLevel(logging.INFO)
 APPLICATIONINSIGHTS_CONNECTION_STRING = os.environ.get("APPLICATIONINSIGHTS_CONNECTION_STRING")
 
 if APPLICATIONINSIGHTS_CONNECTION_STRING is not None:
-
     logger.info("Setting up Azure Application Insights for logging and tracing.")
 
     # Set the tracer provider
     trace.set_tracer_provider(TracerProvider())
 
     # Configure Azure Monitor
-    exporter = AzureMonitorTraceExporter(
-        connection_string=os.environ.get("APPLICATIONINSIGHTS_CONNECTION_STRING")
-    )
+    exporter = AzureMonitorTraceExporter(connection_string=APPLICATIONINSIGHTS_CONNECTION_STRING)
 
     # add to the tracer provider
     trace.get_tracer_provider().add_span_processor(BatchSpanProcessor(exporter))
@@ -65,9 +62,7 @@ if APPLICATIONINSIGHTS_CONNECTION_STRING is not None:
     FastAPIInstrumentor.instrument_app(app)
 
     # Set up logging
-    handler = AzureLogHandler(
-        connection_string=os.environ.get("APPLICATIONINSIGHTS_CONNECTION_STRING")
-    )
+    handler = AzureLogHandler(connection_string=APPLICATIONINSIGHTS_CONNECTION_STRING)
     logger.addHandler(handler)
 
 
