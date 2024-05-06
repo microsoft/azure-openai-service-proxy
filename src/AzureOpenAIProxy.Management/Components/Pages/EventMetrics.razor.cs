@@ -18,16 +18,11 @@ public partial class EventMetrics
 
     private List<ChartSeries> RequestChartSeries { get; set; } = [];
     private string[] RequestChartLabels { get; set; } = [];
-    private int Index { get; set; } = -1;
-    private ChartOptions ChartOptions { get; set; } = new ChartOptions();
     private EventMetric? EventMetric { get; set; }
     private Event? Event { get; set; }
-
     private List<ChartData>? ActiveUsers { get; set; }
-    private ChartOptions ActiveUsersChartOptions { get; set; } = new ChartOptions();
     private List<ChartSeries> ActiveUsersChartSeries { get; set; } = [];
     private string[] ActiveUsersChartLabels { get; set; } = [];
-
     private long ActiveRegistrations { get; set;}
 
     protected override async Task OnInitializedAsync()
