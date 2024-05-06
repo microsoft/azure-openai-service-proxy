@@ -48,8 +48,6 @@ logger.setLevel(logging.INFO)
 APPLICATIONINSIGHTS_CONNECTION_STRING = os.environ.get("APPLICATIONINSIGHTS_CONNECTION_STRING")
 
 if APPLICATIONINSIGHTS_CONNECTION_STRING is not None:
-    logger.info("Setting up Azure Application Insights for logging and tracing.")
-
     # Set the tracer provider
     trace.set_tracer_provider(TracerProvider())
 
@@ -64,6 +62,8 @@ if APPLICATIONINSIGHTS_CONNECTION_STRING is not None:
     # Set up logging
     handler = AzureLogHandler(connection_string=APPLICATIONINSIGHTS_CONNECTION_STRING)
     logger.addHandler(handler)
+
+    logger.info("Azure Application Insights for logging and tracing enabled.")
 
 
 db_config = DBConfig(
