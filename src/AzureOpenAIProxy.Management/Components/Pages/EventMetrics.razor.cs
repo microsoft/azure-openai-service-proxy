@@ -8,6 +8,9 @@ namespace AzureOpenAIProxy.Management.Components.Pages;
 public partial class EventMetrics
 {
     [Inject]
+    private IMetricService MetricService { get; set; } = null!;
+
+    [Inject]
     private IEventService EventService { get; set; } = null!;
 
     [Parameter]
@@ -29,7 +32,7 @@ public partial class EventMetrics
 
     protected override async Task OnInitializedAsync()
     {
-        EventMetric = await EventService.GetEventMetricsAsync(EventId);
+        EventMetric = await MetricService.GetEventMetricsAsync(EventId);
         Event = await EventService.GetEventAsync(EventId);
 
         if (EventMetric?.ModelData?.ChartData != null)
@@ -43,7 +46,7 @@ public partial class EventMetrics
 
 
 
-        ActiveUsers = await EventService.GetActiveRegistrationsAsync(EventId);
+        ActiveUsers = await MetricService.GetActiveRegistrationsAsync(EventId);
         // get the last value for active registrations
         if (ActiveUsers != null && ActiveUsers.Count > 0)
         {

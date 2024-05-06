@@ -15,18 +15,8 @@
     <MudText Typo="Typo.body1">Total Request count: <strong>@EventMetric.RequestCount</strong></MudText>
 
     <MudChart ChartType="ChartType.Line" ChartSeries="@ActiveUsersChartSeries" @bind-SelectedIndex="Index" XAxisLabels="@ActiveUsersChartLabels" Width="100%" Height="350px" ChartOptions="@ChartOptions"/>
-        <MudGrid>
-            <MudItem xs="6">
-                <MudText Typo="Typo.body1" Class="py-3">Selected: @(Index < 0 ? "None" : ChartSeries[Index].Name)</MudText>
-            </MudItem>
-    </MudGrid>
 
     <MudChart ChartType="ChartType.Line" ChartSeries="@ChartSeries" @bind-SelectedIndex="Index" XAxisLabels="@ChartLabels" Width="100%" Height="350px" ChartOptions="@ChartOptions"/>
-        <MudGrid>
-            <MudItem xs="6">
-                <MudText Typo="Typo.body1" Class="py-3">Selected: @(Index < 0 ? "None" : ChartSeries[Index].Name)</MudText>
-            </MudItem>
-        </MudGrid>
 
     <MudTable Items="@EventMetric.ModelData.ModelCounts" Dense="true" Striped="true" SortLabel="Sort By" Hover="true">
         <HeaderContent>

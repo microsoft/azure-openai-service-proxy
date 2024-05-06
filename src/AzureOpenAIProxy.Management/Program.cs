@@ -63,6 +63,7 @@ builder.Services.AddRazorComponents()
 builder.Services.AddScoped<IEventService, EventService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IModelService, ModelService>();
+builder.Services.AddScoped<IMetricService, MetricService>();
 
 builder.Services.AddMudServices();
 
