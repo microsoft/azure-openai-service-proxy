@@ -20,11 +20,33 @@ public partial class EventMetrics
     private EventMetric? EventMetric { get; set; }
     private Event? Event { get; set; }
 
+    private List<(DateTime TimeStamp, int Count)>? ActiveUsers { get; set; }
+    private ChartOptions ActiveUsersChartOptions { get; set; } = new ChartOptions();
+    private List<ChartSeries> ActiveUsersChartSeries { get; set; } = [];
+    private string[] ActiveUsersChartLabels { get; set; } = [];
+
     protected override async Task OnInitializedAsync()
     {
         EventMetric = await EventService.GetEventMetricsAsync(EventId);
         Event = await EventService.GetEventAsync(EventId);
         (ChartSeries, ChartLabels) = BuildChart();
+
+        ActiveUsers = await EventService.GetActiveRegistrationsAsync(EventId);
+
+        ActiveUsersChartSeries =
+        [
+            new ChartSeries
+            {
+                Name = "Active Users",
+                Data = ActiveUsers.Select(au => (double)au.Count).ToArray()
+            }
+        ];
+
+        ActiveUsersChartLabels = ActiveUsers.Select(au => au.TimeStamp.ToString("dd MMM")).ToArray();
+
+
+
+
     }
 
     private (List<ChartSeries> ChartSeries, string[] ChartLabels) BuildChart()

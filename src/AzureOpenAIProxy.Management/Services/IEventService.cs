@@ -18,4 +18,6 @@ public interface IEventService
     Task<EventMetric> GetEventMetricsAsync(string eventId);
 
     Task<List<AllEvents>> GetAllEventsAsync();
+
+    Task<List<(DateTime TimeStamp, int Attendees)>> GetActiveRegistrationsAsync(string eventId);
 }

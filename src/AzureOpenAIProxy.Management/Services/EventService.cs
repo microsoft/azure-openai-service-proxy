@@ -376,4 +376,37 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
         };
         return allEvents;
     }
+
+    public async Task<List<(DateTime TimeStamp, int Attendees)>> GetActiveRegistrationsAsync(string eventId)
+    {
+        // call the Postgres view active_attendee_growth_view, read all the rows and return them as a list of tuples
+
+        if (conn.State != ConnectionState.Open)
+            conn.Open();
+
+        using var activeRegistrationsCountCommand = conn.CreateCommand();
+
+        activeRegistrationsCountCommand.CommandText = """
+        SELECT
+            date_stamp, attendees
+        FROM
+            aoai.active_attendee_growth_view
+        WHERE
+            event_id = @EventId
+        """;
+
+        activeRegistrationsCountCommand.Parameters.Add(new NpgsqlParameter("EventId", eventId));
+
+        using var reader = await activeRegistrationsCountCommand.ExecuteReaderAsync();
+
+        var activeRegistrations = new List<(DateTime TimeStamp, int Count)>();
+
+        while (reader.Read())
+        {
+            var item = (reader.GetDateTime(0), reader.GetInt32(1));
+            activeRegistrations.Add(item);
+        };
+
+        return activeRegistrations;
+    }
 }
