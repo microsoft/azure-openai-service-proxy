@@ -23,30 +23,47 @@ public partial class EventMetrics
     private List<ChartData>? ActiveUsers { get; set; }
     private List<ChartSeries> ActiveUsersChartSeries { get; set; } = [];
     private string[] ActiveUsersChartLabels { get; set; } = [];
-    private long ActiveRegistrations { get; set;}
+    private long ActiveRegistrations { get; set; }
 
-    protected override async Task OnInitializedAsync()
+    private bool IsLoading { get; set; } = false;
+
+    private async Task GetData()
     {
+        if (IsLoading)
+        {
+            return;
+        }
+
+        IsLoading = true;
+
         EventMetric = await MetricService.GetEventMetricsAsync(EventId);
         Event = await EventService.GetEventAsync(EventId);
 
-        if (EventMetric?.ModelData?.ChartData != null)
+        if (EventMetric?.ModelData?.ChartData.Count > 0)
         {
-            (RequestChartSeries, RequestChartLabels) = BuildRequestsChart(EventMetric?.ModelData?.ChartData);
-        }
-        else
-        {
-            (RequestChartSeries, RequestChartLabels) = BuildRequestsChart(new List<ChartData>());
+            (RequestChartSeries, RequestChartLabels) = BuildRequestsChart(EventMetric.ModelData.ChartData);
         }
 
         ActiveUsers = await MetricService.GetActiveRegistrationsAsync(EventId);
         // get the last value for active registrations
-        if (ActiveUsers != null && ActiveUsers.Count > 0)
+        if (ActiveUsers?.Count > 0)
         {
             ActiveRegistrations = ActiveUsers.Last().Count;
         }
 
         (ActiveUsersChartSeries, ActiveUsersChartLabels) = BuildActiveUsersChart(ActiveUsers);
+
+        IsLoading = false;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetData();
+    }
+
+    private async void RefreshData()
+    {
+        await GetData();
     }
 
     private (List<ChartSeries> ActiveUsersChartSeries, string[] ActiveUsersChartLabels) BuildActiveUsersChart(List<ChartData>? activeUsers)
