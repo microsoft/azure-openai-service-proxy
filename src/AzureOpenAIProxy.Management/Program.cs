@@ -65,11 +65,6 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IModelService, ModelService>();
 builder.Services.AddScoped<IMetricService, MetricService>();
 
-builder.Services.AddServerSideBlazor(options =>
-{
-    options.DisconnectedCircuitRetentionPeriod = TimeSpan.FromMinutes(15);
-});
-
 builder.Services.AddMudServices();
 
 builder.Services.AddApplicationInsightsTelemetry();
