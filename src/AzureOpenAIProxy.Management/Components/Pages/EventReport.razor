@@ -10,11 +10,21 @@
     <MudStack>
     <h3>Events Report</h3>
 
-    <MudText Typo="Typo.body1">Total registrations: <strong>@TotalRegistations</strong></MudText>
+    @* <MudText Typo="Typo.body1">Total registrations: <strong>@TotalRegistations</strong></MudText>
 
-    Select the event to view the metrics.
+    Select the event to view the metrics. *@
 
-    <MudTable Items="@AllEvents" Dense="true" Striped="true" SortLabel="Sort By" Hover="true">
+    <MudTable Items="@AllEvents" Dense="true" Striped="true" SortLabel="Sort By"
+        Filter="new Func<AllEvents,bool>(FilterFunc1)" Hover="true">
+        <ToolBarContent>
+            <MudStack Spacing="0">
+                <MudText Typo="Typo.body1">Total registrations: @TotalRegistations</MudText>
+                <MudText Typo="Typo.body1">Select the event to view the metrics.</MudText>
+            </MudStack>
+            <MudSpacer />
+            <MudTextField @bind-Value="searchString1" Placeholder="Search" Adornment="Adornment.Start"
+                AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+        </ToolBarContent>
         <HeaderContent>
             <MudTh>
                 <MudTableSortLabel InitialDirection="SortDirection.Ascending"

@@ -59,7 +59,7 @@ public partial class EventMetrics
             [
                 new ChartSeries
                 {
-                    Name = "Active Registrations",
+                    Name = "New Active Registrations",
                     Data = activeUsers.Select(au => (double)au.Count).ToArray()
                 }
             ];
