@@ -197,7 +197,7 @@ public class MetricService(AoaiProxyContext db) : IMetricService, IDisposable
         SELECT
             e.event_id,
             e.event_code,
-            e.organizer_email,
+            e.organizer_name,
             e.start_timestamp,
             e.end_timestamp,
             COUNT(a.api_key) AS registration_count
