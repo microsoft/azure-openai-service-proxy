@@ -7,6 +7,8 @@ import asyncpg
 from azure.identity import DefaultAzureCredential
 from fastapi import HTTPException
 
+RECYCLE_TIME_SECONDS = 60 * 60 * 6
+
 logging.basicConfig(level=logging.INFO)
 
 
@@ -72,7 +74,7 @@ class DBManager:
         self.db_config = db_config
         self.db_pool = None
         self.conn = None
-        self.pool_timestamp = None
+        self.pool_timestamp = datetime.min
 
     async def create_pool(self):
         """create database pool"""
@@ -121,11 +123,8 @@ class DBManager:
     # https://realpython.com/python-with-statement/
     async def __aenter__(self):
         """Get a connection from the pool"""
-        # If the pool is older than 6 hours, recycle it to renew the managed identity token
-        if (
-            self.pool_timestamp
-            and (datetime.now() - self.pool_timestamp).total_seconds() > 60 * 60 * 6
-        ):
+        # If the pool is older than RECYCLE_TIME_SECONDS, recycle it to renew the managed identity
+        if (datetime.now() - self.pool_timestamp).total_seconds() > RECYCLE_TIME_SECONDS:
             self.logging.info("Connection pool recycled")
             await self.db_pool.close()
             await self.create_pool()
