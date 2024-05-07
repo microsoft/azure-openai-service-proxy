@@ -7,9 +7,14 @@
 
 @if (Event is not null && EventMetric is not null && EventMetric?.ModelData?.ModelCounts is not null)
 {
+
+    <PageTitle>AI Proxy Metrics | @Event.EventCode</PageTitle>
+
     <MudStack>
 
-    <h3>Event Name: @Event.EventCode</h3>
+    <MudLink Target="_blank" Href="@($"{Configuration["PlaygroundUrl"]}/event/{EventId}")">
+        <MudText><strong>@Event.EventCode</strong></MudText>
+    </MudLink>
 
     <MudStack Spacing="1">
         <MudText Typo="Typo.body1">Registrations: <strong>@EventMetric.AttendeeCount</strong></MudText>

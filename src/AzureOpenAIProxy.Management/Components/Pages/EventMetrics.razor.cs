@@ -13,6 +13,9 @@ public partial class EventMetrics
     [Inject]
     private IEventService EventService { get; set; } = null!;
 
+    [Inject]
+    public required IConfiguration Configuration { get; set; }
+
     [Parameter]
     public string EventId { get; set; } = null!;
 

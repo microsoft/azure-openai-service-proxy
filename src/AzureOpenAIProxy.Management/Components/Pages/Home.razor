@@ -1,54 +1,22 @@
 ﻿@page "/"
 
-<PageTitle>Home</PageTitle>
+<PageTitle>AI Proxy Admin</PageTitle>
 
-<style>
-    /* Add your CSS styles here */
-    h1 {
-        color: rgb(89, 74, 226);
-        margin-bottom: 10px;
-        margin-top: 10px;
-    }
-
-    h2 {
-        color: rgb(89, 74, 226);;
-        margin-bottom: 10px;
-        margin-top: 10px;
-    }
-
-    p {
-        font-size: 16px;
-    }
-
-    ol {
-        font-size: 16px;
-        margin-left: 20px;
-    }
-
-    a {
-        color: rgb(89, 74, 226);;
-    }
-    /* Add more styles as needed */
-</style>
-
-<h1>Welcome</h1>
-
-<p>Manage your events and resources for the Azure AI Proxy using the options on the menu.</p>
-
-<h2>FAQ</h2>
-
-For frequently asked questions, please visit the proxy <a href="https://microsoft.github.io/azure-openai-service-proxy/faq" target="_blank">FAQ</a>.
-
-<h2>Documentation</h2>
-
-<p>For more information on the Azure AI Proxy, please visit the <a href="https://aka.ms/ai-proxy-docs" target="_blank">documentation</a>.</p>
-
-<h2>Getting started</h2>
-
-<ol>
-    <li>Create Azure AI resources you need for an event. Resources include OpenAI Models and Azure AI Search Indexes.</li>
-    <li>Create an Azure AI Proxy resource. You will need the Azure AI Key and endpoints, along with the deployment name or Azure AI Search index name.</li>
-    <li>Create an Azure AI Proxy event.</li>
-    <li>Edit the event and add required resources to the event.</li>
-    <li>Select the attendee link from the events page to get the event URL that you'll promote to attendees.</li>
-</ol>
+<MudStack>
+    <MudText Typo="Typo.h4">Welcome</MudText>
+    <MudText Typo="Typo.body1">Manage your events and resources for the Azure AI Proxy using the options on the menu.</MudText>
+    <MudText Typo="Typo.h5">FAQ</MudText>
+    <MudText Typo="Typo.body1">For frequently asked questions, please visit the proxy <a href="https://microsoft.github.io/azure-openai-service-proxy/faq" target="_blank">FAQ</a>.</MudText>
+    <MudText Typo="Typo.h5">Documentation</MudText>
+    <MudText Typo="Typo.body1">For more information on the Azure AI Proxy, please visit the <a href="https://aka.ms/ai-proxy-docs" target="_blank">documentation</a>.</MudText>
+    <MudText Typo="Typo.h5">Getting started</MudText>
+    <MudText Typo="Typo.body1" style="margin-left: 20px;">
+        <ol>
+            <li>Create Azure AI resources you need for an event. Resources include OpenAI Models and Azure AI Search Indexes.</li>
+            <li>Create an Azure AI Proxy resource. You will need the Azure AI Key and endpoints, along with the deployment name or Azure AI Search index name.</li>
+            <li>Create an Azure AI Proxy event.</li>
+            <li>Edit the event and add required resources to the event.</li>
+            <li>Select the attendee link from the events page to get the event URL that you'll promote to attendees.</li>
+        </ol>
+    </MudText>
+</MudStack>
