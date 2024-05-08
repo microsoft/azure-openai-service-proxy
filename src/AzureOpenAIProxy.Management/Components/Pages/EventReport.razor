@@ -9,7 +9,8 @@
 @if (AllEvents?.Count > 0)
 {
     <MudStack>
-    <h3>Events Report</h3>
+
+    <MudText Typo="Typo.h6">Events Report</MudText>
 
     <MudTable Items="@AllEvents" Dense="true" Striped="true" SortLabel="Sort By"
         Filter="new Func<AllEvents,bool>(FilterFunc1)" Hover="true">
@@ -19,8 +20,9 @@
                 <MudText Typo="Typo.body1">Select the event to view the metrics.</MudText>
             </MudStack>
             <MudSpacer />
-            <MudTextField @bind-Value="searchString1" Placeholder="Search by event or organizer name" Adornment="Adornment.Start"
-                AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+            <MudTextField @bind-Value="searchString1" Placeholder="Search by event or organizer name"
+                Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium"
+                Class="mt-0"></MudTextField>
         </ToolBarContent>
         <HeaderContent>
             <MudTh>

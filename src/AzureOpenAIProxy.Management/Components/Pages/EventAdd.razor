@@ -5,7 +5,13 @@
 @namespace AzureOpenAIProxy.Management.Components.Pages
 
 <MudStack>
-    <h1>Create a new event</h1>
+    <MudStack Row="true">
+        <MudText Typo="Typo.h6">Create a new event</MudText>
+        <MudSpacer />
+        <MudLink Target="_blank" Href="https://microsoft.github.io/azure-openai-service-proxy/events/">
+            <MudIcon Icon="@Icons.Material.Filled.Help" />
+        </MudLink>
+    </MudStack>
 
     <EventEditor OnValidSubmit="@HandleValidSubmit" />
 </MudStack>
