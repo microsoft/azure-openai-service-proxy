@@ -17,8 +17,9 @@
 
         <MudCardContent>
             <MudTextField Label="Event Name" @bind-Value="Model.Name" For="@(() => Model.Name)" />
-            <MudTextField Label="Event Shared Code (Optional)" @bind-Value="Model.EventSharedCode" For="@(() => Model.EventSharedCode)" />
-            <MudTextField Label="Event Image URL (Optional)" @bind-Value="Model.EventImageUrl" InputType="InputType.Url"
+            <MudTextField Label="Event Shared Code (Optional: Used when no attendee GitHub account)" @bind-Value="Model.EventSharedCode"
+                For="@(() => Model.EventSharedCode)" />
+            <MudTextField Label="Playground Branding Image URL (Optional: Size ~24px high by ~200px wide)" @bind-Value="Model.EventImageUrl" InputType="InputType.Url"
                 For="@(() => Model.EventImageUrl)" />
             <MudTextField Label="Organiser Name" @bind-Value="Model.OrganizerName" For="@(() => Model.OrganizerName)" />
             <MudTextField Label="Organiser Email" @bind-Value="Model.OrganizerEmail" InputType="InputType.Email"
@@ -31,8 +32,9 @@
             <MudTextField Label="End Date" @bind-Value="Model.End" InputType="InputType.DateTimeLocal"
                 For="@(() => Model.End)" Format="s" />
 
-            <MudAutocomplete T="TimeZoneInfo" @bind-Value="Model.SelectedTimeZone" Label="Time Zone (Start typing the location)" FullWidth="true"
-                For="@(() => Model.SelectedTimeZone)" SearchFunc="FilterTimezones">
+            <MudAutocomplete T="TimeZoneInfo" @bind-Value="Model.SelectedTimeZone"
+                Label="Time Zone (Start typing the location)" FullWidth="true" For="@(() => Model.SelectedTimeZone)"
+                SearchFunc="FilterTimezones">
                 <ItemTemplate Context="e">
                     <MudText>
                         <MudIcon Icon="@Icons.Material.Filled.CheckBoxOutlineBlank" Class="mb-n1 mr-3" />
@@ -46,16 +48,15 @@
                 </ItemSelectedTemplate>
             </MudAutocomplete>
 
+            <MudNumericField Label="Max Tokens (~512 for ~1hr events with > 50 people. Long running hacks ~4000)"
+                @bind-Value="Model.MaxTokenCap" Min="0" Placeholder="512" For="@(() => Model.MaxTokenCap)" />
 
-            <MudNumericField Label="Max Tokens" @bind-Value="Model.MaxTokenCap" Min="0"
-                For="@(() => Model.MaxTokenCap)" />
-            <MudNumericField Label="Daily Request Cap" @bind-Value="Model.DailyRequestCap" Min="0"
-                For="@(() => Model.DailyRequestCap)" />
-
+            <MudNumericField Label="Daily Request Cap (~256 for structured workshops. Long running hacks ~5000)"
+                @bind-Value="Model.DailyRequestCap" Min="0" Placeholder="256" For="@(() => Model.DailyRequestCap)" />
 
             <MudSwitch @bind-Value="Model.Active" Label="Active" Color="Color.Primary" />
-            <MudTextField Label="Description" @bind-Value="Model.Description" Lines="10"
-                    For="@(() => Model.Description)" />
+            <MudTextField Label="Markdown Description" @bind-Value="Model.Description" Lines="10"
+                For="@(() => Model.Description)" />
         </MudCardContent>
 
     </MudCard>
