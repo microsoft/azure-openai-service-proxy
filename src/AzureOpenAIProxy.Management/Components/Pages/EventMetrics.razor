@@ -30,7 +30,7 @@
     <MudChart ChartType="ChartType.Line" ChartSeries="@RequestChartSeries" XAxisLabels="@RequestChartLabels"
         Width="100%" Height="450px" />
 
-    <MudTable Items="@EventMetric.ModelData.ModelCounts" Dense="true" Striped="true" SortLabel="Sort By" Hover="true">
+    <MudTable Items="@EventMetric.ModelData.ModelCounts" Dense="true" Striped="true" SortLabel="Sort By" Hover="true" Style="margin-bottom: 60px;">
         <HeaderContent>
             <MudTh>
                 <MudTableSortLabel SortBy="new Func<ModelCounts, object>(x => x.Resource)">
