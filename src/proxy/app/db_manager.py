@@ -1,14 +1,14 @@
-""" Database manager """
+"""Database manager"""
 
 import logging
-import os
 from datetime import datetime
 
 import asyncpg
 from azure.identity import DefaultAzureCredential
 from fastapi import HTTPException
 
-RECYCLE_TIME_SECONDS = 60 * 60 * 6
+# 12 hr recycle time
+RECYCLE_TIME_SECONDS = 60 * 60 * 12
 
 logging.basicConfig(level=logging.INFO)
 
@@ -125,10 +125,6 @@ class DBManager:
     async def __aenter__(self):
         """Get a connection from the pool"""
         # If the pool is older than RECYCLE_TIME_SECONDS, recycle it to renew the managed identity
-
-        container_name = os.environ.get("WEBSITE_SITE_NAME")
-        self.logging.info(f"Container name: {container_name}")
-
         if (datetime.now() - self.pool_timestamp).total_seconds() > RECYCLE_TIME_SECONDS:
             self.logging.info("Connection pool recycled")
             await self.db_pool.close()
