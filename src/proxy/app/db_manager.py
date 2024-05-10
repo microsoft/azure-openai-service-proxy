@@ -35,6 +35,7 @@ class DBConfig:
         self.password = password.strip() if password else None
         self.encryption_key = encryption_key.strip() if encryption_key else None
         self.connection_string = connection_string.strip() if connection_string else None
+        self.logging = logging.getLogger(__name__)
 
         if not connection_string:
             if not host or not user:
@@ -49,20 +50,20 @@ class DBConfig:
                 detail="Please set the environment variable POSTGRES_ENCRYPTION_KEY",
             )
 
-    def get_auth_token(self, logger):
+    def get_auth_token(self):
         """get token"""
         max_retry = 0
         while max_retry < 5:
             try:
                 azure_credential = DefaultAzureCredential()
-                logger.info("Getting Entra Auth Token")
+                self.logging.info("Getting Entra Auth Token")
                 return azure_credential.get_token(
                     "https://ossrdbms-aad.database.windows.net/.default"
                 ).token
             except ClientAuthenticationError as cae:
                 asyncio.sleep(2)
                 max_retry += 1
-                logger.warning(f"Retrying to get Entra Auth Token {cae.message}")
+                self.logging.warning("Retrying to get Entra Auth Token %s", cae.message)
             except Exception as exception:
                 raise HTTPException(
                     status_code=503, detail=f"Exception: Getting Entra Auth Token {str(exception)}"
@@ -72,20 +73,20 @@ class DBConfig:
             status_code=503, detail="Retry exceeed: Getting Entra Auth Token failed after 5 retries"
         )
 
-    def get_connection_string(self, logger):
+    def get_connection_string(self):
         """get connection string"""
         if self.connection_string:
             return self.connection_string
 
         if not self.password:
-            logger.info("Using Postgres Entra Token Authorization")
-            token = self.get_auth_token(logger)
+            self.logging.info("Using Postgres Entra Token Authorization")
+            token = self.get_auth_token()
 
             connection_string = (
                 f"postgresql://{self.user}:{token}@{self.host}:{self.port}/{self.database}"
             )
         else:
-            logger.info("Using Postgres Password Authorization")
+            self.logging.info("Using Postgres Password Authorization")
             connection_string = (
                 f"postgresql://{self.user}:{self.password}@{self.host}:{self.port}/{self.database}"
             )
@@ -108,7 +109,7 @@ class DBManager:
         self.logging.info("Creating connection pool")
         try:
             self.db_pool = await asyncpg.create_pool(
-                self.db_config.get_connection_string(self.logging),
+                self.db_config.get_connection_string(),
                 max_size=30,
                 max_inactive_connection_lifetime=180,
             )
