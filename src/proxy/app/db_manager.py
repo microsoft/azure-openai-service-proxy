@@ -1,14 +1,16 @@
 """Database manager"""
 
+import asyncio
 import logging
 from datetime import datetime
 
 import asyncpg
+from azure.core.exceptions import ClientAuthenticationError
 from azure.identity import DefaultAzureCredential
 from fastapi import HTTPException
 
-# 12 hr recycle time
-RECYCLE_TIME_SECONDS = 60 * 60 * 12
+# 1 hr recycle time
+RECYCLE_TIME_SECONDS = 60 * 60 * 1
 
 logging.basicConfig(level=logging.INFO)
 
@@ -47,17 +49,37 @@ class DBConfig:
                 detail="Please set the environment variable POSTGRES_ENCRYPTION_KEY",
             )
 
+    def get_auth_token(self, logger):
+        """get token"""
+        max_retry = 0
+
+        while max_retry < 5:
+            try:
+                azure_credential = DefaultAzureCredential()
+                logger.info("Getting auth token")
+                return azure_credential.get_token(
+                    "https://ossrdbms-aad.database.windows.net/.default"
+                ).token
+            except ClientAuthenticationError as cae:
+                asyncio.sleep(2)
+                max_retry += 1
+                logger.warning(f"Retrying to get auth token {cae.message}")
+            except Exception as exception:
+                raise HTTPException(
+                    status_code=503, detail=f"Exception: Get Auth Token failed {str(exception)}"
+                ) from exception
+
+        raise HTTPException(
+            status_code=503, detail="Exception: Get Auth Token failed after 5 retries"
+        )
+
     def get_connection_string(self, logger):
         """get connection string"""
         if self.connection_string:
             return self.connection_string
 
         if not self.password:
-            azure_credential = DefaultAzureCredential()
-            self.password = azure_credential.get_token(
-                "https://ossrdbms-aad.database.windows.net/.default"
-            ).token
-
+            self.password = self.get_auth_token(logger)
             logger.info("Using Postgres Entra Authorization")
 
         connection_string = (
