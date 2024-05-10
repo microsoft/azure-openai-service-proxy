@@ -27,6 +27,8 @@ Calculate the needed Tokens per minute using the following formula:
 
 **Required Tokens per Minute = Number of Attendees * Number of Prompts per Minute * Number of Tokens per Prompt**
 
+This calculation is very generous, as it's unlikely attendees would be generating that number of requests for the whole workshop, but it's better to overestimate than underestimate.
+
 For this example, a model deployment would need at least:
 
 1. `Tokens per Minute Rate Limit` of 80K TPM.
@@ -34,7 +36,7 @@ For this example, a model deployment would need at least:
 
 ## What is the Max Token Cap parameter
 
-When you create an event, you will set the `Max Token Cap` parameter. The Max Token Cap limits the tokens per request to a realistic number required for the prompt to complete successfully. This limit stops people requesting more tokens than required for the prompt to complete, as needed or not, the requested number of tokens is what is used to calculate the TPM for a model deployment limits. Note, billing is based on the actual tokens consumed.
+When you create an event, you will set the `Max Token Cap` parameter. The Max Token Cap limits the tokens per request to a realistic number required for the prompt to complete successfully. This limit stops people requesting more tokens than required for the prompt to complete, as needed or not, the requested number of tokens is what is used to calculate the TPM for a model deployment. Note, billing is based on the actual tokens consumed.
 
 What would happen if there was no Max Token cap? If 20 attendees decided to set the Max response to 4000 in the Playground, that would be 80000 TPM, multiply by 4 prompts per minute = 240000 TPM, you’ll quickly run out of capacity impacting everyone in the workshop.
 
