@@ -52,25 +52,24 @@ class DBConfig:
     def get_auth_token(self, logger):
         """get token"""
         max_retry = 0
-
         while max_retry < 5:
             try:
                 azure_credential = DefaultAzureCredential()
-                logger.info("Getting auth token")
+                logger.info("Getting Entra Auth Token")
                 return azure_credential.get_token(
                     "https://ossrdbms-aad.database.windows.net/.default"
                 ).token
             except ClientAuthenticationError as cae:
                 asyncio.sleep(2)
                 max_retry += 1
-                logger.warning(f"Retrying to get auth token {cae.message}")
+                logger.warning(f"Retrying to get Entra Auth Token {cae.message}")
             except Exception as exception:
                 raise HTTPException(
-                    status_code=503, detail=f"Exception: Get Auth Token failed {str(exception)}"
+                    status_code=503, detail=f"Exception: Getting Entra Auth Token {str(exception)}"
                 ) from exception
 
         raise HTTPException(
-            status_code=503, detail="Exception: Get Auth Token failed after 5 retries"
+            status_code=503, detail="Retry exceeed: Getting Entra Auth Token failed after 5 retries"
         )
 
     def get_connection_string(self, logger):
@@ -79,12 +78,17 @@ class DBConfig:
             return self.connection_string
 
         if not self.password:
-            self.password = self.get_auth_token(logger)
-            logger.info("Using Postgres Entra Authorization")
+            logger.info("Using Postgres Entra Token Authorization")
+            token = self.get_auth_token(logger)
 
-        connection_string = (
-            f"postgresql://{self.user}:{self.password}@{self.host}:{self.port}/{self.database}"
-        )
+            connection_string = (
+                f"postgresql://{self.user}:{token}@{self.host}:{self.port}/{self.database}"
+            )
+        else:
+            logger.info("Using Postgres Password Authorization")
+            connection_string = (
+                f"postgresql://{self.user}:{self.password}@{self.host}:{self.port}/{self.database}"
+            )
 
         return connection_string
 
