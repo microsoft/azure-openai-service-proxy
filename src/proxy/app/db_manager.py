@@ -1,16 +1,14 @@
 """Database manager"""
 
-import asyncio
 import logging
 from datetime import datetime
 
 import asyncpg
-from azure.core.exceptions import ClientAuthenticationError
 from azure.identity import DefaultAzureCredential
 from fastapi import HTTPException
 
-# 1 hr recycle time
-RECYCLE_TIME_SECONDS = 60 * 60 * 1
+# 6 hr recycle time
+RECYCLE_TIME_SECONDS = 60 * 60 * 6
 
 logging.basicConfig(level=logging.INFO)
 
@@ -50,29 +48,6 @@ class DBConfig:
                 detail="Please set the environment variable POSTGRES_ENCRYPTION_KEY",
             )
 
-    def get_auth_token(self):
-        """get token"""
-        max_retry = 0
-        while max_retry < 5:
-            try:
-                azure_credential = DefaultAzureCredential()
-                self.logging.info("Getting Entra Auth Token")
-                return azure_credential.get_token(
-                    "https://ossrdbms-aad.database.windows.net/.default"
-                ).token
-            except ClientAuthenticationError as cae:
-                asyncio.sleep(2)
-                max_retry += 1
-                self.logging.warning("Retrying to get Entra Auth Token %s", cae.message)
-            except Exception as exception:
-                raise HTTPException(
-                    status_code=503, detail=f"Exception: Getting Entra Auth Token {str(exception)}"
-                ) from exception
-
-        raise HTTPException(
-            status_code=503, detail="Retry exceeed: Getting Entra Auth Token failed after 5 retries"
-        )
-
     def get_connection_string(self):
         """get connection string"""
         if self.connection_string:
@@ -80,7 +55,10 @@ class DBConfig:
 
         if not self.password:
             self.logging.info("Using Postgres Entra Token Authorization")
-            token = self.get_auth_token()
+            azure_credential = DefaultAzureCredential()
+            token = azure_credential.get_token(
+                "https://ossrdbms-aad.database.windows.net/.default"
+            ).token
 
             connection_string = (
                 f"postgresql://{self.user}:{token}@{self.host}:{self.port}/{self.database}"
