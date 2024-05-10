@@ -27,7 +27,7 @@ Calculate the needed Tokens per minute using the following formula:
 
 **Required Tokens per Minute = Number of Attendees * Number of Prompts per Minute * Number of Tokens per Prompt**
 
-This calculation is very generous, as it's unlikely attendees would be generating that number of requests every minute for the whole workshop, but it's better to overestimate than underestimate.
+This calculation is very generous, as it's unlikely attendees would collectively be generating that number of requests every minute for the whole workshop, but it's better to overestimate than underestimate.
 
 For this example, a model deployment would need at least:
 
