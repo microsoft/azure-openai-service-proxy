@@ -48,12 +48,6 @@ namespace AzureOpenAIProxy.Management
                 return new AoaiProxyContext(_pgOptionsBuilder.Options);
             }
 
-            // has the connection been created before?
-            if (_pgOptionsBuilder is not null)
-            {
-                NpgsqlConnection.ClearAllPools();
-            }
-
             Console.WriteLine("Generating new Postgres Connection");
 
             _connectionTime = DateTime.Now;
@@ -64,6 +58,9 @@ namespace AzureOpenAIProxy.Management
             _pgDataSource = _pgDataSourceBuilder.Build();
             _pgOptionsBuilder = new DbContextOptionsBuilder<AoaiProxyContext>();
             _pgOptionsBuilder.UseNpgsql(_pgDataSource);
+
+            // clear out connections in the pool that will be using the old connection string
+            NpgsqlConnection.ClearAllPools();
 
             return new AoaiProxyContext(_pgOptionsBuilder.Options);
         }
