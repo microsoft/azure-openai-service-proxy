@@ -1,12 +1,9 @@
 using AzureOpenAIProxy.Management;
 using AzureOpenAIProxy.Management.Components;
-using AzureOpenAIProxy.Management.Database;
 using AzureOpenAIProxy.Management.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Web;
 using MudBlazor.Services;
-using Npgsql;
-using Azure.Identity;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
