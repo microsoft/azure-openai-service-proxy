@@ -9,14 +9,14 @@ namespace AzureOpenAIProxy.Management
     {
         private readonly string? _pgConnectionString = configuration.GetConnectionString("AoaiProxyContext");
         private readonly string? _dbHost = configuration["POSTGRES_SERVER"];
-        private readonly string? _dbName = configuration["POSTGRES_DATABASE"];
+        private readonly string _dbName = configuration["POSTGRES_DATABASE"] ?? "aoai-proxy";
         private readonly string? _dbUser = configuration["POSTGRES_USER"];
         private readonly string? _dbPassword = configuration["POSTGRES_PASSWORD"];
         private DbContextOptionsBuilder<AoaiProxyContext>? _pgOptionsBuilder = null;
         private NpgsqlDataSourceBuilder? _pgDataSourceBuilder = null;
         private NpgsqlDataSource? _pgDataSource = null;
         private DateTime _connectionTime = DateTime.MinValue;
-        private const int _maxConnectionTime = 60 * 1; // 1 hrs
+        private const int _maxConnectionTime = 60 * 4; // 4 hrs
 
         async private Task<string> GetConnectionString()
         {
