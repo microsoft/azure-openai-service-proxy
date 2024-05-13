@@ -46,29 +46,37 @@ public static class AuthExtensions
         if (principal is null)
             throw new ApplicationException("Principal is null");
 
-        AoaiProxyContext db = ctx.HttpContext.RequestServices.GetRequiredService<AoaiProxyContext>();
-        ILogger<Program> logger = ctx.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+        var services = ctx.HttpContext.RequestServices;
+        var dbContextFactory = services.GetRequiredService<IDbContextFactory<AoaiProxyContext>>();
 
-        string id = principal.GetEntraId();
-
-        if (await db.Owners.AnyAsync(o => o.OwnerId == id))
+        using (var db = dbContextFactory.CreateDbContext())
         {
-            logger.LogInformation("User {id} already registered", id);
-            return;
+
+            // AoaiProxyContext db = ctx.HttpContext.RequestServices.GetRequiredService<AoaiProxyContext>();
+            ILogger<Program> logger = ctx.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+
+            string id = principal.GetEntraId();
+
+            if (await db.Owners.AnyAsync(o => o.OwnerId == id))
+            {
+                logger.LogInformation("User {id} already registered", id);
+                return;
+            }
+
+            Owner owner = new()
+            {
+                OwnerId = id,
+                Email = principal.Identity?.Name ?? "Unknown",
+                Name = principal.Claims.FirstOrDefault(c => c.Type == "name")?.Value ?? "Unknown"
+            };
+
+            db.Owners.Add(owner);
+            // Regsiter the current user
+            await db.SaveChangesAsync();
+
+            logger.LogInformation("User {id} registered", id);
+
         }
-
-        Owner owner = new()
-        {
-            OwnerId = id,
-            Email = principal.Identity?.Name ?? "Unknown",
-            Name = principal.Claims.FirstOrDefault(c => c.Type == "name")?.Value ?? "Unknown"
-        };
-
-        db.Owners.Add(owner);
-        // Regsiter the current user
-        await db.SaveChangesAsync();
-
-        logger.LogInformation("User {id} registered", id);
     }
 
     public static string GetEntraId(this ClaimsPrincipal principal)
