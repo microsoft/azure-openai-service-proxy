@@ -15,7 +15,7 @@ namespace AzureOpenAIProxy.Management
         private DbContextOptionsBuilder<AoaiProxyContext>? _pgOptionsBuilder = null;
         private NpgsqlDataSourceBuilder? _pgDataSourceBuilder = null;
         private NpgsqlDataSource? _pgDataSource = null;
-        private DateTime connectionTime = DateTime.MinValue;
+        private DateTime _connectionTime = DateTime.MinValue;
         private const int _maxConnectionTime = 60 * 1; // 1 hrs
 
         async private Task<string> GetConnectionString()
@@ -43,7 +43,7 @@ namespace AzureOpenAIProxy.Management
 
         AoaiProxyContext IDbContextFactory<AoaiProxyContext>.CreateDbContext()
         {
-            if (_pgOptionsBuilder is not null && (DateTime.Now - connectionTime).TotalMinutes < _maxConnectionTime)
+            if (_pgOptionsBuilder is not null && (DateTime.Now - _connectionTime).TotalMinutes < _maxConnectionTime)
             {
                 return new AoaiProxyContext(_pgOptionsBuilder.Options);
             }
@@ -56,7 +56,7 @@ namespace AzureOpenAIProxy.Management
 
             Console.WriteLine("Generating new Postgres Connection");
 
-            connectionTime = DateTime.Now;
+            _connectionTime = DateTime.Now;
             string connectionString = GetConnectionString().GetAwaiter().GetResult();
 
             _pgDataSourceBuilder = new(connectionString);
