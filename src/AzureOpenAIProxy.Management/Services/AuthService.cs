@@ -4,8 +4,24 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AzureOpenAIProxy.Management.Services;
 
-public class AuthService(AuthenticationStateProvider authenticationStateProvider, AoaiProxyContext db) : IAuthService
+public class AuthService(AuthenticationStateProvider authenticationStateProvider, IDbContextFactory<AoaiProxyContext> dbContextFactory) : IAuthService, IDisposable
 {
+    AoaiProxyContext db = dbContextFactory.CreateDbContext();
+
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            db.Dispose();
+        }
+    }
+
     public async Task<Owner> GetCurrentOwnerAsync()
     {
         string entraId = await GetCurrentUserEntraIdAsync();

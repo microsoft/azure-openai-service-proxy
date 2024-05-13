@@ -49,9 +49,10 @@ public class AllEvents
 }
 
 
-public class MetricService(AoaiProxyContext db) : IMetricService, IDisposable
+public class MetricService(IDbContextFactory<AoaiProxyContext> dbContextFactory) : IMetricService, IDisposable
 {
-    private readonly DbConnection conn = db.Database.GetDbConnection();
+    AoaiProxyContext db = dbContextFactory.CreateDbContext();
+    DbConnection conn = dbContextFactory.CreateDbContext().Database.GetDbConnection();
 
     public void Dispose()
     {
@@ -64,6 +65,7 @@ public class MetricService(AoaiProxyContext db) : IMetricService, IDisposable
         if (disposing)
         {
             conn.Dispose();
+            db.Dispose();
         }
     }
 

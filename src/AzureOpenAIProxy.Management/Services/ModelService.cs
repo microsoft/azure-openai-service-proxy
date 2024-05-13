@@ -8,11 +8,26 @@ using NpgsqlTypes;
 
 namespace AzureOpenAIProxy.Management.Services;
 
-public class ModelService(IAuthService authService, AoaiProxyContext db, IConfiguration configuration) : IModelService
+public class ModelService(IAuthService authService, IDbContextFactory<AoaiProxyContext> dbContextFactory, IConfiguration configuration) : IModelService, IDisposable
 {
-
     private const string PostgresEncryptionKey = "PostgresEncryptionKey";
-    private readonly DbConnection connection = db.Database.GetDbConnection();
+    AoaiProxyContext db = dbContextFactory.CreateDbContext();
+    DbConnection connection = dbContextFactory.CreateDbContext().Database.GetDbConnection();
+
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            connection.Dispose();
+            db.Dispose();
+        }
+    }
 
     private async Task<byte[]?> PostgresEncryptValue(string value)
     {
