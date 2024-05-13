@@ -59,7 +59,7 @@ namespace AzureOpenAIProxy.Management
             _pgOptionsBuilder = new DbContextOptionsBuilder<AoaiProxyContext>();
             _pgOptionsBuilder.UseNpgsql(_pgDataSource);
 
-            // clear out connections in the pool that will be using the old connection string
+            // clear out connections in the pool that used the old connection string
             NpgsqlConnection.ClearAllPools();
 
             return new AoaiProxyContext(_pgOptionsBuilder.Options);
