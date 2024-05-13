@@ -46,13 +46,10 @@ public static class AuthExtensions
         if (principal is null)
             throw new ApplicationException("Principal is null");
 
-        var services = ctx.HttpContext.RequestServices;
-        var dbContextFactory = services.GetRequiredService<IDbContextFactory<AoaiProxyContext>>();
+        var dbContextFactory = ctx.HttpContext.RequestServices.GetRequiredService<IDbContextFactory<AoaiProxyContext>>();
 
         using (var db = dbContextFactory.CreateDbContext())
         {
-
-            // AoaiProxyContext db = ctx.HttpContext.RequestServices.GetRequiredService<AoaiProxyContext>();
             ILogger<Program> logger = ctx.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
 
             string id = principal.GetEntraId();
@@ -75,7 +72,6 @@ public static class AuthExtensions
             await db.SaveChangesAsync();
 
             logger.LogInformation("User {id} registered", id);
-
         }
     }
 

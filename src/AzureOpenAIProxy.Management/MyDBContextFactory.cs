@@ -5,27 +5,18 @@ using Npgsql;
 
 namespace AzureOpenAIProxy.Management
 {
-    public class CustomDbContextFactory : IDbContextFactory<AoaiProxyContext>
+    public class CustomDbContextFactory(IConfiguration configuration) : IDbContextFactory<AoaiProxyContext>
     {
-        private readonly string? _pgConnectionString;
-        private readonly string? _dbHost;
-        private readonly string? _dbName;
-        private readonly string? _dbUser;
-        private readonly string? _dbPassword;
+        private readonly string? _pgConnectionString = configuration.GetConnectionString("AoaiProxyContext");
+        private readonly string? _dbHost = configuration["POSTGRES_SERVER"];
+        private readonly string? _dbName = configuration["POSTGRES_DATABASE"];
+        private readonly string? _dbUser = configuration["POSTGRES_USER"];
+        private readonly string? _dbPassword = configuration["POSTGRES_PASSWORD"];
         private DbContextOptionsBuilder<AoaiProxyContext>? _pgOptionsBuilder = null;
         private NpgsqlDataSourceBuilder? _pgDataSourceBuilder = null;
         private NpgsqlDataSource? _pgDataSource = null;
         private DateTime connectionTime = DateTime.MinValue;
         private const int _maxConnectionTime = 60 * 1; // 1 hrs
-
-        public CustomDbContextFactory(IConfiguration configuration)
-        {
-            _dbHost = configuration["POSTGRES_SERVER"];
-            _dbName = configuration["POSTGRES_DATABASE"];
-            _dbUser = configuration["POSTGRES_USER"];
-            _dbPassword = configuration["POSTGRES_PASSWORD"];
-            _pgConnectionString = configuration.GetConnectionString("AoaiProxyContext");
-        }
 
         async private Task<string> GetConnectionString()
         {
@@ -60,12 +51,10 @@ namespace AzureOpenAIProxy.Management
             // has the connection been created before?
             if (_pgOptionsBuilder is not null)
             {
-                // _pgDataSource.Dispose();
-                // _pgDataSource = null;
-                // _pgDataSourceBuilder = null;
-                // _pgOptionsBuilder = null;
                 NpgsqlConnection.ClearAllPools();
             }
+
+            Console.WriteLine("Generating new Postgres Connection");
 
             connectionTime = DateTime.Now;
             string connectionString = GetConnectionString().GetAwaiter().GetResult();
