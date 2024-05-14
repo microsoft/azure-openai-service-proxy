@@ -8,11 +8,31 @@ using NpgsqlTypes;
 
 namespace AzureOpenAIProxy.Management.Services;
 
-public class ModelService(IAuthService authService, IDbContextFactory<AoaiProxyContext> dbContextFactory, IConfiguration configuration) : IModelService, IDisposable
+public class ModelService() : IModelService, IDisposable
 {
     private const string PostgresEncryptionKey = "PostgresEncryptionKey";
-    AoaiProxyContext db = dbContextFactory.CreateDbContext();
-    DbConnection connection = dbContextFactory.CreateDbContext().Database.GetDbConnection();
+    private readonly IConfiguration configuration;
+    private readonly IAuthService authService;
+    private readonly IDbContextFactory<AoaiProxyContext> dbContextFactory;
+    private readonly AoaiProxyContext db;
+    private readonly DbConnection connection;
+
+    public ModelService(IAuthService authService, IDbContextFactory<AoaiProxyContext> dbContextFactory, IConfiguration configuration)
+        : this()
+    {
+        // this.configuration = configuration;
+        // this.authService = authService;
+        // this.dbContextFactory = dbContextFactory;
+
+        // db = dbContextFactory.CreateDbContext();
+        // connection = db.Database.GetDbConnection();
+
+        this.configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+        this.authService = authService ?? throw new ArgumentNullException(nameof(authService));
+        this.dbContextFactory = dbContextFactory ?? throw new ArgumentNullException(nameof(dbContextFactory));
+        db = dbContextFactory.CreateDbContext();
+        connection = db.Database.GetDbConnection();
+    }
 
     public void Dispose()
     {
@@ -58,14 +78,23 @@ public class ModelService(IAuthService authService, IDbContextFactory<AoaiProxyC
         command.Parameters.Add(new NpgsqlParameter("value", NpgsqlDbType.Bytea) { Value = value });
         command.Parameters.Add(new NpgsqlParameter("postgresEncryptionKey", NpgsqlDbType.Text) { Value = postgresEncryptionKey });
 
-        using var reader = await command.ExecuteReaderAsync();
-        await reader.ReadAsync();
-        return reader[0] as string;
+        try
+        {
+            using var reader = await command.ExecuteReaderAsync();
+            await reader.ReadAsync();
+            return reader[0] as string;
+        }
+        catch (Exception)
+        {
+            return string.Empty;
+        }
     }
 
     public async Task<OwnerCatalog> AddOwnerCatalogAsync(ModelEditorModel model)
     {
-        Owner owner = await authService.GetCurrentOwnerAsync();
+        string entraId = await authService.GetCurrentUserEntraIdAsync();
+
+        Owner owner = await db.Owners.FirstOrDefaultAsync(o => o.OwnerId == entraId) ?? throw new InvalidOperationException("EntraID is not a registered owner.");
 
         byte[]? endpointKey = await PostgresEncryptValue(model.EndpointKey!);
         byte[]? endpointUrl = await PostgresEncryptValue(model.EndpointUrl!);
