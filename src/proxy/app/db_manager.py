@@ -1,6 +1,5 @@
 """Database manager"""
 
-import asyncio
 import logging
 from datetime import datetime
 
@@ -8,8 +7,8 @@ import asyncpg
 from azure.identity import DefaultAzureCredential
 from fastapi import HTTPException
 
-# 1 hr recycle time
-RECYCLE_TIME_SECONDS = 60
+# 6 hr recycle time
+RECYCLE_TIME_SECONDS = 60 * 60 * 6
 
 logging.basicConfig(level=logging.INFO)
 
@@ -88,7 +87,7 @@ class DBManager:
         self.logging.info("Creating connection pool")
         try:
             self.db_pool = await asyncpg.create_pool(
-                self.db_config.get_connection_string(), max_size=30, command_timeout=60
+                self.db_config.get_connection_string(), command_timeout=30
             )
             self.logging.info("Connection pool created")
             self.pool_timestamp = datetime.now()
@@ -125,41 +124,18 @@ class DBManager:
         """get postgres encryption key"""
         return self.db_config.encryption_key
 
-    async def recycle_connection_pool(self):
-        """Recycle the connection pool to renew the managed identity"""
-        retries = 3
-        for attempt in range(1, retries + 1):
-            try:
-                self.logging.info("Closing connection pool. Attempt: %d", attempt)
-                await asyncio.wait_for(self.db_pool.close(), timeout=10)
-                break  # Break the loop if successful
-            except TimeoutError:
-                self.logging.error(
-                    "Attempt %d: Timeout occurred while recycling the connection pool", attempt
-                )
-                if attempt == retries:
-                    # Final attempt failed, handle accordingly
-                    self.logging.error(
-                        "Final attempt to recycle the connection pool failed. pool terminated."
-                    )
-                    self.db_pool.terminate()  # brutal but fair!
-            except asyncpg.exceptions.PostgresError as pg_error:
-                self.logging.error(
-                    "Postgres exception recycling the connection pool. Attempt: %d: Error: %s",
-                    attempt,
-                    str(pg_error),
-                )
-                self.db_pool.terminate()
-                break
-
-        self.logging.info("Opening new connection pool.")
-        await self.create_pool()
-
     async def __aenter__(self):
         """Get a connection from the pool"""
-        # If the pool is older than RECYCLE_TIME_SECONDS, recycle it to renew the managed identity
+        # If the pool is older than RECYCLE_TIME_SECONDS, generate new connection string
         if (datetime.now() - self.pool_timestamp).total_seconds() > RECYCLE_TIME_SECONDS:
-            await self.recycle_connection_pool()
+            self.logging.info("Renewing connection pool connection string")
+            # generate a the new connection string for new connections in the pool
+            self.db_pool.set_connect_args(
+                dsn=self.db_config.get_connection_string(), command_timeout=30
+            )
+            # expire all connections with old connection string
+            await self.db_pool.expire_connections()
+            self.pool_timestamp = datetime.now()
 
         self.conn = await self.db_pool.acquire()
         return self.conn
