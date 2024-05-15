@@ -14,7 +14,7 @@ public class ModelService() : IModelService, IDisposable
     private readonly IConfiguration configuration = null!;
     private readonly IAuthService authService = null!;
     private readonly AoaiProxyContext db = null!;
-    private readonly DbConnection connection = null!;
+    private readonly DbConnection conn = null!;
 
     public ModelService(IAuthService authService, IDbContextFactory<AoaiProxyContext> dbContextFactory, IConfiguration configuration)
         : this()
@@ -22,7 +22,7 @@ public class ModelService() : IModelService, IDisposable
         this.configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
         this.authService = authService ?? throw new ArgumentNullException(nameof(authService));
         db = dbContextFactory.CreateDbContext() ?? throw new ArgumentNullException(nameof(dbContextFactory));
-        connection = db.Database.GetDbConnection()?? throw new ArgumentNullException(nameof(dbContextFactory));
+        conn = db.Database.GetDbConnection()?? throw new ArgumentNullException(nameof(dbContextFactory));
     }
 
     public void Dispose()
@@ -35,19 +35,19 @@ public class ModelService() : IModelService, IDisposable
     {
         if (disposing)
         {
-            connection.Dispose();
+            conn.Dispose();
             db.Dispose();
         }
     }
 
     private async Task<byte[]?> PostgresEncryptValue(string value)
     {
-        if (connection.State != ConnectionState.Open)
-            await connection.OpenAsync();
+        if (conn.State != ConnectionState.Open)
+            await conn.OpenAsync();
 
         string? postgresEncryptionKey = configuration[PostgresEncryptionKey];
 
-        using DbCommand command = connection.CreateCommand();
+        using DbCommand command = conn.CreateCommand();
         command.CommandText = $"SELECT aoai.pgp_sym_encrypt(@value, @postgresEncryptionKey);";
         command.Parameters.Add(new NpgsqlParameter("value", NpgsqlDbType.Text) { Value = value });
         command.Parameters.Add(new NpgsqlParameter("postgresEncryptionKey", NpgsqlDbType.Text) { Value = postgresEncryptionKey });
@@ -59,12 +59,12 @@ public class ModelService() : IModelService, IDisposable
 
     private async Task<string?> PostgresDecryptValue(byte[] value)
     {
-        if (connection.State != ConnectionState.Open)
-            await connection.OpenAsync();
+        if (conn.State != ConnectionState.Open)
+            await conn.OpenAsync();
 
         string? postgresEncryptionKey = configuration[PostgresEncryptionKey];
 
-        using DbCommand command = connection.CreateCommand();
+        using DbCommand command = conn.CreateCommand();
         command.CommandText = $"SELECT aoai.pgp_sym_decrypt(@value, @postgresEncryptionKey)";
         command.Parameters.Add(new NpgsqlParameter("value", NpgsqlDbType.Bytea) { Value = value });
         command.Parameters.Add(new NpgsqlParameter("postgresEncryptionKey", NpgsqlDbType.Text) { Value = postgresEncryptionKey });
