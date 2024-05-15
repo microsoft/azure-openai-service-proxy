@@ -1,5 +1,6 @@
 """Database manager"""
 
+import asyncio
 import logging
 from datetime import datetime
 
@@ -87,7 +88,7 @@ class DBManager:
         self.logging.info("Creating connection pool")
         try:
             self.db_pool = await asyncpg.create_pool(
-                self.db_config.get_connection_string(), command_timeout=30
+                self.db_config.get_connection_string(), command_timeout=60
             )
             self.logging.info("Connection pool created")
             self.pool_timestamp = datetime.now()
@@ -107,13 +108,16 @@ class DBManager:
         """close database pool"""
         self.logging.info("Closing connection pool")
         try:
-            await self.db_pool.close()
+            await asyncio.wait_for(self.db_pool.close(), timeout=60)
+        except TimeoutError as error:
+            self.logging.error("Postgres close timeout exception: %s", str(error))
+            self.logging.error("Postgres pool terminated: %s", str(error))
+            self.db_pool.terminate()
         except asyncpg.exceptions.PostgresError as error:
             self.logging.error("Postgres error: %s", str(error))
             raise HTTPException(
                 status_code=503, detail=f"Postgres error closing pool {str(error)}"
             ) from error
-
         except Exception as exception:
             self.logging.error("Error: %s", str(exception))
             raise HTTPException(
@@ -129,9 +133,9 @@ class DBManager:
         # If the pool is older than RECYCLE_TIME_SECONDS, generate new connection string
         if (datetime.now() - self.pool_timestamp).total_seconds() > RECYCLE_TIME_SECONDS:
             self.logging.info("Renewing connection pool connection string")
-            # generate a the new connection string for new connections in the pool
+            # generate a new connection string for new connections to use in the pool
             self.db_pool.set_connect_args(
-                dsn=self.db_config.get_connection_string(), command_timeout=30
+                dsn=self.db_config.get_connection_string(), command_timeout=60
             )
             # expire all connections using previous connection string
             await self.db_pool.expire_connections()
