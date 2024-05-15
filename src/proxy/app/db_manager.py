@@ -133,7 +133,7 @@ class DBManager:
             self.db_pool.set_connect_args(
                 dsn=self.db_config.get_connection_string(), command_timeout=30
             )
-            # expire all connections with old connection string
+            # expire all connections using previous connection string
             await self.db_pool.expire_connections()
             self.pool_timestamp = datetime.now()
 
