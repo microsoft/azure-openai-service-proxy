@@ -9,17 +9,24 @@ using NpgsqlTypes;
 namespace AzureOpenAIProxy.Management.Services;
 
 
-public class EventService(IAuthService authService, IDbContextFactory<AoaiProxyContext> dbContextFactory) : IEventService, IDisposable
+public class EventService() : IEventService, IDisposable
 {
+    private readonly AoaiProxyContext db;
+    private readonly DbConnection conn;
+    private readonly IAuthService authService;
+    private readonly IDbContextFactory<AoaiProxyContext> dbContextFactory;
 
-    AoaiProxyContext db = dbContextFactory.CreateDbContext();
-    DbConnection conn = dbContextFactory.CreateDbContext().Database.GetDbConnection();
+    public EventService(IAuthService authService, IDbContextFactory<AoaiProxyContext> dbContextFactory) : this()
+    {
+        this.authService = authService ?? throw new ArgumentNullException(nameof(authService));
+        this.dbContextFactory = dbContextFactory ?? throw new ArgumentNullException(nameof(dbContextFactory));
+
+        db = dbContextFactory.CreateDbContext();
+        conn = db.Database.GetDbConnection();
+    }
+
     public async Task<Event?> CreateEventAsync(EventEditorModel model)
     {
-        // using (var db = dbContextFactory.CreateDbContext())
-        // using (var conn = db.Database.GetDbConnection())
-        // {
-
         if (string.IsNullOrEmpty(model.EventSharedCode))
         {
             model.EventSharedCode = null;
@@ -88,7 +95,6 @@ public class EventService(IAuthService authService, IDbContextFactory<AoaiProxyC
         }
 
         return newEvent;
-        // }
     }
 
     public Task<Event?> GetEventAsync(string id) => db.Events.Include(e => e.Catalogs).FirstOrDefaultAsync(e => e.EventId == id);
