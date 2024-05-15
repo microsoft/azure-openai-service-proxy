@@ -115,7 +115,7 @@ public partial class EventMetrics
         return ([], []);
     }
 
-    private string[] ScaleLabels(string[] ChartLabels)
+    private static string[] ScaleLabels(string[] ChartLabels)
     {
         // Scale the labels so they don't overlap. Allow for up to 8 labels.
         int chartLabelInterval = (ChartLabels.Length / 8) + 1;
@@ -123,7 +123,7 @@ public partial class EventMetrics
         return ChartLabels;
     }
 
-    private List<ChartData> FillMissingDays(List<ChartData>? chartData)
+    private static List<ChartData> FillMissingDays(List<ChartData>? chartData)
     {
         DateTime? previousDay = null;
         long previousRequests = 0;
