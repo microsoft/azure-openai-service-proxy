@@ -49,10 +49,16 @@ public class AllEvents
 }
 
 
-public class MetricService(IDbContextFactory<AoaiProxyContext> dbContextFactory) : IMetricService, IDisposable
+public class MetricService() : IMetricService, IDisposable
 {
-    AoaiProxyContext db = dbContextFactory.CreateDbContext();
-    DbConnection conn = dbContextFactory.CreateDbContext().Database.GetDbConnection();
+    private readonly AoaiProxyContext db = null!;
+    private readonly DbConnection conn = null!;
+
+    public MetricService(IDbContextFactory<AoaiProxyContext> dbContextFactory) : this()
+    {
+        db = dbContextFactory.CreateDbContext() ?? throw new ArgumentNullException(nameof(dbContextFactory));
+        conn = db.Database.GetDbConnection() ?? throw new ArgumentNullException(nameof(dbContextFactory));
+    }
 
     public void Dispose()
     {
