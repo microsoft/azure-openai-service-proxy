@@ -11,27 +11,18 @@ namespace AzureOpenAIProxy.Management.Services;
 public class ModelService() : IModelService, IDisposable
 {
     private const string PostgresEncryptionKey = "PostgresEncryptionKey";
-    private readonly IConfiguration configuration;
-    private readonly IAuthService authService;
-    private readonly IDbContextFactory<AoaiProxyContext> dbContextFactory;
-    private readonly AoaiProxyContext db;
-    private readonly DbConnection connection;
+    private readonly IConfiguration configuration = null!;
+    private readonly IAuthService authService = null!;
+    private readonly AoaiProxyContext db = null!;
+    private readonly DbConnection connection = null!;
 
     public ModelService(IAuthService authService, IDbContextFactory<AoaiProxyContext> dbContextFactory, IConfiguration configuration)
         : this()
     {
-        // this.configuration = configuration;
-        // this.authService = authService;
-        // this.dbContextFactory = dbContextFactory;
-
-        // db = dbContextFactory.CreateDbContext();
-        // connection = db.Database.GetDbConnection();
-
         this.configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
         this.authService = authService ?? throw new ArgumentNullException(nameof(authService));
-        this.dbContextFactory = dbContextFactory ?? throw new ArgumentNullException(nameof(dbContextFactory));
-        db = dbContextFactory.CreateDbContext();
-        connection = db.Database.GetDbConnection();
+        db = dbContextFactory.CreateDbContext() ?? throw new ArgumentNullException(nameof(dbContextFactory));
+        connection = db.Database.GetDbConnection()?? throw new ArgumentNullException(nameof(dbContextFactory));
     }
 
     public void Dispose()

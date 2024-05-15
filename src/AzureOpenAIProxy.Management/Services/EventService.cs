@@ -11,18 +11,15 @@ namespace AzureOpenAIProxy.Management.Services;
 
 public class EventService() : IEventService, IDisposable
 {
-    private readonly AoaiProxyContext db;
-    private readonly DbConnection conn;
-    private readonly IAuthService authService;
-    private readonly IDbContextFactory<AoaiProxyContext> dbContextFactory;
+    private readonly AoaiProxyContext db = null!;
+    private readonly DbConnection conn = null!;
+    private readonly IAuthService authService = null!;
 
     public EventService(IAuthService authService, IDbContextFactory<AoaiProxyContext> dbContextFactory) : this()
     {
         this.authService = authService ?? throw new ArgumentNullException(nameof(authService));
-        this.dbContextFactory = dbContextFactory ?? throw new ArgumentNullException(nameof(dbContextFactory));
-
-        db = dbContextFactory.CreateDbContext();
-        conn = db.Database.GetDbConnection();
+        db = dbContextFactory.CreateDbContext() ?? throw new ArgumentNullException(nameof(dbContextFactory));
+        conn = db.Database.GetDbConnection() ?? throw new ArgumentNullException(nameof(dbContextFactory));
     }
 
     public async Task<Event?> CreateEventAsync(EventEditorModel model)
@@ -179,8 +176,8 @@ public class EventService() : IEventService, IDisposable
     {
         if (disposing)
         {
-            db.Dispose();
             conn.Dispose();
+            db.Dispose();
         }
     }
 }
