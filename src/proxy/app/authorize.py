@@ -6,6 +6,8 @@ from uuid import UUID
 import asyncpg
 from fastapi import HTTPException
 
+from .lru_cache_with_expiry import lru_cache_with_expiry
+
 # pylint: disable=E0402
 from .monitor import MonitorEntity
 
@@ -73,7 +75,7 @@ class Authorize:
                 detail="Authentication failed.",
             ) from exception
 
-    # @lru_cache_with_expiry(maxsize=128, ttl=180)
+    @lru_cache_with_expiry(maxsize=128, ttl=10)
     async def __authorize(self, *, api_key: str, deployment_name: str) -> AuthorizeResponse:
         """Authorizes a user to access a specific time bound event."""
 

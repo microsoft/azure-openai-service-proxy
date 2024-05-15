@@ -7,6 +7,9 @@ import asyncpg
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
+# pylint: disable=E0402
+from ..lru_cache_with_expiry import lru_cache_with_expiry
+
 logging.basicConfig(level=logging.INFO)
 
 
@@ -71,7 +74,7 @@ class EventRegistrationInfo:
 
         return self.router
 
-    # @lru_cache_with_expiry(maxsize=20, ttl=180)
+    @lru_cache_with_expiry(maxsize=20, ttl=20)
     async def get_event_info(self, event_id: str) -> EventRegistrationResponse:
         """get event info"""
 
