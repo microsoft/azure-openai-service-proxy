@@ -75,7 +75,7 @@ class Authorize:
 
     # Balance between making authorisating db request and performance
     # Technically an attendee could access event resources 60 seconds after the event expired.
-    @lru_cache_with_expiry(maxsize=128, ttl=60)
+    @lru_cache_with_expiry(maxsize=256, ttl=60)
     async def __authorize(self, *, api_key: str, deployment_name: str) -> AuthorizeResponse:
         """Authorizes a user to access a specific time bound event."""
 
