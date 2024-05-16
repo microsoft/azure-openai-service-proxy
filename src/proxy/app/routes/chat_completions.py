@@ -3,14 +3,14 @@
 from collections.abc import AsyncGenerator
 from typing import Any
 
+from app.config import Deployment
+from app.routes.request_manager import RequestManager
 from fastapi import Request, Response
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
 # pylint: disable=E0402
-from ..config import Deployment
 from ..openai_async import OpenAIAsyncManager
-from .request_manager import RequestManager
 
 
 class ChatCompletionsRequest(BaseModel):

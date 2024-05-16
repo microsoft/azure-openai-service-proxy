@@ -4,11 +4,9 @@ import json
 import logging
 from collections.abc import AsyncGenerator
 
+from app.authorize import Authorize, AuthorizeResponse
+from app.config import Config
 from fastapi import APIRouter, HTTPException, Request
-
-# pylint: disable=E0402
-from ..authorize import Authorize, AuthorizeResponse
-from ..config import Config
 
 logging.basicConfig(level=logging.INFO)
 

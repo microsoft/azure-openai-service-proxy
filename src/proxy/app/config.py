@@ -7,7 +7,6 @@ import uuid
 import asyncpg
 from fastapi import HTTPException
 
-# pylint: disable=E0402
 from .authorize import AuthorizeResponse
 from .db_manager import DBManager
 from .lru_cache_with_expiry import lru_cache_with_expiry
@@ -48,7 +47,9 @@ class Config:
         self.monitor = monitor
         self.logging = logging.getLogger(__name__)
 
-    @lru_cache_with_expiry(maxsize=128, ttl=20)
+    # Balance db performance with cache freshness
+    # Technically, the cache could be stale for up to 60 seconds
+    @lru_cache_with_expiry(maxsize=128, ttl=60)
     async def get_event_catalog(
         self, event_id: str, deployment_name: str | None
     ) -> list[Deployment]:

@@ -4,11 +4,9 @@ import logging
 from datetime import datetime
 
 import asyncpg
+from app.lru_cache_with_expiry import lru_cache_with_expiry
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-
-# pylint: disable=E0402
-from ..lru_cache_with_expiry import lru_cache_with_expiry
 
 logging.basicConfig(level=logging.INFO)
 
@@ -74,7 +72,11 @@ class EventRegistrationInfo:
 
         return self.router
 
-    @lru_cache_with_expiry(maxsize=20, ttl=20)
+    # Time out of 60 seconds choosen as it balances between performance in a class room setting
+    # where multiple users are accessing the same event at the same time and the admin setting up
+    # the event and wanting to review the event details and the event details are not changing
+    # due to the cache.
+    @lru_cache_with_expiry(maxsize=20, ttl=60)
     async def get_event_info(self, event_id: str) -> EventRegistrationResponse:
         """get event info"""
 

@@ -2,6 +2,7 @@
 
 import asyncio
 import logging
+import os
 from datetime import datetime
 
 import asyncpg
@@ -82,13 +83,18 @@ class DBManager:
         self.db_pool = None
         self.conn = None
         self.pool_timestamp = datetime.min
+        self.ssl_mode = "development" not in os.environ.get("ENVIRONMENT").lower()
 
     async def create_pool(self):
         """create database pool"""
         self.logging.info("Creating connection pool")
         try:
+            # The command_timeout=60 is used when creating a connection from the pool.
+            # The default is None/Indefinite. A connection stuck on indefinite wait will cause
+            # close pool to wait indefinitly. Note, close pool is wrapped in a timeout
+            # https://magicstack.github.io/asyncpg/current/api/index.html
             self.db_pool = await asyncpg.create_pool(
-                self.db_config.get_connection_string(), command_timeout=60
+                self.db_config.get_connection_string(), command_timeout=60, ssl=self.ssl_mode
             )
             self.logging.info("Connection pool created")
             self.pool_timestamp = datetime.now()
@@ -134,9 +140,7 @@ class DBManager:
         if (datetime.now() - self.pool_timestamp).total_seconds() > RECYCLE_TIME_SECONDS:
             self.logging.info("Renewing connection pool connection string")
             # generate a new connection string for new connections to use in the pool
-            self.db_pool.set_connect_args(
-                dsn=self.db_config.get_connection_string(), command_timeout=60
-            )
+            self.db_pool.set_connect_args(dsn=self.db_config.get_connection_string())
             # expire all connections using previous connection string
             await self.db_pool.expire_connections()
             self.pool_timestamp = datetime.now()

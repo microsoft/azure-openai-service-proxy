@@ -42,7 +42,6 @@ module postgresServer 'core/database/postgresql/flexibleserver.bicep' = {
       storageSizeGB: 32
     }
     version: '16'
-    // databaseNames: [ postgresDatabaseName ]
     allowAzureIPsFirewall: true
     entraAdministratorName: entraAdministratorName
     entraAdministratorObjectId: entraAdministratorObjectId
@@ -117,14 +116,14 @@ resource sqlDeploymentScriptSetup 'Microsoft.Resources/deploymentScripts@2020-10
       echo "Executing permissions setup script starting"
       echo "$SQL_SETUP_SCRIPT" > ./setup.sql
       cat ./setup.sql
-      
+
       psql -a -U "$PG_USER" -d "postgres" -h "$PG_HOST" -v PG_USER="$PG_USER" -v ADMIN_SYSTEM_ASSIGNED_IDENTITY="$ADMIN_SYSTEM_ASSIGNED_IDENTITY" -v PROXY_SYSTEM_ASSIGNED_IDENTITY="$PROXY_SYSTEM_ASSIGNED_IDENTITY" -w -f ./setup.sql
       echo "Executing permissions setup script ended"
 
       echo "Executing database setup script starting"
       echo "$SQL_SCRIPT" > ./setup.sql
       cat ./setup.sql
-      
+
       psql -a -U "$PG_USER" -d "aoai-proxy" -h "$PG_HOST" -w -f ./setup.sql
       echo "Executing database setup script ended"
 

@@ -16,8 +16,6 @@ from opentelemetry.sdk.trace.export import BatchSpanProcessor
 
 from .authorize import Authorize
 from .config import Config
-
-# pylint: disable=E0402
 from .db_manager import DBConfig, DBManager
 from .monitor import Monitor
 from .routes.attendee import AttendeeApi as attendee_router
