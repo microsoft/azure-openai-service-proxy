@@ -1,6 +1,7 @@
 """Database manager"""
 
 import asyncio
+import contextvars
 import logging
 import os
 from datetime import datetime
@@ -13,6 +14,9 @@ from fastapi import HTTPException
 RECYCLE_TIME_SECONDS = 60 * 60 * 6
 
 logging.basicConfig(level=logging.INFO)
+
+# Create a context variable for the connection
+conn_var = contextvars.ContextVar("conn_var")
 
 
 class DBConfig:
@@ -81,7 +85,6 @@ class DBManager:
         self.logging = logging.getLogger(__name__)
         self.db_config = db_config
         self.db_pool = None
-        self.conn = None
         self.pool_timestamp = datetime.min
         self.ssl_mode = "development" not in os.environ.get("ENVIRONMENT").lower()
         # The command_timeout=60 is used when creating a connection from the pool.
@@ -96,7 +99,7 @@ class DBManager:
         try:
             self.db_pool = await asyncpg.create_pool(
                 dsn=self.db_config.get_connection_string(),
-                max_size=15,
+                max_size=50,
                 **self.connection_kwargs,
             )
             self.logging.info("Connection pool created")
@@ -150,9 +153,13 @@ class DBManager:
             await self.db_pool.expire_connections()
             self.pool_timestamp = datetime.now()
 
-        self.conn = await self.db_pool.acquire(timeout=30)
-        return self.conn
+        # Acquire a new connection and store it in the context variable
+        conn = await self.db_pool.acquire(timeout=30)
+        conn_var.set(conn)
+        return conn
 
     async def __aexit__(self, exc_type, exc_value, exc_tb):
         """Release the connection back to the pool"""
-        await self.db_pool.release(self.conn, timeout=15)
+        # Fetch the connection from the context variable
+        conn = conn_var.get()
+        await self.db_pool.release(conn, timeout=15)
