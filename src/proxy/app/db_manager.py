@@ -84,21 +84,20 @@ class DBManager:
         self.conn = None
         self.pool_timestamp = datetime.min
         self.ssl_mode = "development" not in os.environ.get("ENVIRONMENT").lower()
-        self.connection_kwargs = {
-            "command_timeout": 60,
-            "ssl": self.ssl_mode,
-        }
+        # The command_timeout=60 is used when creating a connection from the pool.
+        # The default is None/Indefinite. A connection stuck on indefinite wait will cause
+        # close pool to wait indefinitly. Note, close pool is wrapped in a timeout
+        # https://magicstack.github.io/asyncpg/current/api/index.html
+        self.connection_kwargs = {"command_timeout": 60, "ssl": self.ssl_mode, "timeout": 30}
 
     async def create_pool(self):
         """create database pool"""
         self.logging.info("Creating connection pool")
         try:
-            # The command_timeout=60 is used when creating a connection from the pool.
-            # The default is None/Indefinite. A connection stuck on indefinite wait will cause
-            # close pool to wait indefinitly. Note, close pool is wrapped in a timeout
-            # https://magicstack.github.io/asyncpg/current/api/index.html
             self.db_pool = await asyncpg.create_pool(
-                dsn=self.db_config.get_connection_string(), **self.connection_kwargs
+                dsn=self.db_config.get_connection_string(),
+                max_size=15,
+                **self.connection_kwargs,
             )
             self.logging.info("Connection pool created")
             self.pool_timestamp = datetime.now()
@@ -151,9 +150,9 @@ class DBManager:
             await self.db_pool.expire_connections()
             self.pool_timestamp = datetime.now()
 
-        self.conn = await self.db_pool.acquire()
+        self.conn = await self.db_pool.acquire(timeout=30)
         return self.conn
 
     async def __aexit__(self, exc_type, exc_value, exc_tb):
         """Release the connection back to the pool"""
-        await self.db_pool.release(self.conn)
+        await self.db_pool.release(self.conn, timeout=15)
