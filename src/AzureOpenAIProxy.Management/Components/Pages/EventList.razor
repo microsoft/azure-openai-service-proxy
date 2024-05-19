@@ -53,7 +53,7 @@
             <MudTd>
             <MudStack Row="true" Spacing="1">
                 <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" Href="@($"/event/{context.EventId}")" />
-                <MudIconButton Icon="@Icons.Material.Filled.People" Color="Color.Primary" Href="@($"{Configuration["PlaygroundUrl"]}/event/{context.EventId}")" />
+                <MudIconButton Icon="@Icons.Material.Filled.People" Color="Color.Primary" Href="@($"{Configuration["PlaygroundUrl"]}/event/{context.EventId}")" Target="_blank" />
                 <MudIconButton Icon="@Icons.Material.Filled.InsertChartOutlined" Color="Color.Primary" Href="@($"/event/{context.EventId}/metrics")" />
             </MudStack>
             </MudTd>
