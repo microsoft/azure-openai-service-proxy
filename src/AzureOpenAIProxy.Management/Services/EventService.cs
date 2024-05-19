@@ -99,10 +99,18 @@ public class EventService() : IEventService, IDisposable
     public async Task<IEnumerable<Event>> GetOwnerEventsAsync()
     {
         string entraId = await authService.GetCurrentUserEntraIdAsync();
+        // return await db.Events
+        //     .Where(e => e.OwnerEventMaps.Any(o => o.Owner.OwnerId == entraId))
+        //     .OrderByDescending(e => e.Active)
+        //     .ThenBy(e => e.StartTimestamp)
+        //     .ToListAsync();
+
         return await db.Events
             .Where(e => e.OwnerEventMaps.Any(o => o.Owner.OwnerId == entraId))
             .OrderByDescending(e => e.Active)
-            .ThenBy(e => e.StartTimestamp)
+            .ThenByDescending(e => e.StartTimestamp)
+            // .ThenBy(e => e.Active)
+            .Include(e => e.Catalogs) // Include the Catalogs collection
             .ToListAsync();
     }
 

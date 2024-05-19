@@ -1,4 +1,7 @@
-﻿namespace AzureOpenAIProxy.Management.Database;
+﻿using System;
+using System.Collections.Generic;
+
+namespace AzureOpenAIProxy.Management.Database;
 
 public partial class Owner
 {

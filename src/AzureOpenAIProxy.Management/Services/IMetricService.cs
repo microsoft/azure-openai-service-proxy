@@ -4,9 +4,11 @@ namespace AzureOpenAIProxy.Management.Services;
 
 public interface IMetricService
 {
-    Task<List<AllEvents>> GetAllEventsAsync();
+    Task<List<EventRegistrations>> GetAllEventsAsync();
 
-    Task<List<ChartData>> GetActiveRegistrationsAsync(string eventId);
+    Task<List<EventChartData>> GetActiveRegistrationsAsync(string eventId);
 
-    Task<EventMetric> GetEventMetricsAsync(string eventId);
+    (int attendeeCount, int requestCount) GetAttendeeMetricsAsync(string eventId);
+
+    Task<List<EventMetricsData>> GetEventMetricsAsync(string eventId);
 }

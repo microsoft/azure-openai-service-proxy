@@ -19,10 +19,10 @@ public class ModelService() : IModelService, IDisposable
     public ModelService(IAuthService authService, IDbContextFactory<AoaiProxyContext> dbContextFactory, IConfiguration configuration)
         : this()
     {
-        this.configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
-        this.authService = authService ?? throw new ArgumentNullException(nameof(authService));
-        db = dbContextFactory.CreateDbContext() ?? throw new ArgumentNullException(nameof(dbContextFactory));
-        conn = db.Database.GetDbConnection()?? throw new ArgumentNullException(nameof(dbContextFactory));
+        this.configuration = configuration;
+        this.authService = authService;
+        db = dbContextFactory.CreateDbContext();
+        conn = db.Database.GetDbConnection();
     }
 
     public void Dispose()
@@ -139,8 +139,8 @@ public class ModelService() : IModelService, IDisposable
     {
         var result = await db.OwnerCatalogs.FindAsync(catalogId);
 
-        string? endpointKey = await PostgresDecryptValue(result!.EndpointKeyEncrypted);
-        string? endpointUrl = await PostgresDecryptValue(result!.EndpointUrlEncrypted);
+        string? endpointKey = await PostgresDecryptValue(result!.EndpointKeyEncrypted!);
+        string? endpointUrl = await PostgresDecryptValue(result!.EndpointUrlEncrypted!);
 
         result.EndpointKey = endpointKey!;
         result.EndpointUrl = endpointUrl!;

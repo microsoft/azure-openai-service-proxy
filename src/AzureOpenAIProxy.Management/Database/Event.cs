@@ -1,4 +1,7 @@
-﻿namespace AzureOpenAIProxy.Management.Database;
+﻿using System;
+using System.Collections.Generic;
+
+namespace AzureOpenAIProxy.Management.Database;
 
 public partial class Event
 {
@@ -31,7 +34,6 @@ public partial class Event
     public string TimeZoneLabel { get; set; } = null!;
 
     public string? EventSharedCode { get; set; }
-
 
     public virtual ICollection<EventAttendee> EventAttendees { get; set; } = new List<EventAttendee>();
 

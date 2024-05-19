@@ -12,44 +12,51 @@
         </MudLink>
     </MudStack>
 
-    <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/events/new">New Event</MudButton>
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/events/new">
+    <MudIcon Icon="@Icons.Material.Filled.Add" />New Event
+    </MudButton>
 
-    <MudTable Items="@Events" Loading="@(Events is null)" LoadingProgressColor="Color.Info" Hover="true"
+    <MudTable Items="@Events" Loading="@(Events is null)" LoadingProgressColor="Color.Info" Hover="true" Dense="true" Striped="true"
         Breakpoint="Breakpoint.Sm">
         <HeaderContent>
             <MudTh>Event</MudTh>
             <MudTh>Organiser</MudTh>
-            <MudTh>Duration</MudTh>
+            <MudTh>When</MudTh>
             <MudTh>Active</MudTh>
-            <MudTh></MudTh>
-            <MudTh></MudTh>
             <MudTh></MudTh>
         </HeaderContent>
         <RowTemplate>
-            <MudTd DataLabel="Event">@context.EventCode</MudTd>
-            <MudTd DataLabel="OrganiserName">@context.OrganizerName<br />@context.OrganizerEmail</MudTd>
-            <MudTd DataLabel="Duration">@context.StartTimestamp.ToString("dd/MM/yyyy HH:mm") -
-                @context.EndTimestamp.ToString("dd/MM/yyyy HH:mm")<br />
-                @{
-                    var timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById(@context.TimeZoneLabel);
-                    var displayName = timeZoneInfo.DisplayName;
-                }
-                @displayName
+            <MudTd style="max-width: 350px;">
+                <MudStack Spacing="1">
+                    <MudText Typo="Typo.body1" Color="Color.Primary">@context.EventCode</MudText>
+                    <MudText Typo="Typo.caption">
+                        @string.Join(", ", context.Catalogs.Select(catalog => catalog.FriendlyName).OrderBy(catalog => catalog))
+                    </MudText>
+                </MudStack>
+            </MudTd>
+            <MudTd>
+                <MudStack Spacing="1">
+                    <MudText Typo="Typo.body1">@context.OrganizerName</MudText>
+                    <MudText Typo="Typo.caption">@context.OrganizerEmail</MudText>
+                </MudStack>
+            </MudTd>
+            <MudTd>
+                <MudStack Spacing="1">
+                    <MudText Typo="Typo.body1">
+                        @context.StartTimestamp.ToString("yyyy-MMM-dd HH:mm") -
+                        @context.EndTimestamp.ToString("yyyy-MMM-dd HH:mm")
+                    </MudText>
+                    <MudText Typo="Typo.caption">@context.TimeZoneLabel</MudText>
+                </MudStack>
             </MudTd>
             <MudTd DataLabel="Active">@(context.Active ? "Yes" : "No")</MudTd>
             <MudTd>
-                <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="@($"/event/{context.EventId}")">Edit
-                </MudButton>
-            </MudTd>
-            <MudTd>
-                <MudButton Variant="Variant.Filled" Color="Color.Secondary" Target="_blank"
-                    Href="@($"{Configuration["PlaygroundUrl"]}/event/{context.EventId}")">Attendee</MudButton>
-            </MudTd>
-            <MudTd>
-                <MudButton Variant="Variant.Filled" Color="Color.Secondary"
-                    Href="@($"/event/{context.EventId}/metrics")">Metrics</MudButton>
+            <MudStack Row="true" Spacing="1">
+                <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" Href="@($"/event/{context.EventId}")" />
+                <MudIconButton Icon="@Icons.Material.Filled.People" Color="Color.Primary" Href="@($"{Configuration["PlaygroundUrl"]}/event/{context.EventId}")" />
+                <MudIconButton Icon="@Icons.Material.Filled.InsertChartOutlined" Color="Color.Primary" Href="@($"/event/{context.EventId}/metrics")" />
+            </MudStack>
             </MudTd>
         </RowTemplate>
     </MudTable>
-
 </MudStack>

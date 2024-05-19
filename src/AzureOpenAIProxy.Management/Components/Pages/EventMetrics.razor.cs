@@ -5,6 +5,15 @@ using MudBlazor;
 
 namespace AzureOpenAIProxy.Management.Components.Pages;
 
+public class ModelCounts
+{
+    public string? Resource { get; set; }
+    public int Count { get; set; }
+    public long PromptTokens { get; set; }
+    public long CompletionTokens { get; set; }
+    public long TotalTokens { get; set; }
+}
+
 public partial class EventMetrics
 {
     [Inject]
@@ -21,12 +30,17 @@ public partial class EventMetrics
 
     private List<ChartSeries> RequestChartSeries { get; set; } = [];
     private string[] RequestChartLabels { get; set; } = [];
-    private EventMetric? EventMetric { get; set; }
+    // private EventMetric? EventMetric { get; set; }
     private Event? Event { get; set; }
-    private List<ChartData>? ActiveUsers { get; set; }
+    private List<EventChartData>? ActiveUsers { get; set; }
     private List<ChartSeries> ActiveUsersChartSeries { get; set; } = [];
     private string[] ActiveUsersChartLabels { get; set; } = [];
     private long ActiveRegistrations { get; set; }
+    private List<ModelCounts> ModelCounts { get; set; } = [];
+
+    private int RequestCount { get; set; }
+
+    private int AttendeeCount { get; set; }
 
     private bool IsLoading { get; set; } = false;
 
@@ -39,21 +53,56 @@ public partial class EventMetrics
 
         IsLoading = true;
 
-        EventMetric = await MetricService.GetEventMetricsAsync(EventId);
+
+        (AttendeeCount, RequestCount) = MetricService.GetAttendeeMetricsAsync(EventId);
+        List<EventMetricsData> MetricsData = await MetricService.GetEventMetricsAsync(EventId);
         Event = await EventService.GetEventAsync(EventId);
 
-        if (EventMetric?.ModelData?.ChartData.Count > 0)
+        if (MetricsData is null)
         {
-            (RequestChartSeries, RequestChartLabels) = BuildRequestsChart(EventMetric.ModelData.ChartData);
+            return;
         }
 
+        // Generate Model Counts for summary table
+        ModelCounts = [.. MetricsData
+            .GroupBy(r => new { r.EventId, r.Resource })
+            .Select(g => new ModelCounts
+            {
+                Resource = g.Key.Resource,
+                Count = (int)g.Sum(x => (long)x.Requests),
+                PromptTokens = g.Sum(x => (long)x.PromptTokens),
+                CompletionTokens = g.Sum(x => (long)x.CompletionTokens),
+                TotalTokens = g.Sum(x => (long)x.TotalTokens)
+            })
+            .OrderByDescending(x => x.Count)];
+
+        // Generate Resouce Requests chart data
+        List<EventChartData> requestsChartData = [.. MetricsData
+            .GroupBy(r => r.DateStamp)
+            .Select(g => new EventChartData
+            {
+                DateStamp = g.Key,
+                Count = g.Sum(x => x.Requests)
+            })
+            .OrderBy(x => x.DateStamp)];
+
+        long runningTotal = 0;
+        requestsChartData.ForEach(x => runningTotal = x.Count += runningTotal);
+
+        if (requestsChartData.Count > 0)
+        {
+            // Create Resource Requests line chart
+            (RequestChartSeries, RequestChartLabels) = BuildRequestsChart(requestsChartData);
+        }
+
+        // Get Active Registrations
         ActiveUsers = await MetricService.GetActiveRegistrationsAsync(EventId);
-        // get the last value for active registrations
         if (ActiveUsers?.Count > 0)
         {
             ActiveRegistrations = ActiveUsers.Last().Count;
         }
 
+        // Create Active Registrations line chart
         (ActiveUsersChartSeries, ActiveUsersChartLabels) = BuildActiveUsersChart(ActiveUsers);
 
         IsLoading = false;
@@ -69,11 +118,11 @@ public partial class EventMetrics
         await GetData();
     }
 
-    private (List<ChartSeries> ActiveUsersChartSeries, string[] ActiveUsersChartLabels) BuildActiveUsersChart(List<ChartData>? activeUsers)
+    private (List<ChartSeries> ActiveUsersChartSeries, string[] ActiveUsersChartLabels) BuildActiveUsersChart(List<EventChartData>? activeUsers)
     {
         if (activeUsers != null)
         {
-            List<ChartData> cd = FillMissingDays(activeUsers);
+            List<EventChartData> cd = FillMissingDays(activeUsers);
 
             ActiveUsersChartSeries =
             [
@@ -92,11 +141,11 @@ public partial class EventMetrics
         return ([], []);
     }
 
-    private (List<ChartSeries> ChartSeries, string[] ChartLabels) BuildRequestsChart(List<ChartData>? chartData)
+    private (List<ChartSeries> ChartSeries, string[] ChartLabels) BuildRequestsChart(List<EventChartData>? chartData)
     {
         if (chartData != null)
         {
-            List<ChartData> cd = FillMissingDays(chartData);
+            List<EventChartData> cd = FillMissingDays(chartData);
 
             RequestChartSeries =
             [
@@ -123,11 +172,11 @@ public partial class EventMetrics
         return ChartLabels;
     }
 
-    private static List<ChartData> FillMissingDays(List<ChartData>? chartData)
+    private static List<EventChartData> FillMissingDays(List<EventChartData>? chartData)
     {
         DateTime? previousDay = null;
         long previousRequests = 0;
-        List<ChartData> cd = [];
+        List<EventChartData> cd = [];
 
         if (chartData == null)
         {
@@ -141,7 +190,7 @@ public partial class EventMetrics
             {
                 while (previousDay.Value.AddDays(1) < row.DateStamp)
                 {
-                    cd.Add(new ChartData { DateStamp = previousDay.Value.AddDays(1), Count = previousRequests });
+                    cd.Add(new EventChartData { DateStamp = previousDay.Value.AddDays(1), Count = previousRequests });
                     previousDay = previousDay.Value.AddDays(1);
                 }
             }
