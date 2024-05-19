@@ -22,11 +22,11 @@
             <MudTh>Event</MudTh>
             <MudTh>Organiser</MudTh>
             <MudTh>When</MudTh>
-            <MudTh>Active</MudTh>
+            <MudTh style="padding: 0;">Active</MudTh>
             <MudTh></MudTh>
         </HeaderContent>
         <RowTemplate>
-            <MudTd style="max-width: 350px;">
+            <MudTd style="max-width: 450px;">
                 <MudStack Spacing="1">
                     <MudText Typo="Typo.body1" Color="Color.Primary">@context.EventCode</MudText>
                     <MudText Typo="Typo.caption">
@@ -49,7 +49,7 @@
                     <MudText Typo="Typo.caption">@context.TimeZoneLabel</MudText>
                 </MudStack>
             </MudTd>
-            <MudTd DataLabel="Active">@(context.Active ? "Yes" : "No")</MudTd>
+            <MudTd DataLabel="Active" style="padding: 0;">@(context.Active ? "Yes" : "No")</MudTd>
             <MudTd>
             <MudStack Row="true" Spacing="1">
                 <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" Href="@($"/event/{context.EventId}")" />
