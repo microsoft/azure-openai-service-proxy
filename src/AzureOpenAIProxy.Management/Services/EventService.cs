@@ -102,7 +102,7 @@ public class EventService() : IEventService, IDisposable
         return await db.Events
             .Where(e => e.OwnerEventMaps.Any(o => o.Owner.OwnerId == entraId))
             .OrderByDescending(e => e.Active)
-            .ThenByDescending(e => e.StartTimestamp)
+            .ThenByDescending(e => e.EndTimestamp)
             .Include(e => e.Catalogs) // Include the Catalogs collection
             .ToListAsync();
     }
