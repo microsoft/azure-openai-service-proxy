@@ -56,8 +56,12 @@
                 <MudLink Href="@($"/event/{context.EventId}/metrics")">@context.EventName</MudLink>
             </MudTd>
             <MudTd DataLabel="Organizer name">@context.OrganizerName</MudTd>
-            <MudTd DataLabel="Start date">@context.StartDate.ToString("yyyy-MMM-dd")</MudTd>
-            <MudTd DataLabel="End date">@context.EndDate.ToString("yyyy-MMM-dd")</MudTd>
+            <MudTd>
+                <MudText style="min-width: 100px;" Typo="Typo.body2">@context.StartDate.ToString("yyyy-MMM-dd")</MudText>
+            </MudTd>
+            <MudTd>
+                <MudText style="min-width: 100px;" Typo="Typo.body2">@context.EndDate.ToString("yyyy-MMM-dd")</MudText>
+            </MudTd>
             <MudTd DataLabel="Attendee Count">@context.Registered</MudTd>
             <MudTd DataLabel="Attendee link">
                 <MudLink Target="_blank" Href="@($"{Configuration["PlaygroundUrl"]}/event/{context.EventId}")">
