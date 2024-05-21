@@ -12,7 +12,7 @@
         </MudLink>
     </MudStack>
 
-    <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/events/new">
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/events/new" Style="max-width: 200px">
     <MudIcon Icon="@Icons.Material.Filled.Add" />New Event
     </MudButton>
 
@@ -22,6 +22,7 @@
             <MudTh>Event</MudTh>
             <MudTh>Organiser</MudTh>
             <MudTh>When</MudTh>
+            <MudTh>Registered</MudTh>
             <MudTh style="padding: 0;">Active</MudTh>
             <MudTh></MudTh>
         </HeaderContent>
@@ -43,11 +44,16 @@
             <MudTd>
                 <MudStack Spacing="1">
                     <MudText Typo="Typo.body1">
-                        @context.StartTimestamp.ToString("yyyy-MMM-dd HH:mm") -
+                        @context.StartTimestamp.ToString("yyyy-MMM-dd HH:mm")
+                    </MudText>
+                    <MudText Typo="Typo.body1">
                         @context.EndTimestamp.ToString("yyyy-MMM-dd HH:mm")
                     </MudText>
                     <MudText Typo="Typo.caption">@context.TimeZoneLabel</MudText>
                 </MudStack>
+            </MudTd>
+            <MudTd>
+                <MudText Typo="Typo.body1">@context.EventAttendees.Count</MudText>
             </MudTd>
             <MudTd DataLabel="Active" style="padding: 0;">@(context.Active ? "Yes" : "No")</MudTd>
             <MudTd>
@@ -55,6 +61,7 @@
                 <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" Href="@($"/event/{context.EventId}")" />
                 <MudIconButton Icon="@Icons.Material.Filled.People" Color="Color.Primary" Href="@($"{Configuration["PlaygroundUrl"]}/event/{context.EventId}")" Target="_blank" />
                 <MudIconButton Icon="@Icons.Material.Filled.InsertChartOutlined" Color="Color.Primary" Href="@($"/event/{context.EventId}/metrics")" />
+                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Primary" @onclick="() => OpenDialog(context)" Disabled="context.EventAttendees.Count > 0 ? true : false" />
             </MudStack>
             </MudTd>
         </RowTemplate>

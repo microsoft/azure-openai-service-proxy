@@ -14,4 +14,6 @@ public interface IEventService
     Task<Event?> UpdateEventAsync(string id, EventEditorModel model);
 
     Task<Event?> UpdateModelsForEventAsync(string id, IEnumerable<Guid> modelIds);
+
+    Task DeleteEventAsync(string id);
 }

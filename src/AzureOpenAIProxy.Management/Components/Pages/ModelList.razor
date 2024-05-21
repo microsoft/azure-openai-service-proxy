@@ -13,7 +13,7 @@
         </MudLink>
     </MudStack>
 
-    <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/models/new">
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/models/new" Style="max-width: 200px">
         <MudIcon Icon="@Icons.Material.Filled.Add" />
         New Resource
     </MudButton>
@@ -25,6 +25,7 @@
             <MudTh>Resource Name</MudTh>
             <MudTh>Resource Type</MudTh>
             <MudTh>Location</MudTh>
+            <MudTh>Events</MudTh>
             <MudTh>Active</MudTh>
             <MudTh></MudTh>
         </HeaderContent>
@@ -35,11 +36,12 @@
             <MudTd DataLabel="DeploymentName">@context.DeploymentName</MudTd>
             <MudTd DataLabel="ModelType">@(context.ModelType!.Value.ToString().Replace("_", " "))</MudTd>
             <MudTd DataLabel="Location">@(context.Location)</MudTd>
+            <MudTd DataLabel="Events">@(context.Events.Count)</MudTd>
             <MudTd DataLabel="Active">@(context.Active ? "Yes" : "No")</MudTd>
             <MudTd>
                 <MudStack Row="true" Spacing="1">
                     <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" Href="@($"/models/{context.CatalogId}")" />
-                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Primary" @onclick="() => OpenDialog(context)" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Primary" @onclick="() => OpenDialog(context)" Disabled="context.Events.Count > 0 ? true : false"/>
                 </MudStack>
             </MudTd>
         </RowTemplate>

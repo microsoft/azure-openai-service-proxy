@@ -104,6 +104,7 @@ public class EventService() : IEventService, IDisposable
             .OrderByDescending(e => e.Active)
             .ThenByDescending(e => e.EndTimestamp)
             .Include(e => e.Catalogs) // Include the Catalogs collection
+            .Include(ea => ea.EventAttendees)
             .ToListAsync();
     }
 
@@ -180,5 +181,32 @@ public class EventService() : IEventService, IDisposable
             conn.Dispose();
             db.Dispose();
         }
+    }
+
+    public async Task DeleteEventAsync(string id)
+    {
+        Event? evt = await db.Events.FindAsync(id);
+
+        if (evt is null)
+        {
+            return;
+        }
+
+        // double check there are no event attendees for the event
+        var usageInfo = await db.Events.Where(oc => oc.EventId == id)
+            .Select(oc => new
+            {
+                UsedInEvent = oc.EventAttendees.Count != 0
+            })
+            .FirstAsync();
+
+        // block deletion when it's in use to avoid cascading deletes
+        if (usageInfo.UsedInEvent)
+        {
+            return;
+        }
+
+        db.Events.Remove(evt);
+        await db.SaveChangesAsync();
     }
 }

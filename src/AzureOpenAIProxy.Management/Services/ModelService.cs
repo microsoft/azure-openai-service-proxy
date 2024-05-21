@@ -151,7 +151,11 @@ public class ModelService() : IModelService, IDisposable
     public async Task<IEnumerable<OwnerCatalog>> GetOwnerCatalogsAsync()
     {
         string entraId = await authService.GetCurrentUserEntraIdAsync();
-        var catalogItems = await db.OwnerCatalogs.Where(oc => oc.Owner.OwnerId == entraId).OrderBy(oc => oc.FriendlyName).ToListAsync();
+        var catalogItems = await db.OwnerCatalogs
+            .Where(oc => oc.Owner.OwnerId == entraId)
+            .OrderBy(oc => oc.FriendlyName)
+            .Include(oc => oc.Events)
+            .ToListAsync();
         return catalogItems;
     }
 
