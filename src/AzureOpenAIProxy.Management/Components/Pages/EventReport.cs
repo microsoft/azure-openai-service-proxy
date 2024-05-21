@@ -1,4 +1,5 @@
-﻿using AzureOpenAIProxy.Management.Database;
+﻿using System.Diagnostics.Tracing;
+using AzureOpenAIProxy.Management.Database;
 using AzureOpenAIProxy.Management.Services;
 using Microsoft.AspNetCore.Components;
 
@@ -14,6 +15,8 @@ public partial class EventReport
 
     private List<EventRegistrations>? EventRegistrations { get; set; }
     private int TotalRegistations { get; set; }
+
+    private int EventCount {get; set;}
     private string searchString1 = "";
 
     protected override async Task OnInitializedAsync()
@@ -21,6 +24,8 @@ public partial class EventReport
         EventRegistrations = await MetricService.GetAllEventsAsync();
         // calculate total registrations
         TotalRegistations = EventRegistrations.Sum(e => e.Registered);
+
+        EventCount = EventRegistrations.Count;
     }
 
     private bool EventFilter(EventRegistrations element) => FilterByEventOrOrganizer(element, searchString1);
