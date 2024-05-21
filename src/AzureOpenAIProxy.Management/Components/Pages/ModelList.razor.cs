@@ -21,7 +21,7 @@ public partial class ModelList : ComponentBase
     {
         DialogParameters<DeleteConfirmation> parameters = new()
         {
-            { x => x.ContentText, $"Do you really want to delete the resource '{resource.FriendlyName}'?" },
+            { x => x.ContentText, $"Do you really want to delete the resource '{resource.FriendlyName}'? You can only delete resources that aren't currently in use." },
             { x => x.ButtonText, "Delete" },
             { x => x.Color, Color.Error }
         };
