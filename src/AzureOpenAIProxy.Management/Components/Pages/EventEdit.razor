@@ -6,13 +6,7 @@
 <MudStack>
     <MudGrid>
         <MudItem xs="12" sm="7">
-            <MudStack Row="true">
-                <MudText Typo="Typo.h6">Edit Event</MudText>
-                <MudSpacer />
-                <MudLink Target="_blank" Href="https://microsoft.github.io/azure-openai-service-proxy/events/">
-                    <MudIcon Icon="@Icons.Material.Filled.Help" />
-                </MudLink>
-            </MudStack>
+            <Help Title="Edit Event" />
             <EventEditor OnValidSubmit="@OnValidSubmit" @bind-Model="Model" />
         </MudItem>
         <MudItem xs="12" sm="5">
@@ -23,13 +17,13 @@
                 <MudCardActions>
                     @if (!modelsUpdating)
                     {
-                        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@UpdateModels" Class="ml-auto"
-                            StartIcon="@Icons.Material.Filled.Save">Update Resources
-                        </MudButton>
+                            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@UpdateModels" Class="ml-auto"
+                                StartIcon="@Icons.Material.Filled.Save">Update Resources
+                            </MudButton>
                     }
                     else
                     {
-                        <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-7" />
+                            <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-7" />
                     }
 
                 </MudCardActions>
@@ -40,7 +34,7 @@
                         Disabled="@modelsUpdating">
                         @foreach (var model in AvailableModels)
                         {
-                            <MudSelectItem Value="@model.CatalogId.ToString()">@model.FriendlyName</MudSelectItem>
+                                <MudSelectItem Value="@model.CatalogId.ToString()">@model.FriendlyName</MudSelectItem>
                         }
                     </MudSelect>
 

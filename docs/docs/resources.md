@@ -20,6 +20,6 @@ This is typically a one-off process. Once you have configured the resources, you
 
 ### Load balancing resources
 
-For larger events with many attendees (for example 200 concurrent users generating 10 model requests per minute) you can configure multiple resources with the same resource name to balance the load.
+For larger events with many attendees (for example 200 concurrent users generating 4 model requests per minute) you can configure multiple resources with the same resource name to balance the load.
 
-For example, you can deploy multiple `gpt-35-turbo` models in different Azure OpenAI resources with the same name. The proxy will round robin across the models of the same deployment name to balance the load.
+For example, you can deploy multiple `gpt-35-turbo` models in different Azure OpenAI resources with the same name. The proxy will round robin across the models of the same deployment name to balance the load. See the [Capacity Planning](./capacity.md) guide for more information.
