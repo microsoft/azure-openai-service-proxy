@@ -53,27 +53,7 @@ public partial class ModelEdit : ComponentBase
 
     private async Task OnValidSubmit(ModelEditorModel model)
     {
-        using (var db = DbContextFactory.CreateDbContext())
-        {
-            OwnerCatalog? m = await db.OwnerCatalogs.FindAsync(Guid.Parse(Id));
-
-            if (m is null)
-            {
-                NavigationManager.NavigateTo("/models");
-                return;
-            }
-
-            m.FriendlyName = model.FriendlyName!;
-            m.DeploymentName = model.DeploymentName!;
-            m.EndpointKey = model.EndpointKey!;
-            m.ModelType = model.ModelType!.Value;
-            m.EndpointUrl = model.EndpointUrl!;
-            m.Location = model.Location!;
-            m.Active = model.Active;
-
-            await ModelService.UpdateOwnerCatalogAsync(m);
-
-            NavigationManager.NavigateTo("/models");
-        }
+        await ModelService.UpdateOwnerCatalogAsync(model, Guid.Parse(Id));
+        NavigationManager.NavigateTo("/models");
     }
 }

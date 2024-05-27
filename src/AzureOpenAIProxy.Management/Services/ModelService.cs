@@ -155,23 +155,23 @@ public class ModelService() : IModelService, IDisposable
         return catalogItems;
     }
 
-    public async Task UpdateOwnerCatalogAsync(OwnerCatalog ownerCatalog)
+    public async Task UpdateOwnerCatalogAsync(ModelEditorModel model, Guid id)
     {
-        OwnerCatalog? existingCatalog = await db.OwnerCatalogs.FindAsync(ownerCatalog.CatalogId);
+        OwnerCatalog? existingCatalog = await db.OwnerCatalogs.FindAsync(id);
 
         if (existingCatalog is null)
         {
             return;
         }
 
-        byte[]? endpointKey = await PostgresEncryptValue(ownerCatalog.EndpointKey);
-        byte[]? endpointUrl = await PostgresEncryptValue(ownerCatalog.EndpointUrl);
+        byte[]? endpointKey = await PostgresEncryptValue(model.EndpointKey = model.EndpointKey!);
+        byte[]? endpointUrl = await PostgresEncryptValue(model.EndpointUrl!);
 
-        existingCatalog.FriendlyName = ownerCatalog.FriendlyName;
-        existingCatalog.DeploymentName = ownerCatalog.DeploymentName;
-        existingCatalog.ModelType = ownerCatalog.ModelType;
-        existingCatalog.Location = ownerCatalog.Location;
-        existingCatalog.Active = ownerCatalog.Active;
+        existingCatalog.FriendlyName = model.FriendlyName!;
+        existingCatalog.DeploymentName = model.DeploymentName!;
+        existingCatalog.ModelType = model.ModelType;
+        existingCatalog.Location = model.Location!;
+        existingCatalog.Active = model.Active;
         existingCatalog.EndpointKeyEncrypted = endpointKey!;
         existingCatalog.EndpointUrlEncrypted = endpointUrl!;
 

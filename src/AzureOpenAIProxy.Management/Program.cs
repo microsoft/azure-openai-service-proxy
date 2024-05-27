@@ -7,14 +7,15 @@ using MudBlazor.Services;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddSingleton<IDbContextFactory<AoaiProxyContext>, CustomDbContextFactory>();
-
 builder.AddAuth();
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()
     .AddMicrosoftIdentityConsentHandler();
+
+builder.Services.AddSingleton<IPoolService, PoolService>();
+builder.Services.AddScoped<IDbContextFactory<AoaiProxyContext>, DbContextService>();
 
 builder.Services.AddScoped<IEventService, EventService>();
 builder.Services.AddScoped<IAuthService, AuthService>();

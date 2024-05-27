@@ -9,5 +9,5 @@ public interface IModelService
     Task DeleteOwnerCatalogAsync(Guid catalogId);
     Task<IEnumerable<OwnerCatalog>> GetOwnerCatalogsAsync();
     Task<OwnerCatalog> GetOwnerCatalogAsync(Guid catalogId);
-    Task UpdateOwnerCatalogAsync(OwnerCatalog ownerCatalog);
+    Task UpdateOwnerCatalogAsync(ModelEditorModel model, Guid id);
 }
