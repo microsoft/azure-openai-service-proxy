@@ -4,13 +4,7 @@
 @using AzureOpenAIProxy.Management.Components.ModelManagement
 
 <MudStack>
-    <MudStack Row="true">
-        <MudText Typo="Typo.h6">Edit a resource</MudText>
-        <MudSpacer />
-        <MudLink Target="_blank" Href="https://microsoft.github.io/azure-openai-service-proxy/resources">
-            <MudIcon Icon="@Icons.Material.Filled.Help" />
-        </MudLink>
-    </MudStack>
+    <Help Title="Edit model registration" />
 
     <ModelEditor OnValidSubmit="@OnValidSubmit" @bind-Model="Model" />
 </MudStack>
