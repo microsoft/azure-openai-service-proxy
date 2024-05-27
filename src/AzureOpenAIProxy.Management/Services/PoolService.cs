@@ -8,14 +8,17 @@ namespace AzureOpenAIProxy.Management;
 
 public class PoolService(IConfiguration configuration) : IPoolService
 {
-    private string? _pgConnectionString = configuration.GetConnectionString("AoaiProxyContext");
-    private string? _dbHost = configuration["POSTGRES_SERVER"];
+    private readonly string? _pgConnectionString = configuration.GetConnectionString("AoaiProxyContext");
+    private readonly string? _dbHost = configuration["POSTGRES_SERVER"];
     private readonly string? _dbName = configuration["POSTGRES_DATABASE"] ?? "aoai-proxy";
-    private string? _dbUser = configuration["POSTGRES_USER"];
-    private string? _dbPassword = configuration["POSTGRES_PASSWORD"];
+    private readonly string? _dbUser = configuration["POSTGRES_USER"];
+    private readonly string? _dbPassword = configuration["POSTGRES_PASSWORD"];
     private DbContextOptionsBuilder<AoaiProxyContext>? _pgOptionsBuilder = null;
     private NpgsqlDataSourceBuilder? _pgDataSourceBuilder = null;
     private NpgsqlDataSource? _pgDataSource = null;
+
+    private const int SucessTokenRefreshMinutes = 60;
+    private const int FailureTokenRefreshMinutes = 10;
 
     private string GetConnectionString()
     {
@@ -38,8 +41,6 @@ public class PoolService(IConfiguration configuration) : IPoolService
 
     async private Task<string> GetConnectionPassword()
     {
-        _dbPassword = "mypassword123";
-
         if (!string.IsNullOrEmpty(_dbPassword))
         {
             return _dbPassword;
@@ -57,16 +58,10 @@ public class PoolService(IConfiguration configuration) : IPoolService
         Func<NpgsqlConnectionStringBuilder, CancellationToken, ValueTask<string>>? passwordProvider = async (builder, cancellationToken) =>
         {
             builder.Password = await GetConnectionPassword();
-            // clear out connections in the pool that used the old connection string
-            // Not 100% sure about this comment out for now.
-            // NpgsqlConnection.ClearAllPools();
+            // clear out connections in the pool that used the old connection token
+            NpgsqlConnection.ClearAllPools();
             return builder.Password; // Add this line to return the password
         };
-
-        // _pgConnectionString = null;
-        // _dbHost = "db:5432";
-        // _dbUser = "admin";
-        // _dbPassword = "";
 
         Console.WriteLine("Generating new Postgres Connection");
         string connectionString = GetConnectionString();
@@ -77,7 +72,7 @@ public class PoolService(IConfiguration configuration) : IPoolService
         // If we have a connection string, we don't need to use the periodic password provider
         if (string.IsNullOrEmpty(_pgConnectionString))
         {
-            _pgDataSourceBuilder.UsePeriodicPasswordProvider(passwordProvider, TimeSpan.FromMinutes(1), TimeSpan.FromMinutes(1));
+            _pgDataSourceBuilder.UsePeriodicPasswordProvider(passwordProvider, TimeSpan.FromMinutes(SucessTokenRefreshMinutes), TimeSpan.FromMinutes(FailureTokenRefreshMinutes));
         }
 
         _pgDataSource = _pgDataSourceBuilder.Build();
