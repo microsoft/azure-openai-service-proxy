@@ -46,33 +46,29 @@ public static class AuthExtensions
         if (principal is null)
             throw new ApplicationException("Principal is null");
 
-        var dbContextFactory = ctx.HttpContext.RequestServices.GetRequiredService<IDbContextFactory<AoaiProxyContext>>();
+        AoaiProxyContext db = ctx.HttpContext.RequestServices.GetRequiredService<AoaiProxyContext>();
+        ILogger<Program> logger = ctx.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
 
-        using (var db = dbContextFactory.CreateDbContext())
+        string id = principal.GetEntraId();
+
+        if (await db.Owners.AnyAsync(o => o.OwnerId == id))
         {
-            ILogger<Program> logger = ctx.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
-
-            string id = principal.GetEntraId();
-
-            if (await db.Owners.AnyAsync(o => o.OwnerId == id))
-            {
-                logger.LogInformation("User {id} already registered", id);
-                return;
-            }
-
-            Owner owner = new()
-            {
-                OwnerId = id,
-                Email = principal.Identity?.Name ?? "Unknown",
-                Name = principal.Claims.FirstOrDefault(c => c.Type == "name")?.Value ?? "Unknown"
-            };
-
-            db.Owners.Add(owner);
-            // Regsiter the current user
-            await db.SaveChangesAsync();
-
-            logger.LogInformation("User {id} registered", id);
+            logger.LogInformation("User {id} already registered", id);
+            return;
         }
+
+        Owner owner = new()
+        {
+            OwnerId = id,
+            Email = principal.Identity?.Name ?? "Unknown",
+            Name = principal.Claims.FirstOrDefault(c => c.Type == "name")?.Value ?? "Unknown"
+        };
+
+        db.Owners.Add(owner);
+        // Regsiter the current user
+        await db.SaveChangesAsync();
+
+        logger.LogInformation("User {id} registered", id);
     }
 
     public static string GetEntraId(this ClaimsPrincipal principal)
