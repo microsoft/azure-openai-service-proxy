@@ -8,22 +8,10 @@ using NpgsqlTypes;
 
 namespace AzureOpenAIProxy.Management.Services;
 
-public class ModelService() : IModelService, IDisposable
+public class ModelService(IAuthService authService, AoaiProxyContext db, IConfiguration configuration) : IModelService
 {
     private const string PostgresEncryptionKey = "PostgresEncryptionKey";
-    private readonly IConfiguration configuration = null!;
-    private readonly IAuthService authService = null!;
-    private readonly AoaiProxyContext db = null!;
-    private readonly DbConnection conn = null!;
-
-    public ModelService(IAuthService authService, IDbContextFactory<AoaiProxyContext> dbContextFactory, IConfiguration configuration)
-        : this()
-    {
-        this.configuration = configuration;
-        this.authService = authService;
-        db = dbContextFactory.CreateDbContext();
-        conn = db.Database.GetDbConnection();
-    }
+    private readonly DbConnection conn = db.Database.GetDbConnection();
 
     public void Dispose()
     {
@@ -36,7 +24,6 @@ public class ModelService() : IModelService, IDisposable
         if (disposing)
         {
             conn.Dispose();
-            db.Dispose();
         }
     }
 

@@ -22,24 +22,8 @@ public class EventChartData
 }
 
 
-public class MetricService(IDbContextFactory<AoaiProxyContext> dbContextFactory) : IMetricService, IDisposable
+public class MetricService(AoaiProxyContext db) : IMetricService
 {
-    private readonly AoaiProxyContext db = dbContextFactory.CreateDbContext();
-
-    public void Dispose()
-    {
-        Dispose(true);
-        GC.SuppressFinalize(this);
-    }
-
-    protected virtual void Dispose(bool disposing)
-    {
-        if (disposing)
-        {
-            db.Dispose();
-        }
-    }
-
     public async Task<List<EventMetricsData>> GetEventMetricsAsync(string eventId)
     {
         var query = from mv in db.MetricViews

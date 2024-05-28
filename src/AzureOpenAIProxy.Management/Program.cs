@@ -1,13 +1,22 @@
 using AzureOpenAIProxy.Management;
 using AzureOpenAIProxy.Management.Components;
+using AzureOpenAIProxy.Management.Database;
 using AzureOpenAIProxy.Management.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Web;
 using MudBlazor.Services;
+using Npgsql;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddSingleton<IDbContextFactory<AoaiProxyContext>, CustomDbContextFactory>();
+NpgsqlDataSourceBuilder dataSourceBuilder = new(builder.Configuration.GetConnectionString("AoaiProxyContext"));
+dataSourceBuilder.MapEnum<ModelType>();
+NpgsqlDataSource dataSource = dataSourceBuilder.Build();
+
+builder.Services.AddDbContext<AoaiProxyContext>((options) =>
+{
+    options.UseNpgsql(dataSource);
+});
 
 builder.AddAuth();
 

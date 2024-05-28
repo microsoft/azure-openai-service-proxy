@@ -9,18 +9,9 @@ using NpgsqlTypes;
 namespace AzureOpenAIProxy.Management.Services;
 
 
-public class EventService() : IEventService, IDisposable
+public class EventService(IAuthService authService, AoaiProxyContext db) : IEventService, IDisposable
 {
-    private readonly AoaiProxyContext db = null!;
-    private readonly DbConnection conn = null!;
-    private readonly IAuthService authService = null!;
-
-    public EventService(IAuthService authService, IDbContextFactory<AoaiProxyContext> dbContextFactory) : this()
-    {
-        this.authService = authService ?? throw new ArgumentNullException(nameof(authService));
-        db = dbContextFactory.CreateDbContext() ?? throw new ArgumentNullException(nameof(dbContextFactory));
-        conn = db.Database.GetDbConnection() ?? throw new ArgumentNullException(nameof(dbContextFactory));
-    }
+    private readonly DbConnection conn = db.Database.GetDbConnection();
 
     public async Task<Event?> CreateEventAsync(EventEditorModel model)
     {
@@ -179,7 +170,6 @@ public class EventService() : IEventService, IDisposable
         if (disposing)
         {
             conn.Dispose();
-            db.Dispose();
         }
     }
 
