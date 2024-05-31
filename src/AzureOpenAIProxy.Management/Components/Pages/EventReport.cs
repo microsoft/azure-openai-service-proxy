@@ -1,5 +1,4 @@
-﻿// using AzureOpenAIProxy.Management.Database;
-using AzureOpenAIProxy.Management.Services;
+﻿using AzureOpenAIProxy.Management.Services;
 using Microsoft.AspNetCore.Components;
 
 namespace AzureOpenAIProxy.Management.Components.Pages;
