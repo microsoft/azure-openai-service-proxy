@@ -14,7 +14,7 @@
     "postgresAdminPassword": {
       "value": "$(secretOrRandomPassword ${AZURE_KEY_VAULT_NAME} postgresAdminPassword)"
     },
-    "postgresEncryptionKey":{
+    "postgresEncryptionKey": {
       "value": "$(secretOrRandomPassword ${AZURE_KEY_VAULT_NAME} postgresEncryptionKey)"
     },
     "authTenantId": {
@@ -22,6 +22,16 @@
     },
     "authClientId": {
       "value": "${AUTH_CLIENT_ID}"
+    },
+    "principalId": {
+      "value": "${AZURE_PRINCIPAL_ID}"
+    },
+    "entraAuthorizationToken": {
+      "value": "${ENTRA_AUTHORIZATION_TOKEN}"
+    }
+    ,
+    "principalName": {
+      "value": "${ENTRA_PRINCIPAL_NAME}"
     }
   }
 }

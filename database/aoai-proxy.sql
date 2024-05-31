@@ -3,7 +3,7 @@
 --
 
 -- Dumped from database version 16.1
--- Dumped by pg_dump version 16.2 (Debian 16.2-1.pgdg110+2)
+-- Dumped by pg_dump version 16.2 (Debian 16.2-1.pgdg120+2)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -209,7 +209,7 @@ ALTER FUNCTION aoai.add_event_attendee(p_user_id character varying, p_event_id c
 
 CREATE FUNCTION aoai.get_attendee_authorized(p_api_key character varying) RETURNS TABLE(api_key character varying, user_id character varying, event_id character varying, event_code character varying, organizer_name character varying, organizer_email character varying, event_image_url character varying, max_token_cap integer, daily_request_cap integer, rate_limit_exceed boolean)
     LANGUAGE plpgsql
-    AS $$
+    AS $_$
 DECLARE
     current_utc timestamp;
 	v_request_count integer;
@@ -312,7 +312,7 @@ BEGIN
         E.active = true AND
         current_utc + interval '1 minute' * E.time_zone_offset between E.start_timestamp AND E.end_timestamp;
 END;
-$$;
+$_$;
 
 
 ALTER FUNCTION aoai.get_attendee_authorized(p_api_key character varying) OWNER TO azure_pg_admin;
@@ -411,31 +411,6 @@ SET default_tablespace = '';
 SET default_table_access_method = heap;
 
 --
--- Name: event; Type: TABLE; Schema: aoai; Owner: azure_pg_admin
---
-
-CREATE TABLE aoai.event (
-    event_id character varying(50) DEFAULT gen_random_uuid() NOT NULL,
-    owner_id character varying(128) NOT NULL,
-    event_code character varying(64) NOT NULL,
-    event_markdown character varying(8192) NOT NULL,
-    start_timestamp timestamp(6) without time zone NOT NULL,
-    end_timestamp timestamp(6) without time zone NOT NULL,
-    organizer_name character varying(128) NOT NULL,
-    organizer_email character varying(128) NOT NULL,
-    max_token_cap integer NOT NULL,
-    daily_request_cap integer NOT NULL,
-    active boolean NOT NULL,
-    event_image_url character varying(256),
-    time_zone_offset integer NOT NULL,
-    time_zone_label character varying(64) NOT NULL,
-    event_shared_code character varying(64)
-);
-
-
-ALTER TABLE aoai.event OWNER TO azure_pg_admin;
-
---
 -- Name: event_attendee; Type: TABLE; Schema: aoai; Owner: azure_pg_admin
 --
 
@@ -464,6 +439,52 @@ CREATE TABLE aoai.event_attendee_request (
 ALTER TABLE aoai.event_attendee_request OWNER TO azure_pg_admin;
 
 --
+-- Name: active_attendee_growth_view; Type: VIEW; Schema: aoai; Owner: azure_pg_admin
+--
+
+CREATE VIEW aoai.active_attendee_growth_view AS
+ SELECT event_id,
+    date_stamp,
+    sum(count(*)) OVER (PARTITION BY event_id ORDER BY date_stamp) AS attendees
+   FROM ( SELECT ea.event_id,
+            date_trunc('day'::text, (ear.date_stamp)::timestamp with time zone) AS date_stamp,
+            ear.api_key,
+            row_number() OVER (PARTITION BY ear.api_key ORDER BY (date_trunc('day'::text, (ear.date_stamp)::timestamp with time zone))) AS rn
+           FROM (aoai.event_attendee_request ear
+             JOIN aoai.event_attendee ea ON (((ear.api_key)::text = (ea.api_key)::text)))) sub
+  WHERE (rn = 1)
+  GROUP BY event_id, date_stamp
+  ORDER BY date_stamp;
+
+
+ALTER VIEW aoai.active_attendee_growth_view OWNER TO azure_pg_admin;
+
+--
+-- Name: event; Type: TABLE; Schema: aoai; Owner: azure_pg_admin
+--
+
+CREATE TABLE aoai.event (
+    event_id character varying(50) DEFAULT gen_random_uuid() NOT NULL,
+    owner_id character varying(128) NOT NULL,
+    event_code character varying(64) NOT NULL,
+    event_markdown character varying(8192) NOT NULL,
+    start_timestamp timestamp(6) without time zone NOT NULL,
+    end_timestamp timestamp(6) without time zone NOT NULL,
+    organizer_name character varying(128) NOT NULL,
+    organizer_email character varying(128) NOT NULL,
+    max_token_cap integer NOT NULL,
+    daily_request_cap integer NOT NULL,
+    active boolean NOT NULL,
+    event_image_url character varying(256),
+    time_zone_offset integer NOT NULL,
+    time_zone_label character varying(64) NOT NULL,
+    event_shared_code character varying(64)
+);
+
+
+ALTER TABLE aoai.event OWNER TO azure_pg_admin;
+
+--
 -- Name: event_catalog_map; Type: TABLE; Schema: aoai; Owner: azure_pg_admin
 --
 
@@ -490,6 +511,23 @@ CREATE TABLE aoai.metric (
 
 
 ALTER TABLE aoai.metric OWNER TO azure_pg_admin;
+
+--
+-- Name: metric_view; Type: VIEW; Schema: aoai; Owner: azure_pg_admin
+--
+
+CREATE VIEW aoai.metric_view AS
+ SELECT event_id,
+    resource,
+    date_stamp,
+    time_stamp,
+    ((usage ->> 'prompt_tokens'::text))::integer AS prompt_tokens,
+    ((usage ->> 'completion_tokens'::text))::integer AS completion_tokens,
+    ((usage ->> 'total_tokens'::text))::integer AS total_tokens
+   FROM aoai.metric;
+
+
+ALTER VIEW aoai.metric_view OWNER TO azure_pg_admin;
 
 --
 -- Name: owner; Type: TABLE; Schema: aoai; Owner: azure_pg_admin
@@ -671,8 +709,77 @@ ALTER TABLE ONLY aoai.owner_event_map
 
 
 --
--- PostgreSQL database dump complete
+-- Name: SCHEMA aoai; Type: ACL; Schema: -; Owner: azure_pg_admin
 --
 
+GRANT USAGE ON SCHEMA aoai TO "aoai_proxy_app";
+
+
+--
+-- Name: TYPE model_type; Type: ACL; Schema: aoai; Owner: azure_pg_admin
+--
+
+GRANT ALL ON TYPE aoai.model_type TO "aoai_proxy_app";
+
+
+--
+-- Name: TABLE event_attendee; Type: ACL; Schema: aoai; Owner: azure_pg_admin
+--
+
+GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE aoai.event_attendee TO "aoai_proxy_app";
+
+
+--
+-- Name: TABLE event_attendee_request; Type: ACL; Schema: aoai; Owner: azure_pg_admin
+--
+
+GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE aoai.event_attendee_request TO "aoai_proxy_app";
+
+
+--
+-- Name: TABLE event; Type: ACL; Schema: aoai; Owner: azure_pg_admin
+--
+
+GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE aoai.event TO "aoai_proxy_app";
+
+
+--
+-- Name: TABLE event_catalog_map; Type: ACL; Schema: aoai; Owner: azure_pg_admin
+--
+
+GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE aoai.event_catalog_map TO "aoai_proxy_app";
+
+
+--
+-- Name: TABLE metric; Type: ACL; Schema: aoai; Owner: azure_pg_admin
+--
+
+GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE aoai.metric TO "aoai_proxy_app";
+
+
+--
+-- Name: TABLE owner; Type: ACL; Schema: aoai; Owner: azure_pg_admin
+--
+
+GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE aoai.owner TO "aoai_proxy_app";
+
+
+--
+-- Name: TABLE owner_catalog; Type: ACL; Schema: aoai; Owner: azure_pg_admin
+--
+
+GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE aoai.owner_catalog TO "aoai_proxy_app";
+
+
+--
+-- Name: TABLE owner_event_map; Type: ACL; Schema: aoai; Owner: azure_pg_admin
+--
+
+GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE aoai.owner_event_map TO "aoai_proxy_app";
+
+
+--
+-- PostgreSQL database dump complete
+--
 
 DROP SCHEMA IF EXISTS PUBLIC CASCADE ;

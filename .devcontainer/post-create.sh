@@ -8,7 +8,16 @@ wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dea
 sudo apt-get update
 sudo apt install postgresql-client -y
 
-psql -U admin -d aoai-proxy -h localhost -w -c 'CREATE ROLE azure_pg_admin WITH NOLOGIN NOSUPERUSER INHERIT NOCREATEDB NOCREATEROLE NOREPLICATION;'
+psql -U admin -d aoai-proxy -h localhost -w -c 'CREATE ROLE azure_pg_admin WITH NOLOGIN NOSUPERUSER INHERIT NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS;'
+
+psql -U admin -d aoai-proxy -h localhost -w -c 'CREATE ROLE aoai_proxy_app WITH NOLOGIN NOSUPERUSER INHERIT NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS;'
+
+psql -U admin -d aoai-proxy -h localhost -w -c 'CREATE ROLE aoai_proxy_reporting WITH NOLOGIN NOSUPERUSER INHERIT NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS;'
+
+psql -U admin -d aoai-proxy -h localhost -w -c 'GRANT aoai_proxy_app TO azure_pg_admin;'
+psql -U admin -d aoai-proxy -h localhost -w -c 'GRANT aoai_proxy_reporting TO azure_pg_admin;'
+
+
 psql -U admin -d aoai-proxy -h localhost -w -f ./database/aoai-proxy.sql
 
 echo Setting up Python environment...

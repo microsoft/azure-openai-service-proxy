@@ -13,7 +13,7 @@ param proxyAppExists bool = false
 param adminAppExists bool = false
 
 @description('Location for the Playground app resource group')
-@allowed([ 'centralus', 'eastus2', 'eastasia', 'westeurope', 'westus2' ])
+@allowed(['centralus', 'eastus2', 'eastasia', 'westeurope', 'westus2'])
 @metadata({
   azd: {
     type: 'location'
@@ -21,13 +21,22 @@ param adminAppExists bool = false
 })
 param swaLocation string
 
-@secure()
-@description('PostgreSQL Server administrator password')
-param postgresAdminPassword string
+@description('Id of the user or app to assign application roles')
+param principalId string
+
+@description('Principal name of the user or app to assign application roles')
+param principalName string
+
+@description('Whether the deployment is running on GitHub Actions')
+param runningOnGh string = ''
 
 @secure()
 @description('PostgreSQL Encryption Key')
 param postgresEncryptionKey string
+
+@secure()
+@description('Entra Authorization Token')
+param entraAuthorizationToken string
 
 param authTenantId string = subscription().tenantId
 param authClientId string
@@ -36,8 +45,10 @@ var resourceToken = toLower(uniqueString(subscription().id, name, location))
 var tags = { 'azd-env-name': name }
 var prefix = '${name}-${resourceToken}'
 
-var postgresAdminUser = 'admin${uniqueString(resourceGroup.id)}'
 var postgresDatabaseName = 'aoai-proxy'
+var postgresEntraAdministratorObjectId = principalId
+var postgresEntraAdministratorType = empty(runningOnGh) ? 'User' : 'ServicePrincipal'
+var postgresEntraAdministratorName = principalName
 
 resource resourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   name: '${name}-rg'
@@ -59,17 +70,27 @@ module containerApps 'core/host/container-apps.bicep' = {
   }
 }
 
-// PostgreSQL Server
-module postgresServer 'db.bicep' = {
-  name: 'postgres-server'
+// Admin app
+module admin 'admin.bicep' = {
+  name: 'admin'
   scope: resourceGroup
   params: {
-    name: '${prefix}-postgresql'
+    name: '${prefix}-admin'
     location: location
     tags: tags
-    postgresAdminUser: postgresAdminUser
-    postgresAdminPassword: postgresAdminPassword
-    postgresDatabaseName: postgresDatabaseName
+    identityName: '${prefix}-id-admin'
+    containerAppsEnvironmentName: containerApps.outputs.environmentName
+    containerRegistryName: containerApps.outputs.registryName
+    exists: adminAppExists
+    postgresServer: '${prefix}-postgresql.postgres.database.azure.com'
+    postgresDatabase: postgresDatabaseName
+    postgresUser: '${prefix}-admin'
+    // postgresPassword: postgresAdminPassword
+    postgresEncryptionKey: postgresEncryptionKey
+    tenantId: authTenantId
+    clientId: authClientId
+    playgroundUrl: playground.outputs.SERVICE_WEB_URI
+    appInsightsConnectionString: monitoring.outputs.applicationInsightsConnectionString
   }
 }
 
@@ -85,12 +106,36 @@ module proxy 'proxy.bicep' = {
     containerAppsEnvironmentName: containerApps.outputs.environmentName
     containerRegistryName: containerApps.outputs.registryName
     exists: proxyAppExists
-    postgresServer: postgresServer.outputs.DOMAIN_NAME
+    postgresServer: '${prefix}-postgresql.postgres.database.azure.com'
     postgresDatabase: postgresDatabaseName
-    postgresUser: postgresAdminUser
-    postgresPassword: postgresAdminPassword
+    postgresUser: '${prefix}-proxy'
     postgresEncryptionKey: postgresEncryptionKey
+    appInsightsConnectionString: monitoring.outputs.applicationInsightsConnectionString
   }
+}
+
+// PostgreSQL Server
+module postgresServer 'db.bicep' = {
+  name: 'postgres-server'
+  scope: resourceGroup
+  params: {
+    name: '${prefix}-postgresql'
+    location: location
+    tags: tags
+    postgresDatabaseName: postgresDatabaseName
+    authType: 'EntraOnly'
+    entraAdministratorName: postgresEntraAdministratorName
+    entraAdministratorObjectId: postgresEntraAdministratorObjectId
+    entraAdministratorType: postgresEntraAdministratorType
+    entraAuthorizationToken: entraAuthorizationToken
+    adminSystemAssignedIdentity: '${prefix}-admin'
+    proxySystemAssignedIdentity: '${prefix}-proxy'
+  }
+  // admin and proxy need to exist before the database as their system assigned identities are used to grant access
+  dependsOn: [
+    admin
+    proxy
+  ]
 }
 
 // The Playground frontend
@@ -103,6 +148,7 @@ module playground 'playground.bicep' = {
     tags: tags
   }
 }
+
 // link Playground to Proxy backend
 module swaLinkDotnet './linkSwaResource.bicep' = {
   name: 'frontend-link-dotnet'
@@ -126,30 +172,6 @@ module monitoring 'core/monitor/monitoring.bicep' = {
   }
 }
 
-// Admin app
-module admin 'admin.bicep' = {
-  name: 'admin'
-  scope: resourceGroup
-  params: {
-    name: '${prefix}-admin'
-    location: location
-    tags: tags
-    identityName: '${prefix}-id-admin'
-    containerAppsEnvironmentName: containerApps.outputs.environmentName
-    containerRegistryName: containerApps.outputs.registryName
-    exists: adminAppExists
-    postgresServer: postgresServer.outputs.DOMAIN_NAME
-    postgresDatabase: postgresDatabaseName
-    postgresUser: postgresAdminUser
-    postgresPassword: postgresAdminPassword
-    postgresEncryptionKey: postgresEncryptionKey
-    tenantId: authTenantId
-    clientId: authClientId
-    playgroundUrl: playground.outputs.SERVICE_WEB_URI
-    appInsightsConnectionString: monitoring.outputs.applicationInsightsConnectionString
-  }
-}
-
 output AZURE_LOCATION string = location
 output AZURE_CONTAINER_ENVIRONMENT_NAME string = containerApps.outputs.environmentName
 output AZURE_CONTAINER_REGISTRY_NAME string = containerApps.outputs.registryName
@@ -158,7 +180,7 @@ output SERVICE_PROXY_IDENTITY_PRINCIPAL_ID string = proxy.outputs.SERVICE_PROXY_
 output SERVICE_PROXY_NAME string = proxy.outputs.SERVICE_PROXY_NAME
 output SERVICE_PROXY_URI string = proxy.outputs.SERVICE_PROXY_URI
 output SERVICE_PROXY_IMAGE_NAME string = proxy.outputs.SERVICE_PROXY_IMAGE_NAME
-output SERVICE_PROXY_ENDPOINTS array = [ '${proxy.outputs.SERVICE_PROXY_URI}/docs' ]
+output SERVICE_PROXY_ENDPOINTS array = ['${proxy.outputs.SERVICE_PROXY_URI}/docs']
 output SERVICE_PLAYGROUND_URI string = playground.outputs.SERVICE_WEB_URI
 output SERVICE_ADMIN_IDENTITY_PRINCIPAL_ID string = admin.outputs.principalId
 output SERVICE_ADMIN_NAME string = admin.outputs.name

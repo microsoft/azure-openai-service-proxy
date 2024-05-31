@@ -7,9 +7,9 @@ import uuid
 import asyncpg
 from fastapi import HTTPException
 
-# pylint: disable=E0402
 from .authorize import AuthorizeResponse
 from .db_manager import DBManager
+from .lru_cache_with_expiry import lru_cache_with_expiry
 from .monitor import Monitor
 
 # initiase the random number generator
@@ -47,7 +47,9 @@ class Config:
         self.monitor = monitor
         self.logging = logging.getLogger(__name__)
 
-    # @lru_cache_with_expiry(maxsize=128, ttl=180)
+    # Balance db performance with cache freshness
+    # Technically, the cache could be stale for up to 60 seconds
+    @lru_cache_with_expiry(maxsize=128, ttl=60)
     async def get_event_catalog(
         self, event_id: str, deployment_name: str | None
     ) -> list[Deployment]:
@@ -55,10 +57,8 @@ class Config:
 
         config = []
 
-        pool = await self.db_manager.get_connection()
-
         try:
-            async with pool.acquire() as conn:
+            async with self.db_manager as conn:
                 if deployment_name is None:
                     result = await conn.fetch(
                         "SELECT * FROM aoai.get_models_by_event($1)", event_id
@@ -68,7 +68,7 @@ class Config:
                         "SELECT * FROM aoai.get_models_by_deployment_name($1, $2, $3)",
                         event_id,
                         deployment_name,
-                        self.db_manager.postgres_encryption_key,
+                        self.db_manager.get_postgres_encryption_key(),
                     )
 
             for row in result:

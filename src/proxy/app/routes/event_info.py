@@ -1,10 +1,8 @@
 """ event_info route """
 
+from app.routes.request_manager import RequestManager
 from fastapi import Request
 from pydantic import BaseModel
-
-# pylint: disable=E0402
-from .request_manager import RequestManager
 
 
 class EventInfoResponse(BaseModel):
