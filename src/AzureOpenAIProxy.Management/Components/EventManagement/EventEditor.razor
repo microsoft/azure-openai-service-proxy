@@ -49,9 +49,7 @@
                 </ItemSelectedTemplate>
             </MudAutocomplete>
 
-
-            <MudNumericField
-                Label="Max Token Cap (512 for 1hr events with > 50 people. Long running hacks 4000. See help.)"
+            <MudNumericField Label="Max Token Cap (512 for 1hr events with > 50 people. Long running hacks 4000. See help.)"
                 @bind-Value="Model.MaxTokenCap" Min="0" Placeholder="512" For="@(() => Model.MaxTokenCap)" />
 
             <MudNumericField Label="Daily Request Cap (~256 for structured workshops. Long running hacks ~5000)"

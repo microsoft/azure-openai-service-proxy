@@ -1,7 +1,6 @@
 using System.Data;
 using System.Data.Common;
 using AzureOpenAIProxy.Management.Components.ModelManagement;
-using AzureOpenAIProxy.Management.Database;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using NpgsqlTypes;

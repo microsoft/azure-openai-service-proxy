@@ -4,13 +4,10 @@
 @using AzureOpenAIProxy.Management.Components.EventManagement
 
 <MudStack>
-
-
     <MudGrid>
         <MudItem xs="12" sm="7">
             <Help Title="Edit Event" />
             <EventEditor OnValidSubmit="@OnValidSubmit" @bind-Model="Model" />
-
         </MudItem>
         <MudItem xs="12" sm="5">
             <h1>Resources</h1>
