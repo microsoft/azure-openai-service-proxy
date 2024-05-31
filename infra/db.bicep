@@ -69,7 +69,7 @@ resource sqlDeploymentScriptSetup 'Microsoft.Resources/deploymentScripts@2020-10
   location: location
   kind: 'AzureCLI'
   properties: {
-    azCliVersion: '2.9.1'
+    azCliVersion: '2.37.0'
     retentionInterval: 'PT1H' // Retain the script resource for 1 hour after it ends running
     timeout: 'PT5M' // Five minutes
     cleanupPreference: 'OnSuccess'
