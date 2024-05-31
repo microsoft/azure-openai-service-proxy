@@ -59,63 +59,59 @@ public partial class EventMetrics
         IsLoading = false;
     }
 
-    protected override async Task OnInitializedAsync()
-    {
-        await GetData();
-    }
+    protected override Task OnInitializedAsync() => GetData();
 
-    private async void RefreshData()
-    {
-        await GetData();
-    }
+    private Task RefreshData() => GetData();
 
     private (List<ChartSeries> ActiveUsersChartSeries, string[] ActiveUsersChartLabels) BuildActiveUsersChart(List<ChartData>? activeUsers)
     {
-        if (activeUsers != null)
+        if (activeUsers is null)
         {
-            List<ChartData> cd = FillMissingDays(activeUsers);
+            return ([], []);
+        }
 
-            ActiveUsersChartSeries =
-            [
-                new ChartSeries
+        List<ChartData> cd = FillMissingDays(activeUsers);
+
+        ActiveUsersChartSeries =
+        [
+            new ChartSeries
                 {
                     Name = "New Active Registrations",
                     Data = activeUsers.Select(au => (double)au.Count).ToArray()
                 }
-            ];
+        ];
 
-            ActiveUsersChartLabels = activeUsers.Select(au => au.DateStamp.ToString("dd MMM")).ToArray();
-            ActiveUsersChartLabels = ScaleLabels(ActiveUsersChartLabels);
+        ActiveUsersChartLabels = activeUsers.Select(au => au.DateStamp.ToString("dd MMM")).ToArray();
+        ActiveUsersChartLabels = ScaleLabels(ActiveUsersChartLabels);
 
-            return (ActiveUsersChartSeries, ActiveUsersChartLabels);
-        }
-        return ([], []);
+        return (ActiveUsersChartSeries, ActiveUsersChartLabels);
     }
 
     private (List<ChartSeries> ChartSeries, string[] ChartLabels) BuildRequestsChart(List<ChartData>? chartData)
     {
-        if (chartData != null)
+        if (chartData is null)
         {
-            List<ChartData> cd = FillMissingDays(chartData);
+            return ([], []);
+        }
 
-            RequestChartSeries =
-            [
-                new ChartSeries
+        List<ChartData> cd = FillMissingDays(chartData);
+
+        RequestChartSeries =
+        [
+            new ChartSeries
                 {
                     Name = "Requests",
                     Data = cd.Select(cd => (double)cd.Count).ToArray()
                 }
-            ];
+        ];
 
-            RequestChartLabels = cd.Select(cd => cd.DateStamp.ToString("dd MMM")).ToArray();
-            RequestChartLabels = ScaleLabels(RequestChartLabels);
+        RequestChartLabels = cd.Select(cd => cd.DateStamp.ToString("dd MMM")).ToArray();
+        RequestChartLabels = ScaleLabels(RequestChartLabels);
 
-            return (RequestChartSeries, RequestChartLabels);
-        }
-        return ([], []);
+        return (RequestChartSeries, RequestChartLabels);
     }
 
-    private string[] ScaleLabels(string[] ChartLabels)
+    private static string[] ScaleLabels(string[] ChartLabels)
     {
         // Scale the labels so they don't overlap. Allow for up to 8 labels.
         int chartLabelInterval = (ChartLabels.Length / 8) + 1;
@@ -123,13 +119,13 @@ public partial class EventMetrics
         return ChartLabels;
     }
 
-    private List<ChartData> FillMissingDays(List<ChartData>? chartData)
+    private static List<ChartData> FillMissingDays(List<ChartData>? chartData)
     {
         DateTime? previousDay = null;
         long previousRequests = 0;
         List<ChartData> cd = [];
 
-        if (chartData == null)
+        if (chartData is null)
         {
             return cd;
         }
@@ -137,7 +133,7 @@ public partial class EventMetrics
         // rebuild chart data to fill in missing days
         foreach (var row in chartData.OrderBy(r => r.DateStamp))
         {
-            if (previousDay != null && previousDay.Value.AddDays(1) < row.DateStamp)
+            if (previousDay is not null && previousDay.Value.AddDays(1) < row.DateStamp)
             {
                 while (previousDay.Value.AddDays(1) < row.DateStamp)
                 {
