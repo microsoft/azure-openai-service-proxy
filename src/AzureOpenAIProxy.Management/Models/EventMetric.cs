@@ -1,6 +1,4 @@
-using AzureOpenAIProxy.Management.Services;
-
-namespace AzureOpenAIProxy.Management.Database;
+namespace AzureOpenAIProxy.Management.Models;
 public class EventMetric
 {
     public string EventId { get; set; } = null!;

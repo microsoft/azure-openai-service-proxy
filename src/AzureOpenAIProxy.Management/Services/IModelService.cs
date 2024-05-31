@@ -1,5 +1,4 @@
 using AzureOpenAIProxy.Management.Components.ModelManagement;
-using AzureOpenAIProxy.Management.Database;
 
 namespace AzureOpenAIProxy.Management.Services;
 

@@ -1,5 +1,4 @@
 using AzureOpenAIProxy.Management.Components.EventManagement;
-using AzureOpenAIProxy.Management.Database;
 
 namespace AzureOpenAIProxy.Management.Services;
 
@@ -14,4 +13,6 @@ public interface IEventService
     Task<Event?> UpdateEventAsync(string id, EventEditorModel model);
 
     Task<Event?> UpdateModelsForEventAsync(string id, IEnumerable<Guid> modelIds);
+
+    Task<IEnumerable<EventWithRegistration>> GetEventsWithRegistrationsAsync();
 }

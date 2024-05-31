@@ -1,13 +1,11 @@
 using System.Data;
 using System.Data.Common;
 using AzureOpenAIProxy.Management.Components.EventManagement;
-using AzureOpenAIProxy.Management.Database;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using NpgsqlTypes;
 
 namespace AzureOpenAIProxy.Management.Services;
-
 
 public class EventService(IAuthService authService, AoaiProxyContext db) : IEventService, IDisposable
 {
@@ -169,5 +167,20 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
         {
             conn.Dispose();
         }
+    }
+
+    public async Task<IEnumerable<EventWithRegistration>> GetEventsWithRegistrationsAsync()
+    {
+        var events = await db.Events
+        .Select(evt => new EventWithRegistration(
+            evt.EventCode,
+            evt.OrganizerName,
+            evt.StartTimestamp,
+            evt.EndTimestamp,
+            evt.EventAttendees.Count,
+            evt.EventId))
+        .ToListAsync();
+
+        return events;
     }
 }

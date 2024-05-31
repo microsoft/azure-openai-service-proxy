@@ -1,53 +1,9 @@
 using System.Data;
 using System.Data.Common;
-using AzureOpenAIProxy.Management.Database;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 
 namespace AzureOpenAIProxy.Management.Services;
-
-public class ModelCounts
-{
-    public string? Resource { get; set; }
-    public int Count { get; set; }
-    public long PromptTokens { get; set; }
-    public long CompletionTokens { get; set; }
-    public long TotalTokens { get; set; }
-}
-
-public class MetricsData
-{
-    public string EventId { get; set; } = null!;
-    public DateTime DateStamp { get; set; }
-    public string Resource { get; set; } = null!;
-    public long PromptTokens { get; set; }
-    public long CompletionTokens { get; set; }
-    public long TotalTokens { get; set; }
-    public long Requests { get; set; }
-}
-
-public class ChartData
-{
-    public DateTime DateStamp { get; set; }
-    public long Count { get; set; }
-}
-
-public class ModelData
-{
-    public List<ModelCounts> ModelCounts { get; set; } = [];
-    public List<ChartData> ChartData { get; set; } = [];
-}
-
-public class AllEvents
-{
-    public string OrganizerName { get; set; } = null!;
-    public string EventName { get; set; } = null!;
-    public DateTime StartDate { get; set; }
-    public DateTime EndDate { get; set; }
-    public int Registered { get; set; }
-    public string EventId { get; set; } = null!;
-}
-
 
 public class MetricService(AoaiProxyContext db) : IMetricService, IDisposable
 {
@@ -97,7 +53,7 @@ public class MetricService(AoaiProxyContext db) : IMetricService, IDisposable
         modelCountCommand.Parameters.Add(new NpgsqlParameter("EventId", eventId));
         using var reader = await modelCountCommand.ExecuteReaderAsync();
 
-        var metricsData = new List<MetricsData>();
+        List<MetricsData> metricsData = [];
         while (reader.Read())
         {
             var item = new MetricsData
@@ -115,7 +71,7 @@ public class MetricService(AoaiProxyContext db) : IMetricService, IDisposable
         };
 
         var summary = metricsData
-            .GroupBy(r => new { EventId = r.EventId, Resource = r.Resource })
+            .GroupBy(r => new { r.EventId, r.Resource })
             .Select(g => new
             {
                 g.Key.Resource,
@@ -136,7 +92,8 @@ public class MetricService(AoaiProxyContext db) : IMetricService, IDisposable
         }).ToList();
 
         // Create Line Chart Data X axis is DateStamp and Y axis is Requests
-        List<ChartData> chartData = metricsData
+        List<ChartData> chartData = [
+            .. metricsData
             .GroupBy(r => r.DateStamp)
             .Select(g => new ChartData
             {
@@ -144,18 +101,15 @@ public class MetricService(AoaiProxyContext db) : IMetricService, IDisposable
                 Count = g.Sum(x => x.Requests)
             })
             .OrderBy(x => x.DateStamp)
-            .ToList();
+        ];
 
-        long runningTotal = 0;
-        chartData.ForEach(x => runningTotal = x.Count += runningTotal);
+        long runningTotal = chartData.Aggregate(0L, (acc, x) => acc += x.Count);
 
-        ModelData md = new()
+        return new()
         {
             ModelCounts = modelCounts,
             ChartData = chartData
         };
-
-        return md;
     }
 
     private async Task<(int attendeeCount, int requestCount)> GetAttendeeMetricsAsync(string eventId)
@@ -185,51 +139,6 @@ public class MetricService(AoaiProxyContext db) : IMetricService, IDisposable
         return (0, 0);
     }
 
-    public async Task<List<AllEvents>> GetAllEventsAsync()
-    {
-        // create an empty list of AllEvents and populate it with dummy data
-
-        if (conn.State != ConnectionState.Open)
-            await conn.OpenAsync();
-
-        using var modelCountCommand = conn.CreateCommand();
-        modelCountCommand.CommandText = """
-        SELECT
-            e.event_id,
-            e.event_code,
-            e.organizer_name,
-            e.start_timestamp,
-            e.end_timestamp,
-            COUNT(a.api_key) AS registration_count
-        FROM
-            aoai.event AS e
-        LEFT JOIN
-            aoai.event_attendee AS a ON e.event_id = a.event_id
-        GROUP BY
-            e.event_id;
-        """;
-
-        using var reader = await modelCountCommand.ExecuteReaderAsync();
-
-        var allEvents = new List<AllEvents>();
-
-        while (reader.Read())
-        {
-            var item = new AllEvents
-            {
-                EventId = reader.GetString(0),
-                EventName = reader.GetString(1),
-                OrganizerName = reader.GetString(2),
-                StartDate = reader.GetDateTime(3),
-                EndDate = reader.GetDateTime(4),
-                Registered = reader.GetInt32(5),
-
-            };
-            allEvents.Add(item);
-        };
-        return allEvents;
-    }
-
     public async Task<List<ChartData>> GetActiveRegistrationsAsync(string eventId)
     {
         // call the Postgres view active_attendee_growth_view, read all the rows and return them as a list of tuples
@@ -252,7 +161,7 @@ public class MetricService(AoaiProxyContext db) : IMetricService, IDisposable
 
         using var reader = await activeRegistrationsCountCommand.ExecuteReaderAsync();
 
-        var activeRegistrations = new List<ChartData>();
+        List<ChartData> activeRegistrations = [];
 
         while (reader.Read())
         {
@@ -260,5 +169,16 @@ public class MetricService(AoaiProxyContext db) : IMetricService, IDisposable
         };
 
         return activeRegistrations;
+    }
+
+    internal class MetricsData
+    {
+        public string EventId { get; set; } = null!;
+        public DateTime DateStamp { get; set; }
+        public string Resource { get; set; } = null!;
+        public long PromptTokens { get; set; }
+        public long CompletionTokens { get; set; }
+        public long TotalTokens { get; set; }
+        public long Requests { get; set; }
     }
 }
