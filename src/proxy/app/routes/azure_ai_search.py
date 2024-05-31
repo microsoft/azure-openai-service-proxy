@@ -2,13 +2,13 @@
 
 from typing import Any
 
+from app.config import Deployment
+from app.routes.request_manager import RequestManager
 from fastapi import Request, Response
 from pydantic import RootModel
 
 # pylint: disable=E0402
-from ..config import Deployment
 from ..openai_async import OpenAIAsyncManager
-from .request_manager import RequestManager
 
 
 class AiSearchRequest(RootModel):

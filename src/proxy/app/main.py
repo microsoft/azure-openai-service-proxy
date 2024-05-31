@@ -3,15 +3,19 @@
 import logging
 import os
 
+from azure.monitor.opentelemetry.exporter import AzureMonitorTraceExporter
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import ResponseValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from opencensus.ext.azure.log_exporter import AzureLogHandler
+from opentelemetry import trace
+from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
 
 from .authorize import Authorize
 from .config import Config
-
-# pylint: disable=E0402
 from .db_manager import DBConfig, DBManager
 from .monitor import Monitor
 from .routes.attendee import AttendeeApi as attendee_router
@@ -31,14 +35,34 @@ DEFAULT_IMAGES_GENERATIONS_API_VERSION = "2023-06-01-preview"
 DEFAULT_SEARCH_API_VERSION = "2023-11-01"
 OPENAI_IMAGES_API_VERSION = "2023-12-01-preview"
 
-
-logging.basicConfig(level=logging.WARNING)
-logger = logging.getLogger(__name__)
-
 app = FastAPI(
     # docs_url=None,  # Disable docs (Swagger UI)
     # redoc_url=None,  # Disable redoc
 )
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+APPLICATIONINSIGHTS_CONNECTION_STRING = os.environ.get("APPLICATIONINSIGHTS_CONNECTION_STRING")
+
+if APPLICATIONINSIGHTS_CONNECTION_STRING is not None:
+    # Set the tracer provider
+    trace.set_tracer_provider(TracerProvider())
+
+    # Configure Azure Monitor
+    exporter = AzureMonitorTraceExporter(connection_string=APPLICATIONINSIGHTS_CONNECTION_STRING)
+
+    # add to the tracer provider
+    trace.get_tracer_provider().add_span_processor(BatchSpanProcessor(exporter))
+
+    FastAPIInstrumentor.instrument_app(app)
+
+    # Set up logging
+    handler = AzureLogHandler(connection_string=APPLICATIONINSIGHTS_CONNECTION_STRING)
+    logger.addHandler(handler)
+
+    logger.info("Azure Application Insights for logging and tracing enabled.")
+
 
 db_config = DBConfig(
     host=os.environ.get("POSTGRES_SERVER"),
@@ -123,14 +147,13 @@ async def custom_http_exception_handler(request: Request, exc: HTTPException):
 async def validation_exception_handler(request, exc):
     """validation exception handler"""
 
-    print("Caught Validation Error:%s ", str(exc))
+    logger.error("Caught Validation Error:%s ", str(exc))
 
     return JSONResponse(content={"message": "Response validation error"}, status_code=400)
 
 
 @app.on_event("startup")
 async def startup_event():
-    """startup event"""
     await db_manager.create_pool()
 
 

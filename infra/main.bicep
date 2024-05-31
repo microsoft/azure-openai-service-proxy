@@ -110,6 +110,7 @@ module proxy 'proxy.bicep' = {
     postgresDatabase: postgresDatabaseName
     postgresUser: '${prefix}-proxy'
     postgresEncryptionKey: postgresEncryptionKey
+    appInsightsConnectionString: monitoring.outputs.applicationInsightsConnectionString
   }
 }
 

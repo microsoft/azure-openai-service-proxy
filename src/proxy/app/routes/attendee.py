@@ -50,9 +50,7 @@ class AttendeeApi:
             try:
                 user_id = self.get_user_id(request=request)
 
-                pool = await self.db_manager.get_connection()
-
-                async with pool.acquire() as conn:
+                async with self.db_manager as conn:
                     result = await conn.fetch(
                         "SELECT * FROM aoai.add_event_attendee($1, $2)", user_id, event_id
                     )
@@ -77,12 +75,10 @@ class AttendeeApi:
             """Get attendees"""
             logging.info("Getting attendees")
 
-            pool = await self.db_manager.get_connection()
-
             try:
                 user_id = self.get_user_id(request=request)
 
-                async with pool.acquire() as conn:
+                async with self.db_manager as conn:
                     result = await conn.fetch(
                         "SELECT EA.api_key, EA.active "
                         "FROM aoai.event_attendee EA "

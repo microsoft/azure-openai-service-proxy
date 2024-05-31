@@ -4,6 +4,7 @@ import logging
 from datetime import datetime
 
 import asyncpg
+from app.lru_cache_with_expiry import lru_cache_with_expiry
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
@@ -71,14 +72,16 @@ class EventRegistrationInfo:
 
         return self.router
 
-    # @lru_cache_with_expiry(maxsize=20, ttl=180)
+    # Time out of 30 seconds choosen as it balances between performance in a class room setting
+    # where multiple users are accessing the same event at the same time and the admin setting up
+    # the event and wanting to review the event details and the event details are not changing
+    # due to the cache.
+    @lru_cache_with_expiry(maxsize=20, ttl=30)
     async def get_event_info(self, event_id: str) -> EventRegistrationResponse:
         """get event info"""
 
-        pool = await self.db_manager.get_connection()
-
         try:
-            async with pool.acquire() as conn:
+            async with self.db_manager as conn:
                 result = await conn.fetch(
                     "SELECT * FROM aoai.get_event_registration_by_event_id($1)", event_id
                 )
@@ -98,6 +101,12 @@ class EventRegistrationInfo:
             self.logger.error("Postgres error: get_event_info %s", str(error))
             raise HTTPException(
                 status_code=503, detail=f"Postgres error: get_event_info {str(error)}"
+            ) from error
+
+        except TimeoutError as error:
+            self.logger.error("Postgres error timeout: get_event_info")
+            raise HTTPException(
+                status_code=504, detail="Postgres timeout error: get_event_info"
             ) from error
 
         except Exception as exp:
