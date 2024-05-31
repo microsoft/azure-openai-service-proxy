@@ -1,40 +1,67 @@
 @page "/event/{eventId}/metrics"
 @using AzureOpenAIProxy.Management.Database
+@using AzureOpenAIProxy.Management.Services;
 
 @namespace AzureOpenAIProxy.Management.Components.Pages
 
-@if (Event is not null && EventMetric is not null)
+
+@if (Event is not null && EventMetric is not null && EventMetric?.ModelData?.ModelCounts is not null)
 {
+    <PageTitle>AI Proxy Metrics | @Event.EventCode</PageTitle>
+
     <MudStack>
-        <h3>Event Name: @Event.EventCode</h3>
 
-        <MudText Typo="Typo.body1">Attendee count: <strong>@EventMetric.AttendeeCount</strong></MudText>
+    <MudLink Target="_blank" Href="@($"{Configuration["PlaygroundUrl"]}/event/{EventId}")">
+        <MudText><strong>@Event.EventCode</strong></MudText>
+    </MudLink>
+
+    <MudStack Spacing="1">
+        <MudText Typo="Typo.body1">Registrations: <strong>@EventMetric.AttendeeCount</strong></MudText>
+        <MudText Typo="Typo.body1">Active Registrations: <strong>@ActiveRegistrations</strong></MudText>
         <MudText Typo="Typo.body1">Total Request count: <strong>@EventMetric.RequestCount</strong></MudText>
-
-        <MudTable Items="@EventMetric.ModelCounts" SortLabel="Sort By" Hover="true">
-            <HeaderContent>
-                <MudTh>
-                    <MudTableSortLabel
-                        SortBy="new Func<(ModelType modelType, string deploymentName, int count), object>(x => x.deploymentName)">
-                        Resource Name (Deployment or Index Name)</MudTableSortLabel>
-                </MudTh>
-                <MudTh>
-                    <MudTableSortLabel
-                        SortBy="new Func<(ModelType modelType, string deploymentName, int count), object>(x => x.modelType)">
-                        Resource Type</MudTableSortLabel>
-                </MudTh>
-                <MudTh>
-                    <MudTableSortLabel InitialDirection="SortDirection.Descending"
-                        SortBy="new Func<(ModelType modelType, string deploymentName, int count), object>(x => x.count)">
-                        Request Count</MudTableSortLabel>
-                </MudTh>
-            </HeaderContent>
-
-            <RowTemplate>
-                <MudTd DataLabel="Resource Name (Deployment or Index Name)">@context.deploymentName</MudTd>
-                <MudTd DataLabel="Resource Type">@context.modelType</MudTd>
-                <MudTd DataLabel="Request Count">@context.count</MudTd>
-            </RowTemplate>
-        </MudTable>
     </MudStack>
+
+    <MudIconButton Icon="@Icons.Material.Filled.Refresh" Variant="Variant.Filled" Color="Color.Primary"
+        Size="Size.Small" Style="width: 80px;" OnClick="RefreshData" />
+
+    <MudChart ChartType="ChartType.Line" ChartSeries="@ActiveUsersChartSeries" XAxisLabels="@ActiveUsersChartLabels"
+        Width="100%" Height="450px" />
+
+    <MudChart ChartType="ChartType.Line" ChartSeries="@RequestChartSeries" XAxisLabels="@RequestChartLabels"
+        Width="100%" Height="450px" />
+
+    <MudTable Items="@EventMetric.ModelData.ModelCounts" Dense="true" Striped="true" SortLabel="Sort By" Hover="true" Style="margin-bottom: 60px;">
+        <HeaderContent>
+            <MudTh>
+                <MudTableSortLabel SortBy="new Func<ModelCounts, object>(x => x.Resource)">
+                    Resource Name (Deployment or Index Name)</MudTableSortLabel>
+            </MudTh>
+            <MudTh>
+                <MudTableSortLabel SortBy="new Func<ModelCounts, object>(x => x.PromptTokens)">
+                    Prompt tokens</MudTableSortLabel>
+            </MudTh>
+            <MudTh>
+                <MudTableSortLabel SortBy="new Func<ModelCounts, object>(x => x.CompletionTokens)">
+                    Completion tokens</MudTableSortLabel>
+            </MudTh>
+            <MudTh>
+                <MudTableSortLabel SortBy="new Func<ModelCounts, object>(x => x.TotalTokens)">
+                    Total tokens</MudTableSortLabel>
+            </MudTh>
+            <MudTh>
+                <MudTableSortLabel InitialDirection="SortDirection.Descending"
+                    SortBy="new Func<ModelCounts, object>(x => x.Count)">
+                    Requests</MudTableSortLabel>
+            </MudTh>
+        </HeaderContent>
+
+        <RowTemplate>
+            <MudTd DataLabel="Resource Name (Deployment or Index Name)">@context.Resource</MudTd>
+            <MudTd DataLabel="Prompt tokens">@context.PromptTokens</MudTd>
+            <MudTd DataLabel="Completion tokens">@context.CompletionTokens</MudTd>
+            <MudTd DataLabel="Total tokens">@context.TotalTokens</MudTd>
+            <MudTd DataLabel="Request Count">@context.Count</MudTd>
+        </RowTemplate>
+    </MudTable>
+</MudStack>
 }

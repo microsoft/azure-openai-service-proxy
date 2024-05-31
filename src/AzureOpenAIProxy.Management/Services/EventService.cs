@@ -1,7 +1,6 @@
 using System.Data;
 using System.Data.Common;
 using AzureOpenAIProxy.Management.Components.EventManagement;
-using AzureOpenAIProxy.Management.Database;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using NpgsqlTypes;
@@ -86,81 +85,6 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
 
     public Task<Event?> GetEventAsync(string id) => db.Events.Include(e => e.Catalogs).FirstOrDefaultAsync(e => e.EventId == id);
 
-    public async Task<EventMetric> GetEventMetricsAsync(string eventId)
-    {
-        (int attendeeCount, int requestCount) = await GetAttendeeMetricsAsync(eventId);
-        IEnumerable<(ModelType modelType, string deploymentName, int count)> modelCount = await GetModelCountAsync(eventId);
-
-        return new()
-        {
-            EventId = eventId,
-            AttendeeCount = attendeeCount,
-            RequestCount = requestCount,
-            ModelCounts = modelCount
-        };
-    }
-
-    private async Task<IEnumerable<(ModelType modelType, string deploymentName, int count)>> GetModelCountAsync(string eventId)
-    {
-        if (conn.State != ConnectionState.Open)
-            await conn.OpenAsync();
-
-        using var modelCountCommand = conn.CreateCommand();
-        modelCountCommand.CommandText = """
-        SELECT count(api_key) count, resource
-        FROM aoai.metric
-        WHERE event_id = @EventId
-        GROUP BY resource
-        ORDER BY count DESC
-        """;
-
-        modelCountCommand.Parameters.Add(new NpgsqlParameter("EventId", eventId));
-        using var reader = await modelCountCommand.ExecuteReaderAsync();
-        List<(ModelType modelType, string deploymentName, int count)> modelCounts = [];
-        if (reader.HasRows)
-        {
-            while (await reader.ReadAsync())
-            {
-                var count = reader.GetInt32(0);
-                var resource = reader.GetString(1);
-
-                var parts = resource.Split(" | ");
-                var modelType = ModelTypeExtensions.ParsePostgresValue(parts[0]);
-                modelCounts.Add((modelType, string.Join(" | ", parts[1..]), count));
-            }
-        }
-
-        return modelCounts;
-    }
-
-    private async Task<(int attendeeCount, int requestCount)> GetAttendeeMetricsAsync(string eventId)
-    {
-        if (conn.State != ConnectionState.Open)
-            await conn.OpenAsync();
-
-        using var eventAttendeeCommand = conn.CreateCommand();
-        eventAttendeeCommand.CommandText = """
-        SELECT
-            COUNT(user_id) as user_count,
-            (SELECT count(api_key) FROM aoai.metric WHERE event_id = @EventId) as request_count
-        FROM aoai.event_attendee
-        WHERE event_id = @EventId
-        """;
-
-        eventAttendeeCommand.Parameters.Add(new NpgsqlParameter("EventId", eventId));
-
-        using var reader = await eventAttendeeCommand.ExecuteReaderAsync();
-        if (reader.HasRows)
-        {
-            while (await reader.ReadAsync())
-            {
-                return (reader.GetInt32(0), reader.GetInt32(1));
-            }
-        }
-
-        return (0, 0);
-    }
-
     public async Task<IEnumerable<Event>> GetOwnerEventsAsync()
     {
         string entraId = await authService.GetCurrentUserEntraIdAsync();
@@ -243,5 +167,20 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
         {
             conn.Dispose();
         }
+    }
+
+    public async Task<IEnumerable<EventWithRegistration>> GetEventsWithRegistrationsAsync()
+    {
+        var events = await db.Events
+        .Select(evt => new EventWithRegistration(
+            evt.EventCode,
+            evt.OrganizerName,
+            evt.StartTimestamp,
+            evt.EndTimestamp,
+            evt.EventAttendees.Count,
+            evt.EventId))
+        .ToListAsync();
+
+        return events;
     }
 }

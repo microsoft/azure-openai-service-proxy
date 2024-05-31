@@ -1,0 +1,68 @@
+@page "/reports"
+
+@namespace AzureOpenAIProxy.Management.Components.Pages
+
+<PageTitle>AI Proxy Reports</PageTitle>
+
+@if (AllEvents?.Count() > 0)
+{
+    <MudStack>
+
+    <MudText Typo="Typo.h6">Events Report</MudText>
+
+    <MudTable Items="@AllEvents" Dense="true" Striped="true" SortLabel="Sort By"
+        Filter="new Func<EventWithRegistration, bool>(FilterFunc)" Hover="true">
+        <ToolBarContent>
+            <MudStack Spacing="0">
+                <MudText Typo="Typo.body1">Total registrations: <strong>@TotalRegistations</strong></MudText>
+                <MudText Typo="Typo.body1">Select the event to view the metrics.</MudText>
+            </MudStack>
+            <MudSpacer />
+            <MudTextField @bind-Value="searchString" Placeholder="Search by event or organizer name"
+                Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium"
+                Class="mt-0"></MudTextField>
+        </ToolBarContent>
+        <HeaderContent>
+            <MudTh>
+                <MudTableSortLabel InitialDirection="SortDirection.Ascending"
+                    SortBy="new Func<EventWithRegistration, object>(x => x.Name)">
+                    Event metrics</MudTableSortLabel>
+            </MudTh>
+            <MudTh>
+                <MudTableSortLabel SortBy="new Func<EventWithRegistration, object>(x => x.OrganizerName)">
+                    Organizer name</MudTableSortLabel>
+            </MudTh>
+            <MudTh>
+                <MudTableSortLabel SortBy="new Func<EventWithRegistration, object>(x => x.StartDate)">
+                    Start date</MudTableSortLabel>
+            </MudTh>
+            <MudTh>
+                <MudTableSortLabel SortBy="new Func<EventWithRegistration, object>(x => x.EndDate)">
+                    End date</MudTableSortLabel>
+            </MudTh>
+            <MudTh>
+                <MudTableSortLabel SortBy="new Func<EventWithRegistration, object>(x => x.RegistrationCount)">
+                    Registrations</MudTableSortLabel>
+            </MudTh>
+            <MudTh>
+                Attendee link
+            </MudTh>
+        </HeaderContent>
+
+        <RowTemplate>
+            <MudTd DataLabel="Event Metrics">
+                <MudLink Href="@($"/event/{context.EventId}/metrics")">@context.Name</MudLink>
+            </MudTd>
+            <MudTd DataLabel="Organizer name">@context.OrganizerName</MudTd>
+            <MudTd DataLabel="Start date">@context.StartDate.ToString("yyyy MMM dd")</MudTd>
+            <MudTd DataLabel="End date">@context.EndDate.ToString("yyyy MMM dd")</MudTd>
+            <MudTd DataLabel="Attendee Count">@context.RegistrationCount</MudTd>
+            <MudTd DataLabel="Attendee link">
+                <MudLink Target="_blank" Href="@($"{Configuration["PlaygroundUrl"]}/event/{context.EventId}")">
+                    <MudIcon Icon="@Icons.Material.Filled.Link" />
+                </MudLink>
+            </MudTd>
+        </RowTemplate>
+    </MudTable>
+</MudStack>
+}
