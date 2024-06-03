@@ -1,4 +1,7 @@
-﻿namespace AzureOpenAIProxy.Management.Database;
+﻿using System;
+using System.Collections.Generic;
+
+namespace AzureOpenAIProxy.Management.Database;
 
 public partial class EventAttendee
 {
@@ -11,4 +14,6 @@ public partial class EventAttendee
     public string ApiKey { get; set; } = null!;
 
     public virtual Event Event { get; set; } = null!;
+
+    public virtual ICollection<EventAttendeeRequest> EventAttendeeRequests { get; set; } = new List<EventAttendeeRequest>();
 }

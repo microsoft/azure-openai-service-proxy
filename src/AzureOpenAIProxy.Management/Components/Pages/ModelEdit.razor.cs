@@ -3,6 +3,7 @@ using AzureOpenAIProxy.Management.Components.ModelManagement;
 using AzureOpenAIProxy.Management.Database;
 using AzureOpenAIProxy.Management.Services;
 using Microsoft.AspNetCore.Components;
+using Microsoft.EntityFrameworkCore;
 
 namespace AzureOpenAIProxy.Management.Components.Pages;
 
