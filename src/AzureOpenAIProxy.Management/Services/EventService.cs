@@ -1,11 +1,13 @@
 using System.Data;
 using System.Data.Common;
 using AzureOpenAIProxy.Management.Components.EventManagement;
+using AzureOpenAIProxy.Management.Database;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using NpgsqlTypes;
 
 namespace AzureOpenAIProxy.Management.Services;
+
 
 public class EventService(IAuthService authService, AoaiProxyContext db) : IEventService, IDisposable
 {
@@ -91,7 +93,9 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
         return await db.Events
             .Where(e => e.OwnerEventMaps.Any(o => o.Owner.OwnerId == entraId))
             .OrderByDescending(e => e.Active)
-            .ThenBy(e => e.StartTimestamp)
+            .ThenByDescending(e => e.EndTimestamp)
+            .Include(e => e.Catalogs) // Include the Catalogs collection
+            .Include(ea => ea.EventAttendees)
             .ToListAsync();
     }
 
@@ -169,18 +173,30 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
         }
     }
 
-    public async Task<IEnumerable<EventWithRegistration>> GetEventsWithRegistrationsAsync()
+    public async Task DeleteEventAsync(string id)
     {
-        var events = await db.Events
-        .Select(evt => new EventWithRegistration(
-            evt.EventCode,
-            evt.OrganizerName,
-            evt.StartTimestamp,
-            evt.EndTimestamp,
-            evt.EventAttendees.Count,
-            evt.EventId))
-        .ToListAsync();
+        Event? evt = await db.Events.FindAsync(id);
 
-        return events;
+        if (evt is null)
+        {
+            return;
+        }
+
+        // double check there are no event attendees for the event
+        var usageInfo = await db.Events.Where(oc => oc.EventId == id)
+            .Select(oc => new
+            {
+                UsedInEvent = oc.EventAttendees.Count != 0
+            })
+            .FirstAsync();
+
+        // block deletion when it's in use to avoid cascading deletes
+        if (usageInfo.UsedInEvent)
+        {
+            return;
+        }
+
+        db.Events.Remove(evt);
+        await db.SaveChangesAsync();
     }
 }

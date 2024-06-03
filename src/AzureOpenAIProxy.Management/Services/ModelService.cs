@@ -1,6 +1,7 @@
 using System.Data;
 using System.Data.Common;
 using AzureOpenAIProxy.Management.Components.ModelManagement;
+using AzureOpenAIProxy.Management.Database;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using NpgsqlTypes;
@@ -9,18 +10,31 @@ namespace AzureOpenAIProxy.Management.Services;
 
 public class ModelService(IAuthService authService, AoaiProxyContext db, IConfiguration configuration) : IModelService
 {
-
     private const string PostgresEncryptionKey = "PostgresEncryptionKey";
-    private readonly DbConnection connection = db.Database.GetDbConnection();
+    private readonly DbConnection conn = db.Database.GetDbConnection();
+
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            conn.Dispose();
+        }
+    }
 
     private async Task<byte[]?> PostgresEncryptValue(string value)
     {
-        if (connection.State != ConnectionState.Open)
-            await connection.OpenAsync();
+        if (conn.State != ConnectionState.Open)
+            await conn.OpenAsync();
 
         string? postgresEncryptionKey = configuration[PostgresEncryptionKey];
 
-        using DbCommand command = connection.CreateCommand();
+        using DbCommand command = conn.CreateCommand();
         command.CommandText = $"SELECT aoai.pgp_sym_encrypt(@value, @postgresEncryptionKey);";
         command.Parameters.Add(new NpgsqlParameter("value", NpgsqlDbType.Text) { Value = value });
         command.Parameters.Add(new NpgsqlParameter("postgresEncryptionKey", NpgsqlDbType.Text) { Value = postgresEncryptionKey });
@@ -32,24 +46,33 @@ public class ModelService(IAuthService authService, AoaiProxyContext db, IConfig
 
     private async Task<string?> PostgresDecryptValue(byte[] value)
     {
-        if (connection.State != ConnectionState.Open)
-            await connection.OpenAsync();
+        if (conn.State != ConnectionState.Open)
+            await conn.OpenAsync();
 
         string? postgresEncryptionKey = configuration[PostgresEncryptionKey];
 
-        using DbCommand command = connection.CreateCommand();
+        using DbCommand command = conn.CreateCommand();
         command.CommandText = $"SELECT aoai.pgp_sym_decrypt(@value, @postgresEncryptionKey)";
         command.Parameters.Add(new NpgsqlParameter("value", NpgsqlDbType.Bytea) { Value = value });
         command.Parameters.Add(new NpgsqlParameter("postgresEncryptionKey", NpgsqlDbType.Text) { Value = postgresEncryptionKey });
 
-        using var reader = await command.ExecuteReaderAsync();
-        await reader.ReadAsync();
-        return reader[0] as string;
+        try
+        {
+            using var reader = await command.ExecuteReaderAsync();
+            await reader.ReadAsync();
+            return reader[0] as string;
+        }
+        catch (Exception)
+        {
+            return string.Empty;
+        }
     }
 
     public async Task<OwnerCatalog> AddOwnerCatalogAsync(ModelEditorModel model)
     {
-        Owner owner = await authService.GetCurrentOwnerAsync();
+        string entraId = await authService.GetCurrentUserEntraIdAsync();
+
+        Owner owner = await db.Owners.FirstOrDefaultAsync(o => o.OwnerId == entraId) ?? throw new InvalidOperationException("EntraID is not a registered owner.");
 
         byte[]? endpointKey = await PostgresEncryptValue(model.EndpointKey!);
         byte[]? endpointUrl = await PostgresEncryptValue(model.EndpointUrl!);
@@ -103,8 +126,8 @@ public class ModelService(IAuthService authService, AoaiProxyContext db, IConfig
     {
         var result = await db.OwnerCatalogs.FindAsync(catalogId);
 
-        string? endpointKey = await PostgresDecryptValue(result!.EndpointKeyEncrypted);
-        string? endpointUrl = await PostgresDecryptValue(result!.EndpointUrlEncrypted);
+        string? endpointKey = await PostgresDecryptValue(result!.EndpointKeyEncrypted!);
+        string? endpointUrl = await PostgresDecryptValue(result!.EndpointUrlEncrypted!);
 
         result.EndpointKey = endpointKey!;
         result.EndpointUrl = endpointUrl!;
@@ -115,7 +138,11 @@ public class ModelService(IAuthService authService, AoaiProxyContext db, IConfig
     public async Task<IEnumerable<OwnerCatalog>> GetOwnerCatalogsAsync()
     {
         string entraId = await authService.GetCurrentUserEntraIdAsync();
-        var catalogItems = await db.OwnerCatalogs.Where(oc => oc.Owner.OwnerId == entraId).OrderBy(oc => oc.FriendlyName).ToListAsync();
+        var catalogItems = await db.OwnerCatalogs
+            .Where(oc => oc.Owner.OwnerId == entraId)
+            .Include(oc => oc.Events)
+            .OrderBy(oc => oc.FriendlyName)
+            .ToListAsync();
         return catalogItems;
     }
 

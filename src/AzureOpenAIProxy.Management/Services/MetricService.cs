@@ -1,184 +1,114 @@
 using System.Data;
-using System.Data.Common;
+using AzureOpenAIProxy.Management.Database;
 using Microsoft.EntityFrameworkCore;
-using Npgsql;
 
 namespace AzureOpenAIProxy.Management.Services;
 
-public class MetricService(AoaiProxyContext db) : IMetricService, IDisposable
+public class EventMetricsData
 {
-    private readonly DbConnection conn = db.Database.GetDbConnection();
+    public string EventId { get; set; } = null!;
+    public DateTime DateStamp { get; set; }
+    public string Resource { get; set; } = null!;
+    public long PromptTokens { get; set; }
+    public long CompletionTokens { get; set; }
+    public long TotalTokens { get; set; }
+    public long Requests { get; set; }
+}
 
-    public void Dispose()
+public class EventChartData
+{
+    public DateTime DateStamp { get; set; }
+    public long Count { get; set; }
+}
+
+
+public class MetricService(AoaiProxyContext db) : IMetricService
+{
+    public async Task<List<EventMetricsData>> GetEventMetricsAsync(string eventId)
     {
-        Dispose(true);
-        GC.SuppressFinalize(this);
+        var query = from mv in db.MetricViews
+                    where mv.EventId == eventId
+                    group mv by new { mv.EventId, mv.DateStamp, mv.Resource } into g
+                    orderby g.Count() descending
+                    select new
+                    {
+                        g.Key.EventId,
+                        g.Key.DateStamp,
+                        g.Key.Resource,
+                        PromptTokens = g.Sum(x => x.PromptTokens),
+                        CompletionTokens = g.Sum(x => x.CompletionTokens),
+                        TotalTokens = g.Sum(x => x.TotalTokens),
+                        Requests = g.Count()
+                    };
+
+        List<EventMetricsData> metricsData = await query.Select(x => new EventMetricsData
+        {
+            EventId = x.EventId,
+            DateStamp = x.DateStamp,
+            Resource = x.Resource,
+            PromptTokens = x.PromptTokens,
+            CompletionTokens = x.CompletionTokens,
+            TotalTokens = x.TotalTokens,
+            Requests = x.Requests
+        }).ToListAsync();
+
+        return metricsData;
     }
 
-    protected virtual void Dispose(bool disposing)
+    public (int attendeeCount, int requestCount) GetAttendeeMetricsAsync(string eventId)
     {
-        if (disposing)
-        {
-            conn.Dispose();
-        }
+        var userCount = db.EventAttendees
+            .Where(ea => ea.EventId == eventId)
+            .Count();
+
+        var requestCount = db.Metrics
+            .Where(m => m.EventId == eventId)
+            .Count();
+
+        return (userCount, requestCount);
     }
 
-    public async Task<EventMetric> GetEventMetricsAsync(string eventId)
+    public async Task<List<EventRegistrations>> GetAllEventsAsync()
     {
-        (int attendeeCount, int requestCount) = await GetAttendeeMetricsAsync(eventId);
-        ModelData modeldata = await GetModelCountAsync(eventId);
+        var query = from e in db.Events
+                    join a in db.EventAttendees on e.EventId equals a.EventId into ea
+                    from a in ea.DefaultIfEmpty()
+                    group a by new { e.EventId, e.EventCode, e.OrganizerName, e.StartTimestamp, e.EndTimestamp } into g
+                    select new
+                    {
+                        g.Key.EventId,
+                        g.Key.EventCode,
+                        g.Key.OrganizerName,
+                        g.Key.StartTimestamp,
+                        g.Key.EndTimestamp,
+                        RegistrationCount = g.Count(a => a.ApiKey != null)
+                    };
 
-        return new()
+        var allEvents = await query.Select(x => new EventRegistrations
         {
-            EventId = eventId,
-            AttendeeCount = attendeeCount,
-            RequestCount = requestCount,
-            ModelData = modeldata
-        };
+            EventId = x.EventId,
+            EventName = x.EventCode,
+            OrganizerName = x.OrganizerName,
+            StartDate = x.StartTimestamp,
+            EndDate = x.EndTimestamp,
+            Registered = x.RegistrationCount
+        }).ToListAsync();
+
+        return allEvents;
     }
 
-    private async Task<ModelData> GetModelCountAsync(string eventId)
+    public async Task<List<EventChartData>> GetActiveRegistrationsAsync(string eventId)
     {
-        if (conn.State != ConnectionState.Open)
-            await conn.OpenAsync();
+        var query = from a in db.ActiveAttendeeGrowthViews
+                    where a.EventId == eventId
+                    select new { a.DateStamp, a.Attendees };
 
-        using var modelCountCommand = conn.CreateCommand();
-        modelCountCommand.CommandText = """
-        SELECT event_id, date_stamp, resource, SUM(prompt_tokens) AS prompt_tokens, SUM(completion_tokens) AS completion_tokens, SUM(total_tokens) AS total_tokens, COUNT(*) AS requests
-        FROM aoai.metric_view where event_id = @EventId
-        GROUP BY date_stamp, event_id, resource
-        ORDER BY requests DESC
-        """;
-
-        modelCountCommand.Parameters.Add(new NpgsqlParameter("EventId", eventId));
-        using var reader = await modelCountCommand.ExecuteReaderAsync();
-
-        List<MetricsData> metricsData = [];
-        while (reader.Read())
+        List<EventChartData> activeRegistrations = await query.Select(x => new EventChartData
         {
-            var item = new MetricsData
-            {
-                EventId = eventId,
-                DateStamp = reader.GetDateTime(1),
-                Resource = reader.IsDBNull(2) ? "Unknown" : reader.GetString(2),
-                PromptTokens = reader.IsDBNull(3) ? 0 : reader.GetInt64(3),
-                CompletionTokens = reader.IsDBNull(4) ? 0 : reader.GetInt64(4),
-                TotalTokens = reader.IsDBNull(5) ? 0 : reader.GetInt64(5),
-                Requests = reader.IsDBNull(6) ? 0 : reader.GetInt64(6)
-            };
-
-            metricsData.Add(item);
-        };
-
-        var summary = metricsData
-            .GroupBy(r => new { r.EventId, r.Resource })
-            .Select(g => new
-            {
-                g.Key.Resource,
-                PromptTokens = g.Sum(x => (long)x.PromptTokens),
-                CompletionTokens = g.Sum(x => (long)x.CompletionTokens),
-                TotalTokens = g.Sum(x => (long)x.TotalTokens),
-                Requests = g.Sum(x => (long)x.Requests)
-            })
-            .OrderByDescending(x => x.Requests);
-
-        List<ModelCounts> modelCounts = summary.Select(item => new ModelCounts
-        {
-            Resource = item.Resource,
-            Count = (int)item.Requests,
-            PromptTokens = item.PromptTokens,
-            CompletionTokens = item.CompletionTokens,
-            TotalTokens = item.TotalTokens
-        }).ToList();
-
-        // Create Line Chart Data X axis is DateStamp and Y axis is Requests
-        List<ChartData> chartData = [
-            .. metricsData
-            .GroupBy(r => r.DateStamp)
-            .Select(g => new ChartData
-            {
-                DateStamp = g.Key,
-                Count = g.Sum(x => x.Requests)
-            })
-            .OrderBy(x => x.DateStamp)
-        ];
-
-        long runningTotal = chartData.Aggregate(0L, (acc, x) => acc += x.Count);
-
-        return new()
-        {
-            ModelCounts = modelCounts,
-            ChartData = chartData
-        };
-    }
-
-    private async Task<(int attendeeCount, int requestCount)> GetAttendeeMetricsAsync(string eventId)
-    {
-        if (conn.State != ConnectionState.Open)
-            await conn.OpenAsync();
-
-        using var eventAttendeeCommand = conn.CreateCommand();
-        eventAttendeeCommand.CommandText = """
-        SELECT
-            COUNT(user_id) as user_count,
-            (SELECT count(api_key) FROM aoai.metric WHERE event_id = @EventId) as request_count
-        FROM aoai.event_attendee
-        WHERE event_id = @EventId
-        """;
-
-        eventAttendeeCommand.Parameters.Add(new NpgsqlParameter("EventId", eventId));
-
-        using var reader = await eventAttendeeCommand.ExecuteReaderAsync();
-        if (reader.HasRows)
-        {
-            while (await reader.ReadAsync())
-            {
-                return (reader.GetInt32(0), reader.GetInt32(1));
-            }
-        }
-        return (0, 0);
-    }
-
-    public async Task<List<ChartData>> GetActiveRegistrationsAsync(string eventId)
-    {
-        // call the Postgres view active_attendee_growth_view, read all the rows and return them as a list of tuples
-
-        if (conn.State != ConnectionState.Open)
-            conn.Open();
-
-        using var activeRegistrationsCountCommand = conn.CreateCommand();
-
-        activeRegistrationsCountCommand.CommandText = """
-        SELECT
-            date_stamp, attendees
-        FROM
-            aoai.active_attendee_growth_view
-        WHERE
-            event_id = @EventId
-        """;
-
-        activeRegistrationsCountCommand.Parameters.Add(new NpgsqlParameter("EventId", eventId));
-
-        using var reader = await activeRegistrationsCountCommand.ExecuteReaderAsync();
-
-        List<ChartData> activeRegistrations = [];
-
-        while (reader.Read())
-        {
-            activeRegistrations.Add(new ChartData { DateStamp = reader.GetDateTime(0), Count = reader.GetInt32(1) });
-        };
+            DateStamp = x.DateStamp,
+            Count = (int)x.Attendees
+        }).ToListAsync();
 
         return activeRegistrations;
-    }
-
-    internal class MetricsData
-    {
-        public string EventId { get; set; } = null!;
-        public DateTime DateStamp { get; set; }
-        public string Resource { get; set; } = null!;
-        public long PromptTokens { get; set; }
-        public long CompletionTokens { get; set; }
-        public long TotalTokens { get; set; }
-        public long Requests { get; set; }
     }
 }

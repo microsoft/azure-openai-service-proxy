@@ -1,23 +1,22 @@
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
-USER app
-WORKDIR /app
+# https://devblogs.microsoft.com/dotnet/improving-multiplatform-container-support
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+ARG TARGETARCH
+
+WORKDIR /src
+
+# copy csproj and restore as distinct layers
+COPY AzureOpenAIProxy.Management.csproj .
+RUN dotnet restore -a $TARGETARCH
+
+# copy and publish app and libraries
+COPY . .
+RUN dotnet publish -a $TARGETARCH --no-restore -o /app
+
+# final stage/image
+FROM mcr.microsoft.com/dotnet/aspnet:8.0
 EXPOSE 8080
 EXPOSE 8081
-
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
-ARG BUILD_CONFIGURATION=Release
-WORKDIR /src
-COPY ["AzureOpenAIProxy.Management.csproj", "AzureOpenAIProxy.Management/"]
-RUN dotnet restore "AzureOpenAIProxy.Management/AzureOpenAIProxy.Management.csproj"
-WORKDIR "/src/AzureOpenAIProxy.Management"
-COPY . .
-RUN dotnet build -c $BUILD_CONFIGURATION -o /app/build
-
-FROM build AS publish
-ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
-
-FROM base AS final
 WORKDIR /app
-COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "AzureOpenAIProxy.Management.dll"]
+COPY --from=build /app .
+USER $APP_UID
+ENTRYPOINT ["./AzureOpenAIProxy.Management"]

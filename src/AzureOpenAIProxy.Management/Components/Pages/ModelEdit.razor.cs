@@ -3,6 +3,7 @@ using AzureOpenAIProxy.Management.Components.ModelManagement;
 using AzureOpenAIProxy.Management.Database;
 using AzureOpenAIProxy.Management.Services;
 using Microsoft.AspNetCore.Components;
+using Microsoft.EntityFrameworkCore;
 
 namespace AzureOpenAIProxy.Management.Components.Pages;
 
@@ -15,7 +16,7 @@ public partial class ModelEdit : ComponentBase
     public IModelService ModelService { get; set; } = null!;
 
     [Inject]
-    public AoaiProxyContext DbContext { get; set; } = null!;
+    public AoaiProxyContext db { get; set; } = null!;
 
     [Inject]
     public NavigationManager NavigationManager { get; set; } = null!;
@@ -52,7 +53,7 @@ public partial class ModelEdit : ComponentBase
 
     private async Task OnValidSubmit(ModelEditorModel model)
     {
-        OwnerCatalog? m = await DbContext.OwnerCatalogs.FindAsync(Guid.Parse(Id));
+        OwnerCatalog? m = await db.OwnerCatalogs.FindAsync(Guid.Parse(Id));
 
         if (m is null)
         {
