@@ -11,7 +11,7 @@ namespace AzureOpenAIProxy.Management.Services;
 public class ModelService(IAuthService authService, AoaiProxyContext db, IConfiguration configuration) : IModelService
 {
     private const string PostgresEncryptionKey = "PostgresEncryptionKey";
-    private readonly DbConnection conn = db.Database.GetDbConnection();
+    private readonly DbConnection connection = db.Database.GetDbConnection();
 
     public void Dispose()
     {
@@ -23,18 +23,18 @@ public class ModelService(IAuthService authService, AoaiProxyContext db, IConfig
     {
         if (disposing)
         {
-            conn.Dispose();
+            connection.Dispose();
         }
     }
 
     private async Task<byte[]?> PostgresEncryptValue(string value)
     {
-        if (conn.State != ConnectionState.Open)
-            await conn.OpenAsync();
+        if (connection.State != ConnectionState.Open)
+            await connection.OpenAsync();
 
         string? postgresEncryptionKey = configuration[PostgresEncryptionKey];
 
-        using DbCommand command = conn.CreateCommand();
+        using DbCommand command = connection.CreateCommand();
         command.CommandText = $"SELECT aoai.pgp_sym_encrypt(@value, @postgresEncryptionKey);";
         command.Parameters.Add(new NpgsqlParameter("value", NpgsqlDbType.Text) { Value = value });
         command.Parameters.Add(new NpgsqlParameter("postgresEncryptionKey", NpgsqlDbType.Text) { Value = postgresEncryptionKey });
@@ -46,12 +46,12 @@ public class ModelService(IAuthService authService, AoaiProxyContext db, IConfig
 
     private async Task<string?> PostgresDecryptValue(byte[] value)
     {
-        if (conn.State != ConnectionState.Open)
-            await conn.OpenAsync();
+        if (connection.State != ConnectionState.Open)
+            await connection.OpenAsync();
 
         string? postgresEncryptionKey = configuration[PostgresEncryptionKey];
 
-        using DbCommand command = conn.CreateCommand();
+        using DbCommand command = connection.CreateCommand();
         command.CommandText = $"SELECT aoai.pgp_sym_decrypt(@value, @postgresEncryptionKey)";
         command.Parameters.Add(new NpgsqlParameter("value", NpgsqlDbType.Bytea) { Value = value });
         command.Parameters.Add(new NpgsqlParameter("postgresEncryptionKey", NpgsqlDbType.Text) { Value = postgresEncryptionKey });
