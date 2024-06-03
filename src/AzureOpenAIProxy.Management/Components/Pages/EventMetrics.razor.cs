@@ -1,8 +1,3 @@
-using AzureOpenAIProxy.Management.Database;
-using AzureOpenAIProxy.Management.Services;
-using Microsoft.AspNetCore.Components;
-using MudBlazor;
-
 namespace AzureOpenAIProxy.Management.Components.Pages;
 
 public class ModelCounts
@@ -30,7 +25,6 @@ public partial class EventMetrics
 
     private List<ChartSeries> RequestChartSeries { get; set; } = [];
     private string[] RequestChartLabels { get; set; } = [];
-    // private EventMetric? EventMetric { get; set; }
     private Event? Event { get; set; }
     private List<EventChartData>? ActiveUsers { get; set; }
     private List<ChartSeries> ActiveUsersChartSeries { get; set; } = [];
@@ -108,60 +102,54 @@ public partial class EventMetrics
         IsLoading = false;
     }
 
-    protected override async Task OnInitializedAsync()
-    {
-        await GetData();
-    }
+    protected override Task OnInitializedAsync() => GetData();
 
-    private async void RefreshData()
-    {
-        await GetData();
-    }
+    private Task RefreshData() => GetData();
 
     private (List<ChartSeries> ActiveUsersChartSeries, string[] ActiveUsersChartLabels) BuildActiveUsersChart(List<EventChartData>? activeUsers)
     {
-        if (activeUsers != null)
+        if (activeUsers is null)
         {
-            List<EventChartData> cd = FillMissingDays(activeUsers);
+            return ([], []);
+        }
+        List<EventChartData> cd = FillMissingDays(activeUsers);
 
-            ActiveUsersChartSeries =
-            [
-                new ChartSeries
+        ActiveUsersChartSeries =
+        [
+            new ChartSeries
                 {
                     Name = "New Active Registrations",
                     Data = activeUsers.Select(au => (double)au.Count).ToArray()
                 }
-            ];
+        ];
 
-            ActiveUsersChartLabels = activeUsers.Select(au => au.DateStamp.ToString("dd MMM")).ToArray();
-            ActiveUsersChartLabels = ScaleLabels(ActiveUsersChartLabels);
+        ActiveUsersChartLabels = activeUsers.Select(au => au.DateStamp.ToString("dd MMM")).ToArray();
+        ActiveUsersChartLabels = ScaleLabels(ActiveUsersChartLabels);
 
-            return (ActiveUsersChartSeries, ActiveUsersChartLabels);
-        }
-        return ([], []);
+        return (ActiveUsersChartSeries, ActiveUsersChartLabels);
     }
 
     private (List<ChartSeries> ChartSeries, string[] ChartLabels) BuildRequestsChart(List<EventChartData>? chartData)
     {
-        if (chartData != null)
+        if (chartData is null)
         {
-            List<EventChartData> cd = FillMissingDays(chartData);
+            return ([], []);
+        }
+        List<EventChartData> cd = FillMissingDays(chartData);
 
-            RequestChartSeries =
-            [
-                new ChartSeries
+        RequestChartSeries =
+        [
+            new ChartSeries
                 {
                     Name = "Requests",
                     Data = cd.Select(cd => (double)cd.Count).ToArray()
                 }
-            ];
+        ];
 
-            RequestChartLabels = cd.Select(cd => cd.DateStamp.ToString("dd MMM")).ToArray();
-            RequestChartLabels = ScaleLabels(RequestChartLabels);
+        RequestChartLabels = cd.Select(cd => cd.DateStamp.ToString("dd MMM")).ToArray();
+        RequestChartLabels = ScaleLabels(RequestChartLabels);
 
-            return (RequestChartSeries, RequestChartLabels);
-        }
-        return ([], []);
+        return (RequestChartSeries, RequestChartLabels);
     }
 
     private static string[] ScaleLabels(string[] ChartLabels)
@@ -178,7 +166,7 @@ public partial class EventMetrics
         long previousRequests = 0;
         List<EventChartData> cd = [];
 
-        if (chartData == null)
+        if (chartData is null)
         {
             return cd;
         }
@@ -186,7 +174,7 @@ public partial class EventMetrics
         // rebuild chart data to fill in missing days
         foreach (var row in chartData.OrderBy(r => r.DateStamp))
         {
-            if (previousDay != null && previousDay.Value.AddDays(1) < row.DateStamp)
+            if (previousDay is not null && previousDay.Value.AddDays(1) < row.DateStamp)
             {
                 while (previousDay.Value.AddDays(1) < row.DateStamp)
                 {
