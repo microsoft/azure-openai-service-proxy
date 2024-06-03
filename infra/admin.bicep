@@ -52,16 +52,8 @@ module app 'core/host/container-app-upsert.bicep' = {
         value: postgresEncryptionKey
       }
       {
-        name: 'postgres-user'
-        value: postgresUser
-      }
-      {
-        name: 'postgres-database'
-        value: postgresDatabase
-      }
-      {
-        name: 'postgres-server'
-        value: postgresServer
+        name: 'postgres-connection-string'
+        value: 'Server=${postgresServer};Port=5432;User Id=${postgresUser};Database=${postgresDatabase};Ssl Mode=Require;'
       }
     ]
     env: [
@@ -90,16 +82,8 @@ module app 'core/host/container-app-upsert.bicep' = {
         secretRef: 'postgres-encryption-key'
       }
       {
-        name: 'POSTGRES_USER'
-        secretRef: 'postgres-user'
-      }
-      {
-        name: 'POSTGRES_DATABASE'
-        secretRef: 'postgres-database'
-      }
-      {
-        name: 'POSTGRES_SERVER'
-        secretRef: 'postgres-server'
+        name: 'ConnectionStrings__AoaiProxyContext'
+        secretRef: 'postgres-connection-string'
       }
     ]
   }
