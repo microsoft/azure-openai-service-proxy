@@ -6,9 +6,8 @@
 <MudStack>
     <Help Title="Events" />
 
-    <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/events/new" Style="max-width: 200px">
-    <MudIcon Icon="@Icons.Material.Filled.Add" />New Event
-    </MudButton>
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/events/new" Style="max-width: 200px"
+        StartIcon="@Icons.Material.Filled.Add">New Event</MudButton>
 
     <MudTable Items="@Events" Loading="@(Events is null)" LoadingProgressColor="Color.Info" Hover="true" Dense="true" Striped="true"
         Breakpoint="Breakpoint.Sm">
