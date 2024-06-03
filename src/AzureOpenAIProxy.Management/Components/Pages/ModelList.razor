@@ -8,37 +8,35 @@
     <Help Title="Resources" />
 
     <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/models/new" Style="max-width: 200px"
-    StartIcon="@Icons.Material.Filled.Add">New Resource
-        </MudButton>
+        StartIcon="@Icons.Material.Filled.Add">New Resource
+    </MudButton>
 
-
-  <MudTae Items="@Models" Loading="@(Models is null)" LoadingProgressColor="Color.Info" Hover="true" Dense="true"
-       Sped="true" Breakpoint="Breakpoint.Sm">
-     <HederContent>
-        <MudTh>Friendly Name</MudTh>
-        <MudTh>Resource Name</MudTh>
-        <MudTh>Resource Type</MudTh>
-        <MudTh>Location</MudTh>
-        <MudTh>Refd</MudTh>
-        <MudTh>Active</MudTh>
-        <MudTh></MudTh>
-      </aderContent>
-       <Template>
-        <MudTd DataLabel="FriendlyName">
-            <MudText Color="Color.Primary"> @context.FriendlyName</MudText>
-        </MudTd>
-          <MTd DataLabel="DeploymentName">@context.DeploymentName</MudTd>
-           <Td DataLabel="ModelType">@(context.ModelType!.Value.ToString().Replace("_", " "))</MudTd>
-        <MudTd DataLabel="Location">@(context.Location)</MudTd>
-        <MudTd DataLabel="Refd">@(context.Events.Count)</MudTd>
-         <MuTd DataLabel="Active">@(context.Active ? "Yes" : "No")</MudTd>
-         <MuTd>
-            <MudStack Row="true" Spacing="1">
-                <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary"
+    <MudTable Items="@Models" Loading="@(Models is null)" LoadingProgressColor="Color.Info" Hover="true" Dense="true"
+        Striped="true" Breakpoint="Breakpoint.Sm">
+        <HeaderContent>
+            <MudTh>Friendly Name</MudTh>
+            <MudTh>Resource Name</MudTh>
+            <MudTh>Resource Type</MudTh>
+            <MudTh>Location</MudTh>
+            <MudTh>Refd</MudTh>
+            <MudTh>Active</MudTh>
+            <MudTh></MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="FriendlyName">
+                <MudText Color="Color.Primary"> @context.FriendlyName</MudText>
+            </MudTd>
+            <MudTd DataLabel="DeploymentName">@context.DeploymentName</MudTd>
+            <MudTd DataLabel="ModelType">@(context.ModelType!.Value.ToString().Replace("_", " "))</MudTd>
+            <MudTd DataLabel="Location">@(context.Location)</MudTd>
+            <MudTd DataLabel="Refd">@(context.Events.Count)</MudTd>
+            <MudTd DataLabel="Active">@(context.Active ? "Yes" : "No")</MudTd>
+            <MudTd>
+                <MudStack Row="true" Spacing="1">
+                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary"
                         Href="@($"/models/{context.CatalogId}")" />
                     <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Primary"
-                        @onclick="() => OpenDialog(context)"
-                        Disabled="context.Events.Count > 0 ? true : false" />
+                        @onclick="() => OpenDialog(context)" Disabled="context.Events.Count > 0 ? true : false" />
                 </MudStack>
             </MudTd>
         </RowTemplate>
