@@ -1,9 +1,4 @@
-﻿using AzureOpenAIProxy.Management.Database;
-using AzureOpenAIProxy.Management.Services;
-using Microsoft.AspNetCore.Components;
-using MudBlazor;
-
-namespace AzureOpenAIProxy.Management.Components.Pages;
+﻿namespace AzureOpenAIProxy.Management.Components.Pages;
 
 public partial class EventList : ComponentBase
 {
