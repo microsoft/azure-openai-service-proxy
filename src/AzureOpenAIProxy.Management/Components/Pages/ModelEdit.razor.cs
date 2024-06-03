@@ -16,7 +16,7 @@ public partial class ModelEdit : ComponentBase
     public IModelService ModelService { get; set; } = null!;
 
     [Inject]
-    public AoaiProxyContext db { get; set; } = null!;
+    public AoaiProxyContext DbContext { get; set; } = null!;
 
     [Inject]
     public NavigationManager NavigationManager { get; set; } = null!;
@@ -53,7 +53,7 @@ public partial class ModelEdit : ComponentBase
 
     private async Task OnValidSubmit(ModelEditorModel model)
     {
-        OwnerCatalog? m = await db.OwnerCatalogs.FindAsync(Guid.Parse(Id));
+        OwnerCatalog? m = await DbContext.OwnerCatalogs.FindAsync(Guid.Parse(Id));
 
         if (m is null)
         {
