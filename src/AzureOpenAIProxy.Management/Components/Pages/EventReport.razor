@@ -1,6 +1,4 @@
 @page "/reports"
-@using AzureOpenAIProxy.Management.Database
-@using AzureOpenAIProxy.Management.Services;
 
 @namespace AzureOpenAIProxy.Management.Components.Pages
 
@@ -21,7 +19,7 @@
                 <MudText Typo="Typo.body1">Select the event to view the metrics.</MudText>
             </MudStack>
             <MudSpacer />
-            <MudTextField @bind-Value="searchString1" Placeholder="Search by event or organizer name"
+            <MudTextField @bind-Value="searchString" Placeholder="Search by event or organizer name"
                 Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium"
                 Class="mt-0"></MudTextField>
         </ToolBarContent>
@@ -45,7 +43,7 @@
             </MudTh>
             <MudTh>
                 <MudTableSortLabel SortBy="new Func<EventRegistrations, object>(x => x.Registered)">
-                    Regd</MudTableSortLabel>
+                    Registrations</MudTableSortLabel>
             </MudTh>
             <MudTh>
                 Event

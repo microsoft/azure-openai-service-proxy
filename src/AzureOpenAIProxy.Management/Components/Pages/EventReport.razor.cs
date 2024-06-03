@@ -17,7 +17,7 @@ public partial class EventReport
     private int TotalRegistations { get; set; }
 
     private int EventCount {get; set;}
-    private string searchString1 = "";
+    private string searchString = "";
 
     protected override async Task OnInitializedAsync()
     {
@@ -28,9 +28,7 @@ public partial class EventReport
         EventCount = EventRegistrations.Count;
     }
 
-    private bool EventFilter(EventRegistrations element) => FilterByEventOrOrganizer(element, searchString1);
-
-    private bool FilterByEventOrOrganizer(EventRegistrations element, string searchString)
+    private bool EventFilter(EventRegistrations element)
     {
         if (string.IsNullOrWhiteSpace(searchString))
             return true;
