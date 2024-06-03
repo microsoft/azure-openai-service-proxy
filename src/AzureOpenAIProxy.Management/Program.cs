@@ -1,7 +1,6 @@
 using Azure.Core;
 using Azure.Identity;
 using AzureOpenAIProxy.Management;
-using AzureOpenAIProxy.Management.Components;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Web;
 using MudBlazor.Services;
@@ -74,7 +73,7 @@ app.UseStaticFiles();
 
 app.MapControllers();
 
-app.MapRazorComponents<App>()
+app.MapRazorComponents<Program>()
     .AddInteractiveServerRenderMode();
 
 app.Run();
