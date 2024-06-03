@@ -1,5 +1,4 @@
 using System.Data;
-using AzureOpenAIProxy.Management.Database;
 using Microsoft.EntityFrameworkCore;
 
 namespace AzureOpenAIProxy.Management.Services;
@@ -24,35 +23,22 @@ public class EventChartData
 
 public class MetricService(AoaiProxyContext db) : IMetricService
 {
-    public async Task<List<EventMetricsData>> GetEventMetricsAsync(string eventId)
+    public Task<List<EventMetricsData>> GetEventMetricsAsync(string eventId)
     {
-        var query = from mv in db.MetricViews
-                    where mv.EventId == eventId
-                    group mv by new { mv.EventId, mv.DateStamp, mv.Resource } into g
-                    orderby g.Count() descending
-                    select new
-                    {
-                        g.Key.EventId,
-                        g.Key.DateStamp,
-                        g.Key.Resource,
-                        PromptTokens = g.Sum(x => x.PromptTokens),
-                        CompletionTokens = g.Sum(x => x.CompletionTokens),
-                        TotalTokens = g.Sum(x => x.TotalTokens),
-                        Requests = g.Count()
-                    };
-
-        List<EventMetricsData> metricsData = await query.Select(x => new EventMetricsData
-        {
-            EventId = x.EventId,
-            DateStamp = x.DateStamp,
-            Resource = x.Resource,
-            PromptTokens = x.PromptTokens,
-            CompletionTokens = x.CompletionTokens,
-            TotalTokens = x.TotalTokens,
-            Requests = x.Requests
-        }).ToListAsync();
-
-        return metricsData;
+        return db.MetricViews
+            .Where(mv => mv.EventId == eventId)
+            .GroupBy(mv => new { mv.EventId, mv.DateStamp, mv.Resource })
+            .OrderByDescending(g => g.Count())
+            .Select(g => new EventMetricsData
+            {
+                EventId = g.Key.EventId,
+                DateStamp = g.Key.DateStamp,
+                Resource = g.Key.Resource,
+                PromptTokens = g.Sum(x => x.PromptTokens),
+                CompletionTokens = g.Sum(x => x.CompletionTokens),
+                TotalTokens = g.Sum(x => x.TotalTokens),
+                Requests = g.Count()
+            }).ToListAsync();
     }
 
     public (int attendeeCount, int requestCount) GetAttendeeMetricsAsync(string eventId)
@@ -68,47 +54,54 @@ public class MetricService(AoaiProxyContext db) : IMetricService
         return (userCount, requestCount);
     }
 
-    public async Task<List<EventRegistrations>> GetAllEventsAsync()
+    public Task<List<EventRegistrations>> GetAllEventsAsync()
     {
-        var query = from e in db.Events
-                    join a in db.EventAttendees on e.EventId equals a.EventId into ea
-                    from a in ea.DefaultIfEmpty()
-                    group a by new { e.EventId, e.EventCode, e.OrganizerName, e.StartTimestamp, e.EndTimestamp } into g
-                    select new
-                    {
-                        g.Key.EventId,
-                        g.Key.EventCode,
-                        g.Key.OrganizerName,
-                        g.Key.StartTimestamp,
-                        g.Key.EndTimestamp,
-                        RegistrationCount = g.Count(a => a.ApiKey != null)
-                    };
-
-        var allEvents = await query.Select(x => new EventRegistrations
-        {
-            EventId = x.EventId,
-            EventName = x.EventCode,
-            OrganizerName = x.OrganizerName,
-            StartDate = x.StartTimestamp,
-            EndDate = x.EndTimestamp,
-            Registered = x.RegistrationCount
-        }).ToListAsync();
-
-        return allEvents;
+        return db.Events
+            .GroupJoin(db.EventAttendees,
+                e => e.EventId,
+                a => a.EventId,
+                (e, ea) => new { Event = e, Attendees = ea })
+            .SelectMany(
+                x => x.Attendees.DefaultIfEmpty(),
+                (x, a) => new { x.Event, Attendee = a })
+            .GroupBy(
+                x => new
+                {
+                    x.Event.EventId,
+                    x.Event.EventCode,
+                    x.Event.OrganizerName,
+                    x.Event.StartTimestamp,
+                    x.Event.EndTimestamp
+                })
+            .Select(g => new
+            {
+                g.Key.EventId,
+                g.Key.EventCode,
+                g.Key.OrganizerName,
+                g.Key.StartTimestamp,
+                g.Key.EndTimestamp,
+                RegistrationCount = g.Count(a => a.Attendee != null && a.Attendee.ApiKey != null)
+            }).Select(x => new EventRegistrations
+            {
+                EventId = x.EventId,
+                EventName = x.EventCode,
+                OrganizerName = x.OrganizerName,
+                StartDate = x.StartTimestamp,
+                EndDate = x.EndTimestamp,
+                Registered = x.RegistrationCount
+            }).ToListAsync();
     }
 
-    public async Task<List<EventChartData>> GetActiveRegistrationsAsync(string eventId)
+    public Task<List<EventChartData>> GetActiveRegistrationsAsync(string eventId)
     {
-        var query = from a in db.ActiveAttendeeGrowthViews
-                    where a.EventId == eventId
-                    select new { a.DateStamp, a.Attendees };
-
-        List<EventChartData> activeRegistrations = await query.Select(x => new EventChartData
-        {
-            DateStamp = x.DateStamp,
-            Count = (int)x.Attendees
-        }).ToListAsync();
-
-        return activeRegistrations;
+        return db.ActiveAttendeeGrowthViews
+            .Where(a => a.EventId == eventId)
+            .Select(a => new { a.DateStamp, a.Attendees })
+            .Select(x => new EventChartData
+            {
+                DateStamp = x.DateStamp,
+                Count = (int)x.Attendees
+            })
+            .ToListAsync();
     }
 }
