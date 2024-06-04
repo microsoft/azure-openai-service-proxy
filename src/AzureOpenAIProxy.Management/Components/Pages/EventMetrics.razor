@@ -26,7 +26,7 @@
             Size="Size.Small" Style="width: 80px;" OnClick="RefreshData" />
 
         <MudPaper Class="pa-10 ma-2" Elevation="1">
-            <MudChart ChartType="ChartType.Line" ChartSeries="@ActiveUsersChartSeries" XAxisLabels="@ActiveUsersChartLabels" Width="100%" Height="450px">
+            <MudChart ChartType="ChartType.Line" ChartSeries="@ActiveUsersChartSeries" XAxisLabels="@ActiveUsersChartLabels" Width="100%" Height="400px">
                 <CustomGraphics>
                     <style>
                         .mud-chart-line { overflow: visible; }
@@ -36,7 +36,7 @@
         </MudPaper>
 
         <MudPaper Class="pa-10 ma-2" Elevation="1">
-            <MudChart ChartType="ChartType.Line" ChartSeries="@RequestChartSeries" XAxisLabels="@RequestChartLabels" Width="100%" Height="450px">
+            <MudChart ChartType="ChartType.Line" ChartSeries="@RequestChartSeries" XAxisLabels="@RequestChartLabels" Width="100%" Height="400px">
                 <CustomGraphics>
                     <style>
                         .mud-chart-line { overflow: visible; }
@@ -50,7 +50,7 @@
             <HeaderContent>
                 <MudTh>
                     <MudTableSortLabel SortBy="new Func<ModelCounts, object>(x => x.Resource)">
-                        Resource Name (Deployment or Index Name)</MudTableSortLabel>
+                        Resource Name</MudTableSortLabel>
                 </MudTh>
                 <MudTh>
                     <MudTableSortLabel SortBy="new Func<ModelCounts, object>(x => x.PromptTokens)">
@@ -72,7 +72,7 @@
             </HeaderContent>
 
             <RowTemplate>
-                <MudTd DataLabel="Resource Name (Deployment or Index Name)">@context.Resource</MudTd>
+                <MudTd DataLabel="Resource">@context.Resource</MudTd>
                 <MudTd DataLabel="Prompt tokens">@context.PromptTokens</MudTd>
                 <MudTd DataLabel="Completion tokens">@context.CompletionTokens</MudTd>
                 <MudTd DataLabel="Total tokens">@context.TotalTokens</MudTd>

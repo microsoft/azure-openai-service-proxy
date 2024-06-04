@@ -10,17 +10,16 @@
 
     <MudText Typo="Typo.h6">Events Report</MudText>
 
-    <MudTable Items="@EventRegistrations" Dense="true" Striped="true" SortLabel="Sort By" FixedHeader="true" Height="80vh"
+    <MudStack Spacing="2" Row="true">
+        <MudText Typo="Typo.body1">Total events: <strong>@EventCount</strong></MudText>
+        <MudText Typo="Typo.body1">Total registrations: <strong>@TotalRegistations</strong></MudText>
+    </MudStack>
+
+    <MudTable Items="@EventRegistrations" Dense="true" Striped="true" SortLabel="Sort By" FixedHeader="true" Height="calc(80vh - 60px)"
         Filter="new Func<EventRegistrations,bool>(EventFilter)" Hover="true">
         <ToolBarContent>
-            <MudStack Spacing="0">
-                <MudText Typo="Typo.body1">Total events: <strong>@EventCount</strong></MudText>
-                <MudText Typo="Typo.body1">Total registrations: <strong>@TotalRegistations</strong></MudText>
-            </MudStack>
-            <MudSpacer />
             <MudTextField @bind-Value="searchString" Placeholder="Search by event or organizer name"
-                Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium"
-                Class="mt-0"></MudTextField>
+                Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"/>
         </ToolBarContent>
         <HeaderContent>
             <MudTh>
