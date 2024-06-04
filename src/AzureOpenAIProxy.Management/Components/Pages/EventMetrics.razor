@@ -25,13 +25,27 @@
         <MudIconButton Icon="@Icons.Material.Filled.Refresh" Variant="Variant.Filled" Color="Color.Primary"
             Size="Size.Small" Style="width: 80px;" OnClick="RefreshData" />
 
-        <MudChart ChartType="ChartType.Line" ChartSeries="@ActiveUsersChartSeries" XAxisLabels="@ActiveUsersChartLabels"
-            Width="100%" Height="450px" />
+        <MudPaper Class="pa-10 ma-2" Elevation="1">
+            <MudChart ChartType="ChartType.Line" ChartSeries="@ActiveUsersChartSeries" XAxisLabels="@ActiveUsersChartLabels" Width="100%" Height="450px">
+                <CustomGraphics>
+                    <style>
+                        .mud-chart-line { overflow: visible; }
+                    </style>
+                </CustomGraphics>
+            </MudChart>
+        </MudPaper>
 
-        <MudChart ChartType="ChartType.Line" ChartSeries="@RequestChartSeries" XAxisLabels="@RequestChartLabels"
-            Width="100%" Height="450px" />
+        <MudPaper Class="pa-10 ma-2" Elevation="1">
+            <MudChart ChartType="ChartType.Line" ChartSeries="@RequestChartSeries" XAxisLabels="@RequestChartLabels" Width="100%" Height="450px">
+                <CustomGraphics>
+                    <style>
+                        .mud-chart-line { overflow: visible; }
+                    </style>
+                </CustomGraphics>
+            </MudChart>
+        </MudPaper>
 
-        <MudTable Items="@ModelCounts" Dense="true" Striped="true" SortLabel="Sort By" Hover="true"
+        <MudTable Class="pa-4 ma-2" Items="@ModelCounts" Dense="true" Striped="true" SortLabel="Sort By" Hover="true"
             Style="margin-bottom: 60px;">
             <HeaderContent>
                 <MudTh>

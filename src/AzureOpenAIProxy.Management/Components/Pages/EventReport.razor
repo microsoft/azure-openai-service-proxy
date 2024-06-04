@@ -10,13 +10,12 @@
 
     <MudText Typo="Typo.h6">Events Report</MudText>
 
-    <MudTable Items="@EventRegistrations" Dense="true" Striped="true" SortLabel="Sort By"
+    <MudTable Items="@EventRegistrations" Dense="true" Striped="true" SortLabel="Sort By" FixedHeader="true" Height="80vh"
         Filter="new Func<EventRegistrations,bool>(EventFilter)" Hover="true">
         <ToolBarContent>
             <MudStack Spacing="0">
                 <MudText Typo="Typo.body1">Total events: <strong>@EventCount</strong></MudText>
                 <MudText Typo="Typo.body1">Total registrations: <strong>@TotalRegistations</strong></MudText>
-                <MudText Typo="Typo.body1">Select the event to view the metrics.</MudText>
             </MudStack>
             <MudSpacer />
             <MudTextField @bind-Value="searchString" Placeholder="Search by event or organizer name"
@@ -27,11 +26,11 @@
             <MudTh>
                 <MudTableSortLabel InitialDirection="SortDirection.Ascending"
                     SortBy="new Func<EventRegistrations, object>(x => x.EventName)">
-                    Event metrics</MudTableSortLabel>
+                    Metrics</MudTableSortLabel>
             </MudTh>
             <MudTh>
                 <MudTableSortLabel SortBy="new Func<EventRegistrations, object>(x => x.OrganizerName)">
-                    Organizer name</MudTableSortLabel>
+                    Owner</MudTableSortLabel>
             </MudTh>
             <MudTh>
                 <MudTableSortLabel SortBy="new Func<EventRegistrations, object>(x => x.StartDate)">
@@ -43,7 +42,7 @@
             </MudTh>
             <MudTh>
                 <MudTableSortLabel SortBy="new Func<EventRegistrations, object>(x => x.Registered)">
-                    Registrations</MudTableSortLabel>
+                    Regd</MudTableSortLabel>
             </MudTh>
             <MudTh>
                 Event
@@ -51,17 +50,17 @@
         </HeaderContent>
 
         <RowTemplate>
-            <MudTd DataLabel="Event Metrics">
+            <MudTd DataLabel="Metrics">
                 <MudLink Href="@($"/event/{context.EventId}/metrics")">@context.EventName</MudLink>
             </MudTd>
-            <MudTd DataLabel="Organizer name">@context.OrganizerName</MudTd>
-            <MudTd>
-                <MudText style="min-width: 100px;" Typo="Typo.body2">@context.StartDate.ToString("yyyy-MMM-dd")</MudText>
+            <MudTd DataLabel="Owner">@context.OrganizerName</MudTd>
+            <MudTd DataLabel="Start date">
+                <MudText Typo="Typo.body2" style="white-space: nowrap;">@context.StartDate.ToString("yyyy-MMM-dd")</MudText>
             </MudTd>
-            <MudTd>
-                <MudText style="min-width: 100px;" Typo="Typo.body2">@context.EndDate.ToString("yyyy-MMM-dd")</MudText>
+            <MudTd DataLabel="End date">
+                <MudText Typo="Typo.body2" style="white-space: nowrap;">@context.EndDate.ToString("yyyy-MMM-dd")</MudText>
             </MudTd>
-            <MudTd DataLabel="Attendee Count">@context.Registered</MudTd>
+            <MudTd DataLabel="Registered">@context.Registered</MudTd>
             <MudTd DataLabel="Attendee link">
                 <MudLink Target="_blank" Href="@($"{Configuration["PlaygroundUrl"]}/event/{context.EventId}")">
                     <MudIcon Icon="@Icons.Material.Filled.Link" />
