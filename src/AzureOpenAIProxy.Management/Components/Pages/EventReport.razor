@@ -50,14 +50,14 @@
         </HeaderContent>
 
         <RowTemplate>
-            <MudTd>
+            <MudTd DataLabel="Metrics">
                 <MudLink Href="@($"/event/{context.EventId}/metrics")">@context.EventName</MudLink>
             </MudTd>
             <MudTd DataLabel="Owner">@context.OrganizerName</MudTd>
-            <MudTd>
+            <MudTd DataLabel="Start date">
                 <MudText Typo="Typo.body2" style="white-space: nowrap;">@context.StartDate.ToString("yyyy-MMM-dd")</MudText>
             </MudTd>
-            <MudTd>
+            <MudTd DataLabel="End date">
                 <MudText Typo="Typo.body2" style="white-space: nowrap;">@context.EndDate.ToString("yyyy-MMM-dd")</MudText>
             </MudTd>
             <MudTd DataLabel="Registered">@context.Registered</MudTd>
