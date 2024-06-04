@@ -2,12 +2,12 @@ param name string
 param location string = resourceGroup().location
 param tags object = {}
 
+@description('The name of the user assigned identity that the container app will used to connect to the container registraty')
 param identityName string
 param containerAppsEnvironmentName string
 param containerRegistryName string
 param serviceName string = 'proxy'
 param exists bool
-param postgresUser string
 param postgresDatabase string
 param postgresServer string
 @secure()
@@ -32,7 +32,7 @@ module app 'core/host/container-app-upsert.bicep' = {
     containerRegistryName: containerRegistryName
     targetPort: 3100
     containerCpuCoreCount: '0.75'
-    containerMemory:'1.5Gi'
+    containerMemory: '1.5Gi'
     containerMaxReplicas: 2
     secrets: [
       {
@@ -41,7 +41,7 @@ module app 'core/host/container-app-upsert.bicep' = {
       }
       {
         name: 'postgres-user'
-        value: postgresUser
+        value: name
       }
       {
         name: 'postgres-database'
