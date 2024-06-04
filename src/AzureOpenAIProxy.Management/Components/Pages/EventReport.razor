@@ -10,7 +10,7 @@
 
     <MudText Typo="Typo.h6">Events Report</MudText>
 
-    <MudTable Items="@EventRegistrations" Dense="true" Striped="true" SortLabel="Sort By"
+    <MudTable Items="@EventRegistrations" Dense="true" Striped="true" SortLabel="Sort By" FixedHeader="true" Height="80vh"
         Filter="new Func<EventRegistrations,bool>(EventFilter)" Hover="true">
         <ToolBarContent>
             <MudStack Spacing="0">
