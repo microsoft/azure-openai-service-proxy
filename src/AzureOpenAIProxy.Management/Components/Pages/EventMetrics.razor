@@ -25,15 +25,15 @@
         <MudIconButton Icon="@Icons.Material.Filled.Refresh" Variant="Variant.Filled" Color="Color.Primary"
             Size="Size.Small" Style="width: 80px;" OnClick="RefreshData" />
 
-        <MudPaper Class="pa-1 ma-2" Elevation="1">
+        <MudPaper Class="pa-2 ma-2" Elevation="1">
             <MudChart ChartType="ChartType.Line" ChartSeries="@ActiveUsersChartSeries" XAxisLabels="@ActiveUsersChartLabels" Width="100%" Height="400px"/>
         </MudPaper>
 
-        <MudPaper Class="pa-1 ma-2" Elevation="1">
+        <MudPaper Class="pa-2 ma-2" Elevation="1">
             <MudChart ChartType="ChartType.Line" ChartSeries="@RequestChartSeries" XAxisLabels="@RequestChartLabels" Width="100%" Height="400px"/>
         </MudPaper>
 
-        <MudTable Class="pa-1 ma-2" Items="@ModelCounts" Dense="true" Striped="true" SortLabel="Sort By" Hover="true"
+        <MudTable Class="pa-2 ma-2" Items="@ModelCounts" Dense="true" Striped="true" SortLabel="Sort By" Hover="true"
             Style="margin-bottom: 60px;">
             <HeaderContent>
                 <MudTh>
