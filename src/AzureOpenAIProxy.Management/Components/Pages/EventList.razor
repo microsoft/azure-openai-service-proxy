@@ -28,13 +28,13 @@
                     </MudText>
                 </MudStack>
             </MudTd>
-            <MudTd>
+            <MudTd DataLabel="Owner">
                 <MudStack Spacing="1">
                     <MudText Typo="Typo.body1">@context.OrganizerName</MudText>
                     <MudText Typo="Typo.caption">@context.OrganizerEmail</MudText>
                 </MudStack>
             </MudTd>
-            <MudTd>
+            <MudTd DataLabel="When">
                 <MudStack Spacing="1">
                     <MudText Typo="Typo.body1" Style="min-width: 140px">
                         @context.StartTimestamp.ToString("yyyy-MMM-dd HH:mm")
@@ -45,10 +45,10 @@
                     <MudText Typo="Typo.caption">@context.TimeZoneLabel</MudText>
                 </MudStack>
             </MudTd>
-            <MudTd>
+            <MudTd DataLabel="Regd">
                 <MudText Typo="Typo.body1">@context.EventAttendees.Count</MudText>
             </MudTd>
-            <MudTd DataLabel="Active" style="padding: 0;">@(context.Active ? "Yes" : "No")</MudTd>
+            <MudTd DataLabel="Active">@(context.Active ? "Yes" : "No")</MudTd>
             <MudTd>
             <MudStack Row="true" Spacing="1">
                 <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" Href="@($"/event/{context.EventId}")" />
