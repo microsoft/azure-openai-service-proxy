@@ -13,7 +13,7 @@
         Breakpoint="Breakpoint.Sm">
         <HeaderContent>
             <MudTh>Event</MudTh>
-            <MudTh>Organiser</MudTh>
+            <MudTh>Owner</MudTh>
             <MudTh>When</MudTh>
             <MudTh>Regd</MudTh>
             <MudTh style="padding: 0;">Active</MudTh>
@@ -36,10 +36,10 @@
             </MudTd>
             <MudTd DataLabel="When">
                 <MudStack Spacing="1">
-                    <MudText Typo="Typo.body1" Style="min-width: 140px">
+                    <MudText Typo="Typo.body1" style="white-space: nowrap;">
                         @context.StartTimestamp.ToString("yyyy-MMM-dd HH:mm")
                     </MudText>
-                    <MudText Typo="Typo.body1">
+                    <MudText Typo="Typo.body1" style="white-space: nowrap;">
                         @context.EndTimestamp.ToString("yyyy-MMM-dd HH:mm")
                     </MudText>
                     <MudText Typo="Typo.caption">@context.TimeZoneLabel</MudText>
