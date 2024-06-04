@@ -184,7 +184,6 @@ output SERVICE_PROXY_IDENTITY_PRINCIPAL_ID string = proxy.outputs.SERVICE_PROXY_
 output SERVICE_PROXY_NAME string = proxy.outputs.SERVICE_PROXY_NAME
 output SERVICE_PROXY_URI string = proxy.outputs.SERVICE_PROXY_URI
 output SERVICE_PROXY_IMAGE_NAME string = proxy.outputs.SERVICE_PROXY_IMAGE_NAME
-output SERVICE_PROXY_ENDPOINTS array = ['${proxy.outputs.SERVICE_PROXY_URI}/docs']
 
 output SERVICE_PLAYGROUND_URI string = playground.outputs.SERVICE_WEB_URI
 
