@@ -1,25 +1,30 @@
 ﻿@inherits LayoutComponentBase
 
-<MudThemeProvider />
+<MudThemingProvider />
+<MudPopoverProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
 
 <MudLayout>
-    <MudAppBar Elevation="0">
+    <MudAppBar Elevation="1">
+		<MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
+        <MudText Typo="Typo.h5" Class="ml-3">Application</MudText>
         <MudSpacer />
-        <LoginDisplay />
-        <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Color="Color.Inherit"
-            Href="https://aka.ms/ai-proxy-faq" Target="_blank" />
+        <MudIconButton Icon="@Icons.Material.Filled.MoreVert" Color="Color.Inherit" Edge="Edge.End" />
     </MudAppBar>
-    <MudDrawer Open="true" Elevation="1">
-        <MudDrawerHeader>
-            <MudText Typo="Typo.h6">Azure AI Proxy</MudText>
-        </MudDrawerHeader>
+    <MudDrawer @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2">
         <NavMenu />
     </MudDrawer>
-    <MudMainContent>
-        <MudContainer MaxWidth="MaxWidth.Large" Class="mx-0 pt-10">
-            @Body
-        </MudContainer>
+    <MudMainContent Class="mt-16 pa-4">
+        @Body
     </MudMainContent>
 </MudLayout>
+
+@code {
+    private bool _drawerOpen = true;
+
+    private void DrawerToggle()
+    {
+        _drawerOpen = !_drawerOpen;
+    }
+}
