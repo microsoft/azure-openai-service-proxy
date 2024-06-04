@@ -23,13 +23,13 @@
             <MudTh></MudTh>
         </HeaderContent>
         <RowTemplate>
-            <MudTd DataLabel="FriendlyName">
+            <MudTd DataLabel="Friendly Name">
                 <MudText Color="Color.Primary"> @context.FriendlyName</MudText>
             </MudTd>
-            <MudTd DataLabel="DeploymentName">@context.DeploymentName</MudTd>
-            <MudTd DataLabel="ModelType">@(context.ModelType!.Value.ToString().Replace("_", " "))</MudTd>
+            <MudTd DataLabel="Deployment Name">@context.DeploymentName</MudTd>
+            <MudTd DataLabel="Model Type">@(context.ModelType!.Value.ToString().Replace("_", " "))</MudTd>
             <MudTd DataLabel="Location">@(context.Location)</MudTd>
-            <MudTd DataLabel="Refd">@(context.Events.Count)</MudTd>
+            <MudTd DataLabel="Referenced">@(context.Events.Count)</MudTd>
             <MudTd DataLabel="Active">@(context.Active ? "Yes" : "No")</MudTd>
             <MudTd>
                 <MudStack Row="true" Spacing="1">
