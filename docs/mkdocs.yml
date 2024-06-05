@@ -19,6 +19,7 @@ plugins:
 
 theme:
   name: material
+  favicon: media/favicon.png
   features:
     - navigation.instant
     - navigation.footer
