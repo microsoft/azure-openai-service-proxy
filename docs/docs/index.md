@@ -35,3 +35,9 @@ The Azure AI Proxy consists of the following components:
 1. Self-service attendee registration. Attendees can register for an event and receive a time bound API Key to access the AI Proxy service.
 1. The AI Proxy service. The AI Proxy service provides access to the Azure AI resources using a time bound API Key.
 1. The AI Playground. The AI Playground provides an AI `Playground` experience for developers to explore the Azure OpenAI chat completion using the time bound event code with different models and parameters.
+
+## Open Source
+
+The Azure AI Proxy is an open-source project, licensed under MIT. You can find the source code on [GitHub](https://github.com/microsoft/azure-openai-service-proxy).
+
+This project would not be possible without contributions from multiple people. Please feel free to contribute to the project by submitting a pull request or opening an issue.
