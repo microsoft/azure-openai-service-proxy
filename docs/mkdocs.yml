@@ -24,6 +24,7 @@ theme:
   features:
     - navigation.instant
     - navigation.footer
+    - content.code.copy
 
   # Change Font: https://squidfunk.github.io/mkdocs-material/setup/changing-the-fonts/?h=fonts
   # Google Fonts Supported By Default: https://fonts.google.com/
@@ -49,6 +50,7 @@ theme:
 markdown_extensions:
   - toc:
       permalink: true
+      toc_depth: 0
   - admonition
   - pymdownx.details
   - pymdownx.superfences
