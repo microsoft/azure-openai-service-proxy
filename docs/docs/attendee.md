@@ -8,7 +8,7 @@ Attendees are required to have a GitHub account to register for an event. The Gi
 
     ![](./media/attendee_registration.png)
 
-1. From the event details page, select the `ATTENDEE` button. This will opens the event registration page. Share the link to this page with your audience. The following image is an example of the event registration page.
+1. From the event details page, select the highlighted in red `Attendee/People` icon. The event registration page will open. Share the link to this page with your audience. The following image is an example of the event registration page.
 
     ![](./media/attendee-registration.png)
 

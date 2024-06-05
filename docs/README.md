@@ -1,7 +1,6 @@
-# Prompt Flow Demo Docs
+# Azure AI Proxy Service
 
-Published at [Prompt Flow Demo/Workshop](https://gloveboxes.github.io/prompt_flow_demo_docs/)
-
+Published at [AI Proxy Docs](https://microsoft.github.io/azure-openai-service-proxy/)
 
 For full documentation visit [mkdocs.org](https://www.mkdocs.org).
 
@@ -18,3 +17,7 @@ For full documentation visit [mkdocs.org](https://www.mkdocs.org).
     docs/
         index.md  # The documentation homepage.
         ...       # Other markdown pages, images and other files.
+
+## Material docs
+
+[Material for MkDocs](https://squidfunk.github.io/mkdocs-material/)
