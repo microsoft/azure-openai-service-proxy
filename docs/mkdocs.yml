@@ -2,13 +2,13 @@ site_name: Azure AI Proxy
 
 nav:
   - Introduction: index.md
-  - Capacity Planning: capacity.md
   - Resources: resources.md
   - Events: events.md
   - Attendees: attendee.md
   - Reporting: reporting.md
+  - Capacity: capacity.md
   - Playground: playground.md
-  - SDKs: sdk.md
+  - Developers: developers.md
   - Deployment: deployment.md
   - Workshops: workshops.md
   - FAQ: faq.md
