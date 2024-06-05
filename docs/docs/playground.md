@@ -1,4 +1,4 @@
-# Introduction to the AI Proxy Playground
+# The AI Proxy Playground
 
 The Azure AI Playground is a web-based application that provides a `Playground` experience for developers to explore the Azure OpenAI chat completion using a time bound event code with different models and parameters.
 
