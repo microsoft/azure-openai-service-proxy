@@ -11,7 +11,7 @@ The report page summarizes the events that match the search criteria. The report
 5. Number of registrations
 6. The attendee registration link
 
-![](media/events-report.png)
+![This chart shows the events reporting page](media/events-report.png)
 
 ## Detailed metrics for each event
 
@@ -22,14 +22,14 @@ You can view detailed metrics for each event by clicking on the event title. The
 1. The **Requests** chart. This is the number of requests that have been made to the AI Proxy service for the event.
 1. The **Resources** table, which is a breakdown of the resources that have been used in the event. The number of requests and tokens for a model.
 
-### New Active Registrations
+### New Active Registrations over time
 
-![](media/new-active-registrations.png)
+![This chart shows new active registrations](media/new-active-registrations.png)
 
-## Requests
+### AI Proxy Requests over time
 
-![](media/requests.png)
+![This chart shows AI Proxy requests over time](media/requests.png)
 
 ### Event resource usage
 
-![](media/event-resource-usage.png)
+![This chart shows break down of resource usage](media/event-resource-usage.png)
