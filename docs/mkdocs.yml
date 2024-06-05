@@ -21,6 +21,7 @@ theme:
   name: material
   features:
     - navigation.instant
+    - navigation.footer
 
   # Change Font: https://squidfunk.github.io/mkdocs-material/setup/changing-the-fonts/?h=fonts
   # Google Fonts Supported By Default: https://fonts.google.com/

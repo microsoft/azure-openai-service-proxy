@@ -75,19 +75,20 @@ The recommended way to deploy this app is with Dev Containers. Install the [VS C
     ```
 
     You will be prompted for the following:
+
     1. The environment name, keep the name short, max 7 characters to avoid invalid resource names being generated.
     1. Select a subscription from your Azure account.
     1. Select a location (like "eastus" or "sweden central"). Then azd will provision the resources in your account and deploy the latest code. Recommend deploying the proxy to the same location you plan to deploy your models.
     1. Enter a value for the 'authClientId' infrastructure parameter. This is the Entra App Registration `Application (client) ID` you created.
     1. Save the value in the environment for future use.
-    3. Enter a value for the 'swaLocation' infrastructure parameter. Recommend selecting a location close to or the same as the Azure location you previously selected.
-    4. Save the value in the environment for future use.
+    1. Enter a value for the 'swaLocation' infrastructure parameter. Recommend selecting a location close to or the same as the Azure location you previously selected.
+    1. Save the value in the environment for future use.
 
     On completion, the following Azure resources will be provisioned:
 
     ![Azure OpenAI Playground experience](media/azure_resources.png)
 
-2. When `azd` has finished deploying you'll see a link to the Azure Resource Group created for the solution.
+1. When `azd` has finished deploying you'll see a link to the Azure Resource Group created for the solution.
 
     The Admin and Playground links will be displayed when `azd up` completes.
 
