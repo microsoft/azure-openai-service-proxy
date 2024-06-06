@@ -135,6 +135,27 @@ public class ModelService(IAuthService authService, AoaiProxyContext db, IConfig
         return result;
     }
 
+    public async Task DuplicateOwnerCatalogAsync(OwnerCatalog ownerCatalog)
+    {
+        string entraId = await authService.GetCurrentUserEntraIdAsync();
+        Owner owner = await db.Owners.FirstOrDefaultAsync(o => o.OwnerId == entraId) ?? throw new InvalidOperationException("EntraID is not a registered owner.");
+
+        OwnerCatalog catalog = new()
+        {
+            Owner = owner,
+            Active = ownerCatalog.Active,
+            FriendlyName = $"{ownerCatalog.FriendlyName} (Copy)",
+            DeploymentName = ownerCatalog.DeploymentName,
+            Location = ownerCatalog.Location,
+            ModelType = ownerCatalog.ModelType,
+            EndpointKeyEncrypted = ownerCatalog.EndpointKeyEncrypted,
+            EndpointUrlEncrypted = ownerCatalog.EndpointUrlEncrypted
+        };
+
+        await db.OwnerCatalogs.AddAsync(catalog);
+        await db.SaveChangesAsync();
+    }
+
     public async Task<IEnumerable<OwnerCatalog>> GetOwnerCatalogsAsync()
     {
         string entraId = await authService.GetCurrentUserEntraIdAsync();

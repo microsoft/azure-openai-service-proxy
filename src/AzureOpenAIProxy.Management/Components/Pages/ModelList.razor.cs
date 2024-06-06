@@ -34,6 +34,11 @@ public partial class ModelList : ComponentBase
             await ModelService.DeleteOwnerCatalogAsync(resource.CatalogId);
             Models = await ModelService.GetOwnerCatalogsAsync();
         }
+    }
 
+    private async Task DuplicateOwnerCatalogAsync(OwnerCatalog resource)
+    {
+        await ModelService.DuplicateOwnerCatalogAsync(resource);
+        Models = await ModelService.GetOwnerCatalogsAsync();
     }
 }

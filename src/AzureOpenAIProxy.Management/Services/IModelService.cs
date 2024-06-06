@@ -9,4 +9,5 @@ public interface IModelService
     Task<IEnumerable<OwnerCatalog>> GetOwnerCatalogsAsync();
     Task<OwnerCatalog> GetOwnerCatalogAsync(Guid catalogId);
     Task UpdateOwnerCatalogAsync(OwnerCatalog ownerCatalog);
+    Task DuplicateOwnerCatalogAsync(OwnerCatalog ownerCatalog);
 }
