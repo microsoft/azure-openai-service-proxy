@@ -34,6 +34,12 @@ To delete a resource, click on the `Delete` icon next to the resource you want t
 
 ![Image shows how to delete a resource](./media/proxy_delete_resource.png)
 
+### Dall-E resources
+
+Dall-E-3 resources, when added to an event will enable the `Images` tab in the AI Playground.
+
+![](./media/dalle-resource-playground.png)
+
 ### Load balancing resources
 
 For larger events with many attendees (for example 200 concurrent users generating 4 model requests per minute) you can configure multiple resources with the same resource name to balance the load.
