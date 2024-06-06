@@ -22,13 +22,15 @@ To add a resource, click on the `+ New Resource` button.
 
 ### Duplicate resources
 
-To duplicate a resource, click on the `Duplicate` button next to the resource you want to duplicate.
+Duplicating a resource is useful when you want to create a new resource with similar settings as an existing resource.
+
+To duplicate a resource, click on the `Duplicate` icon next to the resource you want to duplicate.
 
 ![Image shows how to duplicate a resource](./media/proxy_duplicate_resource.png)
 
 ### Deleting resources
 
-To delete a resource, click on the `Delete` button next to the resource you want to delete. Note, you cannot delete a resource that is in use by an event.
+To delete a resource, click on the `Delete` icon next to the resource you want to delete. Note, you cannot delete a resource that is in use by an event.
 
 ![Image shows how to delete a resource](./media/proxy_delete_resource.png)
 
