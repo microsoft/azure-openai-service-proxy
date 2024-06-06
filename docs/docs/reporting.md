@@ -2,14 +2,7 @@
 
 The AI Proxy Admin portal provides a reporting feature that allows you to view the usage of the AI Proxy service. All events are listed in the reporting page, and you can filter the events by key words from the event title and event owner.
 
-The report page summarizes the events that match the search criteria. The report includes the following information:
-
-1. Event title
-2. Event owner
-3. Start date and time
-4. End date and time
-5. Number of registrations
-6. The attendee registration link
+The report page summarizes the events that match the search criteria.
 
 ![This chart shows the events reporting page](media/events-report.png)
 

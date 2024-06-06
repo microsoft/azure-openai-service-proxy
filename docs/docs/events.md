@@ -9,7 +9,7 @@ From the AI Proxy Admin portal, you can create and manage events. An event is a 
 1. Sign into the AI Proxy Admin portal and authenticate using your organization's Entra credentials.
 1. Select the `Events` tab, then add a new event.
 
-   ![](./media/proxy-events.png)
+      ![](./media/proxy-events.png)
 
 1. Add the event details, including the event name, start and end date.
 
@@ -37,20 +37,21 @@ From the AI Proxy Admin portal, you can create and manage events. An event is a 
    1. **Description**: The `Markdown` description of the event. This description is displayed when an event attendee registers for a time bound API Key to access the AI Proxy service.
    1. Select `Save` to create the event.
 
-   ![](./media/proxy-new-event.png)
+      ![](./media/proxy-new-event.png)
 
 ## Assigning resources to events
 
 Once you have created an event, you can assign resources to the event. This allows you to control the resources that are available to the event attendees.
 
-1. Select the `Events` tab, then select the event you want to assign resources to.
+1. Select the `Events` tab.
+1. Select the `Edit` icon of the event you want to assign resources.
 
-   ![](./media/proxy-events.png)
+      ![](./media/proxy-events.png)
 
 1. From the event details page, select the `Resources` tab.
 1. From the `Resources` tab, select the resources that you want to assign to the event.
 
-   ![](./media/assign-resources.png)
+      ![](./media/assign-resources.png)
 
 1. Select on white space to close the resource selection dialog.
 1. Select `UPDATE RESOURCES` to assign the resources to the event.

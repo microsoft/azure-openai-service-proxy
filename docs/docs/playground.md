@@ -8,7 +8,7 @@ The AI Playground provides the following features:
 
 1. **Model selection**: The AI Playground allows you to select from a list of available models. The models are configured by the event organizer and are available to the attendees of the event.
 
-![OpenAI Proxy Playground](media/openai_proxy_playground.png)
+    ![OpenAI Proxy Playground](media/openai_proxy_playground.png)
 
 1. Set the `Max Token` parameter: The `Max Token` parameter is used to control the length of the chat completion.
 1. Set the `Temperature` parameter: The `Temperature` parameter is used to control the randomness of the chat completion.
