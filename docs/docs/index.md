@@ -13,6 +13,12 @@ There are four primary use cases for the Azure OpenAI proxy service:
 1. Access to developer APIs via REST endpoints and the OpenAI SDKs and LangChain. Access to these services is granted using a time bound event code.
 1. Access to Azure AI Search queries using the Azure OpenAI proxy service. Access to these services is granted using a time bound event code.
 
+## Getting Started with the Azure AI Proxy
+
+Watch this 5-minute video to learn how to get started with the Azure AI Proxy.
+
+<iframe width="672" height="378" src="https://www.youtube.com/embed/x9N1qivjlfw?si=tdgJv9bDAUabpnPt" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
 ## Bring your own models
 
 The Azure AI Proxy provides the infrastructure to support the deployment of your own models. You need to provide the models supporting your event. Initially, the proxy service supports the `chat completion`, `completion`, `embeddings`, and `dall-e-3` APIs.
