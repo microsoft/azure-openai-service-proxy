@@ -34,12 +34,13 @@
             <MudTd>
                 <MudStack Row="true" Spacing="1">
                     <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary"
-                        Href="@($"/models/{context.CatalogId}")" />
+                        Href="@($"/models/{context.CatalogId}")" Title="Edit" />
+                    <MudIconButton Icon="@Icons.Material.Filled.ContentCopy" Color="Color.Primary"
+                        @onclick="() => DuplicateOwnerCatalogAsync(context)" Title="Duplicate" />
                     <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Primary"
-                        @onclick="() => OpenDialog(context)" Disabled="context.Events.Count > 0 ? true : false" />
+                        @onclick="() => OpenDialog(context)" Disabled="context.Events.Count > 0 ? true : false" Title="Delete" />
                 </MudStack>
             </MudTd>
         </RowTemplate>
     </MudTable>
-
 </MudStack>
