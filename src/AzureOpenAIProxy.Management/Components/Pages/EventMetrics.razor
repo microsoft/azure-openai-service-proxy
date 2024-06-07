@@ -23,7 +23,7 @@
         </MudStack>
 
         <MudIconButton Icon="@Icons.Material.Filled.Refresh" Variant="Variant.Filled" Color="Color.Primary"
-            Size="Size.Small" Style="width: 80px;" OnClick="RefreshData" />
+            Size="Size.Small" Style="width: 80px;" OnClick="RefreshData" Disabled="@IsLoading"/>
 
         <MudPaper Class="pa-10 ma-2" Elevation="1">
             <MudChart ChartType="ChartType.Line" ChartSeries="@ActiveUsersChartSeries" XAxisLabels="@ActiveUsersChartLabels" Width="100%" Height="400px">
