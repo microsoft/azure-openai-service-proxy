@@ -40,13 +40,7 @@ public partial class EventMetrics
 
     private async Task GetData()
     {
-        if (IsLoading)
-        {
-            return;
-        }
-
         IsLoading = true;
-
 
         (AttendeeCount, RequestCount) = MetricService.GetAttendeeMetricsAsync(EventId);
         List<EventMetricsData> MetricsData = await MetricService.GetEventMetricsAsync(EventId);
@@ -54,6 +48,7 @@ public partial class EventMetrics
 
         if (MetricsData is null)
         {
+            IsLoading = false;
             return;
         }
 
