@@ -55,7 +55,6 @@ Once you have created an event, you can assign resources to the event. This allo
 
 1. Select on white space to close the resource selection dialog.
 1. Select `UPDATE RESOURCES` to assign the resources to the event.
-1. Select `Save` to save the event with the updated resources.
 
 !!! note
     Remember, if you are load balancing across multiple models, ensure the model deployments names are the same, and add each deployment to the event.
