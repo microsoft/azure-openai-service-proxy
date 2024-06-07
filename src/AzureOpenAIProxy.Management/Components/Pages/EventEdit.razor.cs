@@ -83,5 +83,7 @@ public partial class EventEdit : ComponentBase
         modelsUpdating = true;
         await EventService.UpdateModelsForEventAsync(Id, SelectedModels.Select(Guid.Parse));
         modelsUpdating = false;
+
+        NavigationManager.NavigateTo("/events");
     }
 }
