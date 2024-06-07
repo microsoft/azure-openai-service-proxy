@@ -15,9 +15,9 @@
         Striped="true" Breakpoint="Breakpoint.Sm">
         <HeaderContent>
             <MudTh>Friendly Name</MudTh>
-            <MudTh>Resource Name</MudTh>
-            <MudTh>Resource Type</MudTh>
-            <MudTh>Location</MudTh>
+            <MudTh>Name</MudTh>
+            <MudTh>Type</MudTh>
+            <MudTh>Region</MudTh>
             <MudTh>Refd</MudTh>
             <MudTh>Active</MudTh>
             <MudTh></MudTh>
@@ -26,9 +26,9 @@
             <MudTd DataLabel="Friendly Name">
                 <MudText Color="Color.Primary"> @context.FriendlyName</MudText>
             </MudTd>
-            <MudTd DataLabel="Deployment Name">@context.DeploymentName</MudTd>
-            <MudTd DataLabel="Model Type">@(context.ModelType!.Value.ToString().Replace("_", " "))</MudTd>
-            <MudTd DataLabel="Location">@(context.Location)</MudTd>
+            <MudTd DataLabel="Name">@context.DeploymentName</MudTd>
+            <MudTd DataLabel="Type">@(context.ModelType!.Value.ToString().Replace("_", " "))</MudTd>
+            <MudTd DataLabel="Region">@(context.Location)</MudTd>
             <MudTd DataLabel="Referenced">@(context.Events.Count)</MudTd>
             <MudTd DataLabel="Active">@(context.Active ? "Yes" : "No")</MudTd>
             <MudTd>
