@@ -18,17 +18,14 @@
         <MudCardContent>
             <MudTextField Label="Event Name" @bind-Value="Model.Name" For="@(() => Model.Name)" />
 
-            @if (Model.AvailableModels != null && Model.AvailableModels.Any())
-            {
-                <MudSelect Label="Event resources" MultiSelection="true" @bind-SelectedValues="Model.SelectedModels"
-                    MultiSelectionTextFunc="@(new Func<List<string>, string>(Model.SelectedModelsDisplay))"
-                    Disabled="@modelsUpdating">
-                    @foreach (var model in Model.AvailableModels)
-                    {
-                        <MudSelectItem Value="@model.CatalogId.ToString()">@model.FriendlyName</MudSelectItem>
-                    }
-                </MudSelect>
-            }
+            <MudSelect Label="Event resources" MultiSelection="true" @bind-SelectedValues="Model.SelectedModels"
+                MultiSelectionTextFunc="@(new Func<List<string>, string>(Model.SelectedModelsDisplay))"
+                Disabled="@modelsUpdating">
+                @foreach (var model in Model.AvailableModels)
+                {
+                    <MudSelectItem Value="@model.CatalogId.ToString()">@model.FriendlyName</MudSelectItem>
+                }
+            </MudSelect>
 
             <MudTextField
                 Label="Event Shared Code (Optional)"
