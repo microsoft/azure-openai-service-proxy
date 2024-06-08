@@ -54,6 +54,12 @@ public partial class EventEdit : ComponentBase
     private async Task OnValidSubmit(EventEditorModel model)
     {
         Event? evt = await EventService.UpdateEventAsync(Id, model);
+
+        if (model.SelectedModels is not null && evt is not null)
+        {
+            await EventService.UpdateModelsForEventAsync(Id, model.SelectedModels.ToList().Select(Guid.Parse));
+        }
+
         NavigationManager.NavigateTo("/events");
     }
 }

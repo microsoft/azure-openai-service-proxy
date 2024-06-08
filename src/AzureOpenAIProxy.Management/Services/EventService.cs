@@ -80,6 +80,7 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
             }
         }
 
+        // Need to close else the next event catalog update fails
         conn.Close();
 
         return newEvent;
@@ -133,11 +134,6 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
         evt.TimeZoneOffset = (int)model.SelectedTimeZone.BaseUtcOffset.TotalMinutes;
 
         await db.SaveChangesAsync();
-
-        if (model.SelectedModels is not null)
-        {
-            await UpdateModelsForEventAsync(id, model.SelectedModels.ToList().Select(Guid.Parse));
-        }
 
         return evt;
     }
