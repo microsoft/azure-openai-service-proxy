@@ -80,6 +80,8 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
             }
         }
 
+        conn.Close();
+
         return newEvent;
     }
 

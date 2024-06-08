@@ -6,6 +6,5 @@
 
 <MudStack>
     <Help Title="Create a new event" />
-
-    <EventEditor OnValidSubmit="@HandleValidSubmit" />
+    <EventEditor OnValidSubmit="@HandleValidSubmit" @bind-Model="Model"/>
 </MudStack>

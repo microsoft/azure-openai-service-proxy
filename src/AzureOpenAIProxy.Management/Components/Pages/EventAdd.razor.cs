@@ -17,9 +17,25 @@ public partial class EventAdd : ComponentBase
     [Inject]
     public required AuthenticationStateProvider AuthenticationStateProvider { get; set; }
 
+    [Inject]
+    public IModelService ModelService { get; set; } = null!;
+
+    public EventEditorModel Model { get; set; } = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        Model.AvailableModels = await ModelService.GetOwnerCatalogsAsync();
+    }
+
     public async Task HandleValidSubmit(EventEditorModel model)
     {
-        await EventService.CreateEventAsync(model);
+        Event? newEvent = await EventService.CreateEventAsync(model);
+
+        if (model.SelectedModels is not null && newEvent is not null)
+        {
+            await EventService.UpdateModelsForEventAsync(newEvent.EventId, model.SelectedModels.ToList().Select(Guid.Parse));
+        }
+
         NavigationManager.NavigateTo("/events", forceLoad: true);
     }
 }

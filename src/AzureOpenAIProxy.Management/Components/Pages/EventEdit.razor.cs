@@ -23,9 +23,9 @@ public partial class EventEdit : ComponentBase
 
     public IEnumerable<OwnerCatalog> CurrentModels { get; set; } = null!;
 
-    public IEnumerable<string> SelectedModels { get; set; } = [];
+    // public IEnumerable<string> SelectedModels { get; set; } = [];
 
-    public IEnumerable<OwnerCatalog> AvailableModels { get; set; } = [];
+    // public IEnumerable<OwnerCatalog> AvailableModels { get; set; } = [];
 
     private bool modelsUpdating = false;
 
@@ -45,9 +45,9 @@ public partial class EventEdit : ComponentBase
             return;
         }
 
-        AvailableModels = await ModelService.GetOwnerCatalogsAsync();
-        CurrentModels = evt.Catalogs;
-        SelectedModels = CurrentModels.Select(oc => oc.CatalogId.ToString());
+        // AvailableModels = await ModelService.GetOwnerCatalogsAsync();
+        // CurrentModels = evt.Catalogs;
+        // SelectedModels = CurrentModels.Select(oc => oc.CatalogId.ToString());
 
         Model.Name = evt.EventCode;
         Model.EventSharedCode = evt.EventSharedCode;
@@ -61,8 +61,8 @@ public partial class EventEdit : ComponentBase
         Model.MaxTokenCap = evt.MaxTokenCap;
         Model.DailyRequestCap = evt.DailyRequestCap;
         Model.SelectedTimeZone = TimeZoneInfo.FindSystemTimeZoneById(evt.TimeZoneLabel);
-        Model.SelectedModels = SelectedModels;
-        Model.AvailableModels = AvailableModels;
+        Model.SelectedModels = evt.Catalogs.Select(oc => oc.CatalogId.ToString());
+        Model.AvailableModels =  await ModelService.GetOwnerCatalogsAsync();
     }
 
     private async Task OnValidSubmit(EventEditorModel model)
