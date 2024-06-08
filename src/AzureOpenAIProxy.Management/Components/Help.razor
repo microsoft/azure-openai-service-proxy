@@ -1,7 +1,7 @@
 <MudStack Row="true">
     <MudText Typo="Typo.h6">@Title</MudText>
     <MudSpacer />
-    <MudLink Target="_blank" Href="https://microsoft.github.io/azure-openai-service-proxy/resources/">
+    <MudLink Target="_blank" Href="@Link">
         <MudIcon Icon="@Icons.Material.Filled.Help" />
     </MudLink>
 </MudStack>
@@ -9,4 +9,7 @@
 @code {
     [Parameter]
     public string Title { get; set; } = "";
+
+    [Parameter]
+    public string Link { get; set; } = "";
 }

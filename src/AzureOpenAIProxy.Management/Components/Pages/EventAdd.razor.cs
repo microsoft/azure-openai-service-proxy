@@ -1,7 +1,4 @@
 using AzureOpenAIProxy.Management.Components.EventManagement;
-using AzureOpenAIProxy.Management.Database;
-using AzureOpenAIProxy.Management.Services;
-using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 
 namespace AzureOpenAIProxy.Management.Components.Pages;

@@ -1,7 +1,4 @@
 using AzureOpenAIProxy.Management.Components.EventManagement;
-using AzureOpenAIProxy.Management.Database;
-using AzureOpenAIProxy.Management.Services;
-using Microsoft.AspNetCore.Components;
 
 namespace AzureOpenAIProxy.Management.Components.Pages;
 
@@ -20,12 +17,8 @@ public partial class EventEdit : ComponentBase
     public NavigationManager NavigationManager { get; set; } = null!;
 
     public EventEditorModel Model { get; set; } = new();
-
     public IEnumerable<OwnerCatalog> CurrentModels { get; set; } = null!;
 
-    // public IEnumerable<string> SelectedModels { get; set; } = [];
-
-    // public IEnumerable<OwnerCatalog> AvailableModels { get; set; } = [];
 
     private bool modelsUpdating = false;
 
@@ -44,10 +37,6 @@ public partial class EventEdit : ComponentBase
             NavigationManager.NavigateTo("/events");
             return;
         }
-
-        // AvailableModels = await ModelService.GetOwnerCatalogsAsync();
-        // CurrentModels = evt.Catalogs;
-        // SelectedModels = CurrentModels.Select(oc => oc.CatalogId.ToString());
 
         Model.Name = evt.EventCode;
         Model.EventSharedCode = evt.EventSharedCode;

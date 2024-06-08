@@ -30,7 +30,6 @@
                 </MudSelect>
             }
 
-
             <MudTextField
                 Label="Event Shared Code (Optional)"
                 HelperText="For users without a GitHub acct. Auth format event-id@shared-code/attendee-email-address"
@@ -41,7 +40,6 @@
             <MudTextField Label="Organiser Name" @bind-Value="Model.OrganizerName" For="@(() => Model.OrganizerName)" />
             <MudTextField Label="Organiser Email" @bind-Value="Model.OrganizerEmail" InputType="InputType.Email"
                 For="@(() => Model.OrganizerEmail)" />
-
 
             <MudTextField Label="Start Date" @bind-Value="Model.Start" InputType="InputType.DateTimeLocal"
                 For="@(() => Model.Start)" Format="s" />
