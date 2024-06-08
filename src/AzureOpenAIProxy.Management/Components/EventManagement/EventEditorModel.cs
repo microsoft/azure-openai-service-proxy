@@ -44,4 +44,10 @@ public class EventEditorModel
 
     [Required(ErrorMessage = "Time zone is required")]
     public TimeZoneInfo? SelectedTimeZone { get; set; }
+
+    public IEnumerable<string>? SelectedModels { get; set; }
+    public IEnumerable<OwnerCatalog>? AvailableModels { get; set; }
+
+    public string SelectedModelsDisplay(List<string> ids) =>
+        ids.Count == 0 ? "Select one or more models" : string.Join(", ", AvailableModels.Where(oc => ids.Contains(oc.CatalogId.ToString())).Select(oc => oc.FriendlyName));
 }

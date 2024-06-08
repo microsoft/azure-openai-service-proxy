@@ -17,6 +17,20 @@
 
         <MudCardContent>
             <MudTextField Label="Event Name" @bind-Value="Model.Name" For="@(() => Model.Name)" />
+
+            @if (Model.AvailableModels != null && Model.AvailableModels.Any())
+            {
+                <MudSelect Label="Event resources" MultiSelection="true" @bind-SelectedValues="Model.SelectedModels"
+                    MultiSelectionTextFunc="@(new Func<List<string>, string>(Model.SelectedModelsDisplay))"
+                    Disabled="@modelsUpdating">
+                    @foreach (var model in Model.AvailableModels)
+                    {
+                        <MudSelectItem Value="@model.CatalogId.ToString()">@model.FriendlyName</MudSelectItem>
+                    }
+                </MudSelect>
+            }
+
+
             <MudTextField
                 Label="Event Shared Code (Optional)"
                 HelperText="For users without a GitHub acct. Auth format event-id@shared-code/attendee-email-address"
@@ -58,7 +72,6 @@
             <MudNumericField Label="Daily Request Cap"
                 HelperText="~256 for structured workshops. Long running hacks ~5000"
                 @bind-Value="Model.DailyRequestCap" Min="0" Placeholder="256" For="@(() => Model.DailyRequestCap)" />
-
 
             <MudSwitch @bind-Value="Model.Active" Label="Active" Color="Color.Primary" />
             <MudTextField Label="Markdown Description" @bind-Value="Model.Description" Lines="10"

@@ -132,6 +132,11 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
 
         await db.SaveChangesAsync();
 
+        if (model.SelectedModels is not null)
+        {
+            await UpdateModelsForEventAsync(id, model.SelectedModels.ToList().Select(Guid.Parse));
+        }
+
         return evt;
     }
 

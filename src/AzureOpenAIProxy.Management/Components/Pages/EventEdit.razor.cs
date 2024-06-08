@@ -61,6 +61,8 @@ public partial class EventEdit : ComponentBase
         Model.MaxTokenCap = evt.MaxTokenCap;
         Model.DailyRequestCap = evt.DailyRequestCap;
         Model.SelectedTimeZone = TimeZoneInfo.FindSystemTimeZoneById(evt.TimeZoneLabel);
+        Model.SelectedModels = SelectedModels;
+        Model.AvailableModels = AvailableModels;
     }
 
     private async Task OnValidSubmit(EventEditorModel model)
@@ -73,15 +75,5 @@ public partial class EventEdit : ComponentBase
         }
 
         NavigationManager.NavigateTo("/events");
-    }
-
-    private string SelectedModelsDisplay(List<string> ids) =>
-        ids.Count == 0 ? "Select one or more models" : string.Join(", ", AvailableModels.Where(oc => ids.Contains(oc.CatalogId.ToString())).Select(oc => oc.FriendlyName));
-
-    private async Task UpdateModels()
-    {
-        modelsUpdating = true;
-        await EventService.UpdateModelsForEventAsync(Id, SelectedModels.Select(Guid.Parse));
-        modelsUpdating = false;
     }
 }
