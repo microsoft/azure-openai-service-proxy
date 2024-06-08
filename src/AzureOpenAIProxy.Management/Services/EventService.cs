@@ -70,18 +70,11 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
         parameter.Value = newEvent.EventImageUrl ?? (object)DBNull.Value;
         cmd.Parameters.Add(parameter);
 
-        var reader = await cmd.ExecuteReaderAsync();
-
-        if (reader.HasRows)
+        var eventId = await cmd.ExecuteScalarAsync();
+        if (eventId != null)
         {
-            while (await reader.ReadAsync())
-            {
-                newEvent.EventId = reader.GetString(0);
-            }
+            newEvent.EventId = eventId.ToString() ?? throw new InvalidOperationException("EventId is null");
         }
-
-        // Need to close else the next event catalog update fails
-        conn.Close();
 
         return newEvent;
     }
