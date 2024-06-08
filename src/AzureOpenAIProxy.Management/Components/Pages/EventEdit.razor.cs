@@ -19,9 +19,6 @@ public partial class EventEdit : ComponentBase
     public EventEditorModel Model { get; set; } = new();
     public IEnumerable<OwnerCatalog> CurrentModels { get; set; } = null!;
 
-
-    private bool modelsUpdating = false;
-
     protected override async Task OnInitializedAsync()
     {
         if (string.IsNullOrEmpty(Id))
@@ -57,12 +54,6 @@ public partial class EventEdit : ComponentBase
     private async Task OnValidSubmit(EventEditorModel model)
     {
         Event? evt = await EventService.UpdateEventAsync(Id, model);
-
-        if (evt is null)
-        {
-            // todo - logging
-        }
-
         NavigationManager.NavigateTo("/events");
     }
 }
