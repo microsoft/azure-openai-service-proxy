@@ -39,6 +39,6 @@ public partial class EventAdd : ComponentBase
             await EventService.UpdateModelsForEventAsync(newEvent.EventId, model.SelectedModels.ToList().Select(Guid.Parse));
         }
 
-        NavigationManager.NavigateTo("/events", forceLoad: true);
+        NavigationManager.NavigateTo("/events");
     }
 }
