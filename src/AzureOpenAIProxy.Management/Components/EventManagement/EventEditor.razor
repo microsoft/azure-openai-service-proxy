@@ -42,11 +42,11 @@
                 For="@(() => Model.OrganizerEmail)" Counter="128" Immediate="true" />
 
             <MudTextField Label="Start Date" @bind-Value="Model.Start" InputType="InputType.DateTimeLocal"
-                For="@(() => Model.Start)" Format="s" HelperText="Start date and time event resources will be available. Set to now for testing"/>
+                For="@(() => Model.Start)" Format="s" HelperText="Start date and time event resources will be available. Defaults to today so you can test the event."/>
 
             <MudTextField Label="End Date" @bind-Value="Model.End" InputType="InputType.DateTimeLocal"
                 For="@(() => Model.End)" Format="s"
-                HelperText="End date and time event resources will be available." />
+                HelperText="End date and time event resources will be available. Defaults to one week from today" />
 
             <MudAutocomplete T="TimeZoneInfo" @bind-Value="Model.SelectedTimeZone" HelperText="Time Zone for the event. Attendees will see the event in their local time."
                 Label="Time Zone (Start typing the location)" FullWidth="true" For="@(() => Model.SelectedTimeZone)"

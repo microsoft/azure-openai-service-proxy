@@ -22,8 +22,8 @@ public partial class EventAdd : ComponentBase
     protected override async Task OnInitializedAsync()
     {
         Model.AvailableModels = await ModelService.GetOwnerCatalogsAsync();
-        Model.Start = DateTimeOffset.Now.LocalDateTime;
-        Model.SelectedTimeZone = TimeZoneInfo.Local;
+        Model.Start = DateTime.Today.AddHours(-12); // allow for tz relative to utc
+        Model.End = DateTime.Today.AddDays(7).AddHours(12); // set a sensible 1 week from today default
     }
 
     public async Task HandleValidSubmit(EventEditorModel model)
