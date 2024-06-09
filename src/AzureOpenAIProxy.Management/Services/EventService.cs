@@ -71,10 +71,7 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
         cmd.Parameters.Add(parameter);
 
         var eventId = await cmd.ExecuteScalarAsync();
-        if (eventId != null)
-        {
-            newEvent.EventId = eventId.ToString() ?? throw new InvalidOperationException("EventId is null");
-        }
+        newEvent.EventId = eventId?.ToString() ?? throw new InvalidOperationException("EventId is null");
 
         return newEvent;
     }

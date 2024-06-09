@@ -18,6 +18,7 @@ public class EventEditorModel
     public string? EventImageUrl { get; set; }
 
     [Required]
+    [StringLength(8192)]
     public string? Description { get; set; }
 
     [Required]

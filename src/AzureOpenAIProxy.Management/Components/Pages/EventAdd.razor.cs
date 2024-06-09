@@ -22,6 +22,8 @@ public partial class EventAdd : ComponentBase
     protected override async Task OnInitializedAsync()
     {
         Model.AvailableModels = await ModelService.GetOwnerCatalogsAsync();
+        Model.Start = DateTimeOffset.Now.LocalDateTime;
+        Model.SelectedTimeZone = TimeZoneInfo.Local;
     }
 
     public async Task HandleValidSubmit(EventEditorModel model)

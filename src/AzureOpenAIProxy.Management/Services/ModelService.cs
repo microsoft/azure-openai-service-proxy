@@ -39,9 +39,7 @@ public class ModelService(IAuthService authService, AoaiProxyContext db, IConfig
         command.Parameters.Add(new NpgsqlParameter("value", NpgsqlDbType.Text) { Value = value });
         command.Parameters.Add(new NpgsqlParameter("postgresEncryptionKey", NpgsqlDbType.Text) { Value = postgresEncryptionKey });
 
-        using var reader = await command.ExecuteReaderAsync();
-        await reader.ReadAsync();
-        return reader[0] as byte[];
+        return await command.ExecuteScalarAsync() as byte[];
     }
 
     private async Task<string?> PostgresDecryptValue(byte[] value)
@@ -56,11 +54,10 @@ public class ModelService(IAuthService authService, AoaiProxyContext db, IConfig
         command.Parameters.Add(new NpgsqlParameter("value", NpgsqlDbType.Bytea) { Value = value });
         command.Parameters.Add(new NpgsqlParameter("postgresEncryptionKey", NpgsqlDbType.Text) { Value = postgresEncryptionKey });
 
+        // wrap in exception to catch invalid encryption key
         try
         {
-            using var reader = await command.ExecuteReaderAsync();
-            await reader.ReadAsync();
-            return reader[0] as string;
+            return await command.ExecuteScalarAsync() as string;
         }
         catch (Exception)
         {
