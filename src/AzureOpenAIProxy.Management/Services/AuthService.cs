@@ -19,10 +19,6 @@ public class AuthService(AuthenticationStateProvider authenticationStateProvider
                            where o.OwnerId == entraId
                            select new { o.Name, o.Email }).FirstOrDefaultAsync();
 
-        if (owner != null)
-        {
-            return (owner.Email, owner.Name);
-        }
-        return (string.Empty, string.Empty);
+        return (owner?.Email ?? string.Empty, owner?.Name ?? string.Empty);
     }
 }
