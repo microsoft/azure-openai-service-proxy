@@ -14,6 +14,7 @@ From the AI Proxy Admin portal, you can create and manage events. An event is a 
 1. Add the event details, including the event name, start and end date.
 
    1. **Event Name**: The name of the event.
+   1. **Event Resources**: You can select multiple resources for an event. The resources are the model and indexes that you configured in [Resources](./resources.md).
    1. **Event Shared Code**: In most cases, you can leave this field blank.
 
       - The `Event Shared Code` is used where attendees may not have a GitHub account or for various reasons are unable to authenticate using their existing GitHub account. The shared code should only be used for **short** (eg 1hr) workshops at in-person events or online events, it's not recommended for longer running hacks.
@@ -39,22 +40,5 @@ From the AI Proxy Admin portal, you can create and manage events. An event is a 
 
       ![](./media/proxy-new-event.png)
 
-## Assigning resources to events
-
-Once you have created an event, you can assign resources to the event. This allows you to control the resources that are available to the event attendees.
-
-1. Select the `Events` tab.
-1. Select the `Edit` icon of the event you want to assign resources.
-
-      ![](./media/proxy-events.png)
-
-1. From the event details page, select the `Resources` tab.
-1. From the `Resources` tab, select the resources that you want to assign to the event.
-
-      ![](./media/assign-resources.png)
-
-1. Select on white space to close the resource selection dialog.
-1. Select `UPDATE RESOURCES` to assign the resources to the event.
-
 !!! note
-    Remember, if you are load balancing across multiple models, ensure the model deployments names are the same, and add each deployment to the event.
+    Remember, if you are load balancing across multiple models, ensure the model deployments names are the same, and add each deployment to the event. For more information about load balancing, see the [Capacity planning](./capacity.md/#scaling-capacity) section.
