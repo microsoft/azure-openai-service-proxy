@@ -83,7 +83,7 @@ The recommended way to deploy this app is with Dev Containers. Install the [VS C
     1. You will be prompted for the `entraAuthorizationToken`. Press <kbd>ctrl+c</kbd> to cancel the deployment.
     1. Run the `azd up` command again. You will be prompted for the `authClientSecret` infrastructure parameter again, but this time you will not be prompted for the `entraAuthorizationToken`.
     1. Enter a value for the `principalName` infrastructure parameter. This is the name of the PostgreSQL database admin user. Recommend using your email address.
-    1. Enter a value for the 'swaLocation' infrastructure parameter. Recommend selecting a location close to or the same as the Azure location you previously selected.
+    1. Select the 'swaLocation' infrastructure parameter. Recommend selecting a location close to or the same as the Azure location you previously selected.
 
     On completion, the following Azure resources will be provisioned:
 
