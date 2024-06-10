@@ -128,13 +128,13 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
         return evt;
     }
 
-    public async Task<Event?> UpdateModelsForEventAsync(string id, IEnumerable<Guid> modelIds)
+    public async Task UpdateModelsForEventAsync(string id, IEnumerable<Guid> modelIds)
     {
         Event? evt = await db.Events.Include(e => e.Catalogs).FirstOrDefaultAsync(e => e.EventId == id);
 
         if (evt is null)
         {
-            return null;
+            return;
         }
 
         evt.Catalogs.Clear();
@@ -147,7 +147,6 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
         }
 
         await db.SaveChangesAsync();
-        return evt;
     }
 
     public void Dispose()
