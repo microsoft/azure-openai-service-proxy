@@ -97,7 +97,7 @@ The recommended way to deploy this app is with Dev Containers. Install the [VS C
 
 ## Entra App Registration
 
-After the solution has been deployed, you will need to amend the app registration to add the redirect URI and enable the `ID tokens` under `Authentication`.
+After the solution has been deployed, you may need to manually amend the app registration to add the redirect URI and enable the `ID tokens` under `Authentication`.
 
 1. Navigate to the AI Proxy Admin portal URL. You'll find the URL from the output of the `azd up` command under `Deploying service admin`.
 
