@@ -16,7 +16,7 @@
         </MudCardActions>
 
         <MudCardContent>
-            <MudTextField Label="Event Name" @bind-Value="Model.Name" For="@(() => Model.Name)" Counter="64" Immediate="true" />
+            <MudTextField Label="Event Name" @bind-Value="Model.Name" For="@(() => Model.Name)" Counter="64" Immediate="true" AutoFocus="true" />
 
             <MudSelect Label="Event Resources" MultiSelection="true" @bind-SelectedValues="Model.SelectedModels"
                 MultiSelectionTextFunc="@(new Func<List<string>, string>(Model.SelectedModelsDisplay))" HelperText="Event resources are available to attendees between the event start and end dates"
@@ -26,15 +26,6 @@
                     <MudSelectItem Value="@model.CatalogId.ToString()">@model.FriendlyName</MudSelectItem>
                 }
             </MudSelect>
-
-            <MudTextField
-                Label="Event Shared Code (Optional)" Counter="64" Immediate="true"
-                HelperText="For users without a GitHub acct. Auth format event-id@shared-code/attendee-email-address"
-                @bind-Value="Model.EventSharedCode" For="@(() => Model.EventSharedCode)" />
-
-            <MudTextField Label="Playground Branding Image URL (Optional)" Counter="256" Immediate="true"
-                HelperText="Size ~24px high by ~200px wide"
-                @bind-Value="Model.EventImageUrl" InputType="InputType.Url" For="@(() => Model.EventImageUrl)" />
 
             <MudTextField Label="Organiser Name" @bind-Value="Model.OrganizerName" For="@(() => Model.OrganizerName)" Counter="128" Immediate="true" />
 
@@ -75,6 +66,16 @@
             <MudSwitch @bind-Value="Model.Active" Label="Active" Color="Color.Primary" />
 
             <MudTextField Label="Markdown Description" @bind-Value="Model.Description" AutoGrow Lines="4" Counter="8192" Immediate="true" For="@(() => Model.Description)" />
+
+            <MudTextField
+                Label="Event Shared Code (Optional)" Counter="64" Immediate="true"
+                HelperText="For users without a GitHub acct. Auth format event-id@shared-code/attendee-email-address"
+                @bind-Value="Model.EventSharedCode" For="@(() => Model.EventSharedCode)" />
+
+            <MudTextField Label="Playground Branding Image URL (Optional)" Counter="256" Immediate="true"
+                HelperText="Size ~24px high by ~200px wide"
+                @bind-Value="Model.EventImageUrl" InputType="InputType.Url" For="@(() => Model.EventImageUrl)" />
+
         </MudCardContent>
 
     </MudCard>
