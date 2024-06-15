@@ -32,6 +32,8 @@ public partial class EventMetrics
     private long ActiveRegistrations { get; set; }
     private List<ModelCounts> ModelCounts { get; set; } = [];
 
+    private IEnumerable<(ModelType?, string)> ResourcesByType { get; set; } = [];
+
     private int RequestCount { get; set; }
 
     private int AttendeeCount { get; set; }
@@ -93,6 +95,8 @@ public partial class EventMetrics
 
         // Create Active Registrations line chart
         (ActiveUsersChartSeries, ActiveUsersChartLabels) = BuildActiveUsersChart(ActiveUsers);
+
+        ResourcesByType = await EventService.GetEventResourcesByTypeAsync(EventId);
 
         IsLoading = false;
     }
