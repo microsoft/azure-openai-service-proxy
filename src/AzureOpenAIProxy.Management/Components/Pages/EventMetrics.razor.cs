@@ -1,3 +1,5 @@
+using System.Linq;
+
 namespace AzureOpenAIProxy.Management.Components.Pages;
 
 public class ModelCounts
@@ -32,7 +34,7 @@ public partial class EventMetrics
     private long ActiveRegistrations { get; set; }
     private List<ModelCounts> ModelCounts { get; set; } = [];
 
-    private IEnumerable<(ModelType?, string)> ResourcesByType { get; set; } = [];
+    private List<(ModelType?, string)> ResourcesByType { get; set; } = [];
 
     private int RequestCount { get; set; }
 
@@ -96,7 +98,14 @@ public partial class EventMetrics
         // Create Active Registrations line chart
         (ActiveUsersChartSeries, ActiveUsersChartLabels) = BuildActiveUsersChart(ActiveUsers);
 
-        ResourcesByType = await EventService.GetEventResourcesByTypeAsync(EventId);
+        // Get Resources by Type list
+        ResourcesByType = Event?.Catalogs
+            .GroupBy(c => c.ModelType)
+            .OrderBy(c => c.Key)
+            .Select(g => new { ModelType = g.Key, Names = string.Join(", ", g.Select(c => c.DeploymentName)) })
+            .ToList()
+            .Select(x => (x.ModelType, x.Names))
+            .ToList() ?? [];
 
         IsLoading = false;
     }

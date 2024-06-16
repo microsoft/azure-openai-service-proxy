@@ -51,22 +51,25 @@
             </MudPaper>
         }
 
-        <MudTable Class="pa-4 ma-2" Items="@ResourcesByType" Dense="true" Striped="true" SortLabel="Sort By">
-            <HeaderContent>
-                <MudTh>
-                    <MudTableSortLabel SortBy="new Func<(ModelType?, string), object>(x => x.Item1)">
-                        Type</MudTableSortLabel>
-                </MudTh>
-                <MudTh>
-                    <MudTableSortLabel SortBy="new Func<(ModelType?, string), object>(x => x.Item2)">
-                        Resource(s)</MudTableSortLabel>
-                </MudTh>
-            </HeaderContent>
-            <RowTemplate>
-                <MudTd>@context.Item1</MudTd>
-                <MudTd>@context.Item2</MudTd>
-            </RowTemplate>
-        </MudTable>
+        @if (ResourcesByType.Count > 0)
+        {
+            <MudTable Class="pa-4 ma-2" Items="@ResourcesByType" Dense="true" Striped="true" SortLabel="Sort By">
+                <HeaderContent>
+                    <MudTh>
+                        <MudTableSortLabel SortBy="new Func<(ModelType?, string), object>(x => x.Item1)">
+                            Type</MudTableSortLabel>
+                    </MudTh>
+                    <MudTh>
+                        <MudTableSortLabel SortBy="new Func<(ModelType?, string), object>(x => x.Item2)">
+                            Resource(s)</MudTableSortLabel>
+                    </MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd>@context.Item1</MudTd>
+                    <MudTd>@context.Item2</MudTd>
+                </RowTemplate>
+            </MudTable>
+        }
 
         @if (ModelCounts.Count > 0)
         {

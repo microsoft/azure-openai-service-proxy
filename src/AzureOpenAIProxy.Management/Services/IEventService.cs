@@ -15,6 +15,4 @@ public interface IEventService
     Task UpdateModelsForEventAsync(string id, IEnumerable<Guid> modelIds);
 
     Task DeleteEventAsync(string id);
-
-    Task<IEnumerable<(ModelType?, string)>> GetEventResourcesByTypeAsync(string id);
 }

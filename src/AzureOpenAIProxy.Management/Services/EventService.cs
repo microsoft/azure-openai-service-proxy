@@ -189,16 +189,4 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
         db.Events.Remove(evt);
         await db.SaveChangesAsync();
     }
-
-    public async Task<IEnumerable<(ModelType?, string)>> GetEventResourcesByTypeAsync(string id)
-    {
-        return await db.Events
-            .Include(e => e.Catalogs)
-            .Where(e => e.EventId == id)
-            .SelectMany(e => e.Catalogs)
-            .GroupBy(c => c.ModelType)
-            .Select(g => new { ModelType = g.Key, Names = string.Join(", ", g.Select(c => c.DeploymentName)) })
-            .ToListAsync()
-            .ContinueWith(t => t.Result.Select(r => (r.ModelType, r.Names)));
-    }
 }
