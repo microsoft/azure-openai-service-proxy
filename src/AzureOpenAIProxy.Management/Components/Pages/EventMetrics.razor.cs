@@ -11,6 +11,12 @@ public class ModelCounts
     public long TotalTokens { get; set; }
 }
 
+public class ResourceByType
+{
+    public string ModelType { get; set; } = null!;
+    public string Names { get; set; } = null!;
+}
+
 public partial class EventMetrics
 {
     [Inject]
@@ -34,7 +40,7 @@ public partial class EventMetrics
     private long ActiveRegistrations { get; set; }
     private List<ModelCounts> ModelCounts { get; set; } = [];
 
-    private List<(string ModelType, string Names)> ResourcesByType { get; set; } = [];
+    private List<ResourceByType> ResourcesByType { get; set; } = [];
 
     private int RequestCount { get; set; }
 
@@ -99,12 +105,14 @@ public partial class EventMetrics
         (ActiveUsersChartSeries, ActiveUsersChartLabels) = BuildActiveUsersChart(ActiveUsers);
 
         // Get Resources by Type list
-        ResourcesByType = Event?.Catalogs
+        ResourcesByType = [.. Event?.Catalogs
             .GroupBy(c => c.ModelType)
-            .Select(g => new { ModelType = g.Key.ToString()!.ToLower().Replace('_', ' '), Names = string.Join(", ", g.Select(c => c.DeploymentName)) })
-            .Select(x => (x.ModelType, x.Names))
-            .OrderBy(x => x.ModelType)
-            .ToList() ?? [];
+            .Select(g => new ResourceByType()
+            {
+                ModelType = g.Key.ToString()!.ToLower().Replace('_', ' '),
+                Names = string.Join(", ", g.OrderBy(c => c.DeploymentName).Select(c => c.DeploymentName))
+            })
+            .OrderBy(x => x.ModelType)];
 
         IsLoading = false;
     }
