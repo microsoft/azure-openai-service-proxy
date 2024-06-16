@@ -34,7 +34,7 @@ public partial class EventMetrics
     private long ActiveRegistrations { get; set; }
     private List<ModelCounts> ModelCounts { get; set; } = [];
 
-    private List<(ModelType?, string)> ResourcesByType { get; set; } = [];
+    private List<(string, string)> ResourcesByType { get; set; } = [];
 
     private int RequestCount { get; set; }
 
@@ -102,7 +102,7 @@ public partial class EventMetrics
         ResourcesByType = Event?.Catalogs
             .GroupBy(c => c.ModelType)
             .OrderBy(c => c.Key)
-            .Select(g => new { ModelType = g.Key, Names = string.Join(", ", g.Select(c => c.DeploymentName)) })
+            .Select(g => new { ModelType = g.Key.ToString()!.ToLower().Replace('_', ' '), Names = string.Join(", ", g.Select(c => c.DeploymentName)) })
             .ToList()
             .Select(x => (x.ModelType, x.Names))
             .ToList() ?? [];
