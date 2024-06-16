@@ -103,7 +103,6 @@ public partial class EventMetrics
             .GroupBy(c => c.ModelType)
             .OrderBy(c => c.Key)
             .Select(g => new { ModelType = g.Key.ToString()!.ToLower().Replace('_', ' '), Names = string.Join(", ", g.Select(c => c.DeploymentName)) })
-            .ToList()
             .Select(x => (x.ModelType, x.Names))
             .ToList() ?? [];
 
