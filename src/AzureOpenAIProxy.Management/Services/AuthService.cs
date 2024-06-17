@@ -15,9 +15,10 @@ public class AuthService(AuthenticationStateProvider authenticationStateProvider
     public async Task<(string email, string name)> GetCurrentUserEmailNameAsync()
     {
         string entraId = await GetCurrentUserEntraIdAsync();
-        var owner = await (from o in db.Owners
-                           where o.OwnerId == entraId
-                           select new { o.Name, o.Email }).FirstOrDefaultAsync();
+        var owner = await db.Owners
+                             .Where(o => o.OwnerId == entraId)
+                             .Select(o => new { o.Name, o.Email })
+                             .FirstOrDefaultAsync();
 
         return (owner?.Email ?? string.Empty, owner?.Name ?? string.Empty);
     }
