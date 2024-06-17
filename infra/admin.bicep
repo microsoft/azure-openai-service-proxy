@@ -2,12 +2,12 @@ param name string
 param location string = resourceGroup().location
 param tags object = {}
 
+@description('The name of the user assigned identity that the container app will used to connect to the container registraty')
 param identityName string
 param containerAppsEnvironmentName string
 param containerRegistryName string
 param serviceName string = 'admin'
 param exists bool
-param postgresUser string
 param postgresDatabase string
 param postgresServer string
 @secure()
@@ -53,7 +53,7 @@ module app 'core/host/container-app-upsert.bicep' = {
       }
       {
         name: 'postgres-connection-string'
-        value: 'Server=${postgresServer};Port=5432;User Id=${postgresUser};Database=${postgresDatabase};Ssl Mode=Require;'
+        value: 'Server=${postgresServer};Port=5432;User Id=${name};Database=${postgresDatabase};Ssl Mode=Require;'
       }
     ]
     env: [
@@ -89,7 +89,7 @@ module app 'core/host/container-app-upsert.bicep' = {
   }
 }
 
-output principalId string = adminIdentity.properties.principalId
-output name string = app.outputs.name
-output uri string = app.outputs.uri
-output imageName string = app.outputs.imageName
+output SERVICE_ADMIN_IDENTITY_PRINCIPAL_ID string = adminIdentity.properties.principalId
+output SERVICE_ADMIN_NAME string = app.outputs.name
+output SERVICE_ADMIN_URI string = app.outputs.uri
+output SERVICE_ADMIN_IMAGE_NAME string = app.outputs.imageName
