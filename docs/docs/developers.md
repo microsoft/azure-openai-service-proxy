@@ -28,7 +28,7 @@ The following is an example of calling the Azure OpenAI Chat Completions API usi
 """ Test Azure OpenAI Chat Completions API """
 
 ENDPOINT_URL = "https://<YOUR_PROXY_PLAYGROUND_URL>/api/v1"
-API_KEY = "36a69054-0956-4eb6-963a-571089d46c58"
+API_KEY = "<YOUR_PERSONAL_AI_PROXY_API_KEY>"
 
 import os
 
