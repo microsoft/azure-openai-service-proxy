@@ -82,10 +82,8 @@ module admin 'admin.bicep' = {
     containerAppsEnvironmentName: containerApps.outputs.environmentName
     containerRegistryName: containerApps.outputs.registryName
     exists: adminAppExists
-    postgresServer: '${prefix}-postgresql.postgres.database.azure.com'
+    postgresServer: postgresServer.outputs.DOMAIN_NAME
     postgresDatabase: postgresDatabaseName
-    postgresUser: '${prefix}-admin'
-    // postgresPassword: postgresAdminPassword
     postgresEncryptionKey: postgresEncryptionKey
     tenantId: authTenantId
     clientId: authClientId
@@ -106,9 +104,8 @@ module proxy 'proxy.bicep' = {
     containerAppsEnvironmentName: containerApps.outputs.environmentName
     containerRegistryName: containerApps.outputs.registryName
     exists: proxyAppExists
-    postgresServer: '${prefix}-postgresql.postgres.database.azure.com'
+    postgresServer: postgresServer.outputs.DOMAIN_NAME
     postgresDatabase: postgresDatabaseName
-    postgresUser: '${prefix}-proxy'
     postgresEncryptionKey: postgresEncryptionKey
     appInsightsConnectionString: monitoring.outputs.applicationInsightsConnectionString
   }
@@ -122,20 +119,26 @@ module postgresServer 'db.bicep' = {
     name: '${prefix}-postgresql'
     location: location
     tags: tags
-    postgresDatabaseName: postgresDatabaseName
     authType: 'EntraOnly'
     entraAdministratorName: postgresEntraAdministratorName
     entraAdministratorObjectId: postgresEntraAdministratorObjectId
     entraAdministratorType: postgresEntraAdministratorType
-    entraAuthorizationToken: entraAuthorizationToken
-    adminSystemAssignedIdentity: '${prefix}-admin'
-    proxySystemAssignedIdentity: '${prefix}-proxy'
   }
-  // admin and proxy need to exist before the database as their system assigned identities are used to grant access
-  dependsOn: [
-    admin
-    proxy
-  ]
+}
+
+module postgresDbSeeding 'db-seed.bicep' = {
+  name: 'postgres-db-seeding'
+  scope: resourceGroup
+  params: {
+    name: '${prefix}-db-seed'
+    location: location
+    postgresServerName: postgresServer.outputs.RESOURCE_NAME
+    entraAdministratorName: postgresEntraAdministratorName
+    postgresDatabaseName: postgresDatabaseName
+    entraAuthorizationToken: entraAuthorizationToken
+    adminSystemAssignedIdentity: admin.outputs.SERVICE_ADMIN_NAME
+    proxySystemAssignedIdentity: proxy.outputs.SERVICE_PROXY_NAME
+  }
 }
 
 // The Playground frontend
@@ -176,13 +179,18 @@ output AZURE_LOCATION string = location
 output AZURE_CONTAINER_ENVIRONMENT_NAME string = containerApps.outputs.environmentName
 output AZURE_CONTAINER_REGISTRY_NAME string = containerApps.outputs.registryName
 output AZURE_CONTAINER_REGISTRY_ENDPOINT string = containerApps.outputs.registryLoginServer
+
 output SERVICE_PROXY_IDENTITY_PRINCIPAL_ID string = proxy.outputs.SERVICE_PROXY_IDENTITY_PRINCIPAL_ID
 output SERVICE_PROXY_NAME string = proxy.outputs.SERVICE_PROXY_NAME
 output SERVICE_PROXY_URI string = proxy.outputs.SERVICE_PROXY_URI
 output SERVICE_PROXY_IMAGE_NAME string = proxy.outputs.SERVICE_PROXY_IMAGE_NAME
-output SERVICE_PROXY_ENDPOINTS array = ['${proxy.outputs.SERVICE_PROXY_URI}/docs']
+
 output SERVICE_PLAYGROUND_URI string = playground.outputs.SERVICE_WEB_URI
-output SERVICE_ADMIN_IDENTITY_PRINCIPAL_ID string = admin.outputs.principalId
-output SERVICE_ADMIN_NAME string = admin.outputs.name
-output SERVICE_ADMIN_URI string = admin.outputs.uri
-output SERVICE_ADMIN_IMAGE_NAME string = admin.outputs.imageName
+
+output SERVICE_ADMIN_IDENTITY_PRINCIPAL_ID string = admin.outputs.SERVICE_ADMIN_IDENTITY_PRINCIPAL_ID
+output SERVICE_ADMIN_NAME string = admin.outputs.SERVICE_ADMIN_NAME
+output SERVICE_ADMIN_URI string = admin.outputs.SERVICE_ADMIN_URI
+output SERVICE_ADMIN_IMAGE_NAME string = admin.outputs.SERVICE_ADMIN_IMAGE_NAME
+
+output SERVICE_DB_SERVER_NAME string = postgresServer.outputs.RESOURCE_NAME
+output SERVICE_DB_SERVER_FQDN string = postgresServer.outputs.DOMAIN_NAME
