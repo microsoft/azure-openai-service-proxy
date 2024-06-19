@@ -19,7 +19,6 @@ public partial class EventEditor : ComponentBase
 
     private bool isSubmitting = false;
 
-    private bool modelsUpdating = false;
 
     private IEnumerable<TimeZoneInfo>? TimeZones { get; set; }
 

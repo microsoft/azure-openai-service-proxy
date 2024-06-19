@@ -26,8 +26,11 @@ public partial class EventAdd : ComponentBase
     {
         Model.AvailableModels = await ModelService.GetOwnerCatalogsAsync();
         (Model.OrganizerEmail, Model.OrganizerName) = await AuthService.GetCurrentUserEmailNameAsync();
-        Model.Start = DateTime.Today.AddHours(-12); // allow for tz relative to utc
-        Model.End = DateTime.Today.AddDays(7).AddHours(12); // set a sensible 1 week from today default
+        // The container time in UTC 0.
+        // Start date should be yesterday in all time zones, end date should be 7 days from now.
+        Model.Start = DateTime.Today.AddDays(-1);
+        // set a sensible 1 week from today default
+        Model.End = DateTime.Today.AddDays(7).AddHours(12);
     }
 
     public async Task HandleValidSubmit(EventEditorModel model)

@@ -19,8 +19,7 @@
             <MudTextField Label="Event Name" @bind-Value="Model.Name" For="@(() => Model.Name)" Counter="64" Immediate="true" AutoFocus="true" />
 
             <MudSelect Label="Event Resources" MultiSelection="true" @bind-SelectedValues="Model.SelectedModels"
-                MultiSelectionTextFunc="@(new Func<List<string>, string>(Model.SelectedModelsDisplay))" HelperText="Event resources are available to attendees between the event start and end dates"
-                Disabled="@modelsUpdating">
+                MultiSelectionTextFunc="@(new Func<List<string>, string>(Model.SelectedModelsDisplay))" HelperText="Event resources are available to attendees between the event start and end dates" >
                 @foreach (var model in Model.AvailableModels)
                 {
                     <MudSelectItem Value="@model.CatalogId.ToString()">@model.FriendlyName</MudSelectItem>
