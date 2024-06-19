@@ -70,15 +70,8 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
         parameter.Value = newEvent.EventImageUrl ?? (object)DBNull.Value;
         cmd.Parameters.Add(parameter);
 
-        var reader = await cmd.ExecuteReaderAsync();
-
-        if (reader.HasRows)
-        {
-            while (await reader.ReadAsync())
-            {
-                newEvent.EventId = reader.GetString(0);
-            }
-        }
+        var eventId = await cmd.ExecuteScalarAsync();
+        newEvent.EventId = eventId?.ToString() ?? throw new InvalidOperationException("EventId is null");
 
         return newEvent;
     }
@@ -135,13 +128,13 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
         return evt;
     }
 
-    public async Task<Event?> UpdateModelsForEventAsync(string id, IEnumerable<Guid> modelIds)
+    public async Task UpdateModelsForEventAsync(string id, IEnumerable<Guid> modelIds)
     {
         Event? evt = await db.Events.Include(e => e.Catalogs).FirstOrDefaultAsync(e => e.EventId == id);
 
         if (evt is null)
         {
-            return null;
+            return;
         }
 
         evt.Catalogs.Clear();
@@ -154,7 +147,6 @@ public class EventService(IAuthService authService, AoaiProxyContext db) : IEven
         }
 
         await db.SaveChangesAsync();
-        return evt;
     }
 
     public void Dispose()

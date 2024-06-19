@@ -5,7 +5,6 @@
 @namespace AzureOpenAIProxy.Management.Components.Pages
 
 <MudStack>
-    <Help Title="Create a new event" />
-
-    <EventEditor OnValidSubmit="@HandleValidSubmit" />
+    <Help Title="Create a new event" Link="https://microsoft.github.io/azure-openai-service-proxy/events/" />
+    <EventEditor OnValidSubmit="@HandleValidSubmit" @bind-Model="Model" />
 </MudStack>

@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 
 namespace AzureOpenAIProxy.Management.Components.EventManagement;
@@ -20,7 +19,9 @@ public partial class EventEditor : ComponentBase
 
     private bool isSubmitting = false;
 
+
     private IEnumerable<TimeZoneInfo>? TimeZones { get; set; }
+
 
     protected override Task OnInitializedAsync()
     {

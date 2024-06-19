@@ -1,7 +1,4 @@
 using AzureOpenAIProxy.Management.Components.EventManagement;
-using AzureOpenAIProxy.Management.Database;
-using AzureOpenAIProxy.Management.Services;
-using Microsoft.AspNetCore.Components;
 
 namespace AzureOpenAIProxy.Management.Components.Pages;
 
@@ -20,14 +17,7 @@ public partial class EventEdit : ComponentBase
     public NavigationManager NavigationManager { get; set; } = null!;
 
     public EventEditorModel Model { get; set; } = new();
-
     public IEnumerable<OwnerCatalog> CurrentModels { get; set; } = null!;
-
-    public IEnumerable<string> SelectedModels { get; set; } = [];
-
-    public IEnumerable<OwnerCatalog> AvailableModels { get; set; } = [];
-
-    private bool modelsUpdating = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -45,10 +35,6 @@ public partial class EventEdit : ComponentBase
             return;
         }
 
-        AvailableModels = await ModelService.GetOwnerCatalogsAsync();
-        CurrentModels = evt.Catalogs;
-        SelectedModels = CurrentModels.Select(oc => oc.CatalogId.ToString());
-
         Model.Name = evt.EventCode;
         Model.EventSharedCode = evt.EventSharedCode;
         Model.Description = evt.EventMarkdown;
@@ -61,27 +47,19 @@ public partial class EventEdit : ComponentBase
         Model.MaxTokenCap = evt.MaxTokenCap;
         Model.DailyRequestCap = evt.DailyRequestCap;
         Model.SelectedTimeZone = TimeZoneInfo.FindSystemTimeZoneById(evt.TimeZoneLabel);
+        Model.SelectedModels = evt.Catalogs.Select(oc => oc.CatalogId.ToString());
+        Model.AvailableModels =  await ModelService.GetOwnerCatalogsAsync();
     }
 
     private async Task OnValidSubmit(EventEditorModel model)
     {
         Event? evt = await EventService.UpdateEventAsync(Id, model);
 
-        if (evt is null)
+        if (model.SelectedModels is not null && evt is not null)
         {
-            // todo - logging
+            await EventService.UpdateModelsForEventAsync(Id, model.SelectedModels.ToList().Select(Guid.Parse));
         }
 
         NavigationManager.NavigateTo("/events");
-    }
-
-    private string SelectedModelsDisplay(List<string> ids) =>
-        ids.Count == 0 ? "Select one or more models" : string.Join(", ", AvailableModels.Where(oc => ids.Contains(oc.CatalogId.ToString())).Select(oc => oc.FriendlyName));
-
-    private async Task UpdateModels()
-    {
-        modelsUpdating = true;
-        await EventService.UpdateModelsForEventAsync(Id, SelectedModels.Select(Guid.Parse));
-        modelsUpdating = false;
     }
 }

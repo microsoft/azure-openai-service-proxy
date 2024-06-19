@@ -16,8 +16,6 @@ public partial class ModelAdd : ComponentBase
     public async Task HandleValidSubmit(ModelEditorModel model)
     {
         OwnerCatalog _ = await ModelService.AddOwnerCatalogAsync(model);
-
-        // NavigationManager.NavigateTo("/models", forceLoad: true);
         NavigationManager.NavigateTo("/models");
     }
 }

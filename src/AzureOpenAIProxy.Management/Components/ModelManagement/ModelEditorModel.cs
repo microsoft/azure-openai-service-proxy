@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using AzureOpenAIProxy.Management.Database;
 
 namespace AzureOpenAIProxy.Management.Components.ModelManagement;
 
@@ -15,6 +14,7 @@ public class ModelEditorModel
 
     [Required]
     [StringLength(256)]
+    [Url]
     public string? EndpointUrl { get; set; }
 
     [Required]

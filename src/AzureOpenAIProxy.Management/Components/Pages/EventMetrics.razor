@@ -25,59 +25,82 @@
         <MudIconButton Icon="@Icons.Material.Filled.Refresh" Variant="Variant.Filled" Color="Color.Primary"
             Size="Size.Small" Style="width: 80px;" OnClick="RefreshData" Disabled="@IsLoading"/>
 
-        <MudPaper Class="pa-10 ma-2" Elevation="1">
-            <MudChart ChartType="ChartType.Line" ChartSeries="@ActiveUsersChartSeries" XAxisLabels="@ActiveUsersChartLabels" Width="100%" Height="400px">
-                <CustomGraphics>
-                    <style>
-                        .mud-chart-line { overflow: visible; }
-                    </style>
-                </CustomGraphics>
-            </MudChart>
-        </MudPaper>
+        @if (ActiveUsersChartLabels.Length > 1)
+        {
+            <MudPaper Class="pa-10 ma-2" Elevation="1">
+                <MudChart ChartType="ChartType.Line" ChartSeries="@ActiveUsersChartSeries" XAxisLabels="@ActiveUsersChartLabels" Width="100%" Height="400px">
+                    <CustomGraphics>
+                        <style>
+                            .mud-chart-line { overflow: visible; }
+                        </style>
+                    </CustomGraphics>
+                </MudChart>
+            </MudPaper>
+        }
 
-        <MudPaper Class="pa-10 ma-2" Elevation="1">
-            <MudChart ChartType="ChartType.Line" ChartSeries="@RequestChartSeries" XAxisLabels="@RequestChartLabels" Width="100%" Height="400px">
-                <CustomGraphics>
-                    <style>
-                        .mud-chart-line { overflow: visible; }
-                    </style>
-                </CustomGraphics>
-            </MudChart>
-        </MudPaper>
+        @if (RequestChartLabels.Length > 1)
+        {
+            <MudPaper Class="pa-10 ma-2" Elevation="1">
+                <MudChart ChartType="ChartType.Line" ChartSeries="@RequestChartSeries" XAxisLabels="@RequestChartLabels" Width="100%" Height="400px">
+                    <CustomGraphics>
+                        <style>
+                            .mud-chart-line { overflow: visible; }
+                        </style>
+                    </CustomGraphics>
+                </MudChart>
+            </MudPaper>
+        }
 
-        <MudTable Class="pa-4 ma-2" Items="@ModelCounts" Dense="true" Striped="true" SortLabel="Sort By" Hover="true"
-            Style="margin-bottom: 60px;">
-            <HeaderContent>
-                <MudTh>
-                    <MudTableSortLabel SortBy="new Func<ModelCounts, object>(x => x.Resource)">
-                        Resource Name</MudTableSortLabel>
-                </MudTh>
-                <MudTh>
-                    <MudTableSortLabel SortBy="new Func<ModelCounts, object>(x => x.PromptTokens)">
-                        Prompt tokens</MudTableSortLabel>
-                </MudTh>
-                <MudTh>
-                    <MudTableSortLabel SortBy="new Func<ModelCounts, object>(x => x.CompletionTokens)">
-                        Completion tokens</MudTableSortLabel>
-                </MudTh>
-                <MudTh>
-                    <MudTableSortLabel SortBy="new Func<ModelCounts, object>(x => x.TotalTokens)">
-                        Total tokens</MudTableSortLabel>
-                </MudTh>
-                <MudTh>
-                    <MudTableSortLabel InitialDirection="SortDirection.Descending"
-                        SortBy="new Func<ModelCounts, object>(x => x.Count)">
-                        Requests</MudTableSortLabel>
-                </MudTh>
-            </HeaderContent>
+        @if (ResourcesByType.Count > 0)
+        {
+            <MudTable Class="pa-4 ma-2" Items="@ResourcesByType" Dense="true" Striped="true">
+                <HeaderContent>
+                    <MudTh>Type</MudTh>
+                    <MudTh>Resource(s)</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd>@context.ModelType</MudTd>
+                    <MudTd>@context.Names</MudTd>
+                </RowTemplate>
+            </MudTable>
+        }
 
-            <RowTemplate>
-                <MudTd>@context.Resource</MudTd>
-                <MudTd DataLabel="Prompt tokens">@context.PromptTokens</MudTd>
-                <MudTd DataLabel="Completion tokens">@context.CompletionTokens</MudTd>
-                <MudTd DataLabel="Total tokens">@context.TotalTokens</MudTd>
-                <MudTd DataLabel="Request Count">@context.Count</MudTd>
-            </RowTemplate>
-        </MudTable>
+        @if (ModelCounts.Count > 0)
+        {
+            <MudTable Class="pa-4 ma-2" Items="@ModelCounts" Dense="true" Striped="true" SortLabel="Sort By" Hover="true"
+                Style="margin-bottom: 60px;">
+                <HeaderContent>
+                    <MudTh>
+                        <MudTableSortLabel SortBy="new Func<ModelCounts, object>(x => x.Resource!)">
+                            Resource Name</MudTableSortLabel>
+                    </MudTh>
+                    <MudTh>
+                        <MudTableSortLabel SortBy="new Func<ModelCounts, object>(x => x.PromptTokens)">
+                            Prompt tokens</MudTableSortLabel>
+                    </MudTh>
+                    <MudTh>
+                        <MudTableSortLabel SortBy="new Func<ModelCounts, object>(x => x.CompletionTokens)">
+                            Completion tokens</MudTableSortLabel>
+                    </MudTh>
+                    <MudTh>
+                        <MudTableSortLabel SortBy="new Func<ModelCounts, object>(x => x.TotalTokens)">
+                            Total tokens</MudTableSortLabel>
+                    </MudTh>
+                    <MudTh>
+                        <MudTableSortLabel InitialDirection="SortDirection.Descending"
+                            SortBy="new Func<ModelCounts, object>(x => x.Count)">
+                            Requests</MudTableSortLabel>
+                    </MudTh>
+                </HeaderContent>
+
+                <RowTemplate>
+                    <MudTd>@context.Resource</MudTd>
+                    <MudTd DataLabel="Prompt tokens">@context.PromptTokens</MudTd>
+                    <MudTd DataLabel="Completion tokens">@context.CompletionTokens</MudTd>
+                    <MudTd DataLabel="Total tokens">@context.TotalTokens</MudTd>
+                    <MudTd DataLabel="Request Count">@context.Count</MudTd>
+                </RowTemplate>
+            </MudTable>
+        }
     </MudStack>
 }
