@@ -50,21 +50,24 @@ class AttendeeApi:
             try:
                 user_id = self.get_user_id(request=request)
 
-                pool = await self.db_manager.get_connection()
-
-                async with pool.acquire() as conn:
+                async with self.db_manager as conn:
                     result = await conn.fetch(
                         "SELECT * FROM aoai.add_event_attendee($1, $2)", user_id, event_id
                     )
 
                 if not result:
                     raise HTTPException(
-                        status_code=404, detail=f"Event with id {event_id} not found"
+                        status_code=404,
+                        detail=f"Error registering user for event with id {event_id}.",
                     )
 
                 return AttendeeRegistrationResponse()
+
+            except HTTPException:
+                raise
+
             except Exception as error:
-                logging.error(error)
+                self.logger.error(error)
                 raise error
 
         @self.router.get("/attendee/event/{event_id}", status_code=200)
@@ -72,12 +75,10 @@ class AttendeeApi:
             """Get attendees"""
             logging.info("Getting attendees")
 
-            pool = await self.db_manager.get_connection()
-
             try:
                 user_id = self.get_user_id(request=request)
 
-                async with pool.acquire() as conn:
+                async with self.db_manager as conn:
                     result = await conn.fetch(
                         "SELECT EA.api_key, EA.active "
                         "FROM aoai.event_attendee EA "
@@ -87,20 +88,19 @@ class AttendeeApi:
                         user_id,
                     )
 
-                if not result:
+                if not result or len(result) == 0:
                     raise HTTPException(
-                        status_code=404, detail=f"Event with id {event_id} not found"
-                    )
-
-                if len(result) == 0:
-                    raise HTTPException(
-                        status_code=404, detail=f"Event with id {event_id} not found"
+                        status_code=404,
+                        detail=f"The user is not yet registered for event id: {event_id}.",
                     )
 
                 return result[0]
 
+            except HTTPException:
+                raise
+
             except Exception as error:
-                logging.error(error)
+                self.logger.error(error, exc_info=True)
                 raise error
 
         @self.router.delete("/attendee/event/{event_id}/register", status_code=204)

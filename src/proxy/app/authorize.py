@@ -6,7 +6,7 @@ from uuid import UUID
 import asyncpg
 from fastapi import HTTPException
 
-# pylint: disable=E0402
+from .lru_cache_with_expiry import lru_cache_with_expiry
 from .monitor import MonitorEntity
 
 MAX_AUTH_TOKEN_LENGTH = 40
@@ -28,10 +28,8 @@ class Authorize:
     async def __is_user_authorized(self, api_key: UUID, deployment_name: str) -> AuthorizeResponse:
         """Check if user is authorized"""
 
-        pool = await self.db_manager.get_connection()
-
         try:
-            async with pool.acquire() as conn:
+            async with self.db_manager as conn:
                 result = await conn.fetchrow(
                     "SELECT * from aoai.get_attendee_authorized($1)", api_key
                 )
@@ -54,7 +52,6 @@ class Authorize:
             result_dict = dict(result)
             result_dict["is_authorized"] = True
             result_dict["deployment_name"] = deployment_name
-            result_dict["api_key"] = api_key
             del result_dict["rate_limit_exceed"]
 
             return AuthorizeResponse(**result_dict)
@@ -63,20 +60,22 @@ class Authorize:
             raise
 
         except asyncpg.exceptions.PostgresError as error:
-            self.logging.error("Postgres error: %s", str(error))
+            self.logging.error("Postgres error in __is_user_authorized: %s", str(error))
             raise HTTPException(
                 status_code=503,
-                detail=f"Error reading model catalog. {str(error)}",
+                detail="Authentication failed.",
             ) from error
 
         except Exception as exception:
-            self.logging.error("General exception in user_authorized: %s", str(exception))
+            self.logging.error("General exception in __is_user_authorized: %s", str(exception))
             raise HTTPException(
                 status_code=401,
-                detail=f"Authentication failed. General exception. {str(exception)}",
+                detail="Authentication failed.",
             ) from exception
 
-    # @lru_cache_with_expiry(maxsize=128, ttl=180)
+    # Balance between making authorisating db request and performance
+    # Technically an attendee could access event resources 60 seconds after the event expired.
+    @lru_cache_with_expiry(maxsize=256, ttl=60)
     async def __authorize(self, *, api_key: str, deployment_name: str) -> AuthorizeResponse:
         """Authorizes a user to access a specific time bound event."""
 

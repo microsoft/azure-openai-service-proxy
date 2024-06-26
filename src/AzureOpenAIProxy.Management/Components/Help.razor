@@ -1,0 +1,15 @@
+<MudStack Row="true">
+    <MudText Typo="Typo.h4">@Title</MudText>
+    <MudSpacer />
+    <MudLink Target="_blank" Href="@Link">
+        <MudIcon Icon="@Icons.Material.Outlined.HelpOutline" />
+    </MudLink>
+</MudStack>
+
+@code {
+    [Parameter]
+    public string Title { get; set; } = "";
+
+    [Parameter]
+    public string Link { get; set; } = "";
+}

@@ -1,10 +1,8 @@
 """ event_info route """
 
+from app.routes.request_manager import RequestManager
 from fastapi import Request
 from pydantic import BaseModel
-
-# pylint: disable=E0402
-from .request_manager import RequestManager
 
 
 class EventInfoResponse(BaseModel):
@@ -13,8 +11,6 @@ class EventInfoResponse(BaseModel):
     is_authorized: bool
     max_token_cap: int
     event_code: str
-    event_url: str
-    event_url_text: str
     event_image_url: str | None = None
     organizer_name: str
     organizer_email: str
@@ -25,8 +21,6 @@ class EventInfoResponse(BaseModel):
         is_authorized: bool,
         max_token_cap: int,
         event_code: str,
-        event_url: str,
-        event_url_text: str,
         event_image_url: str,
         organizer_name: str,
         organizer_email: str,
@@ -36,8 +30,6 @@ class EventInfoResponse(BaseModel):
             is_authorized=is_authorized,
             max_token_cap=max_token_cap,
             event_code=event_code,
-            event_url=event_url,
-            event_url_text=event_url_text,
             event_image_url=event_image_url,
             organizer_name=organizer_name,
             organizer_email=organizer_email,
@@ -75,8 +67,6 @@ class EventInfo(RequestManager):
                 is_authorized=authorize_response.is_authorized,
                 max_token_cap=authorize_response.max_token_cap,
                 event_code=authorize_response.event_code,
-                event_url=authorize_response.event_url,
-                event_url_text=authorize_response.event_url_text,
                 event_image_url=authorize_response.event_image_url,
                 organizer_name=authorize_response.organizer_name,
                 organizer_email=authorize_response.organizer_email,

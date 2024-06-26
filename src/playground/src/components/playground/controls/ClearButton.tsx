@@ -36,7 +36,7 @@ export const ClearChatButton = ({ className, disabled, onClick }: Props) => {
       onClick={onClick}
     >
       <Delete24Regular />
-      <Text>{"Clear chat"}</Text>
+      <Text>{"Clear"}</Text>
     </div>
   );
 };

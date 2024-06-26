@@ -1,4 +1,7 @@
-﻿namespace AzureOpenAIProxy.Management.Database;
+﻿using System;
+using System.Collections.Generic;
+
+namespace AzureOpenAIProxy.Management.Database;
 
 public partial class Event
 {
@@ -18,10 +21,6 @@ public partial class Event
 
     public string OrganizerEmail { get; set; } = null!;
 
-    public string EventUrl { get; set; } = null!;
-
-    public string EventUrlText { get; set; } = null!;
-
     public int MaxTokenCap { get; set; }
 
     public int DailyRequestCap { get; set; }
@@ -33,6 +32,8 @@ public partial class Event
     public int TimeZoneOffset { get; set; }
 
     public string TimeZoneLabel { get; set; } = null!;
+
+    public string? EventSharedCode { get; set; }
 
     public virtual ICollection<EventAttendee> EventAttendees { get; set; } = new List<EventAttendee>();
 

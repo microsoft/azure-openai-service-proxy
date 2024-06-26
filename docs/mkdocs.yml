@@ -5,18 +5,26 @@ nav:
   - Resources: resources.md
   - Events: events.md
   - Attendees: attendee.md
+  - Reporting: reporting.md
+  - Capacity: capacity.md
   - Playground: playground.md
-  - SDKs: sdk.md
+  - Developers: developers.md
   - Deployment: deployment.md
+  - Workshops: workshops.md
   - FAQ: faq.md
+
 
 plugins:
   - glightbox
 
 theme:
   name: material
+  logo: media/favicon.png
+  favicon: media/favicon.png
   features:
     - navigation.instant
+    - navigation.footer
+    - content.code.copy
 
   # Change Font: https://squidfunk.github.io/mkdocs-material/setup/changing-the-fonts/?h=fonts
   # Google Fonts Supported By Default: https://fonts.google.com/
@@ -40,6 +48,9 @@ theme:
 
 
 markdown_extensions:
+  - toc:
+      permalink: true
+      toc_depth: 0
   - admonition
   - pymdownx.details
   - pymdownx.superfences
@@ -49,3 +60,7 @@ markdown_extensions:
   # - pymdownx.emoji:
       # emoji_index: !!python/name:material.extensions.emoji.twemoji
       # emoji_generator: !!python/name:material.extensions.emoji.to_svg
+
+
+extra_css:
+  - css/custom.css

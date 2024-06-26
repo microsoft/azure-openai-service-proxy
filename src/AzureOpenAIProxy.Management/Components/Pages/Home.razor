@@ -1,54 +1,40 @@
 ﻿@page "/"
 
-<PageTitle>Home</PageTitle>
+<PageTitle>AI Proxy Admin</PageTitle>
 
-<style>
-    /* Add your CSS styles here */
-    h1 {
-        color: rgb(89, 74, 226);
-        margin-bottom: 10px;
-        margin-top: 10px;
-    }
+<MudStack>
+    <Help Title="Welcome" Link="https://microsoft.github.io/azure-openai-service-proxy" />
+    <MudText Typo="Typo.body1">Manage your events and resources for the Azure AI Proxy using the options on the menu.</MudText>
 
-    h2 {
-        color: rgb(89, 74, 226);;
-        margin-bottom: 10px;
-        margin-top: 10px;
-    }
+    <MudText Typo="Typo.h5">Resources</MudText>
+    <MudList Dense="true" DisableGutters="true">
+        <MudListItem Icon="@Icons.Material.Outlined.Book">
+            <a href="https://aka.ms/ai-proxy-docs" target="_blank" style="color: blue; text-decoration: underline;">Documentation</a>
+        </MudListItem>
+        <MudListItem Icon="@Icons.Material.Outlined.ReportProblem">
+            <a href="https://github.com/microsoft/azure-openai-service-proxy/issues" target="_blank" style="color: blue; text-decoration: underline;">Raise an issue</a>
+        </MudListItem>
+        <MudListItem Icon="@Icons.Material.Outlined.Feedback">
+            <a href="https://github.com/microsoft/azure-openai-service-proxy/discussions" target="_blank" style="color: blue; text-decoration: underline;">Questions or feedback</a>
+        </MudListItem>
+        <MudListItem Icon="@Icons.Custom.Brands.GitHub">
+            <a href="https://github.com/microsoft/azure-openai-service-proxy/" target="_blank" style="color: blue; text-decoration: underline;">Contributions welcome!</a>
+        </MudListItem>
+    </MudList>
 
-    p {
-        font-size: 16px;
-    }
+    <MudText Typo="Typo.h5">Getting started</MudText>
+    <MudList Dense="true" DisableGutters="true">
+        <MudListItem Icon="@Icons.Material.Outlined.Cloud"><strong>Step 1:</strong> Deploy Azure AI resources including models and AI Search indexes.
+        </MudListItem>
+        <MudListItem Icon="@Icons.Material.Outlined.AccountBalance"><strong>Step 2:</strong> Map Azure AI resources to AI Proxy resources.</MudListItem>
+        <MudListItem Icon="@Icons.Material.Outlined.Event"><strong>Step 3:</strong> Create an AI Proxy event.</MudListItem>
+        <MudListItem Icon="@Icons.Material.Outlined.People"><strong>Step 4:</strong> Promote the event attendee link.</MudListItem>
+    </MudList>
 
-    ol {
-        font-size: 16px;
-        margin-left: 20px;
-    }
+    <MudText Typo="Typo.h5">Getting started guide</MudText>
+    <MudText Typo="Typo.body1">Check out this 5-minute introduction video.</MudText>
+    <MudPaper Elevation="1" Padding="16px" Width="560px" Height="315px">
+        <iframe src="https://www.youtube.com/embed/x9N1qivjlfw?si=n18L8F5X5p5YXHYu" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    </MudPaper>
 
-    a {
-        color: rgb(89, 74, 226);;
-    }
-    /* Add more styles as needed */
-</style>
-
-<h1>Welcome</h1>
-
-<p>Manage your events and resources for the Azure AI Proxy using the options on the menu.</p>
-
-<h2>FAQ</h2>
-
-For frequently asked questions, please visit the proxy <a href="https://microsoft.github.io/azure-openai-service-proxy/faq" target="_blank">FAQ</a>.
-
-<h2>Documentation</h2>
-
-<p>For more information on the Azure AI Proxy, please visit the <a href="https://aka.ms/ai-proxy-docs" target="_blank">documentation</a>.</p>
-
-<h2>Getting started</h2>
-
-<ol>
-    <li>Create Azure AI resources you need for an event. Resources include OpenAI Models and Azure AI Search Indexes.</li>
-    <li>Create an Azure AI Proxy resource. You will need the Azure AI Key and endpoints, along with the deployment name or Azure AI Search index name.</li>
-    <li>Create an Azure AI Proxy event.</li>
-    <li>Edit the event and add required resources to the event.</li>
-    <li>Select the attendee link from the events page to get the event URL that you'll promote to attendees.</li>
-</ol>
+</MudStack>

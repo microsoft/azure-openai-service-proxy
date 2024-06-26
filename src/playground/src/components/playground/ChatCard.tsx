@@ -6,6 +6,7 @@ import {
   Field,
   Textarea,
   Spinner,
+  shorthands
 } from "@fluentui/react-components";
 import { Dispatch, useEffect, useRef, useState } from "react";
 import { Delete24Regular, SendRegular } from "@fluentui/react-icons";
@@ -24,25 +25,25 @@ interface CardProps {
 }
 
 const useStyles = makeStyles({
-  card: {
-    display: "flex",
-    height: "calc(100vh - 70px)",
-  },
   dialog: {
     display: "block",
   },
   smallButton: {
     width: "100%",
-    height: "50%",
+    height: "40%",
     maxWidth: "none",
+    textAlign: "left",
+    marginBottom: "12px"
   },
   startCard: {
     display: "flex",
     maxWidth: "80%",
-    marginTop: "35%",
-    marginLeft: "20%",
-    marginRight: "20%",
-    marginBottom: "35%",
+    ...shorthands.margin("35%", "20%"),
+    ...shorthands.padding("20px", "0px"),
+  },
+  chatCard: {
+    display: "flex",
+    height: "calc(100vh - 92px)",
   },
 });
 
@@ -65,44 +66,56 @@ export const ChatCard = ({
   }, [messageList]);
 
   return (
-    <Card className={chat.card} header="Chat Session">
-      <div
-        id={"chatContainer"}
-        style={{ overflowY: "auto" }}
-        ref={chatContainerRef}
-      >
-        {messageList.length > 1 ? (
-          messageList.map((message, index) => {
-            if (message.role === "system") {
-              return null;
-            }
-            return message.role === "user" ? (
-              <Message key={index} message={message} />
-            ) : (
-              <Response key={index} message={message} />
-            );
-          })
-        ) : (
-          <Card className={chat.startCard}>
-            <Body1 style={{ textAlign: "center" }}>
-              <h2>Start Chatting</h2>
-            </Body1>
-          </Card>
-        )}
-      </div>
-      {isLoading && <Spinner />}
+    <Card header="Chat session" className={chat.chatCard} >
+
       {isAuthorized && (
-        <ChatInput
-          promptSubmitted={onPromptEntered}
-          onClear={onClear}
-          canChat={canChat}
-        />
-      )}
-      {!isAuthorized && (
         <>
-          <CardFooter style={{ height: "10vh" }}>
-            <p>Please enter your event code to start the chat session.</p>
-          </CardFooter>
+          <div
+            id={"chatContainer"}
+            style={{ overflowY: "auto" }}
+            ref={chatContainerRef}
+          >
+
+            {messageList.length > 1 ? (
+              messageList.map((message, index) => {
+                if (message.role === "system") {
+                  return null;
+                }
+                return message.role === "user" ? (
+                  <Message key={index} message={message} />
+                ) : (
+                  <Response key={index} message={message} />
+                );
+              })
+            ) : (
+              <Card className={chat.startCard}>
+                <Body1 style={{ textAlign: "center" }}>
+                  {!canChat && (<h2>Select a model</h2>)}
+                  {canChat && (
+                    <>
+                      <h2>Start chatting</h2>
+                      Test your assistant by sending queries below. Then adjust your assistant setup to improve the assistant's responses.
+                    </>
+                  )}
+                </Body1>
+              </Card>
+            )}
+          </div>
+          {isLoading && <Spinner />}
+          {isAuthorized && (
+            <ChatInput
+              promptSubmitted={onPromptEntered}
+              onClear={onClear}
+              canChat={canChat}
+            />
+          )}
+          {!isAuthorized && (
+            <>
+              <CardFooter style={{ height: "10vh" }}>
+                <p>Please enter your event code to start the chat session.</p>
+              </CardFooter>
+            </>
+          )}
         </>
       )}
     </Card>
@@ -132,6 +145,7 @@ function ChatInput({
         <Textarea
           value={userPrompt}
           placeholder="Type user query here (Shift + Enter for new line)"
+          disabled={!canChat}
           onChange={(event) => setPrompt(event.target.value)}
           onKeyDown={(event) => {
             if (
@@ -151,7 +165,8 @@ function ChatInput({
           className={chat.smallButton}
           id={"send-button"}
           icon={<SendRegular />}
-          iconPosition="after"
+          iconPosition="before"
+          appearance="primary"
           onClick={() => {
             promptSubmitted(userPrompt);
             setPrompt("");
@@ -163,11 +178,12 @@ function ChatInput({
         <Button
           className={chat.smallButton}
           id="clear-button"
+          disabled={!canChat}
           icon={<Delete24Regular />}
-          iconPosition="after"
+          iconPosition="before"
           onClick={onClear}
         >
-          Clear Chat
+          Clear
         </Button>
       </div>
     </CardFooter>

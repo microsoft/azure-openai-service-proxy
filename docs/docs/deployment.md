@@ -47,7 +47,7 @@ The recommended way to deploy this app is with Dev Containers. Install the [VS C
 
 !!! note
 
-    Deploying the AI Proxy Admin Portal does not work on macOS on Apple Silicon. The workaround for now, is to deploy the solution from a Windows/ Linux machine, or GitHub Codespaces.
+    Deploying the AI Proxy Admin Portal does not work on macOS on Apple Silicon. The workaround for now, is to deploy the solution from a Windows/Linux machine on X64, or GitHub Codespaces.
 
 1. Ensure Docker is installed and running.
 1. Clone the repo:
@@ -75,19 +75,21 @@ The recommended way to deploy this app is with Dev Containers. Install the [VS C
     ```
 
     You will be prompted for the following:
+
     1. The environment name, keep the name short, max 7 characters to avoid invalid resource names being generated.
     1. Select a subscription from your Azure account.
     1. Select a location (like "eastus" or "sweden central"). Then azd will provision the resources in your account and deploy the latest code. Recommend deploying the proxy to the same location you plan to deploy your models.
-    1. Enter a value for the 'authClientId' infrastructure parameter. This is the Entra App Registration `Application (client) ID` you created.
-    1. Save the value in the environment for future use.
-    3. Enter a value for the 'swaLocation' infrastructure parameter. Recommend selecting a location close to or the same as the Azure location you previously selected.
-    4. Save the value in the environment for future use.
+    1. Enter a value for the `authClientId` infrastructure parameter. This is the Entra App Registration `Application (client) ID` you created.
+    1. You will be prompted for the `entraAuthorizationToken`. Press <kbd>ctrl+c</kbd> to cancel the deployment.
+    1. Run the `azd up` command again. You will be prompted for the `authClientSecret` infrastructure parameter again, but this time you will not be prompted for the `entraAuthorizationToken`.
+    1. Enter a value for the `principalName` infrastructure parameter. This is the name of the PostgreSQL database admin user. Recommend using your email address.
+    1. Select the 'swaLocation' infrastructure parameter. Recommend selecting a location close to or the same as the Azure location you previously selected.
 
     On completion, the following Azure resources will be provisioned:
 
     ![Azure OpenAI Playground experience](media/azure_resources.png)
 
-2. When `azd` has finished deploying you'll see a link to the Azure Resource Group created for the solution.
+1. When `azd` has finished deploying you'll see a link to the Azure Resource Group created for the solution.
 
     The Admin and Playground links will be displayed when `azd up` completes.
 
@@ -95,7 +97,7 @@ The recommended way to deploy this app is with Dev Containers. Install the [VS C
 
 ## Entra App Registration
 
-After the solution has been deployed, you will need to amend the app registration to add the redirect URI and enable the `ID tokens` under `Authentication`.
+After the solution has been deployed, you may need to manually amend the app registration to add the redirect URI and enable the `ID tokens` under `Authentication`.
 
 1. Navigate to the AI Proxy Admin portal URL. You'll find the URL from the output of the `azd up` command under `Deploying service admin`.
 
@@ -116,33 +118,15 @@ After the solution has been deployed, you will need to amend the app registratio
 To make any changes to the app code, just run:
 
 ```shell
-azd deploy
+azd deploy [admin | playground | proxy]
 ```
 
-## Scaling the Proxy Service
+## Next steps
 
-The proxy service is stateless and scales vertically and horizontally. By default, the proxy service is configured to scale up to 10 replicas. The proxy service is configured to scale up to 10 replicas. The number of replicas can be changed from the Azure Portal or from the az cli. For example, to scale to 30 replicas using the az cli, change the:
-
-```shell
-az containerapp update -n $APP_NAME -g $RESOURCE_GROUP --subscription $SUBSCRIPTION_ID --replica 30
-```
-
-## Managing resources
-
-You can configure multiple resources with the AI Proxy.
-
-| Model deployment class | Resource | Description |
-| ---------------------- | ------ | ----------- |
-| `openai-chat` | gpt-35-turbo, gpt-35-turbo-16k, or newer | This is the model deployment class for the Azure OpenAI Chat Completions API. |
-| `openai-completions` | davinci-002 or newer | This is the model deployment class for the Azure OpenAI Completions API. |
-| `openai-embeddings` | text-embedding-ada-002 or newer | This is the model deployment class for the Azure OpenAI Embeddings API. |
-| `azure-ai-search` | Azure AI Search index name | This allows for pass through access to an instance of Azure AI Search for Search/Query only. Note, recommend creating a read-only query key in Azure AI Search, if you want to use Semantic Ranking then you need to create a Standard SKU for Azure AI Search.|
-| `openai-dall-e-3` | dall-3-e | This is the model deployment class for the Azure OpenAI Dall-e-3 models. |
-| `openai-dall-e-2` | No model is deploy, just an Azure OpenAI resource in a location that supports the Images Generations API | This is the model deployment class for the Azure OpenAI Images Generations API. |
-
-## Load balancing resources
-
-You can deploy multiple instances of model with the same deployment name. For example, you can deploy multiple `gpt-35-turbo` models in difference Azure OpenAI resources with the same deployment name. The proxy will round robin across the resources with the same deployment name to balance the load.
+1. [Deploy an Azure AI Resources](#deploy-an-azure-ai-resources)
+1. [Map AI Resources to the AI Proxy](./resources.md)
+1. [Create and manage events](./events.md)
+1. [Capacity planning](./capacity.md)
 
 ## Deploy an Azure AI Resources
 
@@ -150,3 +134,31 @@ You can deploy multiple instances of model with the same deployment name. For ex
 1. Create a Azure resource group for your models. Naming suggestions include `ai-proxy-resources`.
 1. Add AI resources to the resource group you created. See [Create and deploy an Azure OpenAI Service resource](https://learn.microsoft.com/azure/ai-services/openai/how-to/create-resource) for more information.
 1. Make a note of the `endpoint_key` and `endpoint_url` as you'll need them when you configure resources for the AI Proxy.
+
+## Troubleshooting
+
+If you encounter any issues deploying the solution, please raise an issue on the [GitHub repo](https://github.com/microsoft/azure-openai-service-proxy/issues)
+
+### azd up failure
+
+If the first deployment with `azd up` fails, the postgresql server is already locked down to the virtual network. Running another deployment will fail because you cannot reach the server and thus database anymore. Go to the Postgres Server and add the IP address that you are deploying from to the firewall rules. Example of the error messages below. Use the IP-address from the warning:
+
+```text
+DeploymentScriptError: The provided script failed with multiple errors. First error:
+Setting postgresql14 as the default version. Please refer to https://aka.ms/DeploymentScriptsTroubleshoot for more deployment script information.
+DeploymentScriptError: * Setting postgresql14 as the default version
+DeploymentScriptError: psql: error: connection to server at "gdex-openai-r2ictxhhwea2i-postgresql.database.azure.com" (4.225.117.213), port 5432 f is not valid for this server's tenant. Please acquire a new token for the tenant 43207ea0-2cda-4abb-9c84-efb8193dada8.
+DeploymentScriptError: connection to server at "gdex-openai-r2ictxhhwea2i-postgresql.postgres.database.azure.com" (4.225.117.213), port 5432 failed: FATAL:
+"4.225.117.213", user "gdex-openai-spn", database "postgres", no encryption
+DeploymentScriptError: psql: error: connection to server at "gdex-openai-r2ictxhhwea2i-postgresql.postgres.database.azure.com" (4.225.117.213), port 5432 f is not valid for this server's tenant. Please acquire a new token for the tenant 43207ea0-2cda-4abb-9c84-efb8193dada8.
+DeploymentScriptError: connection to server at "gdex-openai-r2ictxhhwea2i-postgresql.postgres.database.azure.com" (4.225.117.213), port 5432 failed: FATAL:
+"4.225.117.213", user "gdex-openai-spn", database "aoai-proxy", no encryption
+DeploymentScriptError: psql: error: connection to server at "gdex-openai-r2ictxhhwea2i-postgresql.database.azure.com" (4.225.117.213), port 5432 f is not valid for this server's tenant. Please acquire a new token for the tenant 43207ea0-2cda-4abb-9c84-efb8193dada8.
+DeploymentScriptError: connection to server at "gdex-openai-r2ictxhhwea2i-postgresql.database.azure.com" (4.225.117.213), port 5432 failed: FATAL:
+"4.225.117.213", user "gdex-openai-spn", database "aoai-proxy", no encryption
+```
+
+![Screenshot of the server firewall settings](./media/postgresql_firewall_setting%20.png)
+
+!!! Warning
+    Do not forget to remove the Postgres network firewall rule after a successful deployment!

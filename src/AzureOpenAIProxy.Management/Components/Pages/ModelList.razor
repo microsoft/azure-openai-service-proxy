@@ -2,39 +2,45 @@
 
 @namespace AzureOpenAIProxy.Management.Components.Pages
 
+<PageTitle>AI Proxy Resources</PageTitle>
+
 <MudStack>
-    <h3>Available Resources</h3>
+    <Help Title="Resources" Link="https://microsoft.github.io/azure-openai-service-proxy/resources/"/>
 
-    <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/models/new">New Resource</MudButton>
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/models/new" Style="max-width: 200px"
+        StartIcon="@Icons.Material.Filled.Add">New Resource
+    </MudButton>
 
-    <MudTable Items="@Models" Loading="@(Models is null)" LoadingProgressColor="Color.Info" Hover="true"
-        Breakpoint="Breakpoint.Sm">
+    <MudTable Items="@Models" Loading="@(Models is null)" LoadingProgressColor="Color.Info" Hover="true" Dense="true"
+        Striped="true" Breakpoint="Breakpoint.Sm">
         <HeaderContent>
             <MudTh>Friendly Name</MudTh>
-            <MudTh>Resource Name</MudTh>
-            <MudTh>Endpoint URL</MudTh>
-            <MudTh>Resource Type</MudTh>
-            <MudTh>Location</MudTh>
+            <MudTh>Name</MudTh>
+            <MudTh>Type</MudTh>
+            <MudTh>Region</MudTh>
+            <MudTh>Refd</MudTh>
             <MudTh>Active</MudTh>
-            <MudTh></MudTh>
             <MudTh></MudTh>
         </HeaderContent>
         <RowTemplate>
-            <MudTd DataLabel="FriendlyName">@context.FriendlyName</MudTd>
-            <MudTd DataLabel="DeploymentName">@context.DeploymentName</MudTd>
-            <MudTd DataLabel="EndpointUrl">@context.EndpointUrl</MudTd>
-            <MudTd DataLabel="ModelType">@(context.ModelType!.Value.ToString().Replace("_", " "))</MudTd>
-            <MudTd DataLabel="Location">@(context.Location)</MudTd>
+            <MudTd DataLabel="Friendly Name">
+                <MudText Color="Color.Primary"> @context.FriendlyName</MudText>
+            </MudTd>
+            <MudTd DataLabel="Name">@context.DeploymentName</MudTd>
+            <MudTd DataLabel="Type">@(context.ModelType!.Value.ToString().Replace("_", " "))</MudTd>
+            <MudTd DataLabel="Region">@(context.Location)</MudTd>
+            <MudTd DataLabel="Referenced">@(context.Events.Count)</MudTd>
             <MudTd DataLabel="Active">@(context.Active ? "Yes" : "No")</MudTd>
             <MudTd>
-                <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="@($"/models/{context.CatalogId}")">Edit
-                </MudButton>
-            </MudTd>
-            <MudTd>
-                <MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="() => OpenDialog(context)">Delete
-                </MudButton>
+                <MudStack Row="true" Spacing="1">
+                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary"
+                        Href="@($"/models/{context.CatalogId}")" Title="Edit" />
+                    <MudIconButton Icon="@Icons.Material.Filled.ContentCopy" Color="Color.Primary"
+                        @onclick="() => DuplicateOwnerCatalogAsync(context)" Title="Duplicate" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Primary"
+                        @onclick="() => OpenDialog(context)" Disabled="context.Events.Count > 0 ? true : false" Title="Delete" />
+                </MudStack>
             </MudTd>
         </RowTemplate>
     </MudTable>
-
 </MudStack>

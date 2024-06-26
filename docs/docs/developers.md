@@ -1,4 +1,4 @@
-# SDK support
+# Developer support
 
 The Azure AI Proxy is a transparent proxy that supports several Azure AI SDKs including Azure OpenAI SDKs, Azure AI Search SDKs, REST calls, as well as libraries like LangChain. Access is granted using a time bound API Key and the Azure AI Proxy endpoint URL.
 
@@ -18,7 +18,6 @@ The Azure AI Proxy provides support for the following Azure OpenAI SDKs:
 1. Azure OpenAI Chat Completions
 1. Azure OpenAI Completion
 1. Azure OpenAI Embeddings
-1. Azure OpenAI DALL-E 2
 1. Azure OpenAI DALL-E 3
 
 ### Azure OpenAI Python SDK example
@@ -29,7 +28,7 @@ The following is an example of calling the Azure OpenAI Chat Completions API usi
 """ Test Azure OpenAI Chat Completions API """
 
 ENDPOINT_URL = "https://<YOUR_PROXY_PLAYGROUND_URL>/api/v1"
-API_KEY = "36a69054-0956-4eb6-963a-571089d46c58"
+API_KEY = "<YOUR_PERSONAL_AI_PROXY_API_KEY>"
 
 import os
 

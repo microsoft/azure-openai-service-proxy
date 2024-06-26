@@ -1,5 +1,6 @@
 import { ChatResponseMessage } from "@azure/openai";
 import { makeStyles, shorthands } from "@fluentui/react-components";
+import { Person32Regular } from "@fluentui/react-icons";
 
 interface Props {
   message: ChatResponseMessage;
@@ -14,17 +15,24 @@ const useStyles = makeStyles({
     marginLeft: "auto",
   },
   message: {
-    fontSize: "large",
-    textAlign: "right",
-    color: "white",
+    fontSize: "medium",
+    textAlign: "left",
+    color: "#000",
+    marginRight: "10px",
     boxShadow:
-      "0px 2px 4px rgba(0, 0, 0, 0.14), 0px 0px 2px rgba(0, 0, 0, 0.12)",
-    backgroundColor: "#0078D4",
-    ...shorthands.padding("20px"),
-    ...shorthands.borderRadius("8px"),
-    ...shorthands.outline("transparent solid 1px"),
+      "0px 0px 4px rgba(0, 0, 0, 0.36), 0px 0px 2px rgba(0, 0, 0, 0.24)",
+    backgroundColor: "#fff",
+    ...shorthands.padding("12px", "24px"),
+    ...shorthands.borderRadius("2px"),
   },
+  icon: {
+    minWidth:"24px",
+    maxWidth:"24px",
+    width:"24px",
+    marginTop:"6px"
+  }
 });
+
 
 export const Message = ({ message }: Props) => {
   const styles = useStyles();
@@ -32,6 +40,7 @@ export const Message = ({ message }: Props) => {
   return (
     <div className={styles.container}>
       <div className={styles.message}>{message.content}</div>
+      <Person32Regular className={styles.icon}/>
     </div>
   );
 };

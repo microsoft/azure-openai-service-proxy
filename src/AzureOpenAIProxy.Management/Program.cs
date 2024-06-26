@@ -1,7 +1,7 @@
+using Azure.Core;
+using Azure.Identity;
 using AzureOpenAIProxy.Management;
 using AzureOpenAIProxy.Management.Components;
-using AzureOpenAIProxy.Management.Database;
-using AzureOpenAIProxy.Management.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Web;
 using MudBlazor.Services;
@@ -11,6 +11,25 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 NpgsqlDataSourceBuilder dataSourceBuilder = new(builder.Configuration.GetConnectionString("AoaiProxyContext"));
 dataSourceBuilder.MapEnum<ModelType>();
+
+if (string.IsNullOrEmpty(dataSourceBuilder.ConnectionStringBuilder.Password))
+{
+    // If no password was provided, we're probably going to be using a managed identity to authenticate.
+    // Define the time period the token lives for, and how long to wait to retry if the token fails.
+    int refreshPeriod = builder.Configuration.GetValue("Azure:TokenRefreshSeconds", 14400);
+    int failureRefreshPeriod = builder.Configuration.GetValue("Azure:TokenFailureRefreshSeconds", 10);
+
+    // Use the Azure SDK to get a token from the managed identity and provide it to Npgsql using the
+    // PeriodicPasswordProvider to refresh it on schedule.
+    dataSourceBuilder.UsePeriodicPasswordProvider(async (_, ct) =>
+    {
+        var credential = new DefaultAzureCredential();
+        var ctx = new TokenRequestContext(["https://ossrdbms-aad.database.windows.net/.default"]);
+        var tokenResponse = await credential.GetTokenAsync(ctx, ct);
+        return tokenResponse.Token;
+    }, TimeSpan.FromSeconds(refreshPeriod), TimeSpan.FromSeconds(failureRefreshPeriod));
+}
+
 NpgsqlDataSource dataSource = dataSourceBuilder.Build();
 
 builder.Services.AddDbContext<AoaiProxyContext>((options) =>
@@ -28,6 +47,7 @@ builder.Services.AddRazorComponents()
 builder.Services.AddScoped<IEventService, EventService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IModelService, ModelService>();
+builder.Services.AddScoped<IMetricService, MetricService>();
 
 builder.Services.AddMudServices();
 

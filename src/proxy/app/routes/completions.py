@@ -2,13 +2,13 @@
 
 from typing import Any
 
+from app.config import Deployment
+from app.routes.request_manager import RequestManager
 from fastapi import Request, Response
 from pydantic import BaseModel
 
 # pylint: disable=E0402
-from ..config import Deployment
 from ..openai_async import OpenAIAsyncManager
-from .request_manager import RequestManager
 
 
 class CompletionsRequest(BaseModel):
@@ -56,11 +56,7 @@ class Completions(RequestManager):
 
         return self.router
 
-    async def call_openai(
-        self,
-        model: object,
-        deployment: Deployment,
-    ) -> Any:
+    async def call_openai(self, model: object, deployment: Deployment, request: Request) -> Any:
         """call openai with retry"""
 
         url = (

@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using System.Runtime.InteropServices;
 
 namespace AzureOpenAIProxy.Management.Components.EventManagement;
 
@@ -10,19 +9,16 @@ public class EventEditorModel
     [StringLength(64)]
     public string? Name { get; set; }
 
-    [Required(ErrorMessage = "Url text is required")]
-    [StringLength(256)]
-    public string? UrlText { get; set; }
-    [Required(ErrorMessage = "Url is required")]
-    [StringLength(256)]
-    [Url]
-    public string? Url { get; set; }
+
+    [StringLength(64)]
+    [RegularExpression(@"^[a-zA-Z0-9]{5,}$", ErrorMessage = "Event shared code must be alphanumeric, blank or 5 or more characters long.")]
+    public string? EventSharedCode { get; set; }
 
     [StringLength(256)]
-    [Url]
     public string? EventImageUrl { get; set; }
 
     [Required]
+    [StringLength(8192)]
     public string? Description { get; set; }
 
     [Required]
@@ -39,14 +35,20 @@ public class EventEditorModel
 
     [Required(ErrorMessage = "Specify the maximum number of tokens allowed per request")]
     [Range(1, 100000, ErrorMessage = "Value for MaxTokenCap must be between 1 and 100000")]
-    public int MaxTokenCap { get; set; } = 4096;
+    public int MaxTokenCap { get; set; } = 512;
 
     [Required(ErrorMessage = "Specify the maximum number of requests allowed per day per token")]
     [Range(1, 100000, ErrorMessage = "Value for the maximum number of requests must be between 1 and 100000.")]
-    public int DailyRequestCap { get; set; } = 2000;
+    public int DailyRequestCap { get; set; } = 256;
 
     public bool Active { get; set; }
 
     [Required(ErrorMessage = "Time zone is required")]
     public TimeZoneInfo? SelectedTimeZone { get; set; }
+
+    public IEnumerable<string>? SelectedModels { get; set; }
+    public IEnumerable<OwnerCatalog> AvailableModels { get; set; } = [];
+
+    public string SelectedModelsDisplay(List<string> ids) =>
+        ids.Count == 0 ? "Select one or more models" : string.Join(", ", AvailableModels.Where(oc => ids.Contains(oc.CatalogId.ToString())).Select(oc => oc.FriendlyName));
 }

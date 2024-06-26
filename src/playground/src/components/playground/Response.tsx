@@ -3,6 +3,7 @@ import { ChatResponseMessage } from "@azure/openai";
 import { makeStyles, shorthands } from "@fluentui/react-components";
 import SyntaxHighlighter from "react-syntax-highlighter";
 import { solarizedlight } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { Bot24Regular } from "@fluentui/react-icons";
 
 interface Props {
   message: ChatResponseMessage;
@@ -16,16 +17,26 @@ const useStyles = makeStyles({
     maxWidth: "80%",
   },
   response: {
-    fontSize: "large",
+    fontSize: "medium",
     textAlign: "left",
-    color: "white",
-    backgroundColor: "#8661C5",
-    boxShadow:
-      "0px 2px 4px rgba(0, 0, 0, 0.14), 0px 0px 2px rgba(0, 0, 0, 0.12)",
-    ...shorthands.padding("20px"),
-    ...shorthands.borderRadius("8px"),
+    color: "#000",
+    marginLeft: "12px",
+    backgroundColor: "#fff",
+    boxShadow: "0px 0px 4px rgba(0, 0, 0, 0.36), 0px 0px 2px rgba(0, 0, 0, 0.24)",
+    ...shorthands.padding("0px", "24px"),
+    ...shorthands.borderRadius("2px"),
     ...shorthands.outline("transparent solid 1px"),
   },
+  markdown: {
+    paddingTop: "0px",
+    marginTop: "0px"
+  },
+  icon: {
+    minWidth:"24px",
+    maxWidth:"24px",
+    width:"auto",
+    marginTop:"6px"
+  }
 });
 
 export const Response = ({ message }: Props) => {
@@ -33,8 +44,9 @@ export const Response = ({ message }: Props) => {
   if (message.content) {
     return (
       <div className={styles.container}>
+        <Bot24Regular className={styles.icon}/>
         <div className={styles.response}>
-          <Markdown>{message.content}</Markdown>
+          <Markdown className={styles.markdown}>{message.content}</Markdown>
         </div>
       </div>
     );

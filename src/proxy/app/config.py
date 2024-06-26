@@ -7,9 +7,9 @@ import uuid
 import asyncpg
 from fastapi import HTTPException
 
-# pylint: disable=E0402
 from .authorize import AuthorizeResponse
 from .db_manager import DBManager
+from .lru_cache_with_expiry import lru_cache_with_expiry
 from .monitor import Monitor
 
 # initiase the random number generator
@@ -47,7 +47,9 @@ class Config:
         self.monitor = monitor
         self.logging = logging.getLogger(__name__)
 
-    # @lru_cache_with_expiry(maxsize=128, ttl=180)
+    # Balance db performance with cache freshness
+    # Technically, the cache could be stale for up to 60 seconds
+    @lru_cache_with_expiry(maxsize=128, ttl=60)
     async def get_event_catalog(
         self, event_id: str, deployment_name: str | None
     ) -> list[Deployment]:
@@ -55,19 +57,18 @@ class Config:
 
         config = []
 
-        pool = await self.db_manager.get_connection()
-
         try:
-            async with pool.acquire() as conn:
+            async with self.db_manager as conn:
                 if deployment_name is None:
                     result = await conn.fetch(
                         "SELECT * FROM aoai.get_models_by_event($1)", event_id
                     )
                 else:
                     result = await conn.fetch(
-                        "SELECT * FROM aoai.get_models_by_deployment_name($1, $2)",
+                        "SELECT * FROM aoai.get_models_by_deployment_name($1, $2, $3)",
                         event_id,
                         deployment_name,
+                        self.db_manager.get_postgres_encryption_key(),
                     )
 
             for row in result:
@@ -136,10 +137,10 @@ class Config:
         deployments = await self.get_event_catalog(authorize_response.event_id, None)
         event_model_types = {}
 
-        # create a dictionary with a key of deployment.model_type with a list of deployment names
+        # create a dictionary with a key of deployment.model_type with a set of deployment names
         for deployment in deployments:
             if deployment.model_type not in event_model_types:
-                event_model_types[deployment.model_type] = []
-            event_model_types[deployment.model_type].append(deployment.deployment_name)
+                event_model_types[deployment.model_type] = set()
+            event_model_types[deployment.model_type].add(deployment.deployment_name)
 
         return event_model_types

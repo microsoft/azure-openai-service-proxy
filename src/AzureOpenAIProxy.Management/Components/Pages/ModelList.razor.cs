@@ -21,7 +21,7 @@ public partial class ModelList : ComponentBase
     {
         DialogParameters<DeleteConfirmation> parameters = new()
         {
-            { x => x.ContentText, $"Do you really want to delete the resource '{resource.FriendlyName}'? You can only delete resources that aren't currently in use." },
+            { x => x.ContentText, $"Do you really want to delete the resource '{resource.FriendlyName}'?" },
             { x => x.ButtonText, "Delete" },
             { x => x.Color, Color.Error }
         };
@@ -34,6 +34,11 @@ public partial class ModelList : ComponentBase
             await ModelService.DeleteOwnerCatalogAsync(resource.CatalogId);
             Models = await ModelService.GetOwnerCatalogsAsync();
         }
+    }
 
+    private async Task DuplicateOwnerCatalogAsync(OwnerCatalog resource)
+    {
+        await ModelService.DuplicateOwnerCatalogAsync(resource);
+        Models = await ModelService.GetOwnerCatalogsAsync();
     }
 }

@@ -1,5 +1,7 @@
-﻿using AzureOpenAIProxy.Management.Database;
+﻿using System;
+using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
+using AzureOpenAIProxy.Management.Database;
 
 namespace AzureOpenAIProxy.Management;
 
@@ -14,9 +16,17 @@ public partial class AoaiProxyContext : DbContext
     {
     }
 
+    public virtual DbSet<ActiveAttendeeGrowthView> ActiveAttendeeGrowthViews { get; set; }
+
     public virtual DbSet<Event> Events { get; set; }
 
     public virtual DbSet<EventAttendee> EventAttendees { get; set; }
+
+    public virtual DbSet<EventAttendeeRequest> EventAttendeeRequests { get; set; }
+
+    public virtual DbSet<Metric> Metrics { get; set; }
+
+    public virtual DbSet<MetricView> MetricViews { get; set; }
 
     public virtual DbSet<Owner> Owners { get; set; }
 
@@ -29,6 +39,19 @@ public partial class AoaiProxyContext : DbContext
         modelBuilder
             .HasPostgresEnum("aoai", "model_type", new[] { "openai-chat", "openai-embedding", "openai-dalle3", "openai-whisper", "openai-completion", "openai-instruct", "azure-ai-search" })
             .HasPostgresExtension("aoai", "pgcrypto");
+
+        modelBuilder.Entity<ActiveAttendeeGrowthView>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToView("active_attendee_growth_view", "aoai");
+
+            entity.Property(e => e.Attendees).HasColumnName("attendees");
+            entity.Property(e => e.DateStamp).HasColumnName("date_stamp");
+            entity.Property(e => e.EventId)
+                .HasMaxLength(50)
+                .HasColumnName("event_id");
+        });
 
         modelBuilder.Entity<Event>(entity =>
         {
@@ -55,12 +78,10 @@ public partial class AoaiProxyContext : DbContext
             entity.Property(e => e.EventMarkdown)
                 .HasMaxLength(8192)
                 .HasColumnName("event_markdown");
-            entity.Property(e => e.EventUrl)
-                .HasMaxLength(256)
-                .HasColumnName("event_url");
-            entity.Property(e => e.EventUrlText)
-                .HasMaxLength(256)
-                .HasColumnName("event_url_text");
+            entity.Property(e => e.EventSharedCode)
+                .HasMaxLength(64)
+                .IsRequired(false)
+                .HasColumnName("event_shared_code");
             entity.Property(e => e.MaxTokenCap).HasColumnName("max_token_cap");
             entity.Property(e => e.OrganizerEmail)
                 .HasMaxLength(128)
@@ -123,6 +144,76 @@ public partial class AoaiProxyContext : DbContext
                 .HasConstraintName("fk_eventattendee_event");
         });
 
+        modelBuilder.Entity<EventAttendeeRequest>(entity =>
+        {
+            entity.HasKey(e => new { e.ApiKey, e.DateStamp }).HasName("eventattendeerequest_pkey");
+
+            entity.ToTable("event_attendee_request", "aoai");
+
+            entity.Property(e => e.ApiKey)
+                .HasColumnType("character varying")
+                .HasColumnName("api_key");
+            entity.Property(e => e.DateStamp).HasColumnName("date_stamp");
+            entity.Property(e => e.RequestCount).HasColumnName("request_count");
+            entity.Property(e => e.TokenCount).HasColumnName("token_count");
+
+            entity.HasOne(d => d.ApiKeyNavigation).WithMany(p => p.EventAttendeeRequests)
+                .HasPrincipalKey(p => p.ApiKey)
+                .HasForeignKey(d => d.ApiKey)
+                .HasConstraintName("fk_eventattendeerequest_eventattendee");
+        });
+
+        modelBuilder.Entity<Metric>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToTable("metric", "aoai");
+
+            entity.HasIndex(e => e.EventId, "event_id_index");
+
+            entity.Property(e => e.ApiKey)
+                .HasColumnType("character varying")
+                .HasColumnName("api_key");
+            entity.Property(e => e.DateStamp)
+                .HasDefaultValueSql("CURRENT_DATE")
+                .HasColumnName("date_stamp");
+            entity.Property(e => e.EventId)
+                .HasMaxLength(50)
+                .HasColumnName("event_id");
+            entity.Property(e => e.Resource)
+                .HasMaxLength(64)
+                .HasColumnName("resource");
+            entity.Property(e => e.TimeStamp)
+                .HasDefaultValueSql("CURRENT_TIME")
+                .HasColumnName("time_stamp");
+            entity.Property(e => e.Usage)
+                .HasColumnType("jsonb")
+                .HasColumnName("usage");
+
+            entity.HasOne(d => d.Event).WithMany()
+                .HasForeignKey(d => d.EventId)
+                .HasConstraintName("fk_metric");
+        });
+
+        modelBuilder.Entity<MetricView>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToView("metric_view", "aoai");
+
+            entity.Property(e => e.CompletionTokens).HasColumnName("completion_tokens");
+            entity.Property(e => e.DateStamp).HasColumnName("date_stamp");
+            entity.Property(e => e.EventId)
+                .HasMaxLength(50)
+                .HasColumnName("event_id");
+            entity.Property(e => e.PromptTokens).HasColumnName("prompt_tokens");
+            entity.Property(e => e.Resource)
+                .HasMaxLength(64)
+                .HasColumnName("resource");
+            entity.Property(e => e.TimeStamp).HasColumnName("time_stamp");
+            entity.Property(e => e.TotalTokens).HasColumnName("total_tokens");
+        });
+
         modelBuilder.Entity<Owner>(entity =>
         {
             entity.HasKey(e => e.OwnerId).HasName("owner_pkey");
@@ -153,12 +244,12 @@ public partial class AoaiProxyContext : DbContext
             entity.Property(e => e.DeploymentName)
                 .HasMaxLength(64)
                 .HasColumnName("deployment_name");
-            entity.Property(e => e.EndpointKey)
-                .HasMaxLength(128)
-                .HasColumnName("endpoint_key");
-            entity.Property(e => e.EndpointUrl)
-                .HasMaxLength(256)
-                .HasColumnName("endpoint_url");
+            entity.Property(e => e.EndpointUrlEncrypted)
+                .HasColumnType("bytea")
+                .HasColumnName("endpoint_url_encrypted");
+            entity.Property(e => e.EndpointKeyEncrypted)
+                .HasColumnType("bytea")
+                .HasColumnName("endpoint_key_encrypted");
             entity.Property(e => e.FriendlyName)
                 .HasMaxLength(64)
                 .HasColumnName("friendly_name");

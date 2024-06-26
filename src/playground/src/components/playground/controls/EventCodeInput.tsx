@@ -7,7 +7,7 @@ import {
   useId,
 } from "@fluentui/react-components";
 import { useState } from "react";
-import { useEventDataContext } from "../../providers/EventDataProvider";
+import { useEventDataContext } from "../../../providers/EventDataProvider";
 
 const useStyles = makeStyles({
   container: {
@@ -21,7 +21,7 @@ const useStyles = makeStyles({
 
 export const ApiKeyInput = () => {
   const [code, setCode] = useState("");
-  const { eventData, isAuthorized, setEventCode } = useEventDataContext();
+  const { isAuthorized, setEventCode } = useEventDataContext();
   const inputId = useId();
   const styles = useStyles();
 
@@ -52,24 +52,6 @@ export const ApiKeyInput = () => {
       )}
       {isAuthorized && (
         <>
-          <Label
-            style={{
-              color: "GrayText",
-              fontSize: "small",
-              textAlign: "justify",
-            }}
-          >
-            <div>{eventData!.name}</div>
-            <div>
-              <a
-                href={eventData!.url}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {eventData!.urlText}
-              </a>
-            </div>
-          </Label>
           <Button
             onClick={(e) => {
               e.preventDefault();

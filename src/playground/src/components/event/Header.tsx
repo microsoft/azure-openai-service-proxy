@@ -31,6 +31,7 @@ const useStyles = makeStyles({
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
+    fontSize: "medium",
   },
   left: {
     justifySelf: "left",
@@ -57,7 +58,7 @@ export const Header = () => {
     <div className={styles.container}>
       <div className={styles.left}>
         <Link
-          href="https://github.com/microsoft/azure-openai-proxy-service"
+          href="https://github.com/microsoft/azure-openai-service-proxy"
           title="GitHub repo"
           target="_blank"
         >
@@ -78,7 +79,12 @@ export const Header = () => {
             <Logout
               postLogoutRedirect={window.location.href}
               customRenderer={({ href }) => (
-                <Button href={href} as="a" icon={<SignOutFilled />}>
+                <Button
+                  href={href}
+                  as="a"
+                  appearance="primary"
+                  icon={<SignOutFilled />}
+                >
                   Logout
                 </Button>
               )}
@@ -93,7 +99,7 @@ export const Header = () => {
             postLoginRedirect={window.location.href}
             customRenderer={(props) => {
               return (
-                <Button href={props.href} as="a">
+                <Button href={props.href} as="a" appearance="primary">
                   Login with {props.name}
                 </Button>
               );
