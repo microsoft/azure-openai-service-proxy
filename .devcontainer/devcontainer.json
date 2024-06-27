@@ -45,16 +45,13 @@
         "[python]": {
           "editor.formatOnSave": true,
           "editor.codeActionsOnSave": {
-            "source.fixAll": true
+            "source.fixAll": "always"
           }
         },
         "python.formatting.provider": "black"
       }
     }
   },
-
-  // Use 'forwardPorts' to make a list of ports inside the container available locally.
-  "forwardPorts": [3100],
 
   // Use 'postCreateCommand' to run commands after the container is created.
   "postCreateCommand": "bash ./.devcontainer/post-create.sh",
@@ -64,5 +61,24 @@
 
   "remoteEnv": {
     "ENVIRONMENT": "development"
+  },
+
+  "portsAttributes": {
+    "8000": {
+      "label": "Python Proxy",
+      "onAutoForward": "notify"
+    },
+    "5175": {
+      "label": "Admin",
+      "onAutoForward": "openBrowser"
+    },
+    "5173": {
+      "label": "Playground (internal)",
+      "onAutoForward": "silent"
+    },
+    "4280": {
+      "label": "Playgroud (SWA proxy)",
+      "onAutoForward": "openBrowser"
+    }
   }
 }
