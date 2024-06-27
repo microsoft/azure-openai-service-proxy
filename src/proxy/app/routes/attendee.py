@@ -103,4 +103,70 @@ class AttendeeApi:
                 self.logger.error(error, exc_info=True)
                 raise error
 
+        @self.router.delete("/attendee/event/{event_id}/register", status_code=204)
+        async def unregister_attendee(request: Request, event_id: str):
+            """Unregister attendee"""
+            logging.info("Unregistering attendee")
+
+            try:
+                user_id = self.get_user_id(request=request)
+
+                pool = await self.db_manager.get_connection()
+
+                async with pool.acquire() as conn:
+                    await conn.fetch(
+                        "UPDATE aoai.event_attendee "
+                        "SET active = false "
+                        "WHERE user_id = $1 AND event_id = $2",
+                        user_id,
+                        event_id,
+                    )
+
+            except Exception as error:
+                logging.error(error)
+                raise error
+
+        @self.router.patch("/attendee/event/{event_id}/register", status_code=204)
+        async def activate_user(request: Request, event_id: str):
+            """Unregister attendee"""
+            logging.info("Activate attendee")
+
+            try:
+                user_id = self.get_user_id(request=request)
+
+                pool = await self.db_manager.get_connection()
+
+                async with pool.acquire() as conn:
+                    await conn.fetch(
+                        "UPDATE aoai.event_attendee "
+                        "SET active = true "
+                        "WHERE user_id = $1 AND event_id = $2",
+                        user_id,
+                        event_id,
+                    )
+
+            except Exception as error:
+                logging.error(error)
+                raise error
+
+        @self.router.delete("/attendee", status_code=204)
+        async def delete_account(request: Request):
+            """Delete account and all registrations"""
+            logging.info("Delete account and all registrations")
+
+            try:
+                user_id = self.get_user_id(request=request)
+
+                pool = await self.db_manager.get_connection()
+
+                async with pool.acquire() as conn:
+                    await conn.fetch(
+                        "delete from aoai.event_attendee where user_id = $1",
+                        user_id,
+                    )
+
+            except Exception as error:
+                logging.error(error)
+                raise error
+
         return self.router
