@@ -4,7 +4,7 @@ using Proxy.NET.Services;
 
 namespace Proxy.NET.Endpoints;
 
-public static class AzureAiSearch
+public static class AzureAISearch
 {
     private enum RequestType
     {
@@ -12,7 +12,7 @@ public static class AzureAiSearch
         AiSearchOData
     }
 
-    public static void AzureAiSearchEndpoints(this IEndpointRouteBuilder routes)
+    public static void AzureAISearchEndpoints(this IEndpointRouteBuilder routes)
     {
         MapRoute.Post(routes, RequestType.AiSearch, ProcessRequestAsync, Auth.Type.ApiKey, "/indexes/{index}/docs/search");
         MapRoute.Post(

@@ -5,7 +5,7 @@ using Proxy.NET.Services;
 
 namespace Proxy.NET.Endpoints;
 
-public static class AzureAi
+public static class AzureAI
 {
     private enum RequestType
     {
@@ -16,7 +16,7 @@ public static class AzureAi
         Images
     }
 
-    public static void AzureAiEndpoints(this IEndpointRouteBuilder routes)
+    public static void AzureAIEndpoints(this IEndpointRouteBuilder routes)
     {
         string basePath = "/openai/deployments/{deployment_name}";
         MapRoute.Post(routes, RequestType.ChatCompletions, ProcessRequestAsync, Auth.Type.ApiKey, basePath, "/chat/completions");
