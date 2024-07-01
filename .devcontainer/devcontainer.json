@@ -64,8 +64,12 @@
   },
 
   "portsAttributes": {
+    // "8000": {
+    //   "label": "Python Proxy",
+    //   "onAutoForward": "notify"
+    // },
     "8000": {
-      "label": "Python Proxy",
+      "label": "Proxy.NET",
       "onAutoForward": "notify"
     },
     "5175": {
