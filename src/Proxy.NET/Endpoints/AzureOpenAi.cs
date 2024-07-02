@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text.Json;
+using Microsoft.AspNetCore.Mvc;
 using Proxy.NET.Models;
 using Proxy.NET.Services;
 
@@ -7,48 +8,32 @@ namespace Proxy.NET.Endpoints;
 
 public static class AzureAI
 {
-    private enum RequestType
+    public static RouteGroupBuilder MapAzureOpenAIRoutes(this RouteGroupBuilder builder)
     {
-        ChatCompletions,
-        ChatCompletionsExtensions,
-        Completions,
-        Embeddings,
-        Images
+        var openAIGroup = builder.MapGroup("/openai/deployments/{deploymentName}");
+        openAIGroup.MapPost("/chat/completions", ProcessRequestAsync).WithMetadata(new Auth(Auth.Type.ApiKey));
+        openAIGroup.MapPost("/extensions/chat/completions", ProcessRequestAsync).WithMetadata(new Auth(Auth.Type.ApiKey));
+        openAIGroup.MapPost("/completions", ProcessRequestAsync).WithMetadata(new Auth(Auth.Type.ApiKey));
+        openAIGroup.MapPost("/embeddings", ProcessRequestAsync).WithMetadata(new Auth(Auth.Type.ApiKey));
+        openAIGroup.MapPost("/images/generations", ProcessRequestAsync).WithMetadata(new Auth(Auth.Type.ApiKey));
+        return builder;
     }
 
-    public static void AzureAIEndpoints(this IEndpointRouteBuilder routes)
-    {
-        string basePath = "/openai/deployments/{deployment_name}";
-        MapRoute.Post(routes, RequestType.ChatCompletions, ProcessRequestAsync, Auth.Type.ApiKey, basePath, "/chat/completions");
-        MapRoute.Post(
-            routes,
-            RequestType.ChatCompletionsExtensions,
-            ProcessRequestAsync,
-            Auth.Type.ApiKey,
-            basePath,
-            "/extensions/chat/completions"
-        );
-        MapRoute.Post(routes, RequestType.Completions, ProcessRequestAsync, Auth.Type.ApiKey, basePath, "/completions");
-        MapRoute.Post(routes, RequestType.Embeddings, ProcessRequestAsync, Auth.Type.ApiKey, basePath, "/embeddings");
-        MapRoute.Post(routes, RequestType.Images, ProcessRequestAsync, Auth.Type.ApiKey, basePath, "/images/generations");
-    }
-
-    private static async Task ProcessRequestAsync(HttpContext context, RequestType requestType, string extPath)
+    private static async Task<IResult> ProcessRequestAsync(
+        [FromServices] ICatalogService catalogService,
+        [FromServices] IProxyService proxyService,
+        HttpContext context,
+        string deploymentName
+    )
     {
         string apiVersion;
         bool streaming;
         int? maxTokens;
         string requestString;
 
-        var services = context.RequestServices;
-        var catalogService = services.GetRequiredService<ICatalogService>();
-        var proxyService = services.GetRequiredService<IProxyService>();
-
-        if (context.Items["RequestContext"] is not RequestContext requestContext)
-            throw new ArgumentException("Request context not found");
-
-        if (context.GetRouteData().Values["deployment_name"] is not string deploymentName || string.IsNullOrEmpty(deploymentName))
-            throw new ArgumentException("Deployment name not found");
+        var routePattern = (context.GetEndpoint() as RouteEndpoint)?.RoutePattern.RawText;
+        var extPath = routePattern?.Split("{deploymentName}").Last();
+        var requestContext = context.Items["RequestContext"] as RequestContext;
 
         using (var requestJsonDoc = await context.Request.ReadFromJsonAsync<JsonDocument>())
         {
@@ -63,7 +48,7 @@ public static class AzureAI
             requestString = requestJsonDoc.RootElement.ToString()!;
         }
 
-        requestContext.DeploymentName = deploymentName!;
+        requestContext!.DeploymentName = deploymentName!;
 
         if (maxTokens.HasValue && maxTokens > requestContext.MaxTokenCap && requestContext.MaxTokenCap > 0)
         {
@@ -75,11 +60,12 @@ public static class AzureAI
         }
 
         var deployment = await catalogService.GetCatalogItemAsync(requestContext);
-        var url = GenerateEndpointUrl(deployment, extPath, apiVersion);
+        var url = GenerateEndpointUrl(deployment, extPath!, apiVersion);
 
         if (streaming)
         {
             await proxyService.HttpPostStreamAsync(url, deployment.EndpointKey, context, requestString, requestContext);
+            return new ProxyResult(null!, (int)HttpStatusCode.OK);
         }
         else
         {
@@ -89,10 +75,7 @@ public static class AzureAI
                 requestString,
                 requestContext
             );
-            context.Response.StatusCode = statusCode;
-            context.Response.ContentType = "application/json";
-            context.Response.ContentLength = responseContent.Length;
-            await context.Response.WriteAsync(responseContent);
+            return new ProxyResult(responseContent, statusCode);
         }
     }
 

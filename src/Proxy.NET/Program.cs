@@ -14,6 +14,8 @@ namespace Proxy.NET;
 
 internal class Program
 {
+    public record OpenAIError(int Code, string Message);
+
     private static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
@@ -53,7 +55,7 @@ internal class Program
                     // https://stackoverflow.com/questions/70423137/how-to-gracefully-handle-a-postgres-restart-in-npgsql
                     (options) =>
                     {
-                        options.EnableRetryOnFailure(4, TimeSpan.FromSeconds(30), new string[] { "57P01" });
+                        options.EnableRetryOnFailure(4, TimeSpan.FromSeconds(30), ["57P01"]);
                     }
                 );
             }
@@ -70,12 +72,13 @@ internal class Program
         // https://learn.microsoft.com/en-us/dotnet/architecture/microservices/implement-resilient-applications/use-httpclientfactory-to-implement-resilient-http-requests
         builder.Services.AddHttpClient<IProxyService, ProxyService>();
 
-        builder.Services.AddScoped<ICatalogService, CatalogService>();
-        builder.Services.AddScoped<IAuthorizeService, AuthorizeService>();
-        builder.Services.AddScoped<IProxyService, ProxyService>();
-        builder.Services.AddScoped<IMetricService, MetricService>();
-        builder.Services.AddScoped<IAttendeeService, AttendeeService>();
-        builder.Services.AddScoped<IEventService, EventService>();
+        // builder.Services.AddScoped<ICatalogService, CatalogService>();
+        // builder.Services.AddScoped<IAuthorizeService, AuthorizeService>();
+        // builder.Services.AddScoped<IProxyService, ProxyService>();
+        // builder.Services.AddScoped<IMetricService, MetricService>();
+        // builder.Services.AddScoped<IAttendeeService, AttendeeService>();
+        // builder.Services.AddScoped<IEventService, EventService>();
+        builder.Services.AddProxyServices();
 
         builder.Services.AddApplicationInsightsTelemetry();
 
@@ -90,11 +93,7 @@ internal class Program
 
         app.UseHttpsRedirection();
         app.UseAuthorization();
-
-        app.AzureAiEndpoints();
-        app.AzureAiSearchEndpoints();
-        app.AttendeeEndpoints();
-        app.EventEndpoints();
+        app.MapProxyRoutes();
 
         // validate the request and authorize the user.
         // calling the next middleware if successful.
@@ -169,9 +168,7 @@ internal class Program
     /// <returns>A task representing the asynchronous operation.</returns>
     private static async Task WriteOpenAIExceptionFormat(HttpContext context, string msg, int statusCode)
     {
-        var jsonMsg = new { error = new { code = statusCode, message = msg } };
-        context.Response.StatusCode = statusCode;
-        context.Response.ContentType = "application/json";
-        await context.Response.WriteAsJsonAsync(jsonMsg);
+        var error = new OpenAIError(statusCode, msg);
+        await Results.Json(new { error }, statusCode: statusCode).ExecuteAsync(context);
     }
 }

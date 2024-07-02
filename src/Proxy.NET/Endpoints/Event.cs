@@ -1,5 +1,5 @@
 using System.Net;
-using System.Text.Json;
+using Microsoft.AspNetCore.Mvc;
 using Proxy.NET.Models;
 using Proxy.NET.Services;
 
@@ -7,28 +7,23 @@ namespace Proxy.NET.Endpoints;
 
 public static class Event
 {
-    private enum RequestType
+    public static RouteGroupBuilder MapEventRoutes(this RouteGroupBuilder builder)
     {
-        EventInfo,
-        EventRegistrationInfo
+        builder.MapPost("/eventinfo", EventInfoAsync).WithMetadata(new Auth(Auth.Type.ApiKey));
+        builder.MapGet("/event/{eventId}", EventRegistrationInfoAsync).WithMetadata(new Auth(Auth.Type.None));
+        return builder;
     }
 
-    public static void EventEndpoints(this IEndpointRouteBuilder routes)
+    /// <summary>
+    /// Retrieves event information asynchronously.
+    /// </summary>
+    /// <param name="catalogService">The catalog service used to retrieve event capabilities.</param>
+    /// <param name="context">The HTTP context.</param>
+    /// <returns>EventInfoResponse</returns>
+    private static async Task<IResult> EventInfoAsync([FromServices] ICatalogService catalogService, HttpContext context)
     {
-        MapRoute.Post(routes, RequestType.EventInfo, EventInfoAsync, Auth.Type.ApiKey, "/eventinfo");
-        MapRoute.Get(routes, RequestType.EventRegistrationInfo, EventRegistrationInfoAsync, Auth.Type.None, "/event/{event_id}");
-    }
-
-    private static async Task EventInfoAsync(HttpContext context, RequestType requestType, string extPath)
-    {
-        var services = context.RequestServices;
-        var catalogService = services.GetRequiredService<ICatalogService>();
-        var deploymentName = "event_info";
-
-        if (context.Items["RequestContext"] is not RequestContext requestContext)
-            throw new ArgumentException("Request context not found");
-
-        requestContext.DeploymentName = deploymentName;
+        RequestContext? requestContext = context.Items["RequestContext"] as RequestContext;
+        requestContext!.DeploymentName = "event_info";
         var capabilities = await catalogService.GetCapabilities(requestContext.EventId);
 
         var eventInfo = new EventInfoResponse
@@ -42,24 +37,26 @@ public static class Event
             Capabilities = capabilities
         };
 
-        context.Response.StatusCode = (int)HttpStatusCode.OK;
-        context.Response.ContentType = "application/json";
-        await context.Response.WriteAsync(JsonSerializer.Serialize(eventInfo));
+        return TypedResults.Ok(eventInfo);
     }
 
-    private static async Task EventRegistrationInfoAsync(HttpContext context, RequestType requestType, string extPath)
+    /// <summary>
+    /// Retrieves the registration information for an event.
+    /// </summary>
+    /// <param name="eventService">The event service used to retrieve the registration information.</param>
+    /// <param name="context">The HTTP context.</param>
+    /// <param name="eventId">The ID of the event.</param>
+    /// <returns>The task result contains the registration information for the event.</returns>
+    private static async Task<IResult> EventRegistrationInfoAsync(
+        [FromServices] IEventService eventService,
+        HttpContext context,
+        string eventId
+    )
     {
-        var services = context.RequestServices;
-        var eventService = services.GetRequiredService<IEventService>();
-        if (context.GetRouteData().Values["event_id"] is not string eventId || string.IsNullOrEmpty(eventId))
-            throw new ArgumentException("Event ID not found");
-
         var eventRegistrationInfo =
             await eventService.GetEventRegistrationInfoAsync(eventId!)
             ?? throw new HttpRequestException("Event not found", null, HttpStatusCode.NotFound);
 
-        context.Response.StatusCode = (int)HttpStatusCode.OK;
-        context.Response.ContentType = "application/json";
-        await context.Response.WriteAsync(JsonSerializer.Serialize(eventRegistrationInfo));
+        return TypedResults.Ok(eventRegistrationInfo);
     }
 }

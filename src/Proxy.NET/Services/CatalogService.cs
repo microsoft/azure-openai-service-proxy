@@ -10,7 +10,8 @@ namespace Proxy.NET.Services;
 
 public class CatalogService(AoaiProxyContext db, IConfiguration configuration, IMemoryCache memoryCache) : ICatalogService
 {
-    private readonly string EncryptionKey = configuration["EncryptionKey"] ?? throw new ArgumentNullException("EncryptionKey");
+    private readonly string EncryptionKey =
+        configuration["PostgresEncryptionKey"] ?? throw new ArgumentNullException("PostgresEncryptionKey");
 
     /// <summary>
     /// Retrieves the event catalog for a given event ID and deployment name.
