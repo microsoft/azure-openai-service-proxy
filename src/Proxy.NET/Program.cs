@@ -65,23 +65,12 @@ internal class Program
         builder.Services.AddAuthorization();
         builder.Services.AddMemoryCache();
 
-        // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-        builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerGen();
-
         // https://learn.microsoft.com/en-us/dotnet/architecture/microservices/implement-resilient-applications/use-httpclientfactory-to-implement-resilient-http-requests
         builder.Services.AddHttpClient<IProxyService, ProxyService>();
         builder.Services.AddProxyServices();
         builder.Services.AddApplicationInsightsTelemetry();
 
         var app = builder.Build();
-
-        // Configure the HTTP request pipeline.
-        if (app.Environment.IsDevelopment())
-        {
-            app.UseSwagger();
-            app.UseSwaggerUI();
-        }
 
         app.UseHttpsRedirection();
         app.UseAuthorization();
