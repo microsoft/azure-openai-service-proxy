@@ -71,15 +71,7 @@ internal class Program
 
         // https://learn.microsoft.com/en-us/dotnet/architecture/microservices/implement-resilient-applications/use-httpclientfactory-to-implement-resilient-http-requests
         builder.Services.AddHttpClient<IProxyService, ProxyService>();
-
-        // builder.Services.AddScoped<ICatalogService, CatalogService>();
-        // builder.Services.AddScoped<IAuthorizeService, AuthorizeService>();
-        // builder.Services.AddScoped<IProxyService, ProxyService>();
-        // builder.Services.AddScoped<IMetricService, MetricService>();
-        // builder.Services.AddScoped<IAttendeeService, AttendeeService>();
-        // builder.Services.AddScoped<IEventService, EventService>();
         builder.Services.AddProxyServices();
-
         builder.Services.AddApplicationInsightsTelemetry();
 
         var app = builder.Build();
