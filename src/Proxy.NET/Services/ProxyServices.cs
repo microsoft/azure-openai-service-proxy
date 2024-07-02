@@ -10,6 +10,7 @@ public static class ServicesExtensions
         services.AddScoped<IMetricService, MetricService>();
         services.AddScoped<IAttendeeService, AttendeeService>();
         services.AddScoped<IEventService, EventService>();
+        services.AddScoped<IRequestService, RequestService>();
 
         return services;
     }

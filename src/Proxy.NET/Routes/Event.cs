@@ -20,9 +20,13 @@ public static class Event
     /// <param name="catalogService">The catalog service used to retrieve event capabilities.</param>
     /// <param name="context">The HTTP context.</param>
     /// <returns>EventInfoResponse</returns>
-    private static async Task<IResult> EventInfoAsync([FromServices] ICatalogService catalogService, HttpContext context)
+    private static async Task<IResult> EventInfoAsync(
+        [FromServices] ICatalogService catalogService,
+        [FromServices] IRequestService requestService,
+        HttpContext context
+    )
     {
-        RequestContext? requestContext = context.Items["RequestContext"] as RequestContext;
+        RequestContext? requestContext = requestService.GetUserContext(context) as RequestContext;
         requestContext!.DeploymentName = "event_info";
         var capabilities = await catalogService.GetCapabilities(requestContext.EventId);
 

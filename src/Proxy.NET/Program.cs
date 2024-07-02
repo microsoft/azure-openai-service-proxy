@@ -73,18 +73,20 @@ app.Use(
     {
         var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
         var authorizeService = context.RequestServices.GetRequiredService<IAuthorizeService>();
+        var requestService = context.RequestServices.GetRequiredService<IRequestService>();
         try
         {
-            var endpoint = context.GetEndpoint();
-            var authType = endpoint?.Metadata.GetMetadata<Auth>()?.AuthType;
+            await requestService.GenUserContext(context);
+            // var endpoint = context.GetEndpoint();
+            // var authType = endpoint?.Metadata.GetMetadata<Auth>()?.AuthType;
 
-            context.Items["RequestContext"] = authType switch
-            {
-                Auth.Type.ApiKey => await authorizeService.GetRequestContextByApiKey(context.Request.Headers),
-                Auth.Type.Jwt => authorizeService.GetRequestContextFromJwt(context.Request.Headers),
-                Auth.Type.None => null,
-                _ => throw new ArgumentException("Mismatched auth type or HTTP verb")
-            };
+            // context.Items["RequestContext"] = authType switch
+            // {
+            //     Auth.Type.ApiKey => await authorizeService.GetRequestContextByApiKey(context.Request.Headers),
+            //     Auth.Type.Jwt => authorizeService.GetRequestContextFromJwt(context.Request.Headers),
+            //     Auth.Type.None => null,
+            //     _ => throw new ArgumentException("Mismatched auth type or HTTP verb")
+            // };
 
             await next.Invoke();
         }

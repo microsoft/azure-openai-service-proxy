@@ -17,13 +17,14 @@ public static class AzureAISearch
     private static async Task<IResult> ProcessRequestAsync(
         [FromServices] ICatalogService catalogService,
         [FromServices] IProxyService proxyService,
+        [FromServices] IRequestService requestService,
         HttpContext context,
         string index
     )
     {
         var routePattern = (context.GetEndpoint() as RouteEndpoint)?.RoutePattern.RawText;
         var extPath = routePattern?.Split("/indexes").Last();
-        var requestContext = context.Items["RequestContext"] as RequestContext;
+        var requestContext = requestService.GetUserContext(context) as RequestContext;
         var apiVersion = ApiVersion(context);
 
         var requestString = await new StreamReader(context.Request.Body).ReadToEndAsync();

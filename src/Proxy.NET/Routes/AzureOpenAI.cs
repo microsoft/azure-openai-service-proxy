@@ -22,6 +22,7 @@ public static class AzureAI
     private static async Task<IResult> ProcessRequestAsync(
         [FromServices] ICatalogService catalogService,
         [FromServices] IProxyService proxyService,
+        [FromServices] IRequestService requestService,
         HttpContext context,
         string deploymentName
     )
@@ -33,7 +34,7 @@ public static class AzureAI
 
         var routePattern = (context.GetEndpoint() as RouteEndpoint)?.RoutePattern.RawText;
         var extPath = routePattern?.Split("{deploymentName}").Last();
-        var requestContext = context.Items["RequestContext"] as RequestContext;
+        var requestContext = requestService.GetUserContext(context) as RequestContext;
 
         using (var requestJsonDoc = await context.Request.ReadFromJsonAsync<JsonDocument>())
         {
