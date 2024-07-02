@@ -6,8 +6,8 @@ using AzureOpenAIProxy.Management;
 using AzureOpenAIProxy.Management.Database;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
-using Proxy.NET.Endpoints;
 using Proxy.NET.Models;
+using Proxy.NET.Routes;
 using Proxy.NET.Services;
 
 namespace Proxy.NET;

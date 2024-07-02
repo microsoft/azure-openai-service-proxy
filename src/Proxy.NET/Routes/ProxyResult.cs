@@ -1,4 +1,4 @@
-namespace Proxy.NET.Endpoints;
+namespace Proxy.NET.Routes;
 
 // The ProxyResult class is a custom implementation of the IResult interface that is used to return
 // the response content and status code from a proxy service. The ProxyResults passes the response and the status code

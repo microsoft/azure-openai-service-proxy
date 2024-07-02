@@ -1,4 +1,4 @@
-namespace Proxy.NET.Endpoints;
+namespace Proxy.NET.Routes;
 
 public static class RouteExtensions
 {

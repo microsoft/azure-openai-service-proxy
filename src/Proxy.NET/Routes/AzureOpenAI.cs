@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Proxy.NET.Models;
 using Proxy.NET.Services;
 
-namespace Proxy.NET.Endpoints;
+namespace Proxy.NET.Routes;
 
 public static class AzureAI
 {
