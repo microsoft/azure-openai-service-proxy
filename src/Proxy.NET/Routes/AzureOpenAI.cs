@@ -33,12 +33,12 @@ public static class AzureAI
         {
             var routePattern = (context.GetEndpoint() as RouteEndpoint)?.RoutePattern.RawText;
             var extPath = routePattern?.Split("{deploymentName}").Last();
-            var requestContext = requestService.GetRequestContext() as RequestContext;
+            var requestContext = (RequestContext)requestService.GetRequestContext();
 
             var streaming = IsStreaming(requestJsonDoc);
             var maxTokens = GetMaxTokens(requestJsonDoc);
 
-            requestContext!.DeploymentName = deploymentName!;
+            requestContext.DeploymentName = deploymentName;
 
             if (maxTokens.HasValue && maxTokens > requestContext.MaxTokenCap && requestContext.MaxTokenCap > 0)
             {
