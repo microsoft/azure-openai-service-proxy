@@ -4,7 +4,7 @@ namespace Proxy.NET.Services;
 
 public class RequestService(IAuthorizeService authorizeService) : IRequestService
 {
-    private object? requestContext;
+    private object requestContext = new RequestContext();
 
     public async Task CreateAsync(HttpContext context)
     {
@@ -15,12 +15,12 @@ public class RequestService(IAuthorizeService authorizeService) : IRequestServic
         {
             Auth.Type.ApiKey => await authorizeService.GetRequestContextByApiKey(context.Request.Headers),
             Auth.Type.Jwt => authorizeService.GetRequestContextFromJwt(context.Request.Headers),
-            Auth.Type.None => null,
+            Auth.Type.None => new RequestContext(),
             _ => throw new ArgumentException("Mismatched auth type or HTTP verb")
         };
     }
 
-    public object? GetRequestContext()
+    public object GetRequestContext()
     {
         return requestContext;
     }

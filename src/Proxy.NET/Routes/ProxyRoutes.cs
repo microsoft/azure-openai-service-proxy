@@ -2,9 +2,6 @@ namespace Proxy.NET.Routes;
 
 public static class RouteExtensions
 {
-    public static IEndpointRouteBuilder MapProxyRoutes(this IEndpointRouteBuilder builder)
-    {
+    public static IEndpointRouteBuilder MapProxyRoutes(this IEndpointRouteBuilder builder) =>
         builder.MapGroup("/api/v1").MapAttendeeRoutes().MapEventRoutes().MapAzureOpenAIRoutes().MapAzureAISearchRoutes();
-        return builder;
-    }
 }

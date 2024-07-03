@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text;
+using System.Text.Json;
 using Proxy.NET.Models;
 
 namespace Proxy.NET.Services;
@@ -19,7 +20,7 @@ public class ProxyService(IHttpClientFactory httpClientFactory, IMetricService m
     public async Task<(string responseContent, int statusCode)> HttpPostAsync(
         Uri requestUrl,
         string endpointKey,
-        string requestString,
+        JsonDocument requestJsonDoc,
         RequestContext requestContext
     )
     {
@@ -28,7 +29,7 @@ public class ProxyService(IHttpClientFactory httpClientFactory, IMetricService m
 
         using (var requestMessage = new HttpRequestMessage(HttpMethod.Post, requestUrl))
         {
-            requestMessage.Content = new StringContent(requestString, Encoding.UTF8, "application/json");
+            requestMessage.Content = new StringContent(requestJsonDoc.RootElement.ToString(), Encoding.UTF8, "application/json");
             requestMessage.Headers.Add("api-key", endpointKey);
 
             if (!EnableUnitTesting)
@@ -63,7 +64,7 @@ public class ProxyService(IHttpClientFactory httpClientFactory, IMetricService m
         Uri requestUrl,
         string endpointKey,
         HttpContext context,
-        string requestString,
+        JsonDocument requestJsonDoc,
         RequestContext requestContext
     )
     {
@@ -75,7 +76,7 @@ public class ProxyService(IHttpClientFactory httpClientFactory, IMetricService m
 
         using (var requestMessage = new HttpRequestMessage(HttpMethod.Post, requestUrl))
         {
-            requestMessage.Content = new StringContent(requestString, Encoding.UTF8, "application/json");
+            requestMessage.Content = new StringContent(requestJsonDoc.RootElement.ToString(), Encoding.UTF8, "application/json");
             requestMessage.Headers.Add("api-key", endpointKey);
 
             if (!EnableUnitTesting)

@@ -23,68 +23,51 @@ public static class AzureAI
         [FromServices] ICatalogService catalogService,
         [FromServices] IProxyService proxyService,
         [FromServices] IRequestService requestService,
+        [FromQuery(Name = "api-version")] string apiVersion,
+        [FromBody] JsonDocument requestJsonDoc,
         HttpContext context,
         string deploymentName
     )
     {
-        string apiVersion;
-        bool streaming;
-        int? maxTokens;
-        string requestString;
-
-        var routePattern = (context.GetEndpoint() as RouteEndpoint)?.RoutePattern.RawText;
-        var extPath = routePattern?.Split("{deploymentName}").Last();
-        var requestContext = requestService.GetRequestContext() as RequestContext;
-
-        using (var requestJsonDoc = await context.Request.ReadFromJsonAsync<JsonDocument>())
+        using (requestJsonDoc)
         {
-            if (requestJsonDoc == null || requestJsonDoc.RootElement.ValueKind != JsonValueKind.Object)
+            var routePattern = (context.GetEndpoint() as RouteEndpoint)?.RoutePattern.RawText;
+            var extPath = routePattern?.Split("{deploymentName}").Last();
+            var requestContext = requestService.GetRequestContext() as RequestContext;
+
+            var streaming = IsStreaming(requestJsonDoc);
+            var maxTokens = GetMaxTokens(requestJsonDoc);
+
+            requestContext!.DeploymentName = deploymentName!;
+
+            if (maxTokens.HasValue && maxTokens > requestContext.MaxTokenCap && requestContext.MaxTokenCap > 0)
             {
-                throw new HttpRequestException("Request body is empty or invalid", null, HttpStatusCode.BadRequest);
+                throw new HttpRequestException(
+                    $"max_tokens exceeds the event max token cap of {requestContext.MaxTokenCap}",
+                    null,
+                    HttpStatusCode.BadRequest
+                );
             }
 
-            apiVersion = ApiVersion(context);
-            streaming = IsStreaming(requestJsonDoc);
-            maxTokens = GetMaxTokens(requestJsonDoc);
-            requestString = requestJsonDoc.RootElement.ToString()!;
+            var deployment = await catalogService.GetCatalogItemAsync(requestContext);
+            var url = GenerateEndpointUrl(deployment, extPath!, apiVersion);
+
+            if (streaming)
+            {
+                await proxyService.HttpPostStreamAsync(url, deployment.EndpointKey, context, requestJsonDoc, requestContext);
+                return new ProxyResult(null!, (int)HttpStatusCode.OK);
+            }
+            else
+            {
+                var (responseContent, statusCode) = await proxyService.HttpPostAsync(
+                    url,
+                    deployment.EndpointKey,
+                    requestJsonDoc,
+                    requestContext
+                );
+                return new ProxyResult(responseContent, statusCode);
+            }
         }
-
-        requestContext!.DeploymentName = deploymentName!;
-
-        if (maxTokens.HasValue && maxTokens > requestContext.MaxTokenCap && requestContext.MaxTokenCap > 0)
-        {
-            throw new HttpRequestException(
-                $"max_tokens exceeds the event max token cap of {requestContext.MaxTokenCap}",
-                null,
-                HttpStatusCode.BadRequest
-            );
-        }
-
-        var deployment = await catalogService.GetCatalogItemAsync(requestContext);
-        var url = GenerateEndpointUrl(deployment, extPath!, apiVersion);
-
-        if (streaming)
-        {
-            await proxyService.HttpPostStreamAsync(url, deployment.EndpointKey, context, requestString, requestContext);
-            return new ProxyResult(null!, (int)HttpStatusCode.OK);
-        }
-        else
-        {
-            var (responseContent, statusCode) = await proxyService.HttpPostAsync(
-                url,
-                deployment.EndpointKey,
-                requestString,
-                requestContext
-            );
-            return new ProxyResult(responseContent, statusCode);
-        }
-    }
-
-    private static string ApiVersion(HttpContext context)
-    {
-        if (context.Request.Query["api-version"].FirstOrDefault() is not string apiVersion || string.IsNullOrEmpty(apiVersion))
-            throw new HttpRequestException("API version is required", null, HttpStatusCode.BadRequest);
-        return apiVersion;
     }
 
     private static bool IsStreaming(JsonDocument requestJsonDoc)

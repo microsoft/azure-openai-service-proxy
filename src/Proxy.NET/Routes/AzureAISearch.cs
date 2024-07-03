@@ -1,4 +1,5 @@
 using System.Net;
+using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Proxy.NET.Models;
 using Proxy.NET.Services;
@@ -18,45 +19,44 @@ public static class AzureAISearch
         [FromServices] ICatalogService catalogService,
         [FromServices] IProxyService proxyService,
         [FromServices] IRequestService requestService,
+        [FromQuery(Name = "api-version")] string apiVersion,
+        [FromBody] JsonDocument requestJsonDoc,
         HttpContext context,
         string index
     )
     {
-        var routePattern = (context.GetEndpoint() as RouteEndpoint)?.RoutePattern.RawText;
-        var extPath = routePattern?.Split("/indexes").Last();
-        var requestContext = requestService.GetRequestContext() as RequestContext;
-        var apiVersion = ApiVersion(context);
+        using (requestJsonDoc)
+        {
+            // Get the route pattern and extract the extension path that will be appended to the upstream endpoint
+            var routePattern = (context.GetEndpoint() as RouteEndpoint)?.RoutePattern.RawText;
+            var extPath = routePattern?.Split("/indexes").Last();
+            var requestContext = (RequestContext)requestService.GetRequestContext();
 
-        var requestString = await new StreamReader(context.Request.Body).ReadToEndAsync();
-        if (string.IsNullOrEmpty(requestString))
-            throw new HttpRequestException("Invalid JSON object in body of request", null, HttpStatusCode.BadRequest);
+            requestContext.DeploymentName = index;
+            var deployment = await catalogService.GetCatalogItemAsync(requestContext);
 
-        requestContext!.DeploymentName = index!;
-        var deployment = await catalogService.GetCatalogItemAsync(requestContext);
-
-        var url = GenerateEndpointUrl(deployment, extPath!, apiVersion);
-        var (responseContent, statusCode) = await proxyService.HttpPostAsync(url, deployment.EndpointKey, requestString, requestContext);
-        return new ProxyResult(responseContent, statusCode);
+            var url = GenerateEndpointUrl(deployment, extPath!, apiVersion);
+            var (responseContent, statusCode) = await proxyService.HttpPostAsync(
+                url,
+                deployment.EndpointKey,
+                requestJsonDoc,
+                requestContext
+            );
+            return new ProxyResult(responseContent, statusCode);
+        }
     }
 
     private static Uri GenerateEndpointUrl(Deployment deployment, string extPath, string apiVersion)
     {
-        var baseUrl = $"{deployment.EndpointUrl.TrimEnd('/')}";
+        var baseUrl = deployment.EndpointUrl.TrimEnd('/');
 
         string path = extPath switch
         {
             "/{index}/docs/search" => $"/indexes/{deployment.DeploymentName.Trim()}/docs/search",
             "('{index}')/docs/search.post.search" => $"/indexes('{deployment.DeploymentName.Trim()}')/docs/search.post.search",
-            _ => throw new Exception("Invalid route pattern"),
+            _ => throw new ArgumentException("Invalid route pattern"),
         };
 
         return new Uri($"{baseUrl}{path}?api-version={apiVersion}");
-    }
-
-    private static string ApiVersion(HttpContext context)
-    {
-        if (context.Request.Query["api-version"].FirstOrDefault() is not string apiVersion || string.IsNullOrEmpty(apiVersion))
-            throw new HttpRequestException("API version is required", null, HttpStatusCode.BadRequest);
-        return apiVersion;
     }
 }

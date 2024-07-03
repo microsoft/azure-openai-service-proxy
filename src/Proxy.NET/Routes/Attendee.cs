@@ -28,9 +28,8 @@ public static class Attendee
         string eventId
     )
     {
-        string? userId = requestService.GetRequestContext() as string;
-        // string? userId = context.Items["RequestContext"] as string;
-        string api_key = await attendeeService.AddAttendeeAsync(userId!, eventId);
+        string userId = (string)requestService.GetRequestContext();
+        string api_key = await attendeeService.AddAttendeeAsync(userId, eventId);
         return TypedResults.Created(context.Request.Path, new { api_key });
     }
 
@@ -48,8 +47,8 @@ public static class Attendee
         string eventId
     )
     {
-        string? userId = requestService.GetRequestContext() as string;
-        (string apiKey, bool active) = await attendeeService.GetAttendeeKeyAsync(userId!, eventId);
+        string userId = (string)requestService.GetRequestContext();
+        (string apiKey, bool active) = await attendeeService.GetAttendeeKeyAsync(userId, eventId);
         return TypedResults.Ok(new { api_key = apiKey, active });
     }
 }
