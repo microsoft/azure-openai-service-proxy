@@ -11,10 +11,11 @@ public class RequestService(IAuthorizeService authorizeService) : IRequestServic
         var endpoint = context.GetEndpoint();
         var authType = endpoint?.Metadata.GetMetadata<Auth>()?.AuthType;
 
+        // Passing headers like this is a workarond until auth pipeline sorted
         requestContext = authType switch
         {
-            Auth.Type.ApiKey => await authorizeService.GetRequestContextByApiKey(context.Request.Headers),
-            Auth.Type.Jwt => authorizeService.GetRequestContextFromJwt(context.Request.Headers),
+            Auth.Type.ApiKey => await authorizeService.GetRequestContextByApiKey(context.Request.Headers["api-key"]!),
+            Auth.Type.Jwt => authorizeService.GetRequestContextFromJwt(context.Request.Headers["x-ms-client-principal"]!),
             Auth.Type.None => new RequestContext(),
             _ => throw new ArgumentException("Mismatched auth type or HTTP verb")
         };

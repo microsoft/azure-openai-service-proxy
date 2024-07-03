@@ -2,6 +2,7 @@ using System.Net;
 using System.Text;
 using System.Text.Json;
 using AzureOpenAIProxy.Management;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Npgsql;
@@ -48,15 +49,9 @@ public class AuthorizeService(AoaiProxyContext db, IMemoryCache memoryCache) : I
     /// </summary>
     /// <param name="headers">The HTTP headers containing the API key.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the authorization response.</returns>
-    public async Task<RequestContext> GetRequestContextByApiKey(IHeaderDictionary headers)
+    public async Task<RequestContext> GetRequestContextByApiKey([FromHeader(Name = "api-key")] string apiKey)
     {
-        var apiKey = headers["api-key"];
-        if (apiKey.Count == 0 || string.IsNullOrEmpty(apiKey[0]))
-        {
-            throw new HttpRequestException("Authentication failed.", null, HttpStatusCode.Unauthorized);
-        }
-
-        return await IsUserAuthorized(apiKey[0]!);
+        return await IsUserAuthorized(apiKey);
     }
 
     /// <summary>
@@ -64,13 +59,13 @@ public class AuthorizeService(AoaiProxyContext db, IMemoryCache memoryCache) : I
     /// </summary>
     /// <param name="headers">The headers containing the JWT token.</param>
     /// <returns>The user ID extracted from the JWT token.</returns>
-    public string GetRequestContextFromJwt(IHeaderDictionary headers)
+    public string GetRequestContextFromJwt([FromHeader(Name = "x-ms-client-principal")] string headerValue)
     {
-        var headerValue = headers["x-ms-client-principal"].FirstOrDefault();
-        if (string.IsNullOrEmpty(headerValue))
-        {
-            throw new HttpRequestException("Authentication failed.", null, HttpStatusCode.Unauthorized);
-        }
+        // var headerValue = headers["x-ms-client-principal"].FirstOrDefault();
+        // if (string.IsNullOrEmpty(headerValue))
+        // {
+        //     throw new HttpRequestException("Authentication failed.", null, HttpStatusCode.Unauthorized);
+        // }
 
         try
         {
