@@ -26,7 +26,7 @@ public static class Event
         HttpContext context
     )
     {
-        RequestContext? requestContext = requestService.GetUserContext(context) as RequestContext;
+        RequestContext? requestContext = requestService.GetRequestContext() as RequestContext;
         requestContext!.DeploymentName = "event_info";
         var capabilities = await catalogService.GetCapabilities(requestContext.EventId);
 

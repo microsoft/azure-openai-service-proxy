@@ -24,7 +24,7 @@ public static class AzureAISearch
     {
         var routePattern = (context.GetEndpoint() as RouteEndpoint)?.RoutePattern.RawText;
         var extPath = routePattern?.Split("/indexes").Last();
-        var requestContext = requestService.GetUserContext(context) as RequestContext;
+        var requestContext = requestService.GetRequestContext() as RequestContext;
         var apiVersion = ApiVersion(context);
 
         var requestString = await new StreamReader(context.Request.Body).ReadToEndAsync();

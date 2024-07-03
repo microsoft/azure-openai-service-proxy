@@ -6,7 +6,7 @@ public class RequestService(IAuthorizeService authorizeService) : IRequestServic
 {
     private object? requestContext;
 
-    public async Task GenUserContext(HttpContext context)
+    public async Task CreateAsync(HttpContext context)
     {
         var endpoint = context.GetEndpoint();
         var authType = endpoint?.Metadata.GetMetadata<Auth>()?.AuthType;
@@ -20,7 +20,7 @@ public class RequestService(IAuthorizeService authorizeService) : IRequestServic
         };
     }
 
-    public object? GetUserContext(HttpContext context)
+    public object? GetRequestContext()
     {
         return requestContext;
     }

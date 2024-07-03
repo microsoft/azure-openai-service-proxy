@@ -34,7 +34,7 @@ public static class AzureAI
 
         var routePattern = (context.GetEndpoint() as RouteEndpoint)?.RoutePattern.RawText;
         var extPath = routePattern?.Split("{deploymentName}").Last();
-        var requestContext = requestService.GetUserContext(context) as RequestContext;
+        var requestContext = requestService.GetRequestContext() as RequestContext;
 
         using (var requestJsonDoc = await context.Request.ReadFromJsonAsync<JsonDocument>())
         {

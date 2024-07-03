@@ -76,18 +76,7 @@ app.Use(
         var requestService = context.RequestServices.GetRequiredService<IRequestService>();
         try
         {
-            await requestService.GenUserContext(context);
-            // var endpoint = context.GetEndpoint();
-            // var authType = endpoint?.Metadata.GetMetadata<Auth>()?.AuthType;
-
-            // context.Items["RequestContext"] = authType switch
-            // {
-            //     Auth.Type.ApiKey => await authorizeService.GetRequestContextByApiKey(context.Request.Headers),
-            //     Auth.Type.Jwt => authorizeService.GetRequestContextFromJwt(context.Request.Headers),
-            //     Auth.Type.None => null,
-            //     _ => throw new ArgumentException("Mismatched auth type or HTTP verb")
-            // };
-
+            await requestService.CreateAsync(context);
             await next.Invoke();
         }
         catch (JsonException ex)
