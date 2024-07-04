@@ -2,7 +2,6 @@ using System.Net;
 using System.Text;
 using System.Text.Json;
 using AzureOpenAIProxy.Management;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Npgsql;
@@ -17,7 +16,7 @@ public class AuthorizeService(AoaiProxyContext db, IMemoryCache memoryCache) : I
     /// </summary>
     /// <param name="apiKey">The API key to check authorization for.</param>
     /// <returns>An instance of <see cref="RequestContext"/> containing authorization information.</returns>
-    private async Task<RequestContext> IsUserAuthorized(string apiKey)
+    public async Task<RequestContext?> IsUserAuthorized(string apiKey)
     {
         if (memoryCache.TryGetValue(apiKey, out RequestContext? cachedContext))
             return cachedContext!;
@@ -27,7 +26,7 @@ public class AuthorizeService(AoaiProxyContext db, IMemoryCache memoryCache) : I
             .ToListAsync();
 
         if (result.Count == 0)
-            throw new HttpRequestException("Authentication failed.", null, HttpStatusCode.Unauthorized);
+            return null;
 
         if (result[0].RateLimitExceed)
         {
@@ -45,31 +44,15 @@ public class AuthorizeService(AoaiProxyContext db, IMemoryCache memoryCache) : I
     }
 
     /// <summary>
-    /// Authorizes access to an Azure API based on the provided API key.
-    /// </summary>
-    /// <param name="headers">The HTTP headers containing the API key.</param>
-    /// <returns>A task that represents the asynchronous operation. The task result contains the authorization response.</returns>
-    public async Task<RequestContext> GetRequestContextByApiKey(string apiKey)
-    {
-        return await IsUserAuthorized(apiKey);
-    }
-
-    /// <summary>
     /// Retrieves the user ID from the JWT token in the provided headers.
     /// </summary>
     /// <param name="headers">The headers containing the JWT token.</param>
     /// <returns>The user ID extracted from the JWT token.</returns>
-    public string GetRequestContextFromJwt([FromHeader(Name = "x-ms-client-principal")] string headerValue)
+    public string? GetRequestContextFromJwt(string jwt)
     {
-        // var headerValue = headers["x-ms-client-principal"].FirstOrDefault();
-        // if (string.IsNullOrEmpty(headerValue))
-        // {
-        //     throw new HttpRequestException("Authentication failed.", null, HttpStatusCode.Unauthorized);
-        // }
-
         try
         {
-            var decoded = Encoding.ASCII.GetString(Convert.FromBase64String(headerValue));
+            var decoded = Encoding.ASCII.GetString(Convert.FromBase64String(jwt));
             var principal = JsonSerializer.Deserialize<JsonElement>(decoded);
 
             if (
@@ -80,11 +63,11 @@ public class AuthorizeService(AoaiProxyContext db, IMemoryCache memoryCache) : I
             {
                 return userIdElement.GetString()!;
             }
-            throw new HttpRequestException("Authentication failed.", null, HttpStatusCode.Unauthorized);
+            return null;
         }
-        catch (Exception e)
+        catch (Exception)
         {
-            throw new HttpRequestException("Authentication failed.", e, HttpStatusCode.Unauthorized);
+            return null;
         }
     }
 }

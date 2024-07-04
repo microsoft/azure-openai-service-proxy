@@ -15,13 +15,16 @@ public class ApiKeyAuthenticationHandler(
 {
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {
-        var request = Context.Request;
-        var apiKey = request.Headers["api-key"].FirstOrDefault();
+        var apiKey = Request.Headers["api-key"].FirstOrDefault();
 
         if (string.IsNullOrEmpty(apiKey))
             return AuthenticateResult.Fail("Authentication failed.");
 
-        Context.Items["RequestContext"] = await authorizeService.GetRequestContextByApiKey(apiKey);
+        var requestContext = await authorizeService.IsUserAuthorized(apiKey);
+        if (requestContext == null)
+            return AuthenticateResult.Fail("Authentication failed.");
+
+        Context.Items["RequestContext"] = requestContext;
 
         var identity = new ClaimsIdentity(null, nameof(ApiKeyAuthenticationHandler));
         var ticket = new AuthenticationTicket(new ClaimsPrincipal(identity), Scheme.Name);

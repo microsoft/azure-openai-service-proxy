@@ -9,6 +9,5 @@ public static class ServicesExtensions
             .AddScoped<IProxyService, ProxyService>()
             .AddScoped<IMetricService, MetricService>()
             .AddScoped<IAttendeeService, AttendeeService>()
-            .AddScoped<IEventService, EventService>()
-            .AddScoped<IRequestService, RequestService>();
+            .AddScoped<IEventService, EventService>();
 }

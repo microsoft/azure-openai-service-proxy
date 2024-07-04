@@ -15,7 +15,6 @@ public class ProxyResult(string responseContent, int statusCode) : IResult
         {
             httpContext.Response.StatusCode = StatusCode;
             httpContext.Response.ContentType = "application/json";
-            httpContext.Response.ContentLength = ResponseContent.Length;
             return httpContext.Response.WriteAsync(ResponseContent);
         }
         else

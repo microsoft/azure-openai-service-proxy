@@ -1,5 +1,7 @@
 using System.Net;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Proxy.NET.Authentication;
 using Proxy.NET.Models;
 using Proxy.NET.Services;
 
@@ -9,24 +11,15 @@ public static class Event
 {
     public static RouteGroupBuilder MapEventRoutes(this RouteGroupBuilder builder)
     {
-        builder.MapPost("/eventinfo", EventInfoAsync).WithMetadata(new Auth(Auth.Type.ApiKey));
-        builder.MapGet("/event/{eventId}", EventRegistrationInfoAsync).WithMetadata(new Auth(Auth.Type.None));
+        builder.MapPost("/eventinfo", EventInfoAsync);
+        builder.MapGet("/event/{eventId}", EventRegistrationInfoAsync);
         return builder;
     }
 
-    /// <summary>
-    /// Retrieves event information asynchronously.
-    /// </summary>
-    /// <param name="catalogService">The catalog service used to retrieve event capabilities.</param>
-    /// <param name="context">The HTTP context.</param>
-    /// <returns>EventInfoResponse</returns>
-    private static async Task<IResult> EventInfoAsync(
-        [FromServices] ICatalogService catalogService,
-        [FromServices] IRequestService requestService,
-        HttpContext context
-    )
+    [Authorize(AuthenticationSchemes = ProxyAuthenticationOptions.ApiKeyScheme)]
+    private static async Task<IResult> EventInfoAsync([FromServices] ICatalogService catalogService, HttpContext context)
     {
-        RequestContext requestContext = (RequestContext)requestService.GetRequestContext();
+        RequestContext requestContext = (RequestContext)context.Items["RequestContext"]!;
         requestContext.DeploymentName = "event_info";
         var capabilities = await catalogService.GetCapabilities(requestContext.EventId);
 
@@ -44,13 +37,6 @@ public static class Event
         return TypedResults.Ok(eventInfo);
     }
 
-    /// <summary>
-    /// Retrieves the registration information for an event.
-    /// </summary>
-    /// <param name="eventService">The event service used to retrieve the registration information.</param>
-    /// <param name="context">The HTTP context.</param>
-    /// <param name="eventId">The ID of the event.</param>
-    /// <returns>The task result contains the registration information for the event.</returns>
     private static async Task<IResult> EventRegistrationInfoAsync(
         [FromServices] IEventService eventService,
         HttpContext context,
