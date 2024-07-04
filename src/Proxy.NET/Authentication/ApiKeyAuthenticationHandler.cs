@@ -16,9 +16,7 @@ public class ApiKeyAuthenticationHandler(
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {
         if (!Request.Headers.TryGetValue("api-key", out var apiKey) || string.IsNullOrEmpty(apiKey))
-        {
             return AuthenticateResult.Fail("Authentication failed.");
-        }
 
         var requestContext = await authorizeService.IsUserAuthorized(apiKey!);
         if (requestContext is null)
