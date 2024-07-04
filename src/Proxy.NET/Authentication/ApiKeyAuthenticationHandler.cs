@@ -15,12 +15,12 @@ public class ApiKeyAuthenticationHandler(
 {
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {
-        var apiKey = Request.Headers["api-key"].FirstOrDefault();
-
-        if (string.IsNullOrEmpty(apiKey))
+        if (!Request.Headers.TryGetValue("api-key", out var apiKey) || string.IsNullOrEmpty(apiKey))
+        {
             return AuthenticateResult.Fail("Authentication failed.");
+        }
 
-        var requestContext = await authorizeService.IsUserAuthorized(apiKey);
+        var requestContext = await authorizeService.IsUserAuthorized(apiKey!);
         if (requestContext == null)
             return AuthenticateResult.Fail("Authentication failed.");
 

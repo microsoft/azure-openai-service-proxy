@@ -15,11 +15,12 @@ public class JwtAuthenticationHandler(
 {
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {
-        var jwt = Request.Headers["x-ms-client-principal"].FirstOrDefault();
-        if (string.IsNullOrEmpty(jwt))
+        if (!Request.Headers.TryGetValue("x-ms-client-principal", out var jwt) || string.IsNullOrEmpty(jwt))
+        {
             return AuthenticateResult.Fail("Authentication failed.");
+        }
 
-        var requestContext = authorizeService.GetRequestContextFromJwt(jwt);
+        var requestContext = authorizeService.GetRequestContextFromJwt(jwt!);
         if (requestContext == null)
             return AuthenticateResult.Fail("Authentication failed.");
 
