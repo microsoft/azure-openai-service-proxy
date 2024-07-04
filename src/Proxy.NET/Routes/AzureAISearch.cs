@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Proxy.NET.Authentication;
 using Proxy.NET.Models;
 using Proxy.NET.Services;
 
@@ -15,7 +16,7 @@ public static class AzureAISearch
         return builder;
     }
 
-    [Authorize(AuthenticationSchemes = CustomAuthenticationOptions.ApiKeyScheme)]
+    [Authorize(AuthenticationSchemes = ProxyAuthenticationOptions.ApiKeyScheme)]
     private static async Task<IResult> ProcessRequestAsync(
         [FromServices] ICatalogService catalogService,
         [FromServices] IProxyService proxyService,

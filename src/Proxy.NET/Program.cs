@@ -6,6 +6,7 @@ using AzureOpenAIProxy.Management;
 using AzureOpenAIProxy.Management.Database;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
+using Proxy.NET.Authentication;
 using Proxy.NET.Routes;
 using Proxy.NET.Services;
 
@@ -55,8 +56,8 @@ builder.Services.AddDbContext<AoaiProxyContext>(
 builder.Services.AddAuthorization();
 builder
     .Services.AddAuthentication()
-    .AddScheme<CustomAuthenticationOptions, ApiKeyAuthenticationHandler>(CustomAuthenticationOptions.ApiKeyScheme, _ => { })
-    .AddScheme<CustomAuthenticationOptions, JwtAuthenticationHandler>(CustomAuthenticationOptions.JwtScheme, _ => { });
+    .AddScheme<ProxyAuthenticationOptions, ApiKeyAuthenticationHandler>(ProxyAuthenticationOptions.ApiKeyScheme, _ => { })
+    .AddScheme<ProxyAuthenticationOptions, JwtAuthenticationHandler>(ProxyAuthenticationOptions.JwtScheme, _ => { });
 
 builder.Services.AddMemoryCache();
 builder.Services.AddHttpClient<IProxyService, ProxyService>();

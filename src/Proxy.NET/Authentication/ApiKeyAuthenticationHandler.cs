@@ -4,12 +4,14 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Options;
 using Proxy.NET.Services;
 
+namespace Proxy.NET.Authentication;
+
 public class ApiKeyAuthenticationHandler(
-    IOptionsMonitor<CustomAuthenticationOptions> options,
+    IOptionsMonitor<ProxyAuthenticationOptions> options,
     IAuthorizeService authorizeService,
     ILoggerFactory logger,
     UrlEncoder encoder
-) : AuthenticationHandler<CustomAuthenticationOptions>(options, logger, encoder)
+) : AuthenticationHandler<ProxyAuthenticationOptions>(options, logger, encoder)
 {
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {

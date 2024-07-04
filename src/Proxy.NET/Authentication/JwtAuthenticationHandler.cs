@@ -2,11 +2,10 @@ using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Options;
 
-public class JwtAuthenticationHandler(
-    IOptionsMonitor<CustomAuthenticationOptions> options,
-    ILoggerFactory logger,
-    UrlEncoder encoder
-) : AuthenticationHandler<CustomAuthenticationOptions>(options, logger, encoder)
+namespace Proxy.NET.Authentication;
+
+public class JwtAuthenticationHandler(IOptionsMonitor<ProxyAuthenticationOptions> options, ILoggerFactory logger, UrlEncoder encoder)
+    : AuthenticationHandler<ProxyAuthenticationOptions>(options, logger, encoder)
 {
     protected override Task<AuthenticateResult> HandleAuthenticateAsync()
     {
