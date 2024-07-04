@@ -6,7 +6,6 @@ using AzureOpenAIProxy.Management;
 using AzureOpenAIProxy.Management.Database;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
-using Proxy.NET.Models;
 using Proxy.NET.Routes;
 using Proxy.NET.Services;
 
@@ -54,6 +53,11 @@ builder.Services.AddDbContext<AoaiProxyContext>(
 );
 
 builder.Services.AddAuthorization();
+builder
+    .Services.AddAuthentication()
+    .AddScheme<CustomAuthenticationOptions, ApiKeyAuthenticationHandler>(CustomAuthenticationOptions.ApiKeyScheme, _ => { })
+    .AddScheme<CustomAuthenticationOptions, JwtAuthenticationHandler>(CustomAuthenticationOptions.JwtScheme, _ => { });
+
 builder.Services.AddMemoryCache();
 builder.Services.AddHttpClient<IProxyService, ProxyService>();
 builder.Services.AddProxyServices();
@@ -62,21 +66,18 @@ builder.Services.AddApplicationInsightsTelemetry();
 var app = builder.Build();
 
 app.UseHttpsRedirection();
+app.UseAuthentication();
 app.UseAuthorization();
 app.MapProxyRoutes();
 
-// validate the request and authorize the user.
 // calling the next middleware if successful.
 // global catch exceptions and log them to App Insights
 app.Use(
     async (context, next) =>
     {
         var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
-        var authorizeService = context.RequestServices.GetRequiredService<IAuthorizeService>();
-        var requestService = context.RequestServices.GetRequiredService<IRequestService>();
         try
         {
-            await requestService.CreateAsync(context);
             await next.Invoke();
         }
         catch (JsonException ex)

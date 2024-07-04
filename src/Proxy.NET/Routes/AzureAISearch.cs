@@ -1,5 +1,5 @@
-using System.Net;
 using System.Text.Json;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Proxy.NET.Models;
 using Proxy.NET.Services;
@@ -10,15 +10,15 @@ public static class AzureAISearch
 {
     public static RouteGroupBuilder MapAzureAISearchRoutes(this RouteGroupBuilder builder)
     {
-        builder.MapPost("/indexes/{index}/docs/search", ProcessRequestAsync).WithMetadata(new Auth(Auth.Type.ApiKey));
-        builder.MapPost("/indexes('{index}')/docs/search.post.search", ProcessRequestAsync).WithMetadata(new Auth(Auth.Type.ApiKey));
+        builder.MapPost("/indexes/{index}/docs/search", ProcessRequestAsync);
+        builder.MapPost("/indexes('{index}')/docs/search.post.search", ProcessRequestAsync);
         return builder;
     }
 
+    [Authorize(AuthenticationSchemes = CustomAuthenticationOptions.ApiKeyScheme)]
     private static async Task<IResult> ProcessRequestAsync(
         [FromServices] ICatalogService catalogService,
         [FromServices] IProxyService proxyService,
-        [FromServices] IRequestService requestService,
         [FromQuery(Name = "api-version")] string apiVersion,
         [FromBody] JsonDocument requestJsonDoc,
         HttpContext context,
@@ -30,7 +30,7 @@ public static class AzureAISearch
             // Get the route pattern and extract the extension path that will be appended to the upstream endpoint
             var routePattern = (context.GetEndpoint() as RouteEndpoint)?.RoutePattern.RawText;
             var extPath = routePattern?.Split("/indexes").Last();
-            var requestContext = (RequestContext)requestService.GetRequestContext();
+            var requestContext = (RequestContext)context.Items["RequestContext"]!;
 
             requestContext.DeploymentName = index;
             var deployment = await catalogService.GetCatalogItemAsync(requestContext);

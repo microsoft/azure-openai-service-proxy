@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text.Json;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Proxy.NET.Models;
 using Proxy.NET.Services;
@@ -11,18 +12,18 @@ public static class AzureAI
     public static RouteGroupBuilder MapAzureOpenAIRoutes(this RouteGroupBuilder builder)
     {
         var openAIGroup = builder.MapGroup("/openai/deployments/{deploymentName}");
-        openAIGroup.MapPost("/chat/completions", ProcessRequestAsync).WithMetadata(new Auth(Auth.Type.ApiKey));
-        openAIGroup.MapPost("/extensions/chat/completions", ProcessRequestAsync).WithMetadata(new Auth(Auth.Type.ApiKey));
-        openAIGroup.MapPost("/completions", ProcessRequestAsync).WithMetadata(new Auth(Auth.Type.ApiKey));
-        openAIGroup.MapPost("/embeddings", ProcessRequestAsync).WithMetadata(new Auth(Auth.Type.ApiKey));
-        openAIGroup.MapPost("/images/generations", ProcessRequestAsync).WithMetadata(new Auth(Auth.Type.ApiKey));
+        openAIGroup.MapPost("/chat/completions", ProcessRequestAsync);
+        openAIGroup.MapPost("/extensions/chat/completions", ProcessRequestAsync);
+        openAIGroup.MapPost("/completions", ProcessRequestAsync);
+        openAIGroup.MapPost("/embeddings", ProcessRequestAsync);
+        openAIGroup.MapPost("/images/generations", ProcessRequestAsync);
         return builder;
     }
 
+    [Authorize(AuthenticationSchemes = CustomAuthenticationOptions.ApiKeyScheme)]
     private static async Task<IResult> ProcessRequestAsync(
         [FromServices] ICatalogService catalogService,
         [FromServices] IProxyService proxyService,
-        [FromServices] IRequestService requestService,
         [FromQuery(Name = "api-version")] string apiVersion,
         [FromBody] JsonDocument requestJsonDoc,
         HttpContext context,
@@ -33,7 +34,7 @@ public static class AzureAI
         {
             var routePattern = (context.GetEndpoint() as RouteEndpoint)?.RoutePattern.RawText;
             var extPath = routePattern?.Split("{deploymentName}").Last();
-            var requestContext = (RequestContext)requestService.GetRequestContext();
+            var requestContext = (RequestContext)context.Items["RequestContext"]!;
 
             var streaming = IsStreaming(requestJsonDoc);
             var maxTokens = GetMaxTokens(requestJsonDoc);

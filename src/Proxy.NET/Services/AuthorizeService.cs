@@ -49,7 +49,7 @@ public class AuthorizeService(AoaiProxyContext db, IMemoryCache memoryCache) : I
     /// </summary>
     /// <param name="headers">The HTTP headers containing the API key.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the authorization response.</returns>
-    public async Task<RequestContext> GetRequestContextByApiKey([FromHeader(Name = "api-key")] string apiKey)
+    public async Task<RequestContext> GetRequestContextByApiKey(string apiKey)
     {
         return await IsUserAuthorized(apiKey);
     }
