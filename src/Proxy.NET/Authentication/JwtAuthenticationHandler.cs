@@ -21,7 +21,7 @@ public class JwtAuthenticationHandler(
         }
 
         var requestContext = authorizeService.GetRequestContextFromJwt(jwt!);
-        if (requestContext == null)
+        if (requestContext is null)
             return AuthenticateResult.Fail("Authentication failed.");
 
         Context.Items["RequestContext"] = requestContext;

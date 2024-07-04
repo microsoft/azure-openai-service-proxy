@@ -21,7 +21,7 @@ public class ApiKeyAuthenticationHandler(
         }
 
         var requestContext = await authorizeService.IsUserAuthorized(apiKey!);
-        if (requestContext == null)
+        if (requestContext is null)
             return AuthenticateResult.Fail("Authentication failed.");
 
         Context.Items["RequestContext"] = requestContext;
