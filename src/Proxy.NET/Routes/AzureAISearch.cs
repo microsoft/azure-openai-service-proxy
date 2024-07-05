@@ -47,7 +47,7 @@ public static class AzureAISearch
                 requestJsonDoc,
                 requestContext
             );
-            return new ProxyResult(responseContent, statusCode);
+            return TypedResults.Json(responseContent, statusCode: statusCode);
         }
     }
 
