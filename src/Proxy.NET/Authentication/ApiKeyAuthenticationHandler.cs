@@ -15,18 +15,29 @@ public class ApiKeyAuthenticationHandler(
 {
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {
-        if (!Request.Headers.TryGetValue("api-key", out var apiKey) || string.IsNullOrEmpty(apiKey))
+        if (!Request.Headers.TryGetValue("api-key", out var apiKeyValues))
             return AuthenticateResult.Fail("Authentication failed.");
 
-        var requestContext = await authorizeService.IsUserAuthorized(apiKey!);
-        if (requestContext is null)
-            return AuthenticateResult.Fail("Authentication failed.");
+        var apiKey = apiKeyValues.ToString(); // Convert StringValues to string
+        if (string.IsNullOrWhiteSpace(apiKey))
+            return AuthenticateResult.Fail("API key is empty.");
 
-        Context.Items["RequestContext"] = requestContext;
+        try
+        {
+            var requestContext = await authorizeService.IsUserAuthorizedAsync(apiKey);
+            if (requestContext is null)
+                return AuthenticateResult.Fail("Authentication failed.");
 
-        var identity = new ClaimsIdentity(null, nameof(ApiKeyAuthenticationHandler));
-        var ticket = new AuthenticationTicket(new ClaimsPrincipal(identity), Scheme.Name);
+            Context.Items["RequestContext"] = requestContext;
 
-        return AuthenticateResult.Success(ticket);
+            var identity = new ClaimsIdentity(null, nameof(ApiKeyAuthenticationHandler));
+            var ticket = new AuthenticationTicket(new ClaimsPrincipal(identity), Scheme.Name);
+
+            return AuthenticateResult.Success(ticket);
+        }
+        catch (RateLimiteExceededException ex)
+        {
+            return AuthenticateResult.Fail(ex.Message);
+        }
     }
 }

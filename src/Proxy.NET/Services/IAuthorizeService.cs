@@ -4,6 +4,6 @@ namespace Proxy.NET.Services;
 
 public interface IAuthorizeService
 {
-    Task<RequestContext?> IsUserAuthorized(string apiKey);
+    Task<RequestContext?> IsUserAuthorizedAsync(string apiKey);
     string? GetRequestContextFromJwt(string apiKey);
 }

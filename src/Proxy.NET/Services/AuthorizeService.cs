@@ -16,10 +16,10 @@ public class AuthorizeService(AoaiProxyContext db, IMemoryCache memoryCache) : I
     /// </summary>
     /// <param name="apiKey">The API key to check authorization for.</param>
     /// <returns>An instance of <see cref="RequestContext"/> containing authorization information.</returns>
-    public async Task<RequestContext?> IsUserAuthorized(string apiKey)
+    public async Task<RequestContext?> IsUserAuthorizedAsync(string apiKey)
     {
-        if (memoryCache.TryGetValue(apiKey, out RequestContext? cachedContext))
-            return cachedContext!;
+        if (memoryCache.TryGetValue(apiKey, out RequestContext? cachedContext) && cachedContext is not null)
+            return cachedContext;
 
         var result = await db.Set<RequestContext>()
             .FromSqlRaw("SELECT * FROM aoai.get_attendee_authorized(@apiKey)", new NpgsqlParameter("@apiKey", apiKey))
@@ -30,10 +30,8 @@ public class AuthorizeService(AoaiProxyContext db, IMemoryCache memoryCache) : I
 
         if (result[0].RateLimitExceed)
         {
-            throw new HttpRequestException(
-                $"The event daily request rate of {result[0].DailyRequestCap} calls to has been exceeded. Requests are disabled until UTC midnight.",
-                null,
-                HttpStatusCode.TooManyRequests
+            throw new RateLimiteExceededException(
+                $"The event daily request rate of {result[0].DailyRequestCap} calls to has been exceeded. Requests are disabled until UTC midnight."
             );
         }
 
