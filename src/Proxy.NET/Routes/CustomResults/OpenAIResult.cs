@@ -1,5 +1,4 @@
 using System.Net;
-using System.Reflection.Metadata.Ecma335;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Proxy.NET.Routes.CustomResults;
