@@ -46,26 +46,19 @@ public class AuthorizeService(AoaiProxyContext db, IMemoryCache memoryCache) : I
     /// </summary>
     /// <param name="headers">The headers containing the JWT token.</param>
     /// <returns>The user ID extracted from the JWT token.</returns>
-    public string? GetRequestContextFromJwt(string jwt)
+    public Task<string?> GetRequestContextFromJwtAsync(string jwt)
     {
-        try
-        {
-            var decoded = Encoding.ASCII.GetString(Convert.FromBase64String(jwt));
-            var principal = JsonSerializer.Deserialize<JsonElement>(decoded);
+        var decoded = Encoding.ASCII.GetString(Convert.FromBase64String(jwt));
+        var principal = JsonSerializer.Deserialize<JsonElement>(decoded);
 
-            if (
-                principal.TryGetProperty("userId", out var userIdElement)
-                && userIdElement.ValueKind == JsonValueKind.String
-                && !string.IsNullOrEmpty(userIdElement.GetString())
-            )
-            {
-                return userIdElement.GetString()!;
-            }
-            return null;
-        }
-        catch (Exception)
+        if (
+            principal.TryGetProperty("userId", out var userIdElement)
+            && userIdElement.ValueKind == JsonValueKind.String
+            && !string.IsNullOrEmpty(userIdElement.GetString())
+        )
         {
-            return null;
+            return Task.FromResult(userIdElement.GetString());
         }
+        return Task.FromResult((string?)null);
     }
 }

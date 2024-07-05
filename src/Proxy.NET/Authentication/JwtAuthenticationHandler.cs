@@ -15,10 +15,14 @@ public class JwtAuthenticationHandler(
 {
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {
-        if (!Request.Headers.TryGetValue("x-ms-client-principal", out var jwt) || string.IsNullOrEmpty(jwt))
+        if (!Request.Headers.TryGetValue("x-ms-client-principal", out var jwtValues))
             return AuthenticateResult.Fail("Authentication failed.");
 
-        var requestContext = authorizeService.GetRequestContextFromJwt(jwt!);
+        string? jwt = jwtValues.ToString(); // Convert StringValues to string
+        if (string.IsNullOrWhiteSpace(jwt))
+            return AuthenticateResult.Fail("JWT token is empty.");
+
+        var requestContext = await authorizeService.GetRequestContextFromJwtAsync(jwt);
         if (requestContext is null)
             return AuthenticateResult.Fail("Authentication failed.");
 
@@ -27,8 +31,6 @@ public class JwtAuthenticationHandler(
         var identity = new ClaimsIdentity(null, nameof(ApiKeyAuthenticationHandler));
         var ticket = new AuthenticationTicket(new ClaimsPrincipal(identity), Scheme.Name);
 
-        // Awaiting a completed task to suppress the warning
-        await Task.CompletedTask;
 
         return AuthenticateResult.Success(ticket);
     }
