@@ -82,16 +82,18 @@ public static class AzureAI
                     requestJsonDoc,
                     requestContext
                 );
-                return TypedResults.Ok();
+                return OpenAIResult.NoContent();
             }
-
-            var (responseContent, statusCode) = await proxyService.HttpPostAsync(
-                url,
-                deployment.EndpointKey,
-                requestJsonDoc,
-                requestContext
-            );
-            return TypedResults.Json(responseContent, statusCode: statusCode);
+            else
+            {
+                var (responseContent, statusCode) = await proxyService.HttpPostAsync(
+                    url,
+                    deployment.EndpointKey,
+                    requestJsonDoc,
+                    requestContext
+                );
+                return TypedResults.Json(responseContent, statusCode: statusCode);
+            }
         }
     }
 
