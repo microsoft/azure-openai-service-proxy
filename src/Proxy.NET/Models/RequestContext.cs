@@ -21,7 +21,7 @@ public partial class RequestContext
     public string EventCode { get; set; } = null!;
     public string OrganizerName { get; set; } = null!;
     public string OrganizerEmail { get; set; } = null!;
-    public string EventImageUrl { get; set; } = null!;
+    public string? EventImageUrl { get; set; }
     public int MaxTokenCap { get; set; } = 0;
     public int DailyRequestCap { get; set; } = 0;
     public bool RateLimitExceed { get; set; } = false;
