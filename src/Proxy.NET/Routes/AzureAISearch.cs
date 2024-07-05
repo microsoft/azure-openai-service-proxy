@@ -1,8 +1,10 @@
+using System.Net;
 using System.Text.Json;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Proxy.NET.Authentication;
 using Proxy.NET.Models;
+using Proxy.NET.Routes.CustomResults;
 using Proxy.NET.Services;
 
 namespace Proxy.NET.Routes;
@@ -57,7 +59,7 @@ public static class AzureAISearch
                 requestJsonDoc,
                 requestContext
             );
-            return TypedResults.Json(responseContent, statusCode: statusCode);
+            return new ProxyResult(null!, (int)HttpStatusCode.OK);
         }
     }
 

@@ -1,3 +1,4 @@
+using System.Net;
 using System.Text.Json;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -82,7 +83,7 @@ public static class AzureAI
                     requestJsonDoc,
                     requestContext
                 );
-                return OpenAIResult.NoContent();
+                return new ProxyResult(null!, (int)HttpStatusCode.OK);
             }
 
             var (responseContent, statusCode) = await proxyService.HttpPostAsync(
@@ -91,7 +92,7 @@ public static class AzureAI
                 requestJsonDoc,
                 requestContext
             );
-            return TypedResults.Json(responseContent, statusCode: statusCode);
+            return new ProxyResult(responseContent, statusCode);
         }
     }
 
