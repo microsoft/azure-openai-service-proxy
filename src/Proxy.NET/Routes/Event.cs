@@ -43,9 +43,10 @@ public static class Event
         string eventId
     )
     {
-        var eventRegistrationInfo =
-            await eventService.GetEventRegistrationInfoAsync(eventId!)
-            ?? throw new HttpRequestException("Event not found", null, HttpStatusCode.NotFound);
+        var eventRegistrationInfo = await eventService.GetEventRegistrationInfoAsync(eventId);
+
+        if (eventRegistrationInfo is null)
+            return TypedResults.NotFound("Event not found.");
 
         return TypedResults.Ok(eventRegistrationInfo);
     }
