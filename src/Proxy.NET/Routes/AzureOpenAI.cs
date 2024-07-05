@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Proxy.NET.Authentication;
 using Proxy.NET.Models;
+using Proxy.NET.Routes.CustomResults;
 using Proxy.NET.Services;
 
 namespace Proxy.NET.Routes;
@@ -36,7 +37,7 @@ public static class AzureAI
             var extPath = routePattern?.Split("{deploymentName}").Last();
 
             if (string.IsNullOrEmpty(extPath))
-                return TypedResults.BadRequest("Invalid route pattern.");
+                return OpenAIResult.BadRequest("Invalid route pattern.");
 
             var requestContext = (RequestContext)context.Items["RequestContext"]!;
 
@@ -47,7 +48,7 @@ public static class AzureAI
 
             if (maxTokens.HasValue && maxTokens > requestContext.MaxTokenCap && requestContext.MaxTokenCap > 0)
             {
-                return TypedResults.BadRequest(
+                return OpenAIResult.BadRequest(
                     $"max_tokens exceeds the event max token cap of {requestContext.MaxTokenCap}"
                 );
             }
@@ -55,7 +56,7 @@ public static class AzureAI
             var deployment = await catalogService.GetCatalogItemAsync(requestContext.EventId, requestContext.DeploymentName);
 
             if (deployment is null)
-                return TypedResults.NotFound("Deployment not found matching the provided name for this event.");
+                return OpenAIResult.NotFound("Deployment not found matching the provided name for this event.");
 
             requestContext.CatalogId = deployment.CatalogId;
 

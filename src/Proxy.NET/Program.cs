@@ -1,5 +1,3 @@
-using System.Net;
-using System.Text.Json;
 using Azure.Core;
 using Azure.Identity;
 using AzureOpenAIProxy.Management;
