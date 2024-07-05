@@ -43,24 +43,17 @@ public class CatalogService(AoaiProxyContext db, IConfiguration configuration, I
     /// </summary>
     /// <param name="requestContext">The authorization response containing the event ID and deployment name.</param>
     /// <returns>The deployment associated with the specified catalog name.</returns>
-    public async Task<Deployment> GetCatalogItemAsync(RequestContext requestContext)
+    public async Task<Deployment?> GetCatalogItemAsync(string eventId, string deploymentName)
     {
-        var deployments = await GetDecryptedEventCatalogAsync(requestContext.EventId, requestContext.DeploymentName);
+        var deployments = await GetDecryptedEventCatalogAsync(eventId, deploymentName);
 
         if (deployments.Count == 0)
         {
-            throw new HttpRequestException(
-                $"The requested model '{requestContext.DeploymentName}' is not available for this event. "
-                    + $"Available models are: {string.Join(", ", (await GetEventCatalogAsync(requestContext.EventId)).Select(d => d.DeploymentName))}",
-                null,
-                HttpStatusCode.BadRequest
-            );
+            return null;
         }
 
-        int index = new Random().Next(deployments.Count);
-        requestContext.CatalogId = deployments[index].CatalogId;
 
-        return deployments[index];
+        return deployments[new Random().Next(deployments.Count)];
     }
 
     /// <summary>

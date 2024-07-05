@@ -38,7 +38,12 @@ public static class AzureAISearch
             var requestContext = (RequestContext)context.Items["RequestContext"]!;
 
             requestContext.DeploymentName = index;
-            var deployment = await catalogService.GetCatalogItemAsync(requestContext);
+            var deployment = await catalogService.GetCatalogItemAsync(requestContext.EventId, requestContext.DeploymentName);
+
+            if (deployment is null)
+                return TypedResults.NotFound("Deployment not found matching the provided name for this event.");
+
+            requestContext.CatalogId = deployment.CatalogId;
 
             var url = GenerateEndpointUrl(deployment, extPath, apiVersion);
             var (responseContent, statusCode) = await proxyService.HttpPostAsync(
