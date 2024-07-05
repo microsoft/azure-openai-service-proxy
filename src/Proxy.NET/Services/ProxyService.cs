@@ -24,31 +24,30 @@ public class ProxyService(IHttpClientFactory httpClientFactory, IMetricService m
         RequestContext requestContext
     )
     {
-        var httpClient = httpClientFactory.CreateClient();
+        using var httpClient = httpClientFactory.CreateClient();
         httpClient.Timeout = TimeSpan.FromSeconds(HttpTimeoutSeconds);
 
-        using (var requestMessage = new HttpRequestMessage(HttpMethod.Post, requestUrl))
-        {
-            requestMessage.Content = new StringContent(requestJsonDoc.RootElement.ToString(), Encoding.UTF8, "application/json");
-            requestMessage.Headers.Add("api-key", endpointKey);
+        using var requestMessage = new HttpRequestMessage(HttpMethod.Post, requestUrl);
+        requestMessage.Content = new StringContent(requestJsonDoc.RootElement.ToString(), Encoding.UTF8, "application/json");
+        requestMessage.Headers.Add("api-key", endpointKey);
 
-            if (!EnableUnitTesting)
-            {
-                var response = await httpClient.SendAsync(requestMessage);
-                var responseContent = await response.Content.ReadAsStringAsync();
-                await metricService.LogApiUsageAsync(requestContext, responseContent);
-                return (responseContent, (int)response.StatusCode);
-            }
-            else
-            {
-                await Task.Delay(1000);
-                var responseContent =
-                    "{\"message\": \"Upstream proxy call skipped for testing purposes\", \"status\": 200, \"requestUrl\": \""
-                    + requestUrl
-                    + "\"}";
-                await metricService.LogApiUsageAsync(requestContext, responseContent);
-                return (responseContent, (int)HttpStatusCode.OK);
-            }
+        if (!EnableUnitTesting)
+        {
+            var response = await httpClient.SendAsync(requestMessage);
+            var responseContent = await response.Content.ReadAsStringAsync();
+            await metricService.LogApiUsageAsync(requestContext, responseContent);
+            return (responseContent, (int)response.StatusCode);
+        }
+        else
+        {
+            await Task.Delay(1000);
+            var responseContent =
+                "{\"message\": \"Upstream proxy call skipped for testing purposes\", \"status\": 200, \"requestUrl\": \""
+                + requestUrl
+                + "\"}";
+            await metricService.LogApiUsageAsync(requestContext, responseContent);
+            return (responseContent, (int)HttpStatusCode.OK);
+
         }
     }
 

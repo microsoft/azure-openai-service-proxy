@@ -1,4 +1,3 @@
-using System.Net;
 using System.Text.Json;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -35,6 +34,10 @@ public static class AzureAI
         {
             var routePattern = (context.GetEndpoint() as RouteEndpoint)?.RoutePattern.RawText;
             var extPath = routePattern?.Split("{deploymentName}").Last();
+
+            if (string.IsNullOrEmpty(extPath))
+                return TypedResults.BadRequest("Invalid route pattern.");
+
             var requestContext = (RequestContext)context.Items["RequestContext"]!;
 
             var streaming = IsStreaming(requestJsonDoc);
@@ -44,31 +47,27 @@ public static class AzureAI
 
             if (maxTokens.HasValue && maxTokens > requestContext.MaxTokenCap && requestContext.MaxTokenCap > 0)
             {
-                throw new HttpRequestException(
-                    $"max_tokens exceeds the event max token cap of {requestContext.MaxTokenCap}",
-                    null,
-                    HttpStatusCode.BadRequest
+                return TypedResults.BadRequest(
+                    $"max_tokens exceeds the event max token cap of {requestContext.MaxTokenCap}"
                 );
             }
 
             var deployment = await catalogService.GetCatalogItemAsync(requestContext);
-            var url = GenerateEndpointUrl(deployment, extPath!, apiVersion);
+            var url = GenerateEndpointUrl(deployment, extPath, apiVersion);
 
             if (streaming)
             {
                 await proxyService.HttpPostStreamAsync(url, deployment.EndpointKey, context, requestJsonDoc, requestContext);
-                return new ProxyResult(null!, (int)HttpStatusCode.OK);
+                return TypedResults.Ok();
             }
-            else
-            {
-                var (responseContent, statusCode) = await proxyService.HttpPostAsync(
-                    url,
-                    deployment.EndpointKey,
-                    requestJsonDoc,
-                    requestContext
-                );
-                return new ProxyResult(responseContent, statusCode);
-            }
+
+            var (responseContent, statusCode) = await proxyService.HttpPostAsync(
+                url,
+                deployment.EndpointKey,
+                requestJsonDoc,
+                requestContext
+            );
+            return TypedResults.Json(responseContent, statusCode: statusCode);
         }
     }
 
