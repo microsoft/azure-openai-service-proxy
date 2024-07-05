@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Options;
 using Proxy.NET.Services;
 
-namespace Proxy.NET.Authentication;
+namespace Proxy.NET.Middleware;
 
 public class JwtAuthenticationHandler(
     IOptionsMonitor<ProxyAuthenticationOptions> options,
@@ -30,7 +30,6 @@ public class JwtAuthenticationHandler(
 
         var identity = new ClaimsIdentity(null, nameof(ApiKeyAuthenticationHandler));
         var ticket = new AuthenticationTicket(new ClaimsPrincipal(identity), Scheme.Name);
-
 
         return AuthenticateResult.Success(ticket);
     }

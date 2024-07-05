@@ -1,7 +1,7 @@
 using System.Net;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Proxy.NET.Authentication;
+using Proxy.NET.Middleware;
 using Proxy.NET.Models;
 using Proxy.NET.Services;
 
@@ -17,7 +17,10 @@ public static class Event
     }
 
     [Authorize(AuthenticationSchemes = ProxyAuthenticationOptions.ApiKeyScheme)]
-    private static async Task<IResult> EventInfoAsync([FromServices] ICatalogService catalogService, HttpContext context)
+    private static async Task<IResult> EventInfoAsync(
+        [FromServices] ICatalogService catalogService,
+        HttpContext context
+    )
     {
         RequestContext requestContext = (RequestContext)context.Items["RequestContext"]!;
         requestContext.DeploymentName = "event_info";

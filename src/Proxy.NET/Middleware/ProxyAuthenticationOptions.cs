@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Authentication;
 
-namespace Proxy.NET.Authentication;
+namespace Proxy.NET.Middleware;
 
 public class ProxyAuthenticationOptions : AuthenticationSchemeOptions
 {

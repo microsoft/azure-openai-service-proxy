@@ -2,7 +2,7 @@ using System.Net;
 using System.Text.Json;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Proxy.NET.Authentication;
+using Proxy.NET.Middleware;
 using Proxy.NET.Models;
 using Proxy.NET.Routes.CustomResults;
 using Proxy.NET.Services;

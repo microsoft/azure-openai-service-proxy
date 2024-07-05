@@ -1,4 +1,3 @@
-using System.Net;
 using System.Text;
 using System.Text.Json;
 using AzureOpenAIProxy.Management;
@@ -18,26 +17,32 @@ public class AuthorizeService(AoaiProxyContext db, IMemoryCache memoryCache) : I
     /// <returns>An instance of <see cref="RequestContext"/> containing authorization information.</returns>
     public async Task<RequestContext?> IsUserAuthorizedAsync(string apiKey)
     {
-        if (memoryCache.TryGetValue(apiKey, out RequestContext? cachedContext) && cachedContext is not null)
+        if (
+            memoryCache.TryGetValue(apiKey, out RequestContext? cachedContext)
+            && cachedContext is not null
+        )
             return cachedContext;
 
         var result = await db.Set<RequestContext>()
-            .FromSqlRaw("SELECT * FROM aoai.get_attendee_authorized(@apiKey)", new NpgsqlParameter("@apiKey", apiKey))
+            .FromSqlRaw(
+                "SELECT * FROM aoai.get_attendee_authorized(@apiKey)",
+                new NpgsqlParameter("@apiKey", apiKey)
+            )
             .ToListAsync();
 
+        // Count = 0 when the API key is not found in the database
+        // Or the event is not active or open
         if (result.Count == 0)
             return null;
 
-        if (result[0].RateLimitExceed)
-        {
-            throw new RateLimiteExceededException(
-                $"The event daily request rate of {result[0].DailyRequestCap} calls to has been exceeded. Requests are disabled until UTC midnight."
-            );
-        }
+        result[0].IsAuthorized = !result[0].RateLimitExceed;
 
-        result[0].IsAuthorized = true;
+        memoryCache.Set(
+            apiKey,
+            result[0],
+            result[0].RateLimitExceed ? TimeSpan.FromSeconds(30) : TimeSpan.FromMinutes(2)
+        );
 
-        memoryCache.Set(apiKey, result[0], TimeSpan.FromMinutes(2));
         return result[0];
     }
 

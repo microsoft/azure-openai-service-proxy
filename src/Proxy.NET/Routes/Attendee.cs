@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Proxy.NET.Authentication;
+using Proxy.NET.Middleware;
 using Proxy.NET.Services;
 
 namespace Proxy.NET.Routes;
@@ -16,7 +16,11 @@ public static class Attendee
     }
 
     [Authorize(AuthenticationSchemes = ProxyAuthenticationOptions.JwtScheme)]
-    private static async Task<IResult> AttendeeAdd([FromServices] IAttendeeService attendeeService, HttpContext context, string eventId)
+    private static async Task<IResult> AttendeeAdd(
+        [FromServices] IAttendeeService attendeeService,
+        HttpContext context,
+        string eventId
+    )
     {
         string userId = (string)context.Items["RequestContext"]!;
         string api_key = await attendeeService.AddAttendeeAsync(userId, eventId);
@@ -24,7 +28,11 @@ public static class Attendee
     }
 
     [Authorize(AuthenticationSchemes = ProxyAuthenticationOptions.JwtScheme)]
-    private static async Task<IResult> AttendeeGetKey([FromServices] IAttendeeService attendeeService, HttpContext context, string eventId)
+    private static async Task<IResult> AttendeeGetKey(
+        [FromServices] IAttendeeService attendeeService,
+        HttpContext context,
+        string eventId
+    )
     {
         string userId = (string)context.Items["RequestContext"]!;
         var attendee = await attendeeService.GetAttendeeKeyAsync(userId, eventId);
