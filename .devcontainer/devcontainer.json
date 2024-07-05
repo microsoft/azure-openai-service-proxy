@@ -34,7 +34,8 @@
         "ms-python.black-formatter",
         "ms-python.pylint",
         "ms-dotnettools.csdevkit",
-        "cweijan.vscode-postgresql-client2"
+        "cweijan.vscode-postgresql-client2",
+        "EditorConfig.EditorConfig"
       ],
       // Set *default* container specific settings.json values on container create.
       "settings": {
