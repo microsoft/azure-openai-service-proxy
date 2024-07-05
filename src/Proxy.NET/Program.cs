@@ -39,18 +39,11 @@ if (string.IsNullOrEmpty(dataSourceBuilder.ConnectionStringBuilder.Password))
 
 NpgsqlDataSource dataSource = dataSourceBuilder.Build();
 
-builder.Services.AddDbContext<AoaiProxyContext>(
-    (option) =>
-    {
-        option.UseNpgsql(
-            dataSource,
-            // https://stackoverflow.com/questions/70423137/how-to-gracefully-handle-a-postgres-restart-in-npgsql
-            (options) =>
-            {
-                options.EnableRetryOnFailure(4, TimeSpan.FromSeconds(30), ["57P01"]);
-            }
-        );
-    }
+builder.Services.AddDbContext<AoaiProxyContext>((option) =>
+option.UseNpgsql(
+    dataSource,
+    // https://stackoverflow.com/questions/70423137/how-to-gracefully-handle-a-postgres-restart-in-npgsql
+    (options) => options.EnableRetryOnFailure(4, TimeSpan.FromSeconds(30), ["57P01"]))
 );
 
 builder.Services.AddAuthorization();
