@@ -31,12 +31,16 @@ public static class AzureAISearch
             // Get the route pattern and extract the extension path that will be appended to the upstream endpoint
             var routePattern = (context.GetEndpoint() as RouteEndpoint)?.RoutePattern.RawText;
             var extPath = routePattern?.Split("/indexes").Last();
+
+            if (string.IsNullOrEmpty(extPath))
+                return TypedResults.BadRequest("Invalid route pattern.");
+
             var requestContext = (RequestContext)context.Items["RequestContext"]!;
 
             requestContext.DeploymentName = index;
             var deployment = await catalogService.GetCatalogItemAsync(requestContext);
 
-            var url = GenerateEndpointUrl(deployment, extPath!, apiVersion);
+            var url = GenerateEndpointUrl(deployment, extPath, apiVersion);
             var (responseContent, statusCode) = await proxyService.HttpPostAsync(
                 url,
                 deployment.EndpointKey,
