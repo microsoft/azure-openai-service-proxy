@@ -89,12 +89,12 @@ public class CatalogService(AoaiProxyContext db, IConfiguration configuration, I
     /// <summary>
     /// Retrieves a list of deployments from the catalog for a specific event.
     /// </summary>
-    /// <param name="event_id">The ID of the event.</param>
+    /// <param name="eventId">The ID of the event.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains a list of deployments.</returns>
-    private async Task<List<Deployment>> GetEventCatalogAsync(string event_id)
+    private async Task<List<Deployment>> GetEventCatalogAsync(string eventId)
     {
         var result = await db
-            .OwnerCatalogs.Where(oc => oc.Active && oc.Events.Any(e => e.EventId == event_id))
+            .OwnerCatalogs.Where(oc => oc.Active && oc.Events.Any(e => e.EventId == eventId))
             .OrderBy(oc => oc.DeploymentName)
             .Select(oc => new Deployment
             {
