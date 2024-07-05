@@ -41,14 +41,17 @@ public class AttendeeService(AoaiProxyContext db) : IAttendeeService
     /// <param name="userId">The ID of the user.</param>
     /// <param name="eventId">The ID of the event.</param>
     /// <returns>A tuple containing the attendee key and active status.</returns>
-    public async Task<(string apiKey, bool active)> GetAttendeeKeyAsync(string userId, string eventId)
+    public async Task<AttendeeKey?> GetAttendeeKeyAsync(string userId, string eventId)
     {
         var attendee =
             await db
                 .EventAttendees.Where(ea => ea.EventId == eventId && ea.UserId == userId)
-                .Select(ea => new { ea.ApiKey, ea.Active })
-                .FirstOrDefaultAsync() ?? throw new HttpRequestException("Attendee key not found", null, HttpStatusCode.NotFound);
+                .Select(ea => new AttendeeKey(ea.ApiKey, ea.Active))
+                .FirstOrDefaultAsync();
 
-        return (attendee.ApiKey, attendee.Active);
+        if (attendee is null)
+            return null;
+
+        return attendee;
     }
 }

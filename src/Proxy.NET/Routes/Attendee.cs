@@ -27,7 +27,11 @@ public static class Attendee
     private static async Task<IResult> AttendeeGetKey([FromServices] IAttendeeService attendeeService, HttpContext context, string eventId)
     {
         string userId = (string)context.Items["RequestContext"]!;
-        (string apiKey, bool active) = await attendeeService.GetAttendeeKeyAsync(userId, eventId);
-        return TypedResults.Ok(new { api_key = apiKey, active });
+        var attendee = await attendeeService.GetAttendeeKeyAsync(userId, eventId);
+
+        if (attendee is null)
+            return TypedResults.NotFound("Attendee not found.");
+
+        return TypedResults.Ok(new { attendee.ApiKey, attendee.Active });
     }
 }
