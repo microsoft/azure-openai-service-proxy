@@ -69,7 +69,7 @@ public partial class AoaiProxyContext : DbContext
             entity.Property(a => a.EventCode).IsRequired().HasColumnName("event_code");
             entity.Property(a => a.OrganizerName).IsRequired().HasColumnName("organizer_name");
             entity.Property(a => a.OrganizerEmail).IsRequired().HasColumnName("organizer_email");
-            entity.Property(a => a.EventImageUrl).IsRequired().HasColumnName("event_image_url");
+            entity.Property(a => a.EventImageUrl).HasColumnName("event_image_url");
             entity.Property(a => a.MaxTokenCap).IsRequired().HasColumnName("max_token_cap");
             entity.Property(a => a.DailyRequestCap).IsRequired().HasColumnName("daily_request_cap");
             entity.Property(a => a.RateLimitExceed).IsRequired().HasColumnName("rate_limit_exceed");
