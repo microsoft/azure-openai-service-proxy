@@ -66,20 +66,16 @@
 
   "portsAttributes": {
     "8000": {
-      "label": "Proxy.NET",
-      "onAutoForward": "notify"
+      "label": "Proxy.NET"
     },
     "5175": {
-      "label": "Admin",
-      "onAutoForward": "openBrowser"
+      "label": "Admin"
     },
     "5173": {
-      "label": "Playground (internal)",
-      "onAutoForward": "silent"
+      "label": "Playground (internal)"
     },
     "4280": {
-      "label": "Playgroud (SWA proxy)",
-      "onAutoForward": "openBrowser"
+      "label": "Playgroud (SWA proxy)"
     }
   }
 }
