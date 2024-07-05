@@ -8,10 +8,15 @@ using Proxy.NET.Models;
 
 namespace Proxy.NET.Services;
 
-public class CatalogService(AoaiProxyContext db, IConfiguration configuration, IMemoryCache memoryCache) : ICatalogService
+public class CatalogService(
+    AoaiProxyContext db,
+    IConfiguration configuration,
+    IMemoryCache memoryCache
+) : ICatalogService
 {
     private readonly string EncryptionKey =
-        configuration["PostgresEncryptionKey"] ?? throw new ArgumentNullException("PostgresEncryptionKey");
+        configuration["PostgresEncryptionKey"]
+        ?? throw new ArgumentNullException("PostgresEncryptionKey");
 
     /// <summary>
     /// Retrieves the event catalog for a given event ID and deployment name.
@@ -20,7 +25,10 @@ public class CatalogService(AoaiProxyContext db, IConfiguration configuration, I
     /// <param name="eventId">The ID of the event.</param>
     /// <param name="deploymentName">The name of the deployment.</param>
     /// <returns>A list of Deployment objects representing the event catalog.</returns>
-    private async Task<List<Deployment>> GetDecryptedEventCatalogAsync(string eventId, string deploymentName)
+    private async Task<List<Deployment>> GetDecryptedEventCatalogAsync(
+        string eventId,
+        string deploymentName
+    )
     {
         if (memoryCache.TryGetValue(eventId + deploymentName, out List<Deployment>? cachedContext))
             return cachedContext!;
@@ -39,21 +47,27 @@ public class CatalogService(AoaiProxyContext db, IConfiguration configuration, I
     }
 
     /// <summary>
-    /// Retrieves a catalog item.
+    /// Retrieves a catalog item asynchronously.
     /// </summary>
-    /// <param name="requestContext">The authorization response containing the event ID and deployment name.</param>
-    /// <returns>The deployment associated with the specified catalog name.</returns>
-    public async Task<Deployment?> GetCatalogItemAsync(string eventId, string deploymentName)
+    /// <param name="eventId">The ID of the event.</param>
+    /// <param name="deploymentName">The name of the deployment.</param>
+    /// <returns>A tuple containing the deployment and event catalog.</returns>
+    public async Task<(Deployment? deployment, List<Deployment> eventCatalog)> GetCatalogItemAsync(
+        string eventId,
+        string deploymentName
+    )
     {
         var deployments = await GetDecryptedEventCatalogAsync(eventId, deploymentName);
-
         if (deployments.Count == 0)
         {
-            return null;
+            // If no deployments, fetch the event catalog.
+            return (null, await GetEventCatalogAsync(eventId));
         }
-
-
-        return deployments[new Random().Next(deployments.Count)];
+        else
+        {
+            // If there are deployments, select one at random.
+            return (deployments[new Random().Next(deployments.Count)], []);
+        }
     }
 
     /// <summary>

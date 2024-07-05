@@ -38,10 +38,15 @@ public static class AzureAISearch
             var requestContext = (RequestContext)context.Items["RequestContext"]!;
 
             requestContext.DeploymentName = index;
-            var deployment = await catalogService.GetCatalogItemAsync(requestContext.EventId, requestContext.DeploymentName);
+            var (deployment, eventCatalog) = await catalogService.GetCatalogItemAsync(
+                requestContext.EventId,
+                requestContext.DeploymentName
+            );
 
             if (deployment is null)
-                return TypedResults.NotFound("Deployment not found matching the provided name for this event.");
+                return TypedResults.NotFound(
+                    $"Deployment '{index}' not found for this event. Available deployments are: {string.Join(", ", eventCatalog.Select(d => d.DeploymentName))}"
+                );
 
             requestContext.CatalogId = deployment.CatalogId;
 
@@ -63,7 +68,8 @@ public static class AzureAISearch
         string path = extPath switch
         {
             "/{index}/docs/search" => $"/indexes/{deployment.DeploymentName.Trim()}/docs/search",
-            "('{index}')/docs/search.post.search" => $"/indexes('{deployment.DeploymentName.Trim()}')/docs/search.post.search",
+            "('{index}')/docs/search.post.search"
+                => $"/indexes('{deployment.DeploymentName.Trim()}')/docs/search.post.search",
             _ => throw new ArgumentException("Invalid route pattern"),
         };
 

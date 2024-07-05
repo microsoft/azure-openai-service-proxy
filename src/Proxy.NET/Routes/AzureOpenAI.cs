@@ -46,17 +46,28 @@ public static class AzureAI
 
             requestContext.DeploymentName = deploymentName;
 
-            if (maxTokens.HasValue && maxTokens > requestContext.MaxTokenCap && requestContext.MaxTokenCap > 0)
+            if (
+                maxTokens.HasValue
+                && maxTokens > requestContext.MaxTokenCap
+                && requestContext.MaxTokenCap > 0
+            )
             {
                 return OpenAIResult.BadRequest(
                     $"max_tokens exceeds the event max token cap of {requestContext.MaxTokenCap}"
                 );
             }
 
-            var deployment = await catalogService.GetCatalogItemAsync(requestContext.EventId, requestContext.DeploymentName);
+            var (deployment, eventCatalog) = await catalogService.GetCatalogItemAsync(
+                requestContext.EventId,
+                requestContext.DeploymentName
+            );
 
             if (deployment is null)
-                return OpenAIResult.NotFound("Deployment not found matching the provided name for this event.");
+            {
+                return OpenAIResult.NotFound(
+                    $"Deployment '{deploymentName}' not found for this event. Available deployments are: {string.Join(", ", eventCatalog.Select(d => d.DeploymentName))}"
+                );
+            }
 
             requestContext.CatalogId = deployment.CatalogId;
 
@@ -64,7 +75,13 @@ public static class AzureAI
 
             if (streaming)
             {
-                await proxyService.HttpPostStreamAsync(url, deployment.EndpointKey, context, requestJsonDoc, requestContext);
+                await proxyService.HttpPostStreamAsync(
+                    url,
+                    deployment.EndpointKey,
+                    context,
+                    requestJsonDoc,
+                    requestContext
+                );
                 return TypedResults.Ok();
             }
 
@@ -82,7 +99,10 @@ public static class AzureAI
     {
         return requestJsonDoc.RootElement.ValueKind == JsonValueKind.Object
             && requestJsonDoc.RootElement.TryGetProperty("stream", out JsonElement streamElement)
-            && (streamElement.ValueKind == JsonValueKind.True || streamElement.ValueKind == JsonValueKind.False)
+            && (
+                streamElement.ValueKind == JsonValueKind.True
+                || streamElement.ValueKind == JsonValueKind.False
+            )
             && streamElement.GetBoolean();
     }
 
@@ -99,7 +119,8 @@ public static class AzureAI
 
     private static Uri GenerateEndpointUrl(Deployment deployment, string extPath, string apiVersion)
     {
-        var baseUrl = $"{deployment.EndpointUrl.TrimEnd('/')}/openai/deployments/{deployment.DeploymentName.Trim()}";
+        var baseUrl =
+            $"{deployment.EndpointUrl.TrimEnd('/')}/openai/deployments/{deployment.DeploymentName.Trim()}";
         return new Uri($"{baseUrl}{extPath}?api-version={apiVersion}");
     }
 }
