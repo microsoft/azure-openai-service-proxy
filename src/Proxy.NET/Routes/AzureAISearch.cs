@@ -59,7 +59,7 @@ public static class AzureAISearch
                 requestJsonDoc,
                 requestContext
             );
-            return new ProxyResult(null!, (int)HttpStatusCode.OK);
+            return new ProxyResult(responseContent, statusCode);
         }
     }
 
