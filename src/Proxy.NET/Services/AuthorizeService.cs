@@ -37,10 +37,11 @@ public class AuthorizeService(AoaiProxyContext db, IMemoryCache memoryCache) : I
 
         result[0].IsAuthorized = !result[0].RateLimitExceed;
 
+        // cache the result for 2 minutes if authorized, otherwise cache for 30 seconds
         memoryCache.Set(
             apiKey,
             result[0],
-            result[0].RateLimitExceed ? TimeSpan.FromSeconds(30) : TimeSpan.FromMinutes(2)
+            result[0].IsAuthorized ? TimeSpan.FromMinutes(2) : TimeSpan.FromSeconds(30)
         );
 
         return result[0];
