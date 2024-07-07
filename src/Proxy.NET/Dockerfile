@@ -1,10 +1,7 @@
 # https://devblogs.microsoft.com/dotnet/improving-multiplatform-container-support
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 
-
 WORKDIR /src
-
-COPY MockResponses/ MockResponses/
 
 # copy csproj and restore as distinct layers
 COPY Proxy.NET.csproj .
@@ -20,5 +17,7 @@ EXPOSE 8080
 EXPOSE 8081
 WORKDIR /app
 COPY --from=build /app .
+COPY --from=build /src/MockResponses /app/MockResponses
+
 USER $APP_UID
 ENTRYPOINT ["./Proxy.NET"]
