@@ -72,7 +72,10 @@ public class ProxyService(IHttpClientFactory httpClientFactory, IMetricService m
             );
             requestMessage.Headers.Add("api-key", endpointKey);
 
-            var response = await httpClient.SendAsync(requestMessage);
+            var response = await httpClient.SendAsync(
+                requestMessage,
+                HttpCompletionOption.ResponseHeadersRead
+            );
             await metricService.LogApiUsageAsync(requestContext, deployment, null);
 
             context.Response.StatusCode = (int)response.StatusCode;
