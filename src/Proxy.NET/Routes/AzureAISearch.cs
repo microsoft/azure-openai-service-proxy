@@ -39,10 +39,9 @@ public static class AzureAISearch
 
             var requestContext = (RequestContext)context.Items["RequestContext"]!;
 
-            requestContext.DeploymentName = index;
             var (deployment, eventCatalog) = await catalogService.GetCatalogItemAsync(
                 requestContext.EventId,
-                requestContext.DeploymentName
+                index
             );
 
             if (deployment is null)
@@ -50,15 +49,13 @@ public static class AzureAISearch
                     $"Deployment '{index}' not found for this event. Available deployments are: {string.Join(", ", eventCatalog.Select(d => d.DeploymentName))}"
                 );
 
-            requestContext.CatalogId = deployment.CatalogId;
-            requestContext.ModelType = deployment.ModelType;
-
             var url = GenerateEndpointUrl(deployment, extPath, apiVersion);
             var (responseContent, statusCode) = await proxyService.HttpPostAsync(
                 url,
                 deployment.EndpointKey,
                 requestJsonDoc,
-                requestContext
+                requestContext,
+                deployment
             );
             return new ProxyResult(responseContent, statusCode);
         }

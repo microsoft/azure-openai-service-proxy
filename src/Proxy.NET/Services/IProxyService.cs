@@ -9,13 +9,15 @@ public interface IProxyService
         Uri requestUrl,
         string endpointKey,
         JsonDocument requestJsonDoc,
-        RequestContext requestContext
+        RequestContext requestContext,
+        Deployment deployment
     );
     Task HttpPostStreamAsync(
         Uri requestUrl,
         string endpointKey,
         HttpContext context,
         JsonDocument requestJsonDoc,
-        RequestContext requestContext
+        RequestContext requestContext,
+        Deployment deployment
     );
 }

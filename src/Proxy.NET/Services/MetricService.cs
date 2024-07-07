@@ -14,16 +14,23 @@ public class MetricService(AoaiProxyContext db) : IMetricService
     /// </summary>
     /// <param name="requestContext">The authorization response containing the necessary data for logging.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
-    public async Task LogApiUsageAsync(RequestContext requestContext, string? responseContent)
+    public async Task LogApiUsageAsync(
+        RequestContext requestContext,
+        Deployment deployment,
+        string? responseContent
+    )
     {
-        requestContext.Usage = GetUsage(responseContent);
+        var usage = GetUsage(responseContent);
 
         await db.Database.ExecuteSqlRawAsync(
             "CALL aoai.add_attendee_metric(@apiKey, @eventId, @catalogId, @usage)",
             new NpgsqlParameter("@apiKey", NpgsqlDbType.Varchar) { Value = requestContext.ApiKey },
-            new NpgsqlParameter("@eventId", NpgsqlDbType.Varchar) { Value = requestContext.EventId },
-            new NpgsqlParameter("@catalogId", NpgsqlDbType.Uuid) { Value = requestContext.CatalogId },
-            new NpgsqlParameter("@usage", NpgsqlDbType.Jsonb) { Value = requestContext.Usage }
+            new NpgsqlParameter("@eventId", NpgsqlDbType.Varchar)
+            {
+                Value = requestContext.EventId
+            },
+            new NpgsqlParameter("@catalogId", NpgsqlDbType.Uuid) { Value = deployment.CatalogId },
+            new NpgsqlParameter("@usage", NpgsqlDbType.Jsonb) { Value = usage }
         );
     }
 
@@ -40,7 +47,9 @@ public class MetricService(AoaiProxyContext db) : IMetricService
         try
         {
             using var jsonDoc = JsonDocument.Parse(responseContent);
-            return jsonDoc.RootElement.TryGetProperty("usage", out var usage) ? usage.ToString() : "{}";
+            return jsonDoc.RootElement.TryGetProperty("usage", out var usage)
+                ? usage.ToString()
+                : "{}";
         }
         catch (JsonException)
         {

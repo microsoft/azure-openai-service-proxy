@@ -45,8 +45,6 @@ public static class AzureAI
             var streaming = IsStreaming(requestJsonDoc);
             var maxTokens = GetMaxTokens(requestJsonDoc);
 
-            requestContext.DeploymentName = deploymentName;
-
             if (
                 maxTokens.HasValue
                 && maxTokens > requestContext.MaxTokenCap
@@ -60,7 +58,7 @@ public static class AzureAI
 
             var (deployment, eventCatalog) = await catalogService.GetCatalogItemAsync(
                 requestContext.EventId,
-                requestContext.DeploymentName
+                deploymentName
             );
 
             if (deployment is null)
@@ -69,9 +67,6 @@ public static class AzureAI
                     $"Deployment '{deploymentName}' not found for this event. Available deployments are: {string.Join(", ", eventCatalog.Select(d => d.DeploymentName))}"
                 );
             }
-
-            requestContext.CatalogId = deployment.CatalogId;
-            requestContext.ModelType = deployment.ModelType;
 
             var url = GenerateEndpointUrl(deployment, extPath, apiVersion);
 
@@ -82,7 +77,8 @@ public static class AzureAI
                     deployment.EndpointKey,
                     context,
                     requestJsonDoc,
-                    requestContext
+                    requestContext,
+                    deployment
                 );
                 return new ProxyResult(null!, (int)HttpStatusCode.OK);
             }
@@ -91,7 +87,8 @@ public static class AzureAI
                 url,
                 deployment.EndpointKey,
                 requestJsonDoc,
-                requestContext
+                requestContext,
+                deployment
             );
             return new ProxyResult(responseContent, statusCode);
         }

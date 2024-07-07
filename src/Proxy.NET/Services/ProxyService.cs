@@ -21,7 +21,8 @@ public class ProxyService(IHttpClientFactory httpClientFactory, IMetricService m
         Uri requestUrl,
         string endpointKey,
         JsonDocument requestJsonDoc,
-        RequestContext requestContext
+        RequestContext requestContext,
+        Deployment deployment
     )
     {
         using var httpClient = httpClientFactory.CreateClient();
@@ -37,7 +38,7 @@ public class ProxyService(IHttpClientFactory httpClientFactory, IMetricService m
 
         var response = await httpClient.SendAsync(requestMessage);
         var responseContent = await response.Content.ReadAsStringAsync();
-        await metricService.LogApiUsageAsync(requestContext, responseContent);
+        await metricService.LogApiUsageAsync(requestContext, deployment, responseContent);
 
         return (responseContent, (int)response.StatusCode);
     }
@@ -55,7 +56,8 @@ public class ProxyService(IHttpClientFactory httpClientFactory, IMetricService m
         string endpointKey,
         HttpContext context,
         JsonDocument requestJsonDoc,
-        RequestContext requestContext
+        RequestContext requestContext,
+        Deployment deployment
     )
     {
         var buffer = new byte[512];
@@ -74,7 +76,7 @@ public class ProxyService(IHttpClientFactory httpClientFactory, IMetricService m
             requestMessage.Headers.Add("api-key", endpointKey);
 
             var response = await httpClient.SendAsync(requestMessage);
-            await metricService.LogApiUsageAsync(requestContext, null);
+            await metricService.LogApiUsageAsync(requestContext, deployment, null);
 
             context.Response.StatusCode = (int)response.StatusCode;
             context.Response.ContentType = "application/json";

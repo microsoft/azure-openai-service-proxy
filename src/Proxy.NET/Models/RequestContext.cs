@@ -7,17 +7,6 @@ public partial class RequestContext
     [NotMapped]
     public bool IsAuthorized { get; set; } = false;
 
-    [NotMapped]
-    public string DeploymentName { get; set; } = null!;
-
-    [NotMapped]
-    public string Usage { get; set; } = "{}";
-
-    [NotMapped]
-    public string ModelType { get; set; } = null!;
-
-    [NotMapped]
-    public Guid? CatalogId { get; set; } = null;
     public string ApiKey { get; set; } = null!;
     public string UserId { get; set; } = null!;
     public string EventId { get; set; } = null!;

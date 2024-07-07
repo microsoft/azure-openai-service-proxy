@@ -1,4 +1,3 @@
-using System.Net;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Proxy.NET.Middleware;
@@ -23,7 +22,6 @@ public static class Event
     )
     {
         RequestContext requestContext = (RequestContext)context.Items["RequestContext"]!;
-        requestContext.DeploymentName = "event_info";
         var capabilities = await catalogService.GetCapabilities(requestContext.EventId);
 
         var eventInfo = new EventInfoResponse

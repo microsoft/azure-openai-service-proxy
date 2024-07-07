@@ -26,7 +26,8 @@ public class MockProxyService(IHttpClientFactory httpClientFactory, IMetricServi
         Uri requestUrl,
         string endpointKey,
         JsonDocument requestJsonDoc,
-        RequestContext requestContext
+        RequestContext requestContext,
+        Deployment deployment
     )
     {
         using var httpClient = httpClientFactory.CreateClient();
@@ -44,13 +45,13 @@ public class MockProxyService(IHttpClientFactory httpClientFactory, IMetricServi
         await Task.Delay(RandomDelayInMilliseconds);
 
         // Return a mock response content
-        var responseContent = GetMockResponseContent(
-            requestContext.ModelType,
+        var responseContent = await GetMockResponseContentAsync(
+            deployment.ModelType,
             requestUrl.ToString(),
             false
         );
 
-        await metricService.LogApiUsageAsync(requestContext, responseContent);
+        await metricService.LogApiUsageAsync(requestContext, deployment, responseContent);
 
         return (responseContent, (int)HttpStatusCode.OK);
     }
@@ -64,7 +65,8 @@ public class MockProxyService(IHttpClientFactory httpClientFactory, IMetricServi
         string endpointKey,
         HttpContext context,
         JsonDocument requestJsonDoc,
-        RequestContext requestContext
+        RequestContext requestContext,
+        Deployment deployment
     )
     {
         var httpClient = httpClientFactory.CreateClient();
@@ -82,15 +84,14 @@ public class MockProxyService(IHttpClientFactory httpClientFactory, IMetricServi
             // Simulate a delay
             await Task.Delay(RandomDelayInMilliseconds);
 
-            // return a mock response content
             // Return a mock response content
-            var responseContent = GetMockResponseContent(
-                requestContext.ModelType,
+            var responseContent = await GetMockResponseContentAsync(
+                deployment.ModelType,
                 requestUrl.ToString(),
                 true
             );
 
-            await metricService.LogApiUsageAsync(requestContext, responseContent);
+            await metricService.LogApiUsageAsync(requestContext, deployment, responseContent);
 
             context.Response.StatusCode = (int)HttpStatusCode.OK;
             context.Response.ContentType = "application/json";
@@ -98,7 +99,11 @@ public class MockProxyService(IHttpClientFactory httpClientFactory, IMetricServi
         }
     }
 
-    private string GetMockResponseContent(string modelType, string requestUrl, bool streaming)
+    public async Task<string> GetMockResponseContentAsync(
+        string modelType,
+        string requestUrl,
+        bool streaming
+    )
     {
         string extension = streaming ? ".streaming.txt" : ".txt";
         string filePath = Path.Combine(
@@ -109,7 +114,7 @@ public class MockProxyService(IHttpClientFactory httpClientFactory, IMetricServi
 
         if (File.Exists(filePath))
         {
-            return File.ReadAllText(filePath);
+            return await File.ReadAllTextAsync(filePath);
         }
         else
         {
