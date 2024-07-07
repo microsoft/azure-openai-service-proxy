@@ -14,6 +14,9 @@ public partial class RequestContext
     public string Usage { get; set; } = "{}";
 
     [NotMapped]
+    public string ModelType { get; set; } = null!;
+
+    [NotMapped]
     public Guid? CatalogId { get; set; } = null;
     public string ApiKey { get; set; } = null!;
     public string UserId { get; set; } = null!;

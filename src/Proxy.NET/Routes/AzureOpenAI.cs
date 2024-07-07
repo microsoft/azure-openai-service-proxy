@@ -71,6 +71,7 @@ public static class AzureAI
             }
 
             requestContext.CatalogId = deployment.CatalogId;
+            requestContext.ModelType = deployment.ModelType;
 
             var url = GenerateEndpointUrl(deployment, extPath, apiVersion);
 

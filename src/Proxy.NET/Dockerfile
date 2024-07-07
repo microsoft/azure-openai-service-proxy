@@ -4,6 +4,8 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 
 WORKDIR /src
 
+COPY MockResponses/ MockResponses/
+
 # copy csproj and restore as distinct layers
 COPY Proxy.NET.csproj .
 RUN dotnet restore

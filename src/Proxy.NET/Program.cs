@@ -9,6 +9,7 @@ using Proxy.NET.Routes;
 using Proxy.NET.Services;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+var useMockProxy = builder.Configuration.GetValue<bool>("UseMockProxy");
 
 NpgsqlDataSourceBuilder dataSourceBuilder =
     new(builder.Configuration.GetConnectionString("AoaiProxyContext"));
@@ -66,7 +67,7 @@ builder
 
 builder.Services.AddMemoryCache();
 builder.Services.AddHttpClient<IProxyService, ProxyService>();
-builder.Services.AddProxyServices();
+builder.Services.AddProxyServices(useMockProxy);
 builder.Services.AddApplicationInsightsTelemetry();
 
 var app = builder.Build();

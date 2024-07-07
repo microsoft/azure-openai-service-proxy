@@ -5,10 +5,10 @@ using Proxy.NET.Models;
 
 namespace Proxy.NET.Services;
 
-public class ProxyService(IHttpClientFactory httpClientFactory, IMetricService metricService, IConfiguration configuration) : IProxyService
+public class ProxyService(IHttpClientFactory httpClientFactory, IMetricService metricService)
+    : IProxyService
 {
     private const int HttpTimeoutSeconds = 60;
-    private bool EnableUnitTesting => configuration.GetValue<bool>("EnableUnitTesting");
 
     /// <summary>
     /// Sends an HTTP POST request with the specified JSON object to the specified request URL using the provided endpoint key.
@@ -28,27 +28,18 @@ public class ProxyService(IHttpClientFactory httpClientFactory, IMetricService m
         httpClient.Timeout = TimeSpan.FromSeconds(HttpTimeoutSeconds);
 
         using var requestMessage = new HttpRequestMessage(HttpMethod.Post, requestUrl);
-        requestMessage.Content = new StringContent(requestJsonDoc.RootElement.ToString(), Encoding.UTF8, "application/json");
+        requestMessage.Content = new StringContent(
+            requestJsonDoc.RootElement.ToString(),
+            Encoding.UTF8,
+            "application/json"
+        );
         requestMessage.Headers.Add("api-key", endpointKey);
 
-        if (!EnableUnitTesting)
-        {
-            var response = await httpClient.SendAsync(requestMessage);
-            var responseContent = await response.Content.ReadAsStringAsync();
-            await metricService.LogApiUsageAsync(requestContext, responseContent);
-            return (responseContent, (int)response.StatusCode);
-        }
-        else
-        {
-            await Task.Delay(1000);
-            var responseContent =
-                "{\"message\": \"Upstream proxy call skipped for testing purposes\", \"status\": 200, \"requestUrl\": \""
-                + requestUrl
-                + "\"}";
-            await metricService.LogApiUsageAsync(requestContext, responseContent);
-            return (responseContent, (int)HttpStatusCode.OK);
+        var response = await httpClient.SendAsync(requestMessage);
+        var responseContent = await response.Content.ReadAsStringAsync();
+        await metricService.LogApiUsageAsync(requestContext, responseContent);
 
-        }
+        return (responseContent, (int)response.StatusCode);
     }
 
     /// <summary>
@@ -75,35 +66,24 @@ public class ProxyService(IHttpClientFactory httpClientFactory, IMetricService m
 
         using (var requestMessage = new HttpRequestMessage(HttpMethod.Post, requestUrl))
         {
-            requestMessage.Content = new StringContent(requestJsonDoc.RootElement.ToString(), Encoding.UTF8, "application/json");
+            requestMessage.Content = new StringContent(
+                requestJsonDoc.RootElement.ToString(),
+                Encoding.UTF8,
+                "application/json"
+            );
             requestMessage.Headers.Add("api-key", endpointKey);
 
-            if (!EnableUnitTesting)
-            {
-                var response = await httpClient.SendAsync(requestMessage);
-                await metricService.LogApiUsageAsync(requestContext, null);
+            var response = await httpClient.SendAsync(requestMessage);
+            await metricService.LogApiUsageAsync(requestContext, null);
 
-                context.Response.StatusCode = (int)response.StatusCode;
-                context.Response.ContentType = "application/json";
+            context.Response.StatusCode = (int)response.StatusCode;
+            context.Response.ContentType = "application/json";
 
-                await using var responseStream = await response.Content.ReadAsStreamAsync();
-                while ((bytesRead = await responseStream.ReadAsync(buffer)) > 0)
-                {
-                    await context.Response.Body.WriteAsync(buffer.AsMemory(0, bytesRead));
-                    await context.Response.Body.FlushAsync();
-                }
-            }
-            else
+            await using var responseStream = await response.Content.ReadAsStreamAsync();
+            while ((bytesRead = await responseStream.ReadAsync(buffer)) > 0)
             {
-                await Task.Delay(1000);
-                var responseContent =
-                    "{\"message\": \"Upstream proxy streaming call skipped for testing purposes\", \"status\": 200, \"requestUrl\": \""
-                    + requestUrl
-                    + "\"}";
-                await metricService.LogApiUsageAsync(requestContext, responseContent);
-                context.Response.StatusCode = (int)HttpStatusCode.OK;
-                context.Response.ContentType = "application/json";
-                await context.Response.WriteAsync(responseContent);
+                await context.Response.Body.WriteAsync(buffer.AsMemory(0, bytesRead));
+                await context.Response.Body.FlushAsync();
             }
         }
     }

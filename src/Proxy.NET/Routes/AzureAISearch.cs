@@ -51,6 +51,7 @@ public static class AzureAISearch
                 );
 
             requestContext.CatalogId = deployment.CatalogId;
+            requestContext.ModelType = deployment.ModelType;
 
             var url = GenerateEndpointUrl(deployment, extPath, apiVersion);
             var (responseContent, statusCode) = await proxyService.HttpPostAsync(
