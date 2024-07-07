@@ -12,4 +12,8 @@
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.*" />
   </ItemGroup>
 
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="cp -r $(ProjectDir)/MockResponses $(TargetDir)/MockResponses" />
+  </Target>
+
 </Project>
