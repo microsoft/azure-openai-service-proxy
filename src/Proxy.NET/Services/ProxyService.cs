@@ -60,9 +60,6 @@ public class ProxyService(IHttpClientFactory httpClientFactory, IMetricService m
         Deployment deployment
     )
     {
-        var buffer = new byte[512];
-        int bytesRead;
-
         var httpClient = httpClientFactory.CreateClient();
         httpClient.Timeout = TimeSpan.FromSeconds(HttpTimeoutSeconds);
 
@@ -82,11 +79,7 @@ public class ProxyService(IHttpClientFactory httpClientFactory, IMetricService m
             context.Response.ContentType = "application/json";
 
             await using var responseStream = await response.Content.ReadAsStreamAsync();
-            while ((bytesRead = await responseStream.ReadAsync(buffer)) > 0)
-            {
-                await context.Response.Body.WriteAsync(buffer.AsMemory(0, bytesRead));
-                await context.Response.Body.FlushAsync();
-            }
+            await responseStream.CopyToAsync(context.Response.Body);
         }
     }
 }
