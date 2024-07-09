@@ -3,5 +3,5 @@
     "editor.defaultFormatter": "ms-python.black-formatter"
   },
   "python.formatting.provider": "none",
-  "dotnet.defaultSolution": "src/AzureOpenAIProxy.sln"
+  "dotnet.defaultSolution": "src/AzureAIProxy.sln"
 }

@@ -1,0 +1,10 @@
+@page "/events/new"
+@using System.ComponentModel.DataAnnotations
+@using AzureAIProxy.Management.Components.EventManagement
+
+@namespace AzureAIProxy.Management.Components.Pages
+
+<MudStack>
+    <Help Title="Create a new event" Link="https://microsoft.github.io/azure-openai-service-proxy/events/" />
+    <EventEditor OnValidSubmit="@HandleValidSubmit" @bind-Model="Model" />
+</MudStack>

@@ -32,20 +32,20 @@
       "name": "Management UI",
       "type": "dotnet",
       "request": "launch",
-      "projectPath": "${workspaceFolder}/src/AzureOpenAIProxy.Management/AzureOpenAIProxy.Management.csproj"
+      "projectPath": "${workspaceFolder}/src/AzureAIProxy.Management/AzureAIProxy.Management.csproj"
     },
     {
-      "name": "Proxy.NET",
+      "name": "AzureAIProxy",
       "type": "dotnet",
       "request": "launch",
-      "projectPath": "${workspaceFolder}/src/Proxy.NET/Proxy.NET.csproj"
+      "projectPath": "${workspaceFolder}/src/AzureAIProxy/AzureAIProxy.csproj"
     }
   ],
   "compounds": [
     {
       "name": "Run all",
       "configurations": [
-        "Proxy.NET",
+        "AzureAIProxy",
         "Playground",
         "SWA Playground",
         "Management UI"
@@ -58,7 +58,7 @@
     },
     {
       "name": "Admin",
-      "configurations": ["Proxy.NET", "Management UI"],
+      "configurations": ["AzureAIProxy", "Management UI"],
       "presentation": {
         "hidden": false,
         "group": "Frontend",
@@ -67,7 +67,7 @@
     },
     {
       "name": "End user",
-      "configurations": ["Proxy.NET", "Playground", "SWA Playground"],
+      "configurations": ["AzureAIProxy", "Playground", "SWA Playground"],
       "presentation": {
         "hidden": false,
         "group": "Frontend",

@@ -66,7 +66,7 @@
 
   "portsAttributes": {
     "8000": {
-      "label": "Proxy.NET"
+      "label": "AzureAIProxy"
     },
     "5175": {
       "label": "Admin"

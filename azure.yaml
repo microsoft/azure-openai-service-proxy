@@ -12,7 +12,7 @@ services:
     host: staticwebapp
     dist: dist
   admin:
-    project: ./src/AzureOpenAIProxy.Management
+    project: ./src/AzureAIProxy.Management
     language: csharp
     host: containerapp
     hooks:
