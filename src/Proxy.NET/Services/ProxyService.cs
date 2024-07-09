@@ -1,4 +1,3 @@
-using System.Net;
 using System.Text;
 using System.Text.Json;
 using Proxy.NET.Models;
@@ -63,26 +62,24 @@ public class ProxyService(IHttpClientFactory httpClientFactory, IMetricService m
         var httpClient = httpClientFactory.CreateClient();
         httpClient.Timeout = TimeSpan.FromSeconds(HttpTimeoutSeconds);
 
-        using (var requestMessage = new HttpRequestMessage(HttpMethod.Post, requestUrl))
-        {
-            requestMessage.Content = new StringContent(
-                requestJsonDoc.RootElement.ToString(),
-                Encoding.UTF8,
-                "application/json"
-            );
-            requestMessage.Headers.Add("api-key", endpointKey);
+        using var requestMessage = new HttpRequestMessage(HttpMethod.Post, requestUrl);
+        requestMessage.Content = new StringContent(
+            requestJsonDoc.RootElement.ToString(),
+            Encoding.UTF8,
+            "application/json"
+        );
+        requestMessage.Headers.Add("api-key", endpointKey);
 
-            var response = await httpClient.SendAsync(
-                requestMessage,
-                HttpCompletionOption.ResponseHeadersRead
-            );
-            await metricService.LogApiUsageAsync(requestContext, deployment, null);
+        var response = await httpClient.SendAsync(
+            requestMessage,
+            HttpCompletionOption.ResponseHeadersRead
+        );
+        await metricService.LogApiUsageAsync(requestContext, deployment, null);
 
-            context.Response.StatusCode = (int)response.StatusCode;
-            context.Response.ContentType = "application/json";
+        context.Response.StatusCode = (int)response.StatusCode;
+        context.Response.ContentType = "application/json";
 
-            await using var responseStream = await response.Content.ReadAsStreamAsync();
-            await responseStream.CopyToAsync(context.Response.Body);
-        }
+        await using var responseStream = await response.Content.ReadAsStreamAsync();
+        await responseStream.CopyToAsync(context.Response.Body);
     }
 }
