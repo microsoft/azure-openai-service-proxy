@@ -1,3 +1,5 @@
+using AzureAIProxy.Services;
+
 namespace AzureAIProxy.Routes;
 
 public static class RouteExtensions
@@ -8,5 +10,7 @@ public static class RouteExtensions
         .MapAttendeeRoutes()
         .MapEventRoutes()
         .MapAzureOpenAIRoutes()
-        .MapAzureAISearchRoutes();
+        .MapAzureAISearchRoutes()
+        .MapOpenAIRoutes()
+        .MapOllamaRoutes();
 }

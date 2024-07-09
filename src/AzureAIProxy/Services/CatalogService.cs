@@ -96,7 +96,7 @@ public class CatalogService(
     /// </summary>
     /// <param name="eventId">The ID of the event.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains a list of deployments.</returns>
-    private async Task<List<Deployment>> GetEventCatalogAsync(string eventId)
+    public async Task<List<Deployment>> GetEventCatalogAsync(string eventId)
     {
         var result = await db
             .OwnerCatalogs.Where(oc => oc.Active && oc.Events.Any(e => e.EventId == eventId))

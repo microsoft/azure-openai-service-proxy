@@ -18,6 +18,10 @@ builder
     .AddScheme<ProxyAuthenticationOptions, JwtAuthenticationHandler>(
         ProxyAuthenticationOptions.JwtScheme,
         _ => { }
+    )
+    .AddScheme<ProxyAuthenticationOptions, BearerTokenAuthenticationHandler>(
+        ProxyAuthenticationOptions.BearerTokenScheme,
+        _ => { }
     );
 
 builder.Services.AddMemoryCache();

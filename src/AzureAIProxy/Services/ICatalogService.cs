@@ -9,4 +9,5 @@ public interface ICatalogService
         string deploymentName
     );
     Task<Dictionary<string, List<string>>> GetCapabilities(string eventId);
+    Task<List<Deployment>> GetEventCatalogAsync(string eventId);
 }
