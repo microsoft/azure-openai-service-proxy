@@ -1,5 +1,5 @@
-using AzureAIProxy.Management.Database;
 using AzureAIProxy.Management.Services;
+using AzureAIProxy.Shared.Database;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
 

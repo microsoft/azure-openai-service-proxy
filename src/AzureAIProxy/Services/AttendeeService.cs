@@ -1,16 +1,14 @@
 using System.Data;
-using System.Net;
-using AzureAIProxy.Management;
+using AzureAIProxy.Shared.Database;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
-using AzureAIProxy.Models;
 
 namespace AzureAIProxy.Services;
 
 /// <summary>
 /// Represents a service for managing attendees of events.
 /// </summary>
-public class AttendeeService(AoaiProxyContext db) : IAttendeeService
+public class AttendeeService(AzureAIProxyContext db) : IAttendeeService
 {
     /// <summary>
     /// Adds an attendee to an event asynchronously.

@@ -1,6 +1,6 @@
 using NpgsqlTypes;
 
-namespace AzureAIProxy.Management.Database;
+namespace AzureAIProxy.Shared.Database;
 
 public enum ModelType
 {

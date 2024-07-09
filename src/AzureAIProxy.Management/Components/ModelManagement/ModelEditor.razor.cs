@@ -1,5 +1,3 @@
-using Microsoft.AspNetCore.Components;
-
 namespace AzureAIProxy.Management.Components.ModelManagement;
 
 public partial class ModelEditor : ComponentBase

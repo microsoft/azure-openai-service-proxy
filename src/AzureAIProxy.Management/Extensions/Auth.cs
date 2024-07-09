@@ -1,5 +1,4 @@
 using System.Security.Claims;
-using AzureAIProxy.Management.Database;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Web;
@@ -46,7 +45,7 @@ public static class AuthExtensions
         if (principal is null)
             throw new ApplicationException("Principal is null");
 
-        AoaiProxyContext db = ctx.HttpContext.RequestServices.GetRequiredService<AoaiProxyContext>();
+        AzureAIProxyContext db = ctx.HttpContext.RequestServices.GetRequiredService<AzureAIProxyContext>();
         ILogger<Program> logger = ctx.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
 
         string id = principal.GetEntraId();

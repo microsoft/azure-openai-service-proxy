@@ -1,5 +1,4 @@
 using AzureAIProxy.Management.Components.ModelManagement;
-using AzureAIProxy.Management.Database;
 using AzureAIProxy.Management.Services;
 using Microsoft.AspNetCore.Components;
 

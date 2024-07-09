@@ -1,4 +1,6 @@
-﻿namespace AzureAIProxy.Management.Components.Pages;
+﻿using AzureAIProxy.Shared.Database;
+
+namespace AzureAIProxy.Management.Components.Pages;
 
 public partial class EventList : ComponentBase
 {

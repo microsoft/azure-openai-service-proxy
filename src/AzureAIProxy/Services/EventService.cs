@@ -1,12 +1,12 @@
 using System.Data;
-using AzureAIProxy.Management;
+using AzureAIProxy.Shared.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using AzureAIProxy.Models;
 
 namespace AzureAIProxy.Services;
 
-public class EventService(AoaiProxyContext db, IMemoryCache memoryCache) : IEventService
+public class EventService(AzureAIProxyContext db, IMemoryCache memoryCache) : IEventService
 {
     /// <summary>
     /// Retrieves the registration information for an event with the specified event ID.

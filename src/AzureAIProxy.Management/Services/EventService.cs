@@ -7,7 +7,7 @@ using NpgsqlTypes;
 
 namespace AzureAIProxy.Management.Services;
 
-public class EventService(IAuthService authService, AoaiProxyContext db) : IEventService, IDisposable
+public class EventService(IAuthService authService, AzureAIProxyContext db) : IEventService, IDisposable
 {
     private readonly DbConnection conn = db.Database.GetDbConnection();
 

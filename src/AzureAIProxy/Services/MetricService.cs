@@ -1,13 +1,12 @@
 using System.Text.Json;
-using AzureAIProxy.Management;
+using AzureAIProxy.Shared.Database;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using NpgsqlTypes;
-using AzureAIProxy.Models;
 
 namespace AzureAIProxy.Services;
 
-public class MetricService(AoaiProxyContext db) : IMetricService
+public class MetricService(AzureAIProxyContext db) : IMetricService
 {
     /// <summary>
     /// Logs the API usage by executing a database command.

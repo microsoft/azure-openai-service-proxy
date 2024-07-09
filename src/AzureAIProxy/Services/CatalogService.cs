@@ -1,15 +1,13 @@
 using System.Data;
-using System.Net;
-using AzureAIProxy.Management;
+using AzureAIProxy.Shared.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Npgsql;
-using AzureAIProxy.Models;
 
 namespace AzureAIProxy.Services;
 
 public class CatalogService(
-    AoaiProxyContext db,
+    AzureAIProxyContext db,
     IConfiguration configuration,
     IMemoryCache memoryCache
 ) : ICatalogService

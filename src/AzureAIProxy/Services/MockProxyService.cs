@@ -1,7 +1,7 @@
 using System.Net;
 using System.Text;
 using System.Text.Json;
-using AzureAIProxy.Models;
+using AzureAIProxy.Shared.Database;
 
 namespace AzureAIProxy.Services;
 

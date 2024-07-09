@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace AzureAIProxy.Models;
+namespace AzureAIProxy.Shared.Database;
 
 public partial class RequestContext
 {
