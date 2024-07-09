@@ -1,6 +1,4 @@
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using AzureAIProxy.Middleware;
 using AzureAIProxy.Services;
 
 namespace AzureAIProxy.Routes;
@@ -15,7 +13,7 @@ public static class Attendee
         return builder;
     }
 
-    [Authorize(AuthenticationSchemes = ProxyAuthenticationOptions.JwtScheme)]
+    [JwtAuthorize]
     private static async Task<IResult> AttendeeAdd(
         [FromServices] IAttendeeService attendeeService,
         HttpContext context,
@@ -27,7 +25,7 @@ public static class Attendee
         return TypedResults.Created(context.Request.Path, new { api_key });
     }
 
-    [Authorize(AuthenticationSchemes = ProxyAuthenticationOptions.JwtScheme)]
+    [JwtAuthorize]
     private static async Task<IResult> AttendeeGetKey(
         [FromServices] IAttendeeService attendeeService,
         HttpContext context,
