@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using AzureAIProxy.Models;
 using AzureAIProxy.Services;
+using AzureAIProxy.Shared.Database;
 
 namespace AzureAIProxy.Routes;
 

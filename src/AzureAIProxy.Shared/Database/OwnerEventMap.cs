@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace AzureAIProxy.Management.Database;
+﻿namespace AzureAIProxy.Shared.Database;
 
 public partial class OwnerEventMap
 {

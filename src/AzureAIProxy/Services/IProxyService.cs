@@ -1,5 +1,5 @@
 using System.Text.Json;
-using AzureAIProxy.Models;
+using AzureAIProxy.Shared.Database;
 
 namespace AzureAIProxy.Services;
 

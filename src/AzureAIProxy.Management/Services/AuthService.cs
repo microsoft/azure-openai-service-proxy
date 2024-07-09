@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AzureAIProxy.Management.Services;
 
-public class AuthService(AuthenticationStateProvider authenticationStateProvider, AoaiProxyContext db) : IAuthService
+public class AuthService(AuthenticationStateProvider authenticationStateProvider, AzureAIProxyDbContext db) : IAuthService
 {
     public async Task<string> GetCurrentUserEntraIdAsync()
     {

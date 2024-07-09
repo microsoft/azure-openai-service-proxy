@@ -1,4 +1,4 @@
-namespace AzureAIProxy.Management.Database;
+namespace AzureAIProxy.Shared.Database;
 
 public class EventRegistrations
 {

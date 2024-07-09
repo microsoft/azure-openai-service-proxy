@@ -1,6 +1,5 @@
 using System.Data;
 using AzureAIProxy.Management.Components.ModelManagement;
-using AzureAIProxy.Management.Database;
 using AzureAIProxy.Management.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore;
@@ -16,7 +15,7 @@ public partial class ModelEdit : ComponentBase
     public IModelService ModelService { get; set; } = null!;
 
     [Inject]
-    public AoaiProxyContext DbContext { get; set; } = null!;
+    public AzureAIProxyDbContext DbContext { get; set; } = null!;
 
     [Inject]
     public NavigationManager NavigationManager { get; set; } = null!;

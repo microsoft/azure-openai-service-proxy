@@ -1,14 +1,12 @@
-﻿using AzureAIProxy.Management.Database;
-using Microsoft.EntityFrameworkCore;
-using AzureAIProxy.Models;
+﻿using Microsoft.EntityFrameworkCore;
 
-namespace AzureAIProxy.Management;
+namespace AzureAIProxy.Shared.Database;
 
-public partial class AoaiProxyContext : DbContext
+public partial class AzureAIProxyDbContext : DbContext
 {
-    public AoaiProxyContext() { }
+    public AzureAIProxyDbContext() { }
 
-    public AoaiProxyContext(DbContextOptions<AoaiProxyContext> options)
+    public AzureAIProxyDbContext(DbContextOptions<AzureAIProxyDbContext> options)
         : base(options) { }
 
     // BEGIN of Manually added Entities

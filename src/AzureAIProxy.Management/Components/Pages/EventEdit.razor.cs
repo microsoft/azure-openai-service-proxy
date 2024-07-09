@@ -1,4 +1,5 @@
 using AzureAIProxy.Management.Components.EventManagement;
+using AzureAIProxy.Shared.Database;
 
 namespace AzureAIProxy.Management.Components.Pages;
 

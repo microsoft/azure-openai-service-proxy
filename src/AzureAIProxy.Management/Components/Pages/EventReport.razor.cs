@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics.Tracing;
-using AzureAIProxy.Management.Database;
 using AzureAIProxy.Management.Services;
 using Microsoft.AspNetCore.Components;
 
