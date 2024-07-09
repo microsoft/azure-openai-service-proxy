@@ -72,31 +72,29 @@ public class MockProxyService(IHttpClientFactory httpClientFactory, IMetricServi
         var httpClient = httpClientFactory.CreateClient();
         httpClient.Timeout = TimeSpan.FromSeconds(HttpTimeoutSeconds);
 
-        using (var requestMessage = new HttpRequestMessage(HttpMethod.Post, requestUrl))
-        {
-            requestMessage.Content = new StringContent(
-                requestJsonDoc.RootElement.ToString(),
-                Encoding.UTF8,
-                "application/json"
-            );
-            requestMessage.Headers.Add("api-key", endpointKey);
+        using var requestMessage = new HttpRequestMessage(HttpMethod.Post, requestUrl);
+        requestMessage.Content = new StringContent(
+            requestJsonDoc.RootElement.ToString(),
+            Encoding.UTF8,
+            "application/json"
+        );
+        requestMessage.Headers.Add("api-key", endpointKey);
 
-            // Simulate a delay
-            await Task.Delay(RandomDelayInMilliseconds);
+        // Simulate a delay
+        await Task.Delay(RandomDelayInMilliseconds);
 
-            // Return a mock response content
-            var responseContent = await GetMockResponseContentAsync(
-                deployment.ModelType,
-                requestUrl.ToString(),
-                true
-            );
+        // Return a mock response content
+        var responseContent = await GetMockResponseContentAsync(
+            deployment.ModelType,
+            requestUrl.ToString(),
+            true
+        );
 
-            await metricService.LogApiUsageAsync(requestContext, deployment, responseContent);
+        await metricService.LogApiUsageAsync(requestContext, deployment, responseContent);
 
-            context.Response.StatusCode = (int)HttpStatusCode.OK;
-            context.Response.ContentType = "application/json";
-            await context.Response.WriteAsync(responseContent);
-        }
+        context.Response.StatusCode = (int)HttpStatusCode.OK;
+        context.Response.ContentType = "application/json";
+        await context.Response.WriteAsync(responseContent);
     }
 
     public async Task<string> GetMockResponseContentAsync(
