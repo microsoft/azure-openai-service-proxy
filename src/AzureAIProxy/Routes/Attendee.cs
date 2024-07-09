@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using AzureAIProxy.Services;
+using System.Text.Json.Serialization;
 
 namespace AzureAIProxy.Routes;
 
@@ -8,25 +9,25 @@ public static class Attendee
     public static RouteGroupBuilder MapAttendeeRoutes(this RouteGroupBuilder builder)
     {
         var attendeeGroup = builder.MapGroup("/attendee/event/{eventId}");
-        attendeeGroup.MapPost("/register", AttendeeAdd);
-        attendeeGroup.MapGet("/", AttendeeGetKey);
+        attendeeGroup.MapPost("/register", AddAttendee);
+        attendeeGroup.MapGet("/", GetAttendeeKey).WithName(nameof(GetAttendeeKey));
         return builder;
     }
 
     [JwtAuthorize]
-    private static async Task<IResult> AttendeeAdd(
+    internal static async Task<IResult> AddAttendee(
         [FromServices] IAttendeeService attendeeService,
         HttpContext context,
         string eventId
     )
     {
         string userId = (string)context.Items["RequestContext"]!;
-        string api_key = await attendeeService.AddAttendeeAsync(userId, eventId);
-        return TypedResults.Created(context.Request.Path, new { api_key });
+        string attendeeApiKey = await attendeeService.AddAttendeeAsync(userId, eventId);
+        return TypedResults.CreatedAtRoute(new AttendeeAdded(attendeeApiKey), nameof(GetAttendeeKey));
     }
 
     [JwtAuthorize]
-    private static async Task<IResult> AttendeeGetKey(
+    internal static async Task<IResult> GetAttendeeKey(
         [FromServices] IAttendeeService attendeeService,
         HttpContext context,
         string eventId
@@ -38,6 +39,9 @@ public static class Attendee
         if (attendee is null)
             return TypedResults.NotFound("Attendee not found.");
 
-        return TypedResults.Ok(new { attendee.ApiKey, attendee.Active });
+        return TypedResults.Ok(new AttendeeStatus(attendee.ApiKey, attendee.Active));
     }
+
+    internal record AttendeeAdded([property: JsonPropertyName("api_key")] string ApiKey);
+    internal record AttendeeStatus(string ApiKey, bool Active);
 }

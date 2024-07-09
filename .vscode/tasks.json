@@ -23,7 +23,7 @@
       "type": "process",
       "args": [
         "build",
-        "${workspaceFolder}/src/AzureAIProxy.sln",
+        "${workspaceFolder}/AzureAIProxy.sln",
         "/property:GenerateFullPaths=true",
         "/consoleloggerparameters:NoSummary;ForceNoAlign"
       ],
@@ -35,7 +35,7 @@
       "type": "process",
       "args": [
         "publish",
-        "${workspaceFolder}/src/AzureAIProxy.sln",
+        "${workspaceFolder}/AzureAIProxy.sln",
         "/property:GenerateFullPaths=true",
         "/consoleloggerparameters:NoSummary;ForceNoAlign"
       ],
@@ -49,7 +49,7 @@
         "watch",
         "run",
         "--project",
-        "${workspaceFolder}/src/AzureAIProxy.sln"
+        "${workspaceFolder}/AzureAIProxy.sln"
       ],
       "problemMatcher": "$msCompile"
     }
