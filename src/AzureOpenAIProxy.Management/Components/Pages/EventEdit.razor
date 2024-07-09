@@ -1,9 +1,0 @@
-@page "/event/{id}"
-
-@namespace AzureOpenAIProxy.Management.Components.Pages
-@using AzureOpenAIProxy.Management.Components.EventManagement
-
-<MudStack>
-    <Help Title="Edit Event" Link="https://microsoft.github.io/azure-openai-service-proxy/events/" />
-    <EventEditor OnValidSubmit="@OnValidSubmit" @bind-Model="Model" />
-</MudStack>
