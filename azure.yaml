@@ -7,8 +7,8 @@ services:
     language: py
     host: containerapp
     docker:
-      path: ./src/Dockerfile.proxy
-      context: .
+      path: ../Dockerfile.proxy
+      context: ../
       platform: amd64
 
   playground:
@@ -28,8 +28,8 @@ services:
         interactive: false
         run: ../../infra/scripts/setup-app-redirect-uris.sh
     docker:
-      path: ./src/Dockerfile.management
-      context: .
+      path: ../Dockerfile.management
+      context: ../
       platform: amd64
 
 hooks:
