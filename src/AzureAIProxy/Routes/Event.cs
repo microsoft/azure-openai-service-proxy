@@ -1,6 +1,4 @@
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using AzureAIProxy.Middleware;
 using AzureAIProxy.Models;
 using AzureAIProxy.Services;
 
@@ -15,7 +13,7 @@ public static class Event
         return builder;
     }
 
-    [Authorize(AuthenticationSchemes = ProxyAuthenticationOptions.ApiKeyScheme)]
+    [ApiKeyAuthorize]
     private static async Task<IResult> EventInfoAsync(
         [FromServices] ICatalogService catalogService,
         HttpContext context
