@@ -1,0 +1,23 @@
+# https://devblogs.microsoft.com/dotnet/improving-multiplatform-container-support
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+ARG TARGETARCH
+
+WORKDIR /src
+
+# copy and publish app and libraries
+COPY ./AzureAIProxy/ ./AzureAIProxy
+COPY ./AzureAIProxy.Shared/ ./AzureAIProxy.Shared
+WORKDIR /src/AzureAIProxy
+
+RUN dotnet publish -a $TARGETARCH -o /app
+
+# final stage/image
+FROM mcr.microsoft.com/dotnet/aspnet:8.0
+EXPOSE 8080
+EXPOSE 8081
+WORKDIR /app
+COPY --from=build /app .
+COPY --from=build /src/AzureAIProxy/MockResponses /app/MockResponses
+
+USER $APP_UID
+ENTRYPOINT ["./AzureAIProxy"]

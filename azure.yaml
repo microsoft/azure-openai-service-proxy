@@ -6,11 +6,17 @@ services:
     project: ./src/proxy
     language: py
     host: containerapp
+    docker:
+      path: ./src/Dockerfile.proxy
+      context: .
+      platform: amd64
+
   playground:
     project: ./src/playground
     language: ts
     host: staticwebapp
     dist: dist
+
   admin:
     project: ./src/AzureAIProxy.Management
     language: csharp
@@ -21,6 +27,10 @@ services:
         continueOnError: false
         interactive: false
         run: ../../infra/scripts/setup-app-redirect-uris.sh
+    docker:
+      path: ./src/Dockerfile.management
+      context: .
+      platform: amd64
 
 hooks:
   preup:
