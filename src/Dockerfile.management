@@ -4,13 +4,12 @@ ARG TARGETARCH
 
 WORKDIR /src
 
-# copy csproj and restore as distinct layers
-COPY AzureAIProxy.Management.csproj .
-RUN dotnet restore -a $TARGETARCH
-
 # copy and publish app and libraries
-COPY . .
-RUN dotnet publish -a $TARGETARCH --no-restore -o /app
+COPY ./AzureAIProxy.Management/ ./AzureAIProxy.Management
+COPY ./AzureAIProxy.Shared/ ./AzureAIProxy.Shared
+WORKDIR /src/AzureAIProxy.Management
+
+RUN dotnet publish -a $TARGETARCH -o /app
 
 # final stage/image
 FROM mcr.microsoft.com/dotnet/aspnet:8.0

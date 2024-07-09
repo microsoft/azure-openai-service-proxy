@@ -1,14 +1,13 @@
 using System.Text;
 using System.Text.Json;
-using AzureAIProxy.Management;
+using AzureAIProxy.Shared.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Npgsql;
-using AzureAIProxy.Models;
 
 namespace AzureAIProxy.Services;
 
-public class AuthorizeService(AoaiProxyContext db, IMemoryCache memoryCache) : IAuthorizeService
+public class AuthorizeService(AzureAIProxyDbContext db, IMemoryCache memoryCache) : IAuthorizeService
 {
     /// <summary>
     /// Checks if the user is authorized based on the provided API key and deployment name.

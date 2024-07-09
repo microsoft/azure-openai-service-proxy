@@ -1,5 +1,4 @@
 @page "/event/{eventId}/metrics"
-@using AzureAIProxy.Management.Database
 @using AzureAIProxy.Management.Services;
 
 @namespace AzureAIProxy.Management.Components.Pages
@@ -19,9 +18,11 @@
             <MudText Typo="Typo.body1">When: <strong>@Event.StartTimestamp.ToString("yyyy-MMM-dd HH:mm") -
                     @Event.EndTimestamp.ToString("yyyy-MMM-dd HH:mm") (@Event.TimeZoneLabel)</strong></MudText>
             <MudText Typo="Typo.body1">Max Token Cap: <strong>@Event.MaxTokenCap</strong> | Daily Request Cap:
-                <strong>@Event.DailyRequestCap</strong></MudText>
+                <strong>@Event.DailyRequestCap</strong>
+            </MudText>
             <MudText Typo="Typo.body1">Registrations: <strong>@AttendeeCount</strong> | Active Registrations:
-                <strong>@ActiveRegistrations</strong></MudText>
+                <strong>@ActiveRegistrations</strong>
+            </MudText>
             <MudText Typo="Typo.body1">Total Requests: <strong>@RequestCount</strong></MudText>
         </MudStack>
 

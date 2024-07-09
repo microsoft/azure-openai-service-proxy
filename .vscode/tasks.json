@@ -52,6 +52,34 @@
         "${workspaceFolder}/AzureAIProxy.sln"
       ],
       "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "docker build: proxy",
+      "command": "docker",
+      "type": "shell",
+      "args": [
+        "build",
+        "-t",
+        "azureai-proxy",
+        "-f",
+        "${workspaceFolder}/src/Dockerfile.proxy",
+        "${workspaceFolder}/src"
+      ],
+      "problemMatcher": ["$msCompile"]
+    },
+    {
+      "label": "docker build: managment",
+      "command": "docker",
+      "type": "shell",
+      "args": [
+        "build",
+        "-t",
+        "azureai-proxy",
+        "-f",
+        "${workspaceFolder}/src/Dockerfile.management",
+        "${workspaceFolder}/src"
+      ],
+      "problemMatcher": ["$msCompile"]
     }
   ]
 }

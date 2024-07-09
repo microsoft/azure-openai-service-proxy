@@ -11,6 +11,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{3BF40B75
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureAIProxy.Tests", "tests\AzureAIProxy.Tests\AzureAIProxy.Tests.csproj", "{21E054B7-AFA4-42D3-BB60-02567B722BF1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureAIProxy.Shared", "AzureAIProxy.Shared\AzureAIProxy.Shared.csproj", "{2797D4D7-7450-43CE-8866-5B1C54E66553}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -29,6 +31,10 @@ Global
 		{21E054B7-AFA4-42D3-BB60-02567B722BF1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{21E054B7-AFA4-42D3-BB60-02567B722BF1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{21E054B7-AFA4-42D3-BB60-02567B722BF1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2797D4D7-7450-43CE-8866-5B1C54E66553}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2797D4D7-7450-43CE-8866-5B1C54E66553}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2797D4D7-7450-43CE-8866-5B1C54E66553}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2797D4D7-7450-43CE-8866-5B1C54E66553}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

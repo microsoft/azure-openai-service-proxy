@@ -1,4 +1,3 @@
-@using AzureAIProxy.Management.Database
 @namespace AzureAIProxy.Management.Components.ModelManagement
 
 <EditForm OnValidSubmit="@HandleValidSubmit" Model="@Model" @bind-Disabled="isSubmitting">
@@ -24,7 +23,7 @@
                     For="@(() => Model.DeploymentName)" Counter="64" Immediate="true" />
 
                 <MudSelect @bind-Value="Model.ModelType" Label="Type" For="@(() => Model.ModelType)">
-                    @foreach (ModelType modelType in Enum.GetValues(typeof(ModelType)))
+                @foreach (ModelType modelType in Enum.GetValues(typeof(ModelType)))
                     {
                         <MudSelectItem Value="@((ModelType?)modelType)">@modelType.ToString().Replace("_", " ")
                         </MudSelectItem>

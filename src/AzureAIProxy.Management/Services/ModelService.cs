@@ -1,14 +1,13 @@
 using System.Data;
 using System.Data.Common;
 using AzureAIProxy.Management.Components.ModelManagement;
-using AzureAIProxy.Management.Database;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using NpgsqlTypes;
 
 namespace AzureAIProxy.Management.Services;
 
-public class ModelService(IAuthService authService, AoaiProxyContext db, IConfiguration configuration) : IModelService
+public class ModelService(IAuthService authService, AzureAIProxyDbContext db, IConfiguration configuration) : IModelService
 {
     private const string PostgresEncryptionKey = "PostgresEncryptionKey";
     private readonly DbConnection connection = db.Database.GetDbConnection();

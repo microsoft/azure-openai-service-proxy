@@ -1,6 +1,3 @@
-using Microsoft.AspNetCore.Components;
-using MudBlazor;
-
 namespace AzureAIProxy.Management.Components;
 public partial class DeleteConfirmation
 {

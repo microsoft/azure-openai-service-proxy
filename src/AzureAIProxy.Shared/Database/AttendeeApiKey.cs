@@ -1,4 +1,4 @@
-namespace AzureAIProxy.Models;
+namespace AzureAIProxy.Shared.Database;
 
 public partial class AttendeeApiKey
 {
