@@ -1,0 +1,64 @@
+{
+  "model": "MOCK-RESPONSE-gpt-35-turbo",
+  "choices": [
+    {
+      "content_filter_results": {
+        "hate": {
+          "filtered": false,
+          "severity": "safe"
+        },
+        "self_harm": {
+          "filtered": false,
+          "severity": "safe"
+        },
+        "sexual": {
+          "filtered": false,
+          "severity": "safe"
+        },
+        "violence": {
+          "filtered": false,
+          "severity": "safe"
+        }
+      },
+      "finish_reason": "stop",
+      "index": 0,
+      "message": {
+        "content": "Majestic Indian elephant, adorned with grace\nTrunk raised high, a symbol of ancient wisdom\nGentle giant of the forest, roaming free\nYour presence brings peace to the land\nOh, how we marvel at your grandeur and might",
+        "role": "assistant"
+      }
+    }
+  ],
+  "created": 1720318308,
+  "id": "chatcmpl-9iBfQ8IQYIt6azdJoXBwyvAHzdlhx",
+
+  "object": "chat.completion",
+  "prompt_filter_results": [
+    {
+      "prompt_index": 0,
+      "content_filter_results": {
+        "hate": {
+          "filtered": false,
+          "severity": "safe"
+        },
+        "self_harm": {
+          "filtered": false,
+          "severity": "safe"
+        },
+        "sexual": {
+          "filtered": false,
+          "severity": "safe"
+        },
+        "violence": {
+          "filtered": false,
+          "severity": "safe"
+        }
+      }
+    }
+  ],
+  "system_fingerprint": "fp_811936bd4f",
+  "usage": {
+    "completion_tokens": 51,
+    "prompt_tokens": 30,
+    "total_tokens": 81
+  }
+}

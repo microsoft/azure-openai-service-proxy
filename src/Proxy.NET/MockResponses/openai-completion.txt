@@ -1,0 +1,60 @@
+{
+  "id": "cmpl-9iBl8LloPHgXV6PUtRfmtJJnoRl0i",
+  "object": "text_completion",
+  "created": 1720318662,
+  "model": "MOCK-RESPONSE-gpt-35-turbo-instruct",
+  "prompt_filter_results": [
+    {
+      "prompt_index": 0,
+      "content_filter_results": {
+        "hate": {
+          "filtered": false,
+          "severity": "safe"
+        },
+        "self_harm": {
+          "filtered": false,
+          "severity": "safe"
+        },
+        "sexual": {
+          "filtered": false,
+          "severity": "safe"
+        },
+        "violence": {
+          "filtered": false,
+          "severity": "safe"
+        }
+      }
+    }
+  ],
+  "choices": [
+    {
+      "text": ",\n\nThree blind mice see they run\n\nSee how they stumble, see how they fall\n\nSee how the others run over them all\n\nBut still they keep running\n\nOn into the night\n\nUntill the bright dawn\n\nWhen they see with new sight",
+      "index": 0,
+      "finish_reason": "length",
+      "logprobs": null,
+      "content_filter_results": {
+        "hate": {
+          "filtered": false,
+          "severity": "safe"
+        },
+        "self_harm": {
+          "filtered": false,
+          "severity": "safe"
+        },
+        "sexual": {
+          "filtered": false,
+          "severity": "safe"
+        },
+        "violence": {
+          "filtered": false,
+          "severity": "safe"
+        }
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 6,
+    "completion_tokens": 50,
+    "total_tokens": 56
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "created": 1720318946,
+  "data": [
+    {
+      "content_filter_results": {
+        "hate": {
+          "filtered": false,
+          "severity": "safe"
+        },
+        "self_harm": {
+          "filtered": false,
+          "severity": "safe"
+        },
+        "sexual": {
+          "filtered": false,
+          "severity": "safe"
+        },
+        "violence": {
+          "filtered": false,
+          "severity": "safe"
+        }
+      },
+      "prompt_filter_results": {
+        "hate": {
+          "filtered": false,
+          "severity": "safe"
+        },
+        "profanity": {
+          "detected": false,
+          "filtered": false
+        },
+        "self_harm": {
+          "filtered": false,
+          "severity": "safe"
+        },
+        "sexual": {
+          "filtered": false,
+          "severity": "safe"
+        },
+        "violence": {
+          "filtered": false,
+          "severity": "safe"
+        }
+      },
+      "revised_prompt": "MOCK RESPONSE A charming illustration of a feline. The cat, possessing a fluffy coat of fur, clearly stands out amid renowned feline details: the sharp, triangular ears positioned on top of its head, its green eyes shimmering with curiosity, and a tail that swings from side to side, mirroring its playful demeanour. A backdrop defines its living quarters, consisting of a cozy cat bed, a scratching post, and additional cat-friendly toys scattered around. Overall, the image radiates warmth, comfort, and the pure bliss that comes from owning a cat.",
+      "url": "https://dalleprodsec.blob.core.windows.net/private/images/"
+    }
+  ]
+}
