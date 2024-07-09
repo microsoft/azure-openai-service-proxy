@@ -1,12 +1,38 @@
 using Azure.Core;
 using Azure.Identity;
+using AzureAIProxy.Shared.Database;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Npgsql;
 
 namespace AzureAIProxy.Shared;
 
 public static class NpgsqlDataSourceBuilderExtensions
 {
+    public static IHostApplicationBuilder AddAzureAIProxyDbContext(this IHostApplicationBuilder builder)
+    {
+        NpgsqlDataSourceBuilder dataSourceBuilder =
+            new(builder.Configuration.GetConnectionString("AoaiProxyContext"));
+        dataSourceBuilder.MapEnum<ModelType>();
+
+        dataSourceBuilder.UseEntraAuth(builder.Configuration);
+
+        NpgsqlDataSource dataSource = dataSourceBuilder.Build();
+
+        builder.Services.AddDbContext<AzureAIProxyDbContext>(
+            (option) =>
+                option.UseNpgsql(
+                    dataSource,
+                    // https://stackoverflow.com/questions/70423137/how-to-gracefully-handle-a-postgres-restart-in-npgsql
+                    (options) => options.EnableRetryOnFailure(4, TimeSpan.FromSeconds(30), ["57P01"])
+                )
+        );
+
+        return builder;
+    }
+
     public static NpgsqlDataSourceBuilder UseEntraAuth(this NpgsqlDataSourceBuilder dataSourceBuilder, IConfiguration configuration)
     {
         if (string.IsNullOrEmpty(dataSourceBuilder.ConnectionStringBuilder.Password))

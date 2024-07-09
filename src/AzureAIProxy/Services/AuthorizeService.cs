@@ -7,7 +7,7 @@ using Npgsql;
 
 namespace AzureAIProxy.Services;
 
-public class AuthorizeService(AzureAIProxyContext db, IMemoryCache memoryCache) : IAuthorizeService
+public class AuthorizeService(AzureAIProxyDbContext db, IMemoryCache memoryCache) : IAuthorizeService
 {
     /// <summary>
     /// Checks if the user is authorized based on the provided API key and deployment name.

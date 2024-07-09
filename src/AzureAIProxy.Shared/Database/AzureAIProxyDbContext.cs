@@ -2,11 +2,11 @@
 
 namespace AzureAIProxy.Shared.Database;
 
-public partial class AzureAIProxyContext : DbContext
+public partial class AzureAIProxyDbContext : DbContext
 {
-    public AzureAIProxyContext() { }
+    public AzureAIProxyDbContext() { }
 
-    public AzureAIProxyContext(DbContextOptions<AzureAIProxyContext> options)
+    public AzureAIProxyDbContext(DbContextOptions<AzureAIProxyDbContext> options)
         : base(options) { }
 
     // BEGIN of Manually added Entities

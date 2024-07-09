@@ -7,7 +7,7 @@ using NpgsqlTypes;
 
 namespace AzureAIProxy.Management.Services;
 
-public class ModelService(IAuthService authService, AzureAIProxyContext db, IConfiguration configuration) : IModelService
+public class ModelService(IAuthService authService, AzureAIProxyDbContext db, IConfiguration configuration) : IModelService
 {
     private const string PostgresEncryptionKey = "PostgresEncryptionKey";
     private readonly DbConnection connection = db.Database.GetDbConnection();

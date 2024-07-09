@@ -8,7 +8,7 @@ namespace AzureAIProxy.Services;
 /// <summary>
 /// Represents a service for managing attendees of events.
 /// </summary>
-public class AttendeeService(AzureAIProxyContext db) : IAttendeeService
+public class AttendeeService(AzureAIProxyDbContext db) : IAttendeeService
 {
     /// <summary>
     /// Adds an attendee to an event asynchronously.

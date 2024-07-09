@@ -1,24 +1,12 @@
 using AzureAIProxy.Shared;
 using AzureAIProxy.Management;
 using AzureAIProxy.Management.Components;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Web;
 using MudBlazor.Services;
-using Npgsql;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-NpgsqlDataSourceBuilder dataSourceBuilder = new(builder.Configuration.GetConnectionString("AoaiProxyContext"));
-dataSourceBuilder.MapEnum<ModelType>();
-
-dataSourceBuilder.UseEntraAuth(builder.Configuration);
-
-NpgsqlDataSource dataSource = dataSourceBuilder.Build();
-
-builder.Services.AddDbContext<AzureAIProxyContext>((options) =>
-{
-    options.UseNpgsql(dataSource);
-});
+builder.AddAzureAIProxyDbContext();
 
 builder.AddAuth();
 

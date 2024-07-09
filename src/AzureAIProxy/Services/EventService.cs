@@ -6,7 +6,7 @@ using AzureAIProxy.Models;
 
 namespace AzureAIProxy.Services;
 
-public class EventService(AzureAIProxyContext db, IMemoryCache memoryCache) : IEventService
+public class EventService(AzureAIProxyDbContext db, IMemoryCache memoryCache) : IEventService
 {
     /// <summary>
     /// Retrieves the registration information for an event with the specified event ID.

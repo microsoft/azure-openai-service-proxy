@@ -15,7 +15,7 @@ public partial class ModelEdit : ComponentBase
     public IModelService ModelService { get; set; } = null!;
 
     [Inject]
-    public AzureAIProxyContext DbContext { get; set; } = null!;
+    public AzureAIProxyDbContext DbContext { get; set; } = null!;
 
     [Inject]
     public NavigationManager NavigationManager { get; set; } = null!;

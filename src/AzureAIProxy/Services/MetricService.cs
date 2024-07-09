@@ -6,7 +6,7 @@ using NpgsqlTypes;
 
 namespace AzureAIProxy.Services;
 
-public class MetricService(AzureAIProxyContext db) : IMetricService
+public class MetricService(AzureAIProxyDbContext db) : IMetricService
 {
     /// <summary>
     /// Logs the API usage by executing a database command.

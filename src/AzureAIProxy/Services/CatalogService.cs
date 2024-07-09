@@ -7,7 +7,7 @@ using Npgsql;
 namespace AzureAIProxy.Services;
 
 public class CatalogService(
-    AzureAIProxyContext db,
+    AzureAIProxyDbContext db,
     IConfiguration configuration,
     IMemoryCache memoryCache
 ) : ICatalogService

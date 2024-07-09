@@ -21,7 +21,7 @@ public class EventChartData
 }
 
 
-public class MetricService(AzureAIProxyContext db) : IMetricService
+public class MetricService(AzureAIProxyDbContext db) : IMetricService
 {
     public Task<List<EventMetricsData>> GetEventMetricsAsync(string eventId)
     {

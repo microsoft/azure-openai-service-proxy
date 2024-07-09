@@ -45,7 +45,7 @@ public static class AuthExtensions
         if (principal is null)
             throw new ApplicationException("Principal is null");
 
-        AzureAIProxyContext db = ctx.HttpContext.RequestServices.GetRequiredService<AzureAIProxyContext>();
+        AzureAIProxyDbContext db = ctx.HttpContext.RequestServices.GetRequiredService<AzureAIProxyDbContext>();
         ILogger<Program> logger = ctx.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
 
         string id = principal.GetEntraId();
