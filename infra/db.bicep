@@ -26,7 +26,7 @@ module postgresServer 'core/database/postgresql/flexibleserver.bicep' = {
     location: location
     tags: tags
     sku: {
-      name: 'Standard_B2s'
+      name: 'Standard_B1ms'
       tier: 'Burstable'
     }
     storage: {
