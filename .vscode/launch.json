@@ -2,26 +2,6 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "AOAI Proxy",
-      "type": "python",
-      "request": "launch",
-      "module": "uvicorn",
-      "args": ["app.main:app", "--reload"],
-      "jinja": true,
-      "justMyCode": true,
-      "envFile": "${workspaceFolder}/src/proxy/.env",
-      "cwd": "${workspaceFolder}/src/proxy"
-    },
-    {
-      "name": "Playground",
-      "type": "node",
-      "request": "launch",
-      "cwd": "${workspaceFolder}/src/playground",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev"],
-      "preLaunchTask": "npm: install"
-    },
-    {
       "type": "node-terminal",
       "name": "SWA Playground",
       "request": "launch",
@@ -29,45 +9,16 @@
       "cwd": "${workspaceFolder}"
     },
     {
-      "name": "Management UI",
+      "name": "Aspire",
       "type": "dotnet",
       "request": "launch",
-      "projectPath": "${workspaceFolder}/src/AzureAIProxy.Management/AzureAIProxy.Management.csproj"
-    },
-    {
-      "name": "AzureAIProxy",
-      "type": "dotnet",
-      "request": "launch",
-      "projectPath": "${workspaceFolder}/src/AzureAIProxy/AzureAIProxy.csproj"
+      "projectPath": "${workspaceFolder}/src/AzureAIProxy.AppHost/AzureAIProxy.AppHost.csproj"
     }
   ],
   "compounds": [
     {
       "name": "Run all",
-      "configurations": [
-        "AzureAIProxy",
-        "Playground",
-        "SWA Playground",
-        "Management UI"
-      ],
-      "presentation": {
-        "hidden": false,
-        "group": "Frontend",
-        "order": 1
-      }
-    },
-    {
-      "name": "Admin",
-      "configurations": ["AzureAIProxy", "Management UI"],
-      "presentation": {
-        "hidden": false,
-        "group": "Frontend",
-        "order": 1
-      }
-    },
-    {
-      "name": "End user",
-      "configurations": ["AzureAIProxy", "Playground", "SWA Playground"],
+      "configurations": ["Aspire", "SWA Playground"],
       "presentation": {
         "hidden": false,
         "group": "Frontend",
