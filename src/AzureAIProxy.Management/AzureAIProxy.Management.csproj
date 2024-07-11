@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AzureAIProxy.Shared\AzureAIProxy.Shared.csproj" />
+    <ProjectReference Include="..\AzureAIProxy.ServiceDefaults\AzureAIProxy.ServiceDefaults.csproj" />
   </ItemGroup>
 
 </Project>
