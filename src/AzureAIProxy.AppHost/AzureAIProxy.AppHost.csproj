@@ -12,9 +12,11 @@
   <ItemGroup>
     <PackageReference Include="Aspire.Hosting.AppHost" Version="8.0.2" />
     <PackageReference Include="Aspire.Hosting.NodeJs" Version="8.0.2" />
+    <PackageReference Include="Aspire.Hosting.PostgreSQL" Version="8.0.2" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\AzureAIProxy.Aspire.Components\AzureAIProxy.Aspire.Components.csproj" IsAspireProjectResource="false" />
     <ProjectReference Include="..\AzureAIProxy\AzureAIProxy.csproj" />
     <ProjectReference Include="..\AzureAIProxy.Management\AzureAIProxy.Management.csproj" />
   </ItemGroup>

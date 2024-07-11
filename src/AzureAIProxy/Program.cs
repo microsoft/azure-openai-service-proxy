@@ -27,10 +27,19 @@ builder.Services.AddApplicationInsightsTelemetry();
 
 var app = builder.Build();
 
-app.UseHttpsRedirection();
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
+}
+else
+{
+    app.UseHttpsRedirection();
+}
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseMiddleware<RateLimiterHandler>();
 app.MapProxyRoutes();
+
+app.Map("/", () => Results.Ok());
 
 app.Run();

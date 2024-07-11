@@ -17,8 +17,25 @@
     <ProjectReference Include="..\AzureAIProxy.ServiceDefaults\AzureAIProxy.ServiceDefaults.csproj" />
   </ItemGroup>
 
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="cp -r $(ProjectDir)/MockResponses $(TargetDir)/MockResponses" />
-  </Target>
+  <ItemGroup>
+    <None Update="MockResponses\azure-ai-search.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="MockResponses\openai-chat.streaming.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="MockResponses\openai-chat.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="MockResponses\openai-completion.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="MockResponses\openai-dalle3.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="MockResponses\openai-embedding.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 
 </Project>
