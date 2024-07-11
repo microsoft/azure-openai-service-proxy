@@ -15,6 +15,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AzureAIProxy.ServiceDefault
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureAIProxy.Aspire.Components", "AzureAIProxy.Aspire.Components\AzureAIProxy.Aspire.Components.csproj", "{7EA1468B-FD97-4992-9F7F-9650CD6E7D3E}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "database", "database", "{3CA9376B-B45C-4827-942D-C3E9A26C117D}"
+	ProjectSection(SolutionItems) = preProject
+		..\database\aoai-proxy-dev.sql = ..\database\aoai-proxy-dev.sql
+		..\database\aoai-proxy.sql = ..\database\aoai-proxy.sql
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
