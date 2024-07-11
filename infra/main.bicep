@@ -49,6 +49,10 @@ var postgresDatabaseName = 'aoai-proxy'
 var postgresEntraAdministratorObjectId = principalId
 var postgresEntraAdministratorType = empty(runningOnGh) ? 'User' : 'ServicePrincipal'
 var postgresEntraAdministratorName = principalName
+// the maximum number of connections for Postgres Standard_B1ms Burstable is 35
+// https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/concepts-limits#maximum-connections
+var proxyPostgresMaxPoolSize = 33
+var proxyAdminPostgresMaxPoolSize = 2
 
 resource resourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   name: '${name}-rg'
@@ -85,6 +89,7 @@ module admin 'admin.bicep' = {
     postgresServer: postgresServer.outputs.DOMAIN_NAME
     postgresDatabase: postgresDatabaseName
     postgresEncryptionKey: postgresEncryptionKey
+    proxyAdminPostgresMaxPoolSize: proxyAdminPostgresMaxPoolSize
     tenantId: authTenantId
     clientId: authClientId
     playgroundUrl: playground.outputs.SERVICE_WEB_URI
@@ -107,6 +112,7 @@ module proxy 'proxy.bicep' = {
     postgresServer: postgresServer.outputs.DOMAIN_NAME
     postgresDatabase: postgresDatabaseName
     postgresEncryptionKey: postgresEncryptionKey
+    proxyPostgresMaxPoolSize: proxyPostgresMaxPoolSize
     appInsightsConnectionString: monitoring.outputs.applicationInsightsConnectionString
   }
 }

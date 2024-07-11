@@ -3,8 +3,8 @@
 name: aoai-proxy
 services:
   proxy:
-    project: ./src/proxy
-    language: py
+    project: ./src/AzureAIProxy
+    language: csharp
     host: containerapp
     docker:
       path: ../Dockerfile.proxy
