@@ -40,7 +40,7 @@ public class AuthorizeService(AzureAIProxyDbContext db, IMemoryCache memoryCache
         memoryCache.Set(
             apiKey,
             result[0],
-            result[0].IsAuthorized ? TimeSpan.FromMinutes(2) : TimeSpan.FromSeconds(30)
+            result[0].IsAuthorized ? TimeSpan.FromMinutes(1) : TimeSpan.FromSeconds(15)
         );
 
         return result[0];
