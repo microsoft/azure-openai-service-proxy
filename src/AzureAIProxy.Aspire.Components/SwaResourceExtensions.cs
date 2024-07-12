@@ -4,7 +4,7 @@ public static class SwaResourceExtensions
     public static IResourceBuilder<SwaResource> AddSwaEmulator(this IDistributedApplicationBuilder builder, string name)
     {
         var resource = new SwaResource(name, Environment.CurrentDirectory);
-        int port = new Random().Next(4280, 5000);
+        int port = 4280;
         return builder.AddResource(resource)
             .WithHttpEndpoint(isProxied: false, port: port)
             .WithArgs(ctx =>

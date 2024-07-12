@@ -2,9 +2,10 @@ using AzureAIProxy.Aspire.Components;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
-var postgres = builder.AddPostgres("postgres-server")
+var postgres = builder.AddPostgres("pg")
     .WithBindMount("../../database/aoai-proxy-dev.sql", "/docker-entrypoint-initdb.d/01-aoai-proxy.sql")
     .WithBindMount("../../database/aoai-proxy.sql", "/docker-entrypoint-initdb.d/02-aoai-proxy.sql")
+    .WithDataVolume()
     .WithPgAdmin();
 
 var db = postgres.AddDatabase("postgres");
