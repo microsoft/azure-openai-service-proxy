@@ -17,6 +17,9 @@ public class OpenAIResult(string value, HttpStatusCode statusCode) : IResult
 
     public static OpenAIResult NoContent() => new(string.Empty, HttpStatusCode.NoContent);
 
+    public static OpenAIResult ServiceUnavailable(string message) =>
+        new(message, HttpStatusCode.ServiceUnavailable);
+
     public Task ExecuteAsync(HttpContext httpContext)
     {
         if (innerResult.StatusCode is (int)HttpStatusCode.NoContent)
