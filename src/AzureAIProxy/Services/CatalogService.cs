@@ -40,7 +40,7 @@ public class CatalogService(
             )
             .ToListAsync();
 
-        memoryCache.Set(eventId + deploymentName, result, TimeSpan.FromMinutes(2));
+        memoryCache.Set(eventId + deploymentName, result, TimeSpan.FromMinutes(1));
         return result;
     }
 

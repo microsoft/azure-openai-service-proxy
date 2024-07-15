@@ -10,6 +10,7 @@ param serviceName string = 'admin'
 param exists bool
 param postgresDatabase string
 param postgresServer string
+param proxyAdminPostgresMaxPoolSize int
 @secure()
 param postgresEncryptionKey string
 param clientId string
@@ -53,7 +54,7 @@ module app 'core/host/container-app-upsert.bicep' = {
       }
       {
         name: 'postgres-connection-string'
-        value: 'Server=${postgresServer};Port=5432;User Id=${name};Database=${postgresDatabase};Ssl Mode=Require;'
+        value: 'Server=${postgresServer};Port=5432;User Id=${name};Database=${postgresDatabase};Ssl Mode=Require;Maximum Pool Size=${proxyAdminPostgresMaxPoolSize};Application Name=aiproxy;'
       }
     ]
     env: [
