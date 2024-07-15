@@ -68,27 +68,43 @@ public static class AzureAI
 
             var url = GenerateEndpointUrl(deployment, extPath, apiVersion);
 
-            if (streaming)
+            try
             {
-                await proxyService.HttpPostStreamAsync(
+                if (streaming)
+                {
+                    await proxyService.HttpPostStreamAsync(
+                        url,
+                        deployment.EndpointKey,
+                        context,
+                        requestJsonDoc,
+                        requestContext,
+                        deployment
+                    );
+                    return new ProxyResult(null!, (int)HttpStatusCode.OK);
+                }
+
+
+                var (responseContent, statusCode) = await proxyService.HttpPostAsync(
                     url,
                     deployment.EndpointKey,
-                    context,
                     requestJsonDoc,
                     requestContext,
                     deployment
                 );
-                return new ProxyResult(null!, (int)HttpStatusCode.OK);
+                return new ProxyResult(responseContent, statusCode);
             }
-
-            var (responseContent, statusCode) = await proxyService.HttpPostAsync(
-                url,
-                deployment.EndpointKey,
-                requestJsonDoc,
-                requestContext,
-                deployment
-            );
-            return new ProxyResult(responseContent, statusCode);
+            catch (TaskCanceledException ex) when (ex.InnerException is System.Net.Sockets.SocketException)
+            {
+                return OpenAIResult.ServiceUnavailable("The request was canceled due to timeout. Inner exception: " + ex.InnerException.Message);
+            }
+            catch (TaskCanceledException ex)
+            {
+                return OpenAIResult.ServiceUnavailable("The request was canceled: " + ex.Message);
+            }
+            catch (HttpRequestException ex)
+            {
+                return OpenAIResult.ServiceUnavailable("The request failed: " + ex.Message);
+            }
         }
     }
 
