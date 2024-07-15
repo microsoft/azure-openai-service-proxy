@@ -7,6 +7,9 @@ services:
     network_mode: service:db
     command: sleep infinity
     environment:
+      # Connection string for Postgres in the proxy app
+      POSTGRES_CONNECTION_STRING: postgresql://admin:mypassword123@db:5432/aoai-proxy
+      POSTGRES_ENCRYPTION_KEY: myencryptionkey123
       # Connection string for Postgres in the management app
       ConnectionStrings__AoaiProxyContext: Host=db:5432;Username=admin;Password=mypassword123;Database=aoai-proxy
       PostgresEncryptionKey: myencryptionkey123

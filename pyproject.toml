@@ -1,0 +1,21 @@
+[tool.black]
+line-length = 100
+target-version = ["py311"]
+src = ["src/proxy/"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+select = ["E", "F", "I", "UP"]
+
+[tool.pytest.ini_options]
+addopts = "-ra --cov=src"
+testpaths = [
+    "src/proxy/",
+    "src/gunicorn_test.py"
+]
+pythonpath = ["src/proxy/"]
+
+[tool.coverage.report]
+show_missing = true
+fail_under = 100
