@@ -2,28 +2,10 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "type": "node-terminal",
-      "name": "SWA Playground",
-      "request": "launch",
-      "command": "swa start playground",
-      "cwd": "${workspaceFolder}"
-    },
-    {
       "name": "Aspire",
       "type": "dotnet",
       "request": "launch",
       "projectPath": "${workspaceFolder}/src/AzureAIProxy.AppHost/AzureAIProxy.AppHost.csproj"
-    }
-  ],
-  "compounds": [
-    {
-      "name": "Run all",
-      "configurations": ["Aspire", "SWA Playground"],
-      "presentation": {
-        "hidden": false,
-        "group": "Frontend",
-        "order": 1
-      }
     }
   ]
 }
