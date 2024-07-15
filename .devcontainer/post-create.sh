@@ -22,8 +22,6 @@ psql -U admin -d aoai-proxy -h localhost -w -f ./database/aoai-proxy.sql
 
 echo Setting up Python environment...
 
-python3 -m pip install -r requirements-dev.txt
-
 echo Setting up commit hooks...
 pre-commit install
 
