@@ -2,17 +2,6 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "AOAI Proxy",
-      "type": "python",
-      "request": "launch",
-      "module": "uvicorn",
-      "args": ["app.main:app", "--reload"],
-      "jinja": true,
-      "justMyCode": true,
-      "envFile": "${workspaceFolder}/src/proxy/.env",
-      "cwd": "${workspaceFolder}/src/proxy"
-    },
-    {
       "name": "Playground",
       "type": "node",
       "request": "launch",
