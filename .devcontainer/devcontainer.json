@@ -24,32 +24,13 @@
     "vscode": {
       // Add the IDs of extensions you want installed when the container is created.
       "extensions": [
-        "ms-python.python",
-        "ms-python.vscode-pylance",
-        "charliermarsh.ruff",
         "ms-azuretools.vscode-docker",
         "ms-azuretools.vscode-bicep",
         "esbenp.prettier-vscode",
-        "ms-python.black-formatter",
-        "ms-python.pylint",
         "ms-dotnettools.csdevkit",
         "cweijan.vscode-postgresql-client2",
         "EditorConfig.EditorConfig"
-      ],
-      // Set *default* container specific settings.json values on container create.
-      "settings": {
-        "python.defaultInterpreterPath": "/usr/local/python/current/bin/python",
-        "python.linting.enabled": true,
-        "python.testing.unittestEnabled": false,
-        "python.testing.pytestEnabled": true,
-        "[python]": {
-          "editor.formatOnSave": true,
-          "editor.codeActionsOnSave": {
-            "source.fixAll": "always"
-          }
-        },
-        "python.formatting.provider": "black"
-      }
+      ]
     }
   },
 
