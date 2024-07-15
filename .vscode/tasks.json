@@ -62,10 +62,13 @@
         "-t",
         "azureai-proxy",
         "-f",
-        "${workspaceFolder}/src/Dockerfile.proxy",
-        "${workspaceFolder}/src"
+        "../Dockerfile.proxy",
+        "../../"
       ],
-      "problemMatcher": ["$msCompile"]
+      "problemMatcher": ["$msCompile"],
+      "options": {
+        "cwd": "${workspaceFolder}/src/AzureAIProxy"
+      }
     },
     {
       "label": "docker build: managment",
@@ -76,10 +79,13 @@
         "-t",
         "azureai-proxy",
         "-f",
-        "${workspaceFolder}/src/Dockerfile.management",
-        "${workspaceFolder}/src"
+        "../Dockerfile.management",
+        "../../"
       ],
-      "problemMatcher": ["$msCompile"]
+      "problemMatcher": ["$msCompile"],
+      "options": {
+        "cwd": "${workspaceFolder}/src/AzureAIProxy.Management"
+      }
     }
   ]
 }
