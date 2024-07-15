@@ -21,6 +21,8 @@ var playground = builder.AddNpmApp("playground", "../playground", scriptName: "d
 _ = builder.AddProject<Projects.AzureAIProxy_Management>("admin")
     .WithReference(playground)
     .WithReference(db)
+    .WithEnvironment("AzureAd:TenantId", builder.Configuration["AzureAd:TenantId"])
+    .WithEnvironment("AzureAd:ClientId", builder.Configuration["AzureAd:ClientId"])
     .WithExternalHttpEndpoints();
 
 _ = builder.AddSwaEmulator("swa")
