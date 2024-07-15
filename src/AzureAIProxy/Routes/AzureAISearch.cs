@@ -47,14 +47,31 @@ public static class AzureAISearch
                 );
 
             var url = GenerateEndpointUrl(deployment, extPath, apiVersion);
-            var (responseContent, statusCode) = await proxyService.HttpPostAsync(
-                url,
-                deployment.EndpointKey,
-                requestJsonDoc,
-                requestContext,
-                deployment
-            );
-            return new ProxyResult(responseContent, statusCode);
+
+            try
+            {
+                var (responseContent, statusCode) = await proxyService.HttpPostAsync(
+                    url,
+                    deployment.EndpointKey,
+                    requestJsonDoc,
+                    requestContext,
+                    deployment
+                );
+                return new ProxyResult(responseContent, statusCode);
+
+            }
+            catch (TaskCanceledException ex) when (ex.InnerException is System.Net.Sockets.SocketException)
+            {
+                return OpenAIResult.ServiceUnavailable("The request was canceled due to timeout. Inner exception: " + ex.InnerException.Message);
+            }
+            catch (TaskCanceledException ex)
+            {
+                return OpenAIResult.ServiceUnavailable("The request was canceled: " + ex.Message);
+            }
+            catch (HttpRequestException ex)
+            {
+                return OpenAIResult.ServiceUnavailable("The request failed: " + ex.Message);
+            }
         }
     }
 
