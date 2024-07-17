@@ -46,4 +46,4 @@ The Azure AI Proxy consists of the following components:
 
 The Azure AI Proxy is an open-source project, licensed under MIT. You can find the source code on [GitHub](https://github.com/microsoft/azure-openai-service-proxy){:target="\_blank"}.
 
-This project would not be possible without contributions from multiple people. Please feel free to contribute to the project by submitting a pull request or opening an issue..
+This project would not be possible without contributions from multiple people. Please feel free to contribute to the project by submitting a pull request or opening an issue.
