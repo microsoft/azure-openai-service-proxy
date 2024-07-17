@@ -15,7 +15,7 @@ public static class Event
     }
 
     [ApiKeyAuthorize]
-    private static async Task<IResult> EventInfoAsync(
+    internal static async Task<IResult> EventInfoAsync(
         [FromServices] ICatalogService catalogService,
         HttpContext context
     )
@@ -37,7 +37,7 @@ public static class Event
         return TypedResults.Ok(eventInfo);
     }
 
-    private static async Task<IResult> EventRegistrationInfoAsync(
+    internal static async Task<IResult> EventRegistrationInfoAsync(
         [FromServices] IEventService eventService,
         HttpContext context,
         string eventId
