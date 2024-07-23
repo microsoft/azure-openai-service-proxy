@@ -120,7 +120,12 @@ export const SystemCard = ({
       <Card header="OpenAI Functions">
         {!editFunctions && (
           <div onClick={() => setEditFunctions(true)}>
-            <SyntaxHighlighter language="json" style={solarizedlight}>
+            <SyntaxHighlighter
+              language="json"
+              style={solarizedlight}
+              wrapLines={true}
+              lineProps={{ style: { whiteSpace: 'pre-wrap' } }}
+            >
               {functions === ""
                 ? ""
                 : JSON.stringify(JSON.parse(functions), null, 2)}
