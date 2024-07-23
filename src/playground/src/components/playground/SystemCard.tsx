@@ -144,7 +144,7 @@ export const SystemCard = ({
               }}
             />
 
-            <div style={{ marginBottom: "0px", textAlign: "left", padding: "" }}>
+            <div style={{ marginBottom: "0px", textAlign: "center", padding: "" }}>
               <Button
                 icon={<Save24Regular />}
                 iconPosition="before"
