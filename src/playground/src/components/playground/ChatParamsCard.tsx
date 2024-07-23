@@ -77,7 +77,7 @@ export const ChatParamsCard = ({
         <ParamSelect
           label="Temperature"
           explain="Controls randomness. Lowering the temperature means that the model will produce more repetitive and deterministic responses. Increasing the temperature will result in more unexpected or creative responses. Try adjusting temperature or Top P but not both."
-          onUpdate={(newValue) => tokenUpdate("temperature", newValue)}
+          onUpdate={(newValue) => tokenUpdate("temperature", Number(newValue))}
           disabled={!isAuthorized}
           options={[
             "0",
@@ -98,7 +98,7 @@ export const ChatParamsCard = ({
         <ParamSelect
           label="Top P"
           explain="Similar to temperature, this controls randomness but uses a different method. Lowering Top P will narrow the model's token selection to likelier tokens. Increasing Top P will let the model choose from tokens with both high and low likelihood. Try adjusting temperature or Top P but not both."
-          onUpdate={(newValue) => tokenUpdate("topP", newValue)}
+          onUpdate={(newValue) => tokenUpdate("topP", Number(newValue))}
           disabled={!isAuthorized}
           options={[
             "0",
