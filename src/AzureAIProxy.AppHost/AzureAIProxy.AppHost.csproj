@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <IsAspireHost>true</IsAspireHost>
+    <UserSecretsId>be2fdb12-16bf-4246-ae61-2bbb16df2a8b</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.AppHost" />
+    <PackageReference Include="Aspire.Hosting.NodeJs" />
+    <PackageReference Include="Aspire.Hosting.PostgreSQL" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AzureAIProxy.Aspire.Components\AzureAIProxy.Aspire.Components.csproj" IsAspireProjectResource="false" />
+    <ProjectReference Include="..\AzureAIProxy\AzureAIProxy.csproj" />
+    <ProjectReference Include="..\AzureAIProxy.Management\AzureAIProxy.Management.csproj" />
+  </ItemGroup>
+
+</Project>

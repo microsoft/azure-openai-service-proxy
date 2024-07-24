@@ -23,6 +23,8 @@ jobs:
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
+      - name: Install Aspire workload
+        run: dotnet workload install aspire
       - name: Restore dependencies
         run: dotnet restore
       - name: Build

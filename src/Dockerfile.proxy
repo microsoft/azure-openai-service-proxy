@@ -5,8 +5,11 @@ ARG TARGETARCH
 WORKDIR /src
 
 # copy and publish app and libraries
-COPY ./AzureAIProxy/ ./AzureAIProxy
-COPY ./AzureAIProxy.Shared/ ./AzureAIProxy.Shared
+COPY ./Directory.Packages.props .
+COPY ./Directory.Build.props .
+COPY ./src/AzureAIProxy/ ./AzureAIProxy
+COPY ./src/AzureAIProxy.Shared/ ./AzureAIProxy.Shared
+COPY ./src/AzureAIProxy.ServiceDefaults/ ./AzureAIProxy.ServiceDefaults
 WORKDIR /src/AzureAIProxy
 
 RUN dotnet publish -a $TARGETARCH -o /app

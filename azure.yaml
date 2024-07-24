@@ -8,7 +8,7 @@ services:
     host: containerapp
     docker:
       path: ../Dockerfile.proxy
-      context: ../
+      context: ../../
       platform: amd64
 
   playground:
@@ -29,7 +29,7 @@ services:
         run: ../../infra/scripts/setup-app-redirect-uris.sh
     docker:
       path: ../Dockerfile.management
-      context: ../
+      context: ../../
       platform: amd64
 
 hooks:
