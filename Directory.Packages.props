@@ -1,7 +1,7 @@
 <Project>
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
-    <AspireVersion>8.0.2</AspireVersion>
+    <AspireVersion>8.1.0</AspireVersion>
     <AspNetVersion>8.0.0</AspNetVersion>
     <AuthVersion>2.20.0</AuthVersion>
     <OpenTelemetryVersion>1.9.0</OpenTelemetryVersion>
