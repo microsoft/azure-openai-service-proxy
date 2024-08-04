@@ -23,7 +23,7 @@ public class MockProxyService(IHttpClientFactory httpClientFactory, IMetricServi
     /// This method is used for testing purposes and does not actually send an HTTP request.
     /// </summary>
     public async Task<(string responseContent, int statusCode)> HttpPostAsync(
-        Uri requestUrl,
+        string requestUrl,
         string endpointKey,
         HttpContext context,
         JsonDocument requestJsonDoc,
@@ -34,7 +34,7 @@ public class MockProxyService(IHttpClientFactory httpClientFactory, IMetricServi
         using var httpClient = httpClientFactory.CreateClient();
         httpClient.Timeout = TimeSpan.FromSeconds(HttpTimeoutSeconds);
 
-        string requestUrlWithQuery = AppendQueryParameters(requestUrl, context);
+        var requestUrlWithQuery = AppendQueryParameters(requestUrl, context);
         using var requestMessage = new HttpRequestMessage(HttpMethod.Post, requestUrlWithQuery);
         requestMessage.Content = new StringContent(
             requestJsonDoc.RootElement.ToString(),
@@ -63,7 +63,7 @@ public class MockProxyService(IHttpClientFactory httpClientFactory, IMetricServi
     /// This method is used for testing purposes and does not actually send an HTTP request.
     /// </summary>
     public async Task HttpPostStreamAsync(
-        Uri requestUrl,
+        string requestUrl,
         string endpointKey,
         HttpContext context,
         JsonDocument requestJsonDoc,
@@ -74,7 +74,7 @@ public class MockProxyService(IHttpClientFactory httpClientFactory, IMetricServi
         var httpClient = httpClientFactory.CreateClient();
         httpClient.Timeout = TimeSpan.FromSeconds(HttpTimeoutSeconds);
 
-        string requestUrlWithQuery = AppendQueryParameters(requestUrl, context);
+        var requestUrlWithQuery = AppendQueryParameters(requestUrl, context);
         using var requestMessage = new HttpRequestMessage(HttpMethod.Post, requestUrlWithQuery);
         requestMessage.Content = new StringContent(
             requestJsonDoc.RootElement.ToString(),
@@ -125,11 +125,14 @@ public class MockProxyService(IHttpClientFactory httpClientFactory, IMetricServi
         }
     }
 
-    private static string AppendQueryParameters(Uri requestUrl, HttpContext context)
+    private static Uri AppendQueryParameters(string requestUrl, HttpContext context)
     {
         var queryCollection = context.Request.Query;
+        if (queryCollection.Count == 0)
+            return new Uri(requestUrl);
+
         var queryString = string.Join("&", queryCollection.Select(q => $"{q.Key}={q.Value}"));
         var requestUrlWithQuery = $"{requestUrl}?{queryString}";
-        return requestUrlWithQuery;
+        return new Uri(requestUrlWithQuery);
     }
 }

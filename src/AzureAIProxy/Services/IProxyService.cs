@@ -6,7 +6,7 @@ namespace AzureAIProxy.Services;
 public interface IProxyService
 {
     Task<(string responseContent, int statusCode)> HttpPostAsync(
-        Uri requestUrl,
+        string requestUrl,
         string endpointKey,
         HttpContext context,
         JsonDocument requestJsonDoc,
@@ -14,7 +14,7 @@ public interface IProxyService
         Deployment deployment
     );
     Task HttpPostStreamAsync(
-        Uri requestUrl,
+        string requestUrl,
         string endpointKey,
         HttpContext context,
         JsonDocument requestJsonDoc,

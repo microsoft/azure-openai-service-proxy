@@ -17,7 +17,7 @@ public class ProxyService(IHttpClientFactory httpClientFactory, IMetricService m
     /// <param name="endpointKey">The endpoint key to use for authentication.</param>
     /// <returns>A tuple containing the response content and the status code of the HTTP response.</returns>
     public async Task<(string responseContent, int statusCode)> HttpPostAsync(
-        Uri requestUrl,
+        string requestUrl,
         string endpointKey,
         HttpContext context,
         JsonDocument requestJsonDoc,
@@ -28,7 +28,7 @@ public class ProxyService(IHttpClientFactory httpClientFactory, IMetricService m
         using var httpClient = httpClientFactory.CreateClient();
         httpClient.Timeout = TimeSpan.FromSeconds(HttpTimeoutSeconds);
 
-        string requestUrlWithQuery = AppendQueryParameters(requestUrl, context);
+        var requestUrlWithQuery = AppendQueryParameters(requestUrl, context);
         using var requestMessage = new HttpRequestMessage(HttpMethod.Post, requestUrlWithQuery);
         requestMessage.Content = new StringContent(
             requestJsonDoc.RootElement.ToString(),
@@ -53,7 +53,7 @@ public class ProxyService(IHttpClientFactory httpClientFactory, IMetricService m
     /// <param name="requestString">The request body as a string.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
     public async Task HttpPostStreamAsync(
-        Uri requestUrl,
+        string requestUrl,
         string endpointKey,
         HttpContext context,
         JsonDocument requestJsonDoc,
@@ -64,7 +64,7 @@ public class ProxyService(IHttpClientFactory httpClientFactory, IMetricService m
         var httpClient = httpClientFactory.CreateClient();
         httpClient.Timeout = TimeSpan.FromSeconds(HttpTimeoutSeconds);
 
-        string requestUrlWithQuery = AppendQueryParameters(requestUrl, context);
+        var requestUrlWithQuery = AppendQueryParameters(requestUrl, context);
         using var requestMessage = new HttpRequestMessage(HttpMethod.Post, requestUrlWithQuery);
         requestMessage.Content = new StringContent(
             requestJsonDoc.RootElement.ToString(),
@@ -86,11 +86,14 @@ public class ProxyService(IHttpClientFactory httpClientFactory, IMetricService m
         await responseStream.CopyToAsync(context.Response.Body);
     }
 
-    private static string AppendQueryParameters(Uri requestUrl, HttpContext context)
+    private static Uri AppendQueryParameters(string requestUrl, HttpContext context)
     {
         var queryCollection = context.Request.Query;
+        if (queryCollection.Count == 0)
+            return new Uri(requestUrl);
+
         var queryString = string.Join("&", queryCollection.Select(q => $"{q.Key}={q.Value}"));
         var requestUrlWithQuery = $"{requestUrl}?{queryString}";
-        return requestUrlWithQuery;
+        return new Uri(requestUrlWithQuery);
     }
 }
