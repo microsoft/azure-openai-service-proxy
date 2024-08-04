@@ -19,6 +19,7 @@ public class ProxyService(IHttpClientFactory httpClientFactory, IMetricService m
     public async Task<(string responseContent, int statusCode)> HttpPostAsync(
         Uri requestUrl,
         string endpointKey,
+        HttpContext context,
         JsonDocument requestJsonDoc,
         RequestContext requestContext,
         Deployment deployment
@@ -27,7 +28,8 @@ public class ProxyService(IHttpClientFactory httpClientFactory, IMetricService m
         using var httpClient = httpClientFactory.CreateClient();
         httpClient.Timeout = TimeSpan.FromSeconds(HttpTimeoutSeconds);
 
-        using var requestMessage = new HttpRequestMessage(HttpMethod.Post, requestUrl);
+        string requestUrlWithQuery = AppendQueryParameters(requestUrl, context);
+        using var requestMessage = new HttpRequestMessage(HttpMethod.Post, requestUrlWithQuery);
         requestMessage.Content = new StringContent(
             requestJsonDoc.RootElement.ToString(),
             Encoding.UTF8,
@@ -62,7 +64,8 @@ public class ProxyService(IHttpClientFactory httpClientFactory, IMetricService m
         var httpClient = httpClientFactory.CreateClient();
         httpClient.Timeout = TimeSpan.FromSeconds(HttpTimeoutSeconds);
 
-        using var requestMessage = new HttpRequestMessage(HttpMethod.Post, requestUrl);
+        string requestUrlWithQuery = AppendQueryParameters(requestUrl, context);
+        using var requestMessage = new HttpRequestMessage(HttpMethod.Post, requestUrlWithQuery);
         requestMessage.Content = new StringContent(
             requestJsonDoc.RootElement.ToString(),
             Encoding.UTF8,
@@ -81,5 +84,13 @@ public class ProxyService(IHttpClientFactory httpClientFactory, IMetricService m
 
         await using var responseStream = await response.Content.ReadAsStreamAsync();
         await responseStream.CopyToAsync(context.Response.Body);
+    }
+
+    private static string AppendQueryParameters(Uri requestUrl, HttpContext context)
+    {
+        var queryCollection = context.Request.Query;
+        var queryString = string.Join("&", queryCollection.Select(q => $"{q.Key}={q.Value}"));
+        var requestUrlWithQuery = $"{requestUrl}?{queryString}";
+        return requestUrlWithQuery;
     }
 }
