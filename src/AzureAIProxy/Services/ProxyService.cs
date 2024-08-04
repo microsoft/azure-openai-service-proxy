@@ -95,6 +95,7 @@ public class ProxyService(IHttpClientFactory httpClientFactory, IMetricService m
     private static Uri AppendQueryParameters(string requestUrl, HttpContext context)
     {
         var queryParameters = context.Request.Query
+            .Where(q => !string.IsNullOrEmpty(q.Value)) // Skip parameters with empty values
             .Select(q => $"{Uri.EscapeDataString(q.Key)}={Uri.EscapeDataString(q.Value!)}");
         var uriBuilder = new UriBuilder(requestUrl)
         {
