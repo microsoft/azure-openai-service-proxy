@@ -94,12 +94,12 @@ public class ProxyService(IHttpClientFactory httpClientFactory, IMetricService m
     /// <returns>A new <see cref="Uri"/> object with the appended query parameters.</returns>
     private static Uri AppendQueryParameters(string requestUrl, HttpContext context)
     {
-        var queryCollection = context.Request.Query;
-        if (queryCollection.Count == 0)
-            return new Uri(requestUrl);
-
-        var queryString = string.Join("&", queryCollection.Select(q => $"{q.Key}={q.Value}"));
-        var requestUrlWithQuery = $"{requestUrl}?{queryString}";
-        return new Uri(requestUrlWithQuery);
+        var queryParameters = context.Request.Query
+            .Select(q => $"{Uri.EscapeDataString(q.Key)}={Uri.EscapeDataString(q.Value!)}");
+        var uriBuilder = new UriBuilder(requestUrl)
+        {
+            Query = string.Join("&", queryParameters)
+        };
+        return uriBuilder.Uri;
     }
 }
