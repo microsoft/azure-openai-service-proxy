@@ -86,6 +86,12 @@ public class ProxyService(IHttpClientFactory httpClientFactory, IMetricService m
         await responseStream.CopyToAsync(context.Response.Body);
     }
 
+    /// <summary>
+    /// Appends query parameters from the specified <see cref="HttpContext"/> to the given request URL.
+    /// </summary>
+    /// <param name="requestUrl">The request URL to append the query parameters to.</param>
+    /// <param name="context">The <see cref="HttpContext"/> containing the query parameters.</param>
+    /// <returns>A new <see cref="Uri"/> object with the appended query parameters.</returns>
     private static Uri AppendQueryParameters(string requestUrl, HttpContext context)
     {
         var queryCollection = context.Request.Query;
