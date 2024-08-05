@@ -23,7 +23,7 @@ public class MockProxyService(IHttpClientFactory httpClientFactory, IMetricServi
     /// This method is used for testing purposes and does not actually send an HTTP request.
     /// </summary>
     public async Task<(string responseContent, int statusCode)> HttpPostAsync(
-        string requestUrl,
+        UriBuilder requestUrl,
         string endpointKey,
         HttpContext context,
         JsonDocument requestJsonDoc,
@@ -63,7 +63,7 @@ public class MockProxyService(IHttpClientFactory httpClientFactory, IMetricServi
     /// This method is used for testing purposes and does not actually send an HTTP request.
     /// </summary>
     public async Task HttpPostStreamAsync(
-        string requestUrl,
+        UriBuilder requestUrl,
         string endpointKey,
         HttpContext context,
         JsonDocument requestJsonDoc,
@@ -131,15 +131,13 @@ public class MockProxyService(IHttpClientFactory httpClientFactory, IMetricServi
     /// <param name="requestUrl">The request URL to append the query parameters to.</param>
     /// <param name="context">The <see cref="HttpContext"/> containing the query parameters.</param>
     /// <returns>A new <see cref="Uri"/> object with the appended query parameters.</returns>
-    private static Uri AppendQueryParameters(string requestUrl, HttpContext context)
+    private static Uri AppendQueryParameters(UriBuilder requestUrl, HttpContext context)
     {
         var queryParameters = context.Request.Query
             .Where(q => !string.IsNullOrEmpty(q.Value)) // Skip parameters with empty values
-            .Select(q => $"{Uri.EscapeDataString(q.Key)}={Uri.EscapeDataString(q.Value!)}");
-        var uriBuilder = new UriBuilder(requestUrl)
-        {
-            Query = string.Join("&", queryParameters)
-        };
-        return uriBuilder.Uri;
+            .Select(q => $"{q.Key}={q.Value!}");
+
+        requestUrl.Query = string.Join("&", queryParameters);
+        return requestUrl.Uri;
     }
 }

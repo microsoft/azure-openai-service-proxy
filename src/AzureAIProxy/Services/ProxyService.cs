@@ -17,7 +17,7 @@ public class ProxyService(IHttpClientFactory httpClientFactory, IMetricService m
     /// <param name="endpointKey">The endpoint key to use for authentication.</param>
     /// <returns>A tuple containing the response content and the status code of the HTTP response.</returns>
     public async Task<(string responseContent, int statusCode)> HttpPostAsync(
-        string requestUrl,
+        UriBuilder requestUrl,
         string endpointKey,
         HttpContext context,
         JsonDocument requestJsonDoc,
@@ -53,7 +53,7 @@ public class ProxyService(IHttpClientFactory httpClientFactory, IMetricService m
     /// <param name="requestString">The request body as a string.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
     public async Task HttpPostStreamAsync(
-        string requestUrl,
+        UriBuilder requestUrl,
         string endpointKey,
         HttpContext context,
         JsonDocument requestJsonDoc,
@@ -92,15 +92,13 @@ public class ProxyService(IHttpClientFactory httpClientFactory, IMetricService m
     /// <param name="requestUrl">The request URL to append the query parameters to.</param>
     /// <param name="context">The <see cref="HttpContext"/> containing the query parameters.</param>
     /// <returns>A new <see cref="Uri"/> object with the appended query parameters.</returns>
-    private static Uri AppendQueryParameters(string requestUrl, HttpContext context)
+    private static Uri AppendQueryParameters(UriBuilder requestUrl, HttpContext context)
     {
         var queryParameters = context.Request.Query
             .Where(q => !string.IsNullOrEmpty(q.Value)) // Skip parameters with empty values
-            .Select(q => $"{Uri.EscapeDataString(q.Key)}={Uri.EscapeDataString(q.Value!)}");
-        var uriBuilder = new UriBuilder(requestUrl)
-        {
-            Query = string.Join("&", queryParameters)
-        };
-        return uriBuilder.Uri;
+            .Select(q => $"{q.Key}={q.Value!}");
+
+        requestUrl.Query = string.Join("&", queryParameters);
+        return requestUrl.Uri;
     }
 }

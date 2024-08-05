@@ -130,10 +130,11 @@ public static class AzureAI
             : null;
     }
 
-    private static string GenerateEndpointUrl(Deployment deployment, string extPath)
+    private static UriBuilder GenerateEndpointUrl(Deployment deployment, string extPath)
     {
-        var baseUrl =
-            $"{deployment.EndpointUrl.TrimEnd('/')}/openai/deployments/{deployment.DeploymentName.Trim()}";
-        return $"{baseUrl}{extPath}";
+        return new UriBuilder(deployment.EndpointUrl.TrimEnd('/'))
+        {
+            Path = $"/openai/deployments/{deployment.DeploymentName.Trim()}{extPath}"
+        };
     }
 }

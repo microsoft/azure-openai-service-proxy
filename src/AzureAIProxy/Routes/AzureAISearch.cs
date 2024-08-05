@@ -58,10 +58,8 @@ public static class AzureAISearch
         }
     }
 
-    private static string GenerateEndpointUrl(Deployment deployment, string extPath)
+    private static UriBuilder GenerateEndpointUrl(Deployment deployment, string extPath)
     {
-        var baseUrl = deployment.EndpointUrl.TrimEnd('/');
-
         string path = extPath switch
         {
             "/{index}/docs/search" => $"/indexes/{deployment.DeploymentName.Trim()}/docs/search",
@@ -70,6 +68,9 @@ public static class AzureAISearch
             _ => throw new ArgumentException("Invalid route pattern"),
         };
 
-        return $"{baseUrl}{path}";
+        return new UriBuilder(deployment.EndpointUrl.TrimEnd('/'))
+        {
+            Path = path
+        };
     }
 }
