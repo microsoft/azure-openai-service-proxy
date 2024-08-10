@@ -10,6 +10,15 @@ public class ProxyService(IHttpClientFactory httpClientFactory, IMetricService m
 {
     private const int HttpTimeoutSeconds = 60;
 
+    /// <summary>
+    /// Sends an HTTP DELETE request to the specified URL using the provided endpoint key.
+    /// </summary>
+    /// <param name="requestUrl"></param>
+    /// <param name="endpointKey"></param>
+    /// <param name="context"></param>
+    /// <param name="requestContext"></param>
+    /// <param name="deployment"></param>
+    /// <returns></returns>
     public async Task<(string responseContent, int statusCode)> HttpDeleteAsync(
         UriBuilder requestUrl,
         string endpointKey,
@@ -31,6 +40,15 @@ public class ProxyService(IHttpClientFactory httpClientFactory, IMetricService m
         return (responseContent, (int)response.StatusCode);
     }
 
+    /// <summary>
+    /// Sends an HTTP GET request to the specified URL using the provided endpoint key.
+    /// </summary>
+    /// <param name="requestUrl"></param>
+    /// <param name="endpointKey"></param>
+    /// <param name="context"></param>
+    /// <param name="requestContext"></param>
+    /// <param name="deployment"></param>
+    /// <returns></returns>
     public async Task<(string responseContent, int statusCode)> HttpGetAsync(
         UriBuilder requestUrl,
         string endpointKey,
