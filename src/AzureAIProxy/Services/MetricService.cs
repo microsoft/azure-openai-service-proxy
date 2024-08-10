@@ -46,7 +46,7 @@ public class MetricService(AzureAIProxyDbContext db) : IMetricService
         try
         {
             using var jsonDoc = JsonDocument.Parse(responseContent);
-            return jsonDoc.RootElement.TryGetProperty("usage", out var usage)
+            return jsonDoc.RootElement.TryGetProperty("usage", out var usage) && !string.IsNullOrEmpty(usage.ToString())
                 ? usage.ToString()
                 : "{}";
         }

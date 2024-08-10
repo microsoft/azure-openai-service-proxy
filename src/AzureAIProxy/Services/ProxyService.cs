@@ -1,3 +1,4 @@
+using System.Net;
 using System.Text;
 using System.Text.Json;
 using AzureAIProxy.Shared.Database;
@@ -8,6 +9,66 @@ public class ProxyService(IHttpClientFactory httpClientFactory, IMetricService m
     : IProxyService
 {
     private const int HttpTimeoutSeconds = 60;
+
+    public async Task<(string responseContent, int statusCode)> HttpDeleteAsync(
+        UriBuilder requestUrl,
+        string endpointKey,
+        HttpContext context,
+        RequestContext requestContext,
+        Deployment deployment
+    )
+    {
+        using var httpClient = httpClientFactory.CreateClient();
+        httpClient.Timeout = TimeSpan.FromSeconds(HttpTimeoutSeconds);
+
+        var requestUrlWithQuery = AppendQueryParameters(requestUrl, context);
+        using var requestMessage = new HttpRequestMessage(HttpMethod.Delete, requestUrlWithQuery);
+        requestMessage.Headers.Add("api-key", endpointKey);
+
+        var response = await httpClient.SendAsync(requestMessage);
+        var responseContent = await response.Content.ReadAsStringAsync();
+
+        return (responseContent, (int)response.StatusCode);
+    }
+
+    public async Task<(string responseContent, int statusCode)> HttpGetAsync(
+        UriBuilder requestUrl,
+        string endpointKey,
+        HttpContext context,
+        RequestContext requestContext,
+        Deployment deployment
+    )
+    {
+        using var httpClient = httpClientFactory.CreateClient();
+        httpClient.Timeout = TimeSpan.FromSeconds(HttpTimeoutSeconds);
+
+        var requestUrlWithQuery = AppendQueryParameters(requestUrl, context);
+        using var requestMessage = new HttpRequestMessage(HttpMethod.Get, requestUrlWithQuery);
+        requestMessage.Headers.Add("api-key", endpointKey);
+
+        var response = await httpClient.SendAsync(requestMessage);
+
+        var mediaType = response.Content.Headers.ContentType?.MediaType;
+        switch (mediaType)
+        {
+            case string type when type.Contains("application/json"):
+                {
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    return (responseContent, (int)response.StatusCode);
+                }
+
+            case string type when type.Contains("application/octet-stream"):
+                {
+                    context.Response.ContentType = "application/octet-stream";
+                    await using var responseStream = await response.Content.ReadAsStreamAsync();
+                    await responseStream.CopyToAsync(context.Response.Body);
+                    return (string.Empty, (int)response.StatusCode);
+                }
+
+            default:
+                return (string.Empty, (int)HttpStatusCode.UnsupportedMediaType);
+        }
+    }
 
     /// <summary>
     /// Sends an HTTP POST request with the specified JSON object to the specified request URL using the provided endpoint key.

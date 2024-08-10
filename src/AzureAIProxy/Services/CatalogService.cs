@@ -44,6 +44,19 @@ public class CatalogService(
         return result;
     }
 
+    public async Task<List<Deployment>> GetEventAssistantEndpoint(string eventId)
+    {
+        var result = await db.Set<Deployment>()
+            .FromSqlRaw(
+                "SELECT * FROM aoai.get_event_openai_assistant(@eventId, @encryptionKey)",
+                new NpgsqlParameter("@eventId", eventId),
+                new NpgsqlParameter("@encryptionKey", EncryptionKey)
+            )
+            .ToListAsync();
+
+        return result;
+    }
+
     /// <summary>
     /// Retrieves a catalog item asynchronously.
     /// </summary>

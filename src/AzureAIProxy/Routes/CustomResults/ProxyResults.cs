@@ -11,7 +11,7 @@ public class ProxyResult(string responseContent, int statusCode) : IResult
 
     public Task ExecuteAsync(HttpContext httpContext)
     {
-        if (ResponseContent != null)
+        if (!string.IsNullOrEmpty(ResponseContent))
         {
             httpContext.Response.StatusCode = StatusCode;
             httpContext.Response.ContentType = "application/json";

@@ -21,4 +21,18 @@ public interface IProxyService
         RequestContext requestContext,
         Deployment deployment
     );
+    Task<(string responseContent, int statusCode)> HttpGetAsync(
+        UriBuilder requestUrl,
+        string endpointKey,
+        HttpContext context,
+        RequestContext requestContext,
+        Deployment deployment
+    );
+    Task<(string responseContent, int statusCode)> HttpDeleteAsync(
+        UriBuilder requestUrl,
+        string endpointKey,
+        HttpContext context,
+        RequestContext requestContext,
+        Deployment deployment
+    );
 }

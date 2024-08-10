@@ -140,4 +140,14 @@ public class MockProxyService(IHttpClientFactory httpClientFactory, IMetricServi
         requestUrl.Query = string.Join("&", queryParameters);
         return requestUrl.Uri;
     }
+
+    public Task<(string responseContent, int statusCode)> HttpGetAsync(UriBuilder requestUrl, string endpointKey, HttpContext context, RequestContext requestContext, Deployment deployment)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<(string responseContent, int statusCode)> HttpDeleteAsync(UriBuilder requestUrl, string endpointKey, HttpContext context, RequestContext requestContext, Deployment deployment)
+    {
+        throw new NotImplementedException();
+    }
 }

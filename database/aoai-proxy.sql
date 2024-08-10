@@ -56,7 +56,8 @@ CREATE TYPE aoai.model_type AS ENUM(
     'openai-whisper',
     'openai-completion',
     'openai-instruct',
-    'azure-ai-search'
+    'azure-ai-search',
+    'openai-assistant'
 );
 
 ALTER TYPE aoai.model_type OWNER TO azure_pg_admin;
@@ -340,6 +341,35 @@ END;
 $_$;
 
 ALTER FUNCTION aoai.get_attendee_authorized (p_api_key character varying) OWNER TO azure_pg_admin;
+
+--
+-- Name: get_event_openai_assistant(character varying, character varying); Type: FUNCTION; Schema: aoai; Owner: azure_pg_admin
+--
+
+CREATE FUNCTION aoai.get_event_openai_assistant(p_event_id character varying, p_postgres_encryption_key character varying) RETURNS TABLE(deployment_name character varying, endpoint_url character varying, endpoint_key character varying, model_type aoai.model_type, catalog_id uuid, location character varying)
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+    RETURN QUERY
+    SELECT
+        OC.deployment_name,
+        aoai.pgp_sym_decrypt(OC.endpoint_url_encrypted, p_postgres_encryption_key)::character varying  AS endpoint_url,
+		aoai.pgp_sym_decrypt(OC.endpoint_key_encrypted, p_postgres_encryption_key)::character varying  AS endpoint_key,
+        OC.model_type,
+        OC.catalog_id,
+		OC.location
+    FROM
+        aoai.event_catalog_map EC
+    INNER JOIN
+        aoai.owner_catalog OC ON EC.catalog_id = OC.catalog_id
+    WHERE
+        EC.event_id = p_event_id AND
+		OC.model_type = 'openai-assistant' AND
+        OC.active = true;
+END;
+$$;
+
+ALTER FUNCTION aoai.get_event_openai_assistant(p_event_id character varying, p_postgres_encryption_key character varying) OWNER TO azure_pg_admin;
 
 --
 -- Name: get_event_registration_by_event_id(character varying); Type: FUNCTION; Schema: aoai; Owner: azure_pg_admin
