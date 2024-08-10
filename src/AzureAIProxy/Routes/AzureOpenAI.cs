@@ -24,7 +24,6 @@ public static class AzureAI
     private static async Task<IResult> ProcessRequestAsync(
         [FromServices] ICatalogService catalogService,
         [FromServices] IProxyService proxyService,
-        [FromQuery(Name = "api-version")] string apiVersion,
         [FromBody] JsonDocument requestJsonDoc,
         HttpContext context,
         string deploymentName
@@ -66,7 +65,7 @@ public static class AzureAI
                 );
             }
 
-            var url = GenerateEndpointUrl(deployment, extPath, apiVersion);
+            var url = GenerateEndpointUrl(deployment, extPath);
 
             try
             {
@@ -87,6 +86,7 @@ public static class AzureAI
                 var (responseContent, statusCode) = await proxyService.HttpPostAsync(
                     url,
                     deployment.EndpointKey,
+                    context,
                     requestJsonDoc,
                     requestContext,
                     deployment
@@ -130,10 +130,11 @@ public static class AzureAI
             : null;
     }
 
-    private static Uri GenerateEndpointUrl(Deployment deployment, string extPath, string apiVersion)
+    private static UriBuilder GenerateEndpointUrl(Deployment deployment, string extPath)
     {
-        var baseUrl =
-            $"{deployment.EndpointUrl.TrimEnd('/')}/openai/deployments/{deployment.DeploymentName.Trim()}";
-        return new Uri($"{baseUrl}{extPath}?api-version={apiVersion}");
+        return new UriBuilder(deployment.EndpointUrl.TrimEnd('/'))
+        {
+            Path = $"/openai/deployments/{deployment.DeploymentName.Trim()}{extPath}"
+        };
     }
 }

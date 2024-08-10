@@ -19,7 +19,6 @@ public static class AzureAISearch
     private static async Task<IResult> ProcessRequestAsync(
         [FromServices] ICatalogService catalogService,
         [FromServices] IProxyService proxyService,
-        [FromQuery(Name = "api-version")] string apiVersion,
         [FromBody] JsonDocument requestJsonDoc,
         HttpContext context,
         string index
@@ -46,10 +45,11 @@ public static class AzureAISearch
                     $"Deployment '{index}' not found for this event. Available deployments are: {string.Join(", ", eventCatalog.Select(d => d.DeploymentName))}"
                 );
 
-            var url = GenerateEndpointUrl(deployment, extPath, apiVersion);
+            var url = GenerateEndpointUrl(deployment, extPath);
             var (responseContent, statusCode) = await proxyService.HttpPostAsync(
                 url,
                 deployment.EndpointKey,
+                context,
                 requestJsonDoc,
                 requestContext,
                 deployment
@@ -58,10 +58,8 @@ public static class AzureAISearch
         }
     }
 
-    private static Uri GenerateEndpointUrl(Deployment deployment, string extPath, string apiVersion)
+    private static UriBuilder GenerateEndpointUrl(Deployment deployment, string extPath)
     {
-        var baseUrl = deployment.EndpointUrl.TrimEnd('/');
-
         string path = extPath switch
         {
             "/{index}/docs/search" => $"/indexes/{deployment.DeploymentName.Trim()}/docs/search",
@@ -70,6 +68,9 @@ public static class AzureAISearch
             _ => throw new ArgumentException("Invalid route pattern"),
         };
 
-        return new Uri($"{baseUrl}{path}?api-version={apiVersion}");
+        return new UriBuilder(deployment.EndpointUrl.TrimEnd('/'))
+        {
+            Path = path
+        };
     }
 }
