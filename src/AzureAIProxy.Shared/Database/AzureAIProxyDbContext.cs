@@ -56,16 +56,6 @@ public partial class AzureAIProxyDbContext : DbContext
                     "azure-ai-search"
                 }
             )
-            .HasPostgresEnum(
-                "aoai",
-                "assistant_id_type",
-                new[]
-                {
-                    "openai-assistant",
-                    "openai-file",
-                    "openai-thread"
-                }
-            )
             .HasPostgresExtension("aoai", "pgcrypto");
 
         // BEGIN of Manually added Entities
@@ -117,9 +107,6 @@ public partial class AzureAIProxyDbContext : DbContext
             entity.Property(e => e.Id)
                 .HasMaxLength(128)
                 .HasColumnName("id")
-                .IsRequired();
-            entity.Property(e => e.Type)
-                .HasColumnName("type")
                 .IsRequired();
         });
 

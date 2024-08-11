@@ -82,24 +82,19 @@ public static class AzureAIOpenAIAssistants
     {
         if (statusCode != 200) return;
 
-        var assistantIdTypeMap = new Dictionary<string, AssistantType>
-        {
-            { "openai/threads", AssistantType.OpenAI_Thread },
-            { "openai/assistants", AssistantType.OpenAI_Assistant },
-            { "openai/files", AssistantType.OpenAI_File }
-        };
+        var assistantIdPaths = new[] { "openai/threads", "openai/assistants", "openai/files" };
 
-        if (context.Request.Method == "POST" && assistantIdTypeMap.ContainsKey(requestPath))
+        if (context.Request.Method == "POST" && assistantIdPaths.Contains(requestPath))
         {
-            await assistantService.AddIdAsync(requestContext.ApiKey, responseContent, assistantIdTypeMap[requestPath]);
+            await assistantService.AddIdAsync(requestContext.ApiKey, responseContent);
         }
         else if (context.Request.Method == "DELETE")
         {
-            foreach (var entry in assistantIdTypeMap)
+            foreach (var path in assistantIdPaths)
             {
-                if (requestPath.StartsWith(entry.Key))
+                if (requestPath.StartsWith(path))
                 {
-                    await assistantService.DeleteIdAsync(requestContext.ApiKey, responseContent, entry.Value);
+                    await assistantService.DeleteIdAsync(requestContext.ApiKey, responseContent);
                     break;
                 }
             }
