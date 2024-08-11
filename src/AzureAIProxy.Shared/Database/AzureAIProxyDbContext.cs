@@ -118,8 +118,8 @@ public partial class AzureAIProxyDbContext : DbContext
                 .HasMaxLength(128)
                 .HasColumnName("id")
                 .IsRequired();
-            entity.Property(e => e.IdType)
-                .HasColumnName("id_type")
+            entity.Property(e => e.Type)
+                .HasColumnName("type")
                 .IsRequired();
         });
 

@@ -16,7 +16,7 @@ public static class NpgsqlDataSourceBuilderExtensions
         NpgsqlDataSourceBuilder dataSourceBuilder =
             new(builder.Configuration.GetConnectionString("AoaiProxyContext"));
         dataSourceBuilder.MapEnum<ModelType>();
-        dataSourceBuilder.MapEnum<AssistantIdType>();
+        dataSourceBuilder.MapEnum<AssistantType>();
 
         dataSourceBuilder.UseEntraAuth(builder.Configuration);
 

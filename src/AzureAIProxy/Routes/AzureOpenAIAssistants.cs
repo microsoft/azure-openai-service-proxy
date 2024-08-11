@@ -82,11 +82,11 @@ public static class AzureAIOpenAIAssistants
     {
         if (statusCode != 200) return;
 
-        var assistantIdTypeMap = new Dictionary<string, AssistantIdType>
+        var assistantIdTypeMap = new Dictionary<string, AssistantType>
         {
-            { "openai/threads", AssistantIdType.OpenAI_Thread },
-            { "openai/assistants", AssistantIdType.OpenAI_Assistant },
-            { "openai/files", AssistantIdType.OpenAI_File }
+            { "openai/threads", AssistantType.OpenAI_Thread },
+            { "openai/assistants", AssistantType.OpenAI_Assistant },
+            { "openai/files", AssistantType.OpenAI_File }
         };
 
         if (context.Request.Method == "POST" && assistantIdTypeMap.ContainsKey(requestPath))

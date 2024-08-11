@@ -1,34 +1,38 @@
 using AzureAIProxy.Shared.Database;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Identity.Client;
 using System.Text.Json;
 
 namespace AzureAIProxy.Services;
 
 public class AssistantService(AzureAIProxyDbContext db) : IAssistantService
 {
-    public async Task AddIdAsync(string api_key, string responseContent, AssistantIdType idType)
+    public async Task AddIdAsync(string api_key, string responseContent, AssistantType idType)
     {
-        var id = JsonDocument.Parse(responseContent).RootElement.GetProperty("id").GetString();
+        var jsonElement = JsonDocument.Parse(responseContent).RootElement;
+        var id = jsonElement.TryGetProperty("id", out var idElement) ? idElement.GetString() : null;
         if (id is null) return;
 
         var assistant = new Assistant
         {
             ApiKey = api_key,
             Id = id,
-            IdType = idType
+            Type = idType
         };
 
         db.Assistants.Add(assistant);
         await db.SaveChangesAsync();
     }
 
-    public async Task DeleteIdAsync(string api_key, string responseContent, AssistantIdType idType)
+    public async Task DeleteIdAsync(string api_key, string responseContent, AssistantType idType)
     {
-        var id = JsonDocument.Parse(responseContent).RootElement.GetProperty("id").GetString();
-        if (id is null) return;
+        var jsonElement = JsonDocument.Parse(responseContent).RootElement;
+        var id = jsonElement.TryGetProperty("id", out var idElement) ? idElement.GetString() : null;
+        var deleted = jsonElement.TryGetProperty("deleted", out var deletedElement) && deletedElement.GetBoolean();
+        if (id is null || !deleted) return;
 
         var assistant = await db.Assistants
-            .Where(a => a.ApiKey == api_key && a.Id == id && a.IdType == idType)
+            .Where(a => a.ApiKey == api_key && a.Id == id && a.Type == idType)
             .FirstOrDefaultAsync();
 
         if (assistant != null)
@@ -38,10 +42,10 @@ public class AssistantService(AzureAIProxyDbContext db) : IAssistantService
         }
     }
 
-    public Task<List<Assistant>> GetIdsAsync(string api_key, AssistantIdType idType)
+    public Task<List<Assistant>> GetIdsAsync(string api_key, AssistantType idType)
     {
         return db.Assistants
-            .Where(a => a.ApiKey == api_key && a.IdType == idType)
+            .Where(a => a.ApiKey == api_key && a.Type == idType)
             .ToListAsync();
     }
 }

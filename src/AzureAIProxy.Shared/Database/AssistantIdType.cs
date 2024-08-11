@@ -2,25 +2,25 @@ using NpgsqlTypes;
 
 namespace AzureAIProxy.Shared.Database;
 
-public enum AssistantIdType
+public enum AssistantType
 {
-    [PgName("openai-assistant")]
+    [PgName("assistant")]
     OpenAI_Assistant,
-    [PgName("openai-file")]
+    [PgName("file")]
     OpenAI_File,
-    [PgName("openai-thread")]
+    [PgName("thread")]
     OpenAI_Thread
 }
 
-public static class AssistantIdTypeExtensions
+public static class TypeExtensions
 {
-    public static AssistantIdType ParsePostgresValue(string value)
+    public static AssistantType ParsePostgresValue(string value)
     {
         return value switch
         {
-            "openai-assistant" => AssistantIdType.OpenAI_Assistant,
-            "openai-file" => AssistantIdType.OpenAI_File,
-            "openai-thread" => AssistantIdType.OpenAI_Thread,
+            "assistant" => AssistantType.OpenAI_Assistant,
+            "file" => AssistantType.OpenAI_File,
+            "thread" => AssistantType.OpenAI_Thread,
             _ => throw new ArgumentOutOfRangeException(nameof(value), value, null)
         };
     }
