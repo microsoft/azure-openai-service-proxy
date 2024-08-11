@@ -26,6 +26,7 @@ public static class AzureAIOpenAIAssistants
     private static async Task<IResult> CreateThreadAsync(
         [FromServices] ICatalogService catalogService,
         [FromServices] IProxyService proxyService,
+        [FromServices] IAssistantService assistantService,
         HttpContext context,
         [FromBody] JsonDocument? requestJsonDoc = null,
         string? path = null
@@ -56,6 +57,9 @@ public static class AzureAIOpenAIAssistants
             try
             {
                 var (responseContent, statusCode) = await handler();
+
+                await AssistantIdTracking(assistantService, context, requestPath, requestContext, responseContent, statusCode);
+
                 return new ProxyResult(responseContent, statusCode);
             }
             catch (TaskCanceledException ex) when (ex.InnerException is System.Net.Sockets.SocketException)
@@ -72,5 +76,33 @@ public static class AzureAIOpenAIAssistants
             }
         }
         return OpenAIResult.BadRequest("Unsupported HTTP method: " + context.Request.Method);
+    }
+
+    private static async Task AssistantIdTracking(IAssistantService assistantService, HttpContext context, string requestPath, RequestContext requestContext, string responseContent, int statusCode)
+    {
+        if (statusCode != 200) return;
+
+        var assistantIdTypeMap = new Dictionary<string, AssistantIdType>
+        {
+            { "openai/threads", AssistantIdType.OpenAI_Thread },
+            { "openai/assistants", AssistantIdType.OpenAI_Assistant },
+            { "openai/files", AssistantIdType.OpenAI_File }
+        };
+
+        if (context.Request.Method == "POST" && assistantIdTypeMap.ContainsKey(requestPath))
+        {
+            await assistantService.AddIdAsync(requestContext.ApiKey, responseContent, assistantIdTypeMap[requestPath]);
+        }
+        else if (context.Request.Method == "DELETE")
+        {
+            foreach (var entry in assistantIdTypeMap)
+            {
+                if (requestPath.StartsWith(entry.Key))
+                {
+                    await assistantService.DeleteIdAsync(requestContext.ApiKey, responseContent, entry.Value);
+                    break;
+                }
+            }
+        }
     }
 }

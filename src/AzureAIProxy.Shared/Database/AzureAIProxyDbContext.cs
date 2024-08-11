@@ -21,6 +21,8 @@ public partial class AzureAIProxyDbContext : DbContext
 
     public virtual DbSet<ActiveAttendeeGrowthView> ActiveAttendeeGrowthViews { get; set; }
 
+    public virtual DbSet<Assistant> Assistants { get; set; }
+
     public virtual DbSet<Event> Events { get; set; }
 
     public virtual DbSet<EventAttendee> EventAttendees { get; set; }
@@ -52,6 +54,16 @@ public partial class AzureAIProxyDbContext : DbContext
                     "openai-completion",
                     "openai-instruct",
                     "azure-ai-search"
+                }
+            )
+            .HasPostgresEnum(
+                "aoai",
+                "assistant_id_type",
+                new[]
+                {
+                    "openai-assistant",
+                    "openai-file",
+                    "openai-thread"
                 }
             )
             .HasPostgresExtension("aoai", "pgcrypto");
@@ -91,6 +103,25 @@ public partial class AzureAIProxyDbContext : DbContext
         });
 
         // END of Manually added Entities
+
+        modelBuilder.Entity<Assistant>(entity =>
+        {
+            entity.HasKey(e => new { e.ApiKey, e.Id }).HasName("assistant_pkey");
+
+            entity.ToTable("assistant", "aoai");
+
+            entity.Property(e => e.ApiKey)
+                .HasMaxLength(36)
+                .HasColumnName("api_key")
+                .IsRequired();
+            entity.Property(e => e.Id)
+                .HasMaxLength(128)
+                .HasColumnName("id")
+                .IsRequired();
+            entity.Property(e => e.IdType)
+                .HasColumnName("id_type")
+                .IsRequired();
+        });
 
         modelBuilder.Entity<ActiveAttendeeGrowthView>(entity =>
         {
