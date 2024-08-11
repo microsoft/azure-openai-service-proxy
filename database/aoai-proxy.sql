@@ -46,6 +46,18 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA aoai;
 COMMENT ON EXTENSION pgcrypto IS 'cryptographic functions';
 
 --
+-- Name: assistant_type; Type: TYPE; Schema: aoai; Owner: azure_pg_admin
+--
+
+CREATE TYPE aoai.assistant_type AS ENUM (
+    'assistant',
+    'file',
+    'thread'
+);
+
+ALTER TYPE aoai.assistant_type OWNER TO azure_pg_admin;
+
+--
 -- Name: model_type; Type: TYPE; Schema: aoai; Owner: azure_pg_admin
 --
 
@@ -480,6 +492,20 @@ CREATE VIEW aoai.active_attendee_growth_view AS
   ORDER BY date_stamp;
 
 ALTER VIEW aoai.active_attendee_growth_view OWNER TO azure_pg_admin;
+
+--
+-- Name: assistant; Type: TABLE; Schema: aoai; Owner: azure_pg_admin
+--
+
+CREATE TABLE aoai.assistant (
+    api_key character varying(36) NOT NULL,
+    id character varying(128) NOT NULL,
+    type aoai.assistant_type NOT NULL,
+    creation_timestamp timestamp without time zone DEFAULT now() NOT NULL,
+    accessed_timestamp timestamp without time zone DEFAULT now() NOT NULL
+);
+
+ALTER TABLE aoai.assistant OWNER TO azure_pg_admin;
 
 --
 -- Name: event; Type: TABLE; Schema: aoai; Owner: azure_pg_admin
