@@ -37,9 +37,6 @@ public static class AzureAIOpenFiles
         var requestPath = context.Request.Path.Value!.Split("/api/v1/").Last();
         var requestContext = (RequestContext)context.Items["RequestContext"]!;
 
-        var form = await request.ReadFormAsync();
-        var file = form.Files.GetFile("file");
-
         var deployments = await catalogService.GetEventAssistantEndpoint(requestContext.EventId);
         var deployment = deployments.FirstOrDefault();
         if (deployment is null)
