@@ -54,7 +54,7 @@ public static class AzureAIOpenAIAssistants
             ["POST"] = () => proxyService.HttpPostAsync(url, deployment.EndpointKey, context, requestJsonDoc!, requestContext, deployment)
         };
 
-        var result = await ValidateId(assistantService, context, assistant_id, thread_id, file_id, requestContext);
+        var result = await ValidateId(assistantService, context.Request.Method, assistant_id, thread_id, file_id, requestContext);
         if (result is not null) return result;
 
         if (methodHandlers.TryGetValue(context.Request.Method, out var handler))
@@ -83,11 +83,11 @@ public static class AzureAIOpenAIAssistants
         return OpenAIResult.BadRequest("Unsupported HTTP method: " + context.Request.Method);
     }
 
-    private static async Task<IResult?> ValidateId(IAssistantService assistantService, HttpContext context, string? assistant_id, string? thread_id, string? file_id, RequestContext requestContext)
+    private static async Task<IResult?> ValidateId(IAssistantService assistantService, string method, string? assistant_id, string? thread_id, string? file_id, RequestContext requestContext)
     {
         string[] validateMethods = ["POST", "DELETE"];
 
-        if (validateMethods.Contains(context.Request.Method))
+        if (validateMethods.Contains(method))
         {
             if (assistant_id is not null)
             {
