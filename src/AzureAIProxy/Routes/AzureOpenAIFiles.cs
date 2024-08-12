@@ -6,11 +6,11 @@ using AzureAIProxy.Services;
 
 namespace AzureAIProxy.Routes;
 
-public static class AzureAIOpenAIAssistants
+public static class AzureAIOpenFiles
 {
-    public static RouteGroupBuilder MapAzureOpenAIAssistantsRoutes(this RouteGroupBuilder builder)
+    public static RouteGroupBuilder MapAzureOpenAIFilesRoutes(this RouteGroupBuilder builder)
     {
-        var openAiPaths = new[] { "/assistants/{*assistant_id}", "/threads/{*thread_id}" };
+        var openAiPaths = new[] { "/files/{*file_id}"};
         var openAIGroup = builder.MapGroup("/openai");
 
         foreach (var path in openAiPaths)
@@ -28,7 +28,7 @@ public static class AzureAIOpenAIAssistants
         [FromServices] IProxyService proxyService,
         [FromServices] IAssistantService assistantService,
         HttpContext context,
-        [FromBody] JsonDocument? requestJsonDoc = null,
+        HttpRequest request,
         string? assistant_id = null,
         string? thread_id = null,
         string? file_id = null
@@ -36,6 +36,9 @@ public static class AzureAIOpenAIAssistants
     {
         var requestPath = context.Request.Path.Value!.Split("/api/v1/").Last();
         var requestContext = (RequestContext)context.Items["RequestContext"]!;
+
+        var form = await request.ReadFormAsync();
+        var file = form.Files.GetFile("file");
 
         var deployments = await catalogService.GetEventAssistantEndpoint(requestContext.EventId);
         var deployment = deployments.FirstOrDefault();
@@ -51,7 +54,7 @@ public static class AzureAIOpenAIAssistants
         {
             ["DELETE"] = () => proxyService.HttpDeleteAsync(url, deployment.EndpointKey, context, requestContext, deployment),
             ["GET"] = () => proxyService.HttpGetAsync(url, deployment.EndpointKey, context, requestContext, deployment),
-            ["POST"] = () => proxyService.HttpPostAsync(url, deployment.EndpointKey, context, requestJsonDoc!, requestContext, deployment)
+            ["POST"] = () => proxyService.HttpPostFormAsync(url, deployment.EndpointKey, context, request, requestContext, deployment)
         };
 
         var result = await ValidateId(assistantService, context.Request.Method, assistant_id, thread_id, file_id, requestContext);

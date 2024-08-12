@@ -150,4 +150,9 @@ public class MockProxyService(IHttpClientFactory httpClientFactory, IMetricServi
     {
         throw new NotImplementedException();
     }
+
+    public Task<(string responseContent, int statusCode)> HttpPostFormAsync(UriBuilder requestUrl, string endpointKey, HttpContext context, HttpRequest request, RequestContext requestContext, Deployment deployment)
+    {
+        throw new NotImplementedException();
+    }
 }

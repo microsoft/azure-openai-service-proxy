@@ -9,5 +9,6 @@ public static class RouteExtensions
         .MapEventRoutes()
         .MapAzureOpenAIRoutes()
         .MapAzureAISearchRoutes()
-        .MapAzureOpenAIAssistantsRoutes();
+        .MapAzureOpenAIAssistantsRoutes()
+        .MapAzureOpenAIFilesRoutes();
 }

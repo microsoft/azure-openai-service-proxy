@@ -1,7 +1,9 @@
 using System.Net;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using AzureAIProxy.Shared.Database;
+using Microsoft.Extensions.Primitives;
 
 namespace AzureAIProxy.Services;
 
@@ -87,6 +89,71 @@ public class ProxyService(IHttpClientFactory httpClientFactory, IMetricService m
                 return (string.Empty, (int)HttpStatusCode.UnsupportedMediaType);
         }
     }
+
+    /// <summary>
+    /// Sends an HTTP POST request with a form body asynchronously.
+    /// </summary>
+    /// <param name="requestUrl">The URL of the request.</param>
+    /// <param name="endpointKey">The API key for the endpoint.</param>
+    /// <param name="context">The HTTP context.</param>
+    /// <returns>A tuple containing the response content and the status code of the HTTP response.</returns>
+    public async Task<(string responseContent, int statusCode)> HttpPostFormAsync(
+        UriBuilder requestUrl,
+        string endpointKey,
+        HttpContext context,
+        HttpRequest request,
+        RequestContext requestContext,
+        Deployment deployment
+    )
+    {
+        using var httpClient = httpClientFactory.CreateClient();
+        httpClient.Timeout = TimeSpan.FromSeconds(HttpTimeoutSeconds);
+
+        var form = await request.ReadFormAsync();
+        var file = form.Files.GetFile("file");
+
+        if (file != null && file.Length > 0)
+        {
+            var requestUrlWithQuery = AppendQueryParameters(requestUrl, context);
+
+            var fileStream = file.OpenReadStream();
+            var fileContent = new StreamContent(fileStream);
+            fileContent.Headers.ContentType = new MediaTypeHeaderValue(file.ContentType);
+
+            // Prepare the multipart form content
+            var multipartContent = new MultipartFormDataContent
+            {
+                { fileContent, "file", file.FileName }
+            };
+
+            foreach (var key in form.Keys.Where(k => k != "file" && !StringValues.IsNullOrEmpty(form[k])))
+            {
+                var fieldContent = new StringContent(form[key]!);
+                multipartContent.Add(fieldContent, key);
+            }
+
+            // Create the request message
+            var requestMessage = new HttpRequestMessage(HttpMethod.Post, requestUrlWithQuery)
+            {
+                Content = multipartContent
+            };
+
+            requestMessage.Headers.Add("api-key", endpointKey);
+
+            var response = await httpClient.SendAsync(requestMessage);
+            var responseContent = await response.Content.ReadAsStringAsync();
+
+            await metricService.LogApiUsageAsync(requestContext, deployment, responseContent);
+
+            return (responseContent, (int)response.StatusCode);
+        }
+        else
+        {
+            return (string.Empty, (int)HttpStatusCode.UnsupportedMediaType);
+        }
+    }
+
+
 
     /// <summary>
     /// Sends an HTTP POST request with the specified JSON object to the specified request URL using the provided endpoint key.
