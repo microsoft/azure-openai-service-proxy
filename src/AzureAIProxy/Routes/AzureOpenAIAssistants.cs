@@ -10,7 +10,7 @@ public static class AzureAIOpenAIAssistants
 {
     public static RouteGroupBuilder MapAzureOpenAIAssistantsRoutes(this RouteGroupBuilder builder)
     {
-        var openAiPaths = new[] { "/threads/{*path}", "/assistants/{*path}", "/files/{*path}" };
+        var openAiPaths = new[] { "/assistants/{*assistant_id}", "/threads/{*thread_id}", "/files/{*file_id}" };
         var openAIGroup = builder.MapGroup("/openai");
 
         foreach (var path in openAiPaths)
@@ -29,7 +29,9 @@ public static class AzureAIOpenAIAssistants
         [FromServices] IAssistantService assistantService,
         HttpContext context,
         [FromBody] JsonDocument? requestJsonDoc = null,
-        string? path = null
+        string? assistant_id = null,
+        string? thread_id = null,
+        string? file_id = null
     )
     {
         var requestPath = context.Request.Path.Value!.Split("/api/v1/").Last();
@@ -51,6 +53,9 @@ public static class AzureAIOpenAIAssistants
             ["GET"] = () => proxyService.HttpGetAsync(url, deployment.EndpointKey, context, requestContext, deployment),
             ["POST"] = () => proxyService.HttpPostAsync(url, deployment.EndpointKey, context, requestJsonDoc!, requestContext, deployment)
         };
+
+        var result = await ValidateId(assistantService, context, assistant_id, thread_id, file_id, requestContext);
+        if (result is not null) return result;
 
         if (methodHandlers.TryGetValue(context.Request.Method, out var handler))
         {
@@ -76,6 +81,34 @@ public static class AzureAIOpenAIAssistants
             }
         }
         return OpenAIResult.BadRequest("Unsupported HTTP method: " + context.Request.Method);
+    }
+
+    private static async Task<IResult?> ValidateId(IAssistantService assistantService, HttpContext context, string? assistant_id, string? thread_id, string? file_id, RequestContext requestContext)
+    {
+        string[] validateMethods = ["POST", "DELETE"];
+
+        if (validateMethods.Contains(context.Request.Method))
+        {
+            if (assistant_id is not null)
+            {
+                var assistant = await assistantService.GetIdAsync(requestContext.ApiKey, assistant_id.Split("/").First());
+                if (assistant.Count == 0)
+                    return OpenAIResult.NotFound("Assistant not found.");
+            }
+            else if (thread_id is not null)
+            {
+                var thread = await assistantService.GetIdAsync(requestContext.ApiKey, thread_id.Split("/").First());
+                if (thread.Count == 0)
+                    return OpenAIResult.NotFound("Thread not found.");
+            }
+            else if (file_id is not null)
+            {
+                var file = await assistantService.GetIdAsync(requestContext.ApiKey, file_id.Split("/").First());
+                if (file.Count == 0)
+                    return OpenAIResult.NotFound("File not found.");
+            }
+        }
+        return null;
     }
 
     private static async Task AssistantIdTracking(IAssistantService assistantService, HttpContext context, string requestPath, RequestContext requestContext, string responseContent, int statusCode)

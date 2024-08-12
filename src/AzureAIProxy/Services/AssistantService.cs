@@ -1,11 +1,11 @@
 using AzureAIProxy.Shared.Database;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Identity.Client;
+using Microsoft.Extensions.Caching.Memory;
 using System.Text.Json;
 
 namespace AzureAIProxy.Services;
 
-public class AssistantService(AzureAIProxyDbContext db) : IAssistantService
+public class AssistantService(AzureAIProxyDbContext db, IMemoryCache memoryCache) : IAssistantService
 {
     public async Task AddIdAsync(string api_key, string responseContent)
     {
@@ -38,7 +38,23 @@ public class AssistantService(AzureAIProxyDbContext db) : IAssistantService
         {
             db.Assistants.Remove(assistant);
             await db.SaveChangesAsync();
+
+            if (memoryCache.TryGetValue(api_key + id, out _))
+                memoryCache.Remove(api_key + id);
         }
+    }
+
+    public async Task<List<Assistant>> GetIdAsync(string api_key, string id)
+    {
+        if (memoryCache.TryGetValue(api_key + id, out List<Assistant>? cachedId))
+            return cachedId!;
+
+        var result = await db.Assistants
+            .Where(a => a.ApiKey == api_key && a.Id == id)
+            .ToListAsync();
+
+        memoryCache.Set(api_key + id, result, TimeSpan.FromMinutes(10));
+        return result;
     }
 
     public Task<List<Assistant>> GetIdsAsync(string api_key, string type)
