@@ -49,7 +49,7 @@ public static class AzureAIOpenFiles
         var requestPath = context.Request.Path.Value!.Split("/api/v1/").Last();
         var requestContext = (RequestContext)context.Items["RequestContext"]!;
 
-        var deployment = await catalogService.GetEventAssistantEndpointAsync(requestContext.EventId);
+        var deployment = await catalogService.GetEventAssistantAsync(requestContext.EventId);
         if (deployment is null)
             return OpenAIResult.NotFound("No OpenAI Assistant deployment found for the event.");
 

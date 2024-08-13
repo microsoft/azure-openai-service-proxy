@@ -8,6 +8,6 @@ public interface ICatalogService
         string eventId,
         string deploymentName
     );
-    Task<Deployment?> GetEventAssistantEndpointAsync(string eventId);
+    Task<Deployment?> GetEventAssistantAsync(string eventId);
     Task<Dictionary<string, List<string>>> GetCapabilitiesAsync(string eventId);
 }

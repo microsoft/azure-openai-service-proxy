@@ -12,6 +12,9 @@ public class CatalogService(
     IMemoryCache memoryCache
 ) : ICatalogService
 {
+    const string CatalogAssistantEventKey = "catalog+assistant+event+key";
+    const string CatalogEventDeploymentKey = "catalog+event+deployment+key";
+
     private readonly string EncryptionKey =
         configuration["PostgresEncryptionKey"]
         ?? throw new ArgumentNullException("PostgresEncryptionKey");
@@ -28,8 +31,8 @@ public class CatalogService(
         string deploymentName
     )
     {
-        if (memoryCache.TryGetValue(eventId + deploymentName, out List<Deployment>? cachedContext))
-            return cachedContext!;
+        if (memoryCache.TryGetValue($"{CatalogEventDeploymentKey}+{eventId}+{deploymentName}", out List<Deployment>? cachedValue))
+            return cachedValue!;
 
         var result = await db.Set<Deployment>()
             .FromSqlRaw(
@@ -40,14 +43,14 @@ public class CatalogService(
             )
             .ToListAsync();
 
-        memoryCache.Set(eventId + deploymentName, result, TimeSpan.FromMinutes(1));
+        memoryCache.Set($"{CatalogEventDeploymentKey}+{eventId}+{deploymentName}", result, TimeSpan.FromMinutes(1));
         return result;
     }
 
-    public async Task<Deployment?> GetEventAssistantEndpointAsync(string eventId)
+    public async Task<Deployment?> GetEventAssistantAsync(string eventId)
     {
-        if (memoryCache.TryGetValue($"assistant-deployment+{eventId}", out Deployment? cachedContext))
-            return cachedContext!;
+        if (memoryCache.TryGetValue($"{CatalogAssistantEventKey}+{eventId}", out Deployment? cachedValue))
+            return cachedValue!;
 
         var result = await db.Set<Deployment>()
             .FromSqlRaw(
@@ -58,7 +61,7 @@ public class CatalogService(
             .FirstOrDefaultAsync();
 
         if (result != null)
-            memoryCache.Set($"assistant-deployment+{eventId}", result, TimeSpan.FromMinutes(4));
+            memoryCache.Set($"{CatalogAssistantEventKey}+{eventId}", result, TimeSpan.FromMinutes(4));
 
         return result;
     }

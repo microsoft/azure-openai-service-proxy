@@ -14,6 +14,8 @@ namespace AzureAIProxy.Services;
 public class AssistantService(AzureAIProxyDbContext db, IMemoryCache memoryCache) : IAssistantService
 {
 
+    const string AssistantIdApiKey = "assistant+id+key";
+
     /// <summary>
     /// Adds a new assistant record to the database based on the provided API key and response content.
     /// </summary>
@@ -36,7 +38,7 @@ public class AssistantService(AzureAIProxyDbContext db, IMemoryCache memoryCache
         db.Assistants.Add(assistant);
         await db.SaveChangesAsync();
 
-        memoryCache.Set($"assistant-id-key+{id}+{apiKey}", assistant, TimeSpan.FromMinutes(10));
+        memoryCache.Set($"{AssistantIdApiKey}+{id}+{apiKey}", assistant, TimeSpan.FromMinutes(10));
     }
 
     /// <summary>
@@ -61,8 +63,8 @@ public class AssistantService(AzureAIProxyDbContext db, IMemoryCache memoryCache
             db.Assistants.Remove(assistant);
             await db.SaveChangesAsync();
 
-            if (memoryCache.TryGetValue($"assistant-id-key+{id}+{apiKey}", out _))
-                memoryCache.Remove($"assistant-id-key+{id}+{apiKey}");
+            if (memoryCache.TryGetValue($"{AssistantIdApiKey}+{id}+{apiKey}", out _))
+                memoryCache.Remove($"{AssistantIdApiKey}+{id}+{apiKey}");
         }
     }
 
@@ -74,14 +76,14 @@ public class AssistantService(AzureAIProxyDbContext db, IMemoryCache memoryCache
     /// <returns>A task that represents the asynchronous operation. The task result contains a list of assistant records.</returns>
     public async Task<Assistant?> GetIdAsync(string apiKey, string id)
     {
-        if (memoryCache.TryGetValue($"assistant-id-key+{id}+{apiKey}", out Assistant? cachedId))
-            return cachedId!;
+        if (memoryCache.TryGetValue($"{AssistantIdApiKey}+{id}+{apiKey}", out Assistant? cachedValue))
+            return cachedValue!;
 
         var result = await db.Assistants
             .FirstOrDefaultAsync(a => a.ApiKey == apiKey && a.Id == id);
 
         if (result != null)
-            memoryCache.Set($"assistant-id-key+{id}+{apiKey}", result, TimeSpan.FromMinutes(10));
+            memoryCache.Set($"{AssistantIdApiKey}+{id}+{apiKey}", result, TimeSpan.FromMinutes(10));
 
         return result;
     }
