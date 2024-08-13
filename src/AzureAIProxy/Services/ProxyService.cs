@@ -7,6 +7,9 @@ using Microsoft.Extensions.Primitives;
 
 namespace AzureAIProxy.Services;
 
+/// <summary>
+/// Provides methods for sending HTTP requests (GET, POST, DELETE) to specified URLs with support for various content types and query parameters.
+/// </summary>
 public class ProxyService(IHttpClientFactory httpClientFactory, IMetricService metricService)
     : IProxyService
 {
@@ -15,12 +18,12 @@ public class ProxyService(IHttpClientFactory httpClientFactory, IMetricService m
     /// <summary>
     /// Sends an HTTP DELETE request to the specified URL using the provided endpoint key.
     /// </summary>
-    /// <param name="requestUrl"></param>
-    /// <param name="endpointKey"></param>
-    /// <param name="context"></param>
-    /// <param name="requestContext"></param>
-    /// <param name="deployment"></param>
-    /// <returns></returns>
+    /// <param name="requestUrl">The URL to which the DELETE request is sent.</param>
+    /// <param name="endpointKey">The API key used for authorization.</param>
+    /// <param name="context">The HTTP context containing additional information for the request.</param>
+    /// <param name="requestContext">The request context object containing relevant details for the request.</param>
+    /// <param name="deployment">The deployment details related to the request.</param>
+    /// <returns>A tuple containing the response content as a string and the HTTP status code.</returns>
     public async Task<(string responseContent, int statusCode)> HttpDeleteAsync(
         UriBuilder requestUrl,
         string endpointKey,
@@ -45,12 +48,13 @@ public class ProxyService(IHttpClientFactory httpClientFactory, IMetricService m
     /// <summary>
     /// Sends an HTTP GET request to the specified URL using the provided endpoint key.
     /// </summary>
-    /// <param name="requestUrl"></param>
-    /// <param name="endpointKey"></param>
-    /// <param name="context"></param>
-    /// <param name="requestContext"></param>
-    /// <param name="deployment"></param>
-    /// <returns></returns>
+    /// <param name="requestUrl">The URL to which the GET request is sent.</param>
+    /// <param name="endpointKey">The API key used for authorization.</param>
+    /// <param name="context">The HTTP context containing additional information for the request.</param>
+    /// <param name="requestContext">The request context object containing relevant details for the request.</param>
+    /// <param name="deployment">The deployment details related to the request.</param>
+    /// <returns>A tuple containing the response content as a string and the HTTP status code.</returns>
+
     public async Task<(string responseContent, int statusCode)> HttpGetAsync(
         UriBuilder requestUrl,
         string endpointKey,
@@ -96,7 +100,10 @@ public class ProxyService(IHttpClientFactory httpClientFactory, IMetricService m
     /// <param name="requestUrl">The URL of the request.</param>
     /// <param name="endpointKey">The API key for the endpoint.</param>
     /// <param name="context">The HTTP context.</param>
-    /// <returns>A tuple containing the response content and the status code of the HTTP response.</returns>
+    /// <param name="request">The HTTP request containing form data.</param>
+    /// <param name="requestContext">The request context object containing relevant details for the request.</param>
+    /// <param name="deployment">The deployment details related to the request.</param>
+    /// <returns>A tuple containing the response content as a string and the HTTP status code.</returns>
     public async Task<(string responseContent, int statusCode)> HttpPostFormAsync(
         UriBuilder requestUrl,
         string endpointKey,
@@ -153,15 +160,16 @@ public class ProxyService(IHttpClientFactory httpClientFactory, IMetricService m
         }
     }
 
-
-
     /// <summary>
-    /// Sends an HTTP POST request with the specified JSON object to the specified request URL using the provided endpoint key.
+    /// Sends an HTTP POST request with a JSON body asynchronously.
     /// </summary>
-    /// <param name="requestJson">The JSON object to send in the request body.</param>
     /// <param name="requestUrl">The URL of the request.</param>
-    /// <param name="endpointKey">The endpoint key to use for authentication.</param>
-    /// <returns>A tuple containing the response content and the status code of the HTTP response.</returns>
+    /// <param name="endpointKey">The API key for the endpoint.</param>
+    /// <param name="context">The HTTP context.</param>
+    /// <param name="requestJsonDoc">The JSON document to be sent in the request body.</param>
+    /// <param name="requestContext">The request context object containing relevant details for the request.</param>
+    /// <param name="deployment">The deployment details related to the request.</param>
+    /// <returns>A tuple containing the response content as a string and the HTTP status code.</returns>
     public async Task<(string responseContent, int statusCode)> HttpPostAsync(
         UriBuilder requestUrl,
         string endpointKey,
@@ -191,12 +199,14 @@ public class ProxyService(IHttpClientFactory httpClientFactory, IMetricService m
     }
 
     /// <summary>
-    /// Sends an HTTP POST request with a stream body asynchronously.
+    /// Sends an HTTP POST request with a JSON body and streams the response body asynchronously.
     /// </summary>
     /// <param name="requestUrl">The URL of the request.</param>
     /// <param name="endpointKey">The API key for the endpoint.</param>
     /// <param name="context">The HTTP context.</param>
-    /// <param name="requestString">The request body as a string.</param>
+    /// <param name="requestJsonDoc">The JSON document to be sent in the request body.</param>
+    /// <param name="requestContext">The request context object containing relevant details for the request.</param>
+    /// <param name="deployment">The deployment details related to the request.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
     public async Task HttpPostStreamAsync(
         UriBuilder requestUrl,
@@ -235,9 +245,14 @@ public class ProxyService(IHttpClientFactory httpClientFactory, IMetricService m
     /// <summary>
     /// Appends query parameters from the specified <see cref="HttpContext"/> to the given request URL.
     /// </summary>
-    /// <param name="requestUrl">The request URL to append the query parameters to.</param>
-    /// <param name="context">The <see cref="HttpContext"/> containing the query parameters.</param>
+    /// <param name="requestUrl">The <see cref="UriBuilder"/> object representing the URL to which the query parameters will be appended.</param>
+    /// <param name="context">The <see cref="HttpContext"/> containing the query parameters to be appended to the URL.</param>
     /// <returns>A new <see cref="Uri"/> object with the appended query parameters.</returns>
+    /// <remarks>
+    /// This method iterates over the query parameters in the <see cref="HttpContext"/>'s request, skips any parameters with empty values,
+    /// and appends the remaining parameters to the query string of the provided <see cref="UriBuilder"/>.
+    /// The resulting <see cref="Uri"/> object reflects the updated URL with the added query parameters.
+    /// </remarks>
     private static Uri AppendQueryParameters(UriBuilder requestUrl, HttpContext context)
     {
         var queryParameters = context.Request.Query

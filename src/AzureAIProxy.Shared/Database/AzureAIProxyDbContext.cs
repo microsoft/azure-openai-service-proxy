@@ -96,7 +96,7 @@ public partial class AzureAIProxyDbContext : DbContext
 
         modelBuilder.Entity<Assistant>(entity =>
         {
-            entity.HasKey(e => new { e.ApiKey, e.Id }).HasName("assistant_pkey");
+            entity.HasKey(e => new { e.Id, e.ApiKey }).HasName("assistant_pkey");
 
             entity.ToTable("assistant", "aoai");
 
@@ -105,7 +105,7 @@ public partial class AzureAIProxyDbContext : DbContext
                 .HasColumnName("api_key")
                 .IsRequired();
             entity.Property(e => e.Id)
-                .HasMaxLength(128)
+                .HasMaxLength(64)
                 .HasColumnName("id")
                 .IsRequired();
         });

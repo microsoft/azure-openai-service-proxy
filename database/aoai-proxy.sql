@@ -486,8 +486,8 @@ ALTER VIEW aoai.active_attendee_growth_view OWNER TO azure_pg_admin;
 --
 
 CREATE TABLE aoai.assistant (
+    id character varying(64) NOT NULL,
     api_key character varying(36) NOT NULL,
-    id character varying(128) NOT NULL,
     creation_timestamp timestamp without time zone DEFAULT now() NOT NULL,
     accessed_timestamp timestamp without time zone DEFAULT now() NOT NULL
 );
@@ -601,6 +601,13 @@ CREATE TABLE aoai.owner_event_map (
 );
 
 ALTER TABLE aoai.owner_event_map OWNER TO azure_pg_admin;
+
+--
+-- Name: assistant assistant_pkey; Type: CONSTRAINT; Schema: aoai; Owner: azure_pg_admin
+--
+
+ALTER TABLE ONLY aoai.assistant
+    ADD CONSTRAINT assistant_pkey PRIMARY KEY (id, api_key);
 
 --
 -- Name: event event_pkey; Type: CONSTRAINT; Schema: aoai; Owner: azure_pg_admin

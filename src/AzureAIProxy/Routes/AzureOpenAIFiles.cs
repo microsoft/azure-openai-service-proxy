@@ -1,4 +1,3 @@
-using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using AzureAIProxy.Shared.Database;
 using AzureAIProxy.Routes.CustomResults;
@@ -6,22 +5,37 @@ using AzureAIProxy.Services;
 
 namespace AzureAIProxy.Routes;
 
+/// <summary>
+/// Defines routes and handling logic for file operations with Azure OpenAI.
+/// </summary>
 public static class AzureAIOpenFiles
 {
+    /// <summary>
+    /// Maps routes for file operations under the "/openai/files/{file_id}" path.
+    /// </summary>
+    /// <param name="builder">The route group builder to configure the routes.</param>
+    /// <returns>The updated route group builder.</returns>
     public static RouteGroupBuilder MapAzureOpenAIFilesRoutes(this RouteGroupBuilder builder)
     {
-        var openAiPaths = new[] { "/files/{*file_id}"};
         var openAIGroup = builder.MapGroup("/openai");
 
-        foreach (var path in openAiPaths)
-        {
-            openAIGroup.MapPost(path, CreateThreadAsync);
-            openAIGroup.MapGet(path, CreateThreadAsync);
-            openAIGroup.MapDelete(path, CreateThreadAsync);
-        }
+        openAIGroup.MapPost("/files/{*file_id}", CreateThreadAsync);
+        openAIGroup.MapGet("/files/{*file_id}", CreateThreadAsync);
+        openAIGroup.MapDelete("/files/{*file_id}", CreateThreadAsync);
+
         return builder;
     }
 
+    /// <summary>
+    /// Handles HTTP requests for file operations by routing them to the appropriate method based on the request type.
+    /// </summary>
+    /// <param name="catalogService">The catalog service for retrieving deployment information.</param>
+    /// <param name="proxyService">The proxy service for forwarding requests.</param>
+    /// <param name="assistantService">The assistant service for managing file IDs.</param>
+    /// <param name="context">The HTTP context of the request.</param>
+    /// <param name="request">The HTTP request.</param>
+    /// <param name="file_id">The optional file identifier from the route.</param>
+    /// <returns>An <see cref="IResult"/> representing the result of the operation.</returns>
     [ApiKeyAuthorize]
     private static async Task<IResult> CreateThreadAsync(
         [FromServices] ICatalogService catalogService,
@@ -29,8 +43,6 @@ public static class AzureAIOpenFiles
         [FromServices] IAssistantService assistantService,
         HttpContext context,
         HttpRequest request,
-        string? assistant_id = null,
-        string? thread_id = null,
         string? file_id = null
     )
     {
@@ -54,7 +66,7 @@ public static class AzureAIOpenFiles
             ["POST"] = () => proxyService.HttpPostFormAsync(url, deployment.EndpointKey, context, request, requestContext, deployment)
         };
 
-        var result = await ValidateId(assistantService, context.Request.Method, assistant_id, thread_id, file_id, requestContext);
+        var result = await ValidateId(assistantService, context.Request.Method, file_id, requestContext.ApiKey);
         if (result is not null) return result;
 
         if (methodHandlers.TryGetValue(context.Request.Method, out var handler))
@@ -62,9 +74,7 @@ public static class AzureAIOpenFiles
             try
             {
                 var (responseContent, statusCode) = await handler();
-
-                await AssistantIdTracking(assistantService, context, requestPath, requestContext, responseContent, statusCode);
-
+                await AssistantIdTracking(assistantService, context.Request.Method, requestContext, responseContent, statusCode);
                 return new ProxyResult(responseContent, statusCode);
             }
             catch (TaskCanceledException ex) when (ex.InnerException is System.Net.Sockets.SocketException)
@@ -83,54 +93,62 @@ public static class AzureAIOpenFiles
         return OpenAIResult.BadRequest("Unsupported HTTP method: " + context.Request.Method);
     }
 
-    private static async Task<IResult?> ValidateId(IAssistantService assistantService, string method, string? assistant_id, string? thread_id, string? file_id, RequestContext requestContext)
+    /// <summary>
+    /// Validates the file identifier based on the HTTP method and API key.
+    /// </summary>
+    /// <param name="assistantService">The assistant service for checking file existence and ownership.</param>
+    /// <param name="method">The HTTP method of the request.</param>
+    /// <param name="file_id">The file identifier from the route.</param>
+    /// <param name="ApiKey">The API key of the requester.</param>
+    /// <returns>An <see cref="IResult"/> representing the validation result, or null if validation passes.</returns>
+    private static async Task<IResult?> ValidateId(IAssistantService assistantService, string method, string? file_id, string ApiKey)
     {
-        string[] validateMethods = ["POST", "DELETE"];
+        if (file_id is null)
+            return null;
 
-        if (validateMethods.Contains(method))
+        if (method.Contains("POST"))
         {
-            if (assistant_id is not null)
+            var file = await assistantService.GetIdAsync(ApiKey, file_id.Split("/").First());
+            if (file.Count == 0)
             {
-                var assistant = await assistantService.GetIdAsync(requestContext.ApiKey, assistant_id.Split("/").First());
-                if (assistant.Count == 0)
-                    return OpenAIResult.NotFound("Assistant not found.");
-            }
-            else if (thread_id is not null)
-            {
-                var thread = await assistantService.GetIdAsync(requestContext.ApiKey, thread_id.Split("/").First());
-                if (thread.Count == 0)
-                    return OpenAIResult.NotFound("Thread not found.");
-            }
-            else if (file_id is not null)
-            {
-                var file = await assistantService.GetIdAsync(requestContext.ApiKey, file_id.Split("/").First());
-                if (file.Count == 0)
-                    return OpenAIResult.NotFound("File not found.");
+                return OpenAIResult.NotFound("File not found.");
             }
         }
+
+        // A user can delete if they are the owner of the file or there is no owner
+        // The no owner case is when the file is created by the code interpreter
+        if (method.Contains("DELETE"))
+        {
+            var file = await assistantService.GetIdAsync(file_id.Split("/").First());
+            if (file.Count != 0 && file.First().ApiKey != ApiKey)
+            {
+                return OpenAIResult.NotFound("File not found.");
+            }
+        }
+
         return null;
     }
 
-    private static async Task AssistantIdTracking(IAssistantService assistantService, HttpContext context, string requestPath, RequestContext requestContext, string responseContent, int statusCode)
+    /// <summary>
+    /// Tracks file operations by updating or deleting the file ID in the assistant service.
+    /// </summary>
+    /// <param name="assistantService">The assistant service for managing file IDs.</param>
+    /// <param name="method">The HTTP method of the request.</param>
+    /// <param name="requestContext">The context of the request.</param>
+    /// <param name="responseContent">The content of the response.</param>
+    /// <param name="statusCode">The HTTP status code of the response.</param>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    private static async Task AssistantIdTracking(IAssistantService assistantService, string method, RequestContext requestContext, string responseContent, int statusCode)
     {
         if (statusCode != 200) return;
 
-        var assistantIdPaths = new[] { "openai/threads", "openai/assistants", "openai/files" };
-
-        if (context.Request.Method == "POST" && assistantIdPaths.Contains(requestPath))
+        if (method == "POST")
         {
             await assistantService.AddIdAsync(requestContext.ApiKey, responseContent);
         }
-        else if (context.Request.Method == "DELETE")
+        else if (method == "DELETE")
         {
-            foreach (var path in assistantIdPaths)
-            {
-                if (requestPath.StartsWith(path))
-                {
-                    await assistantService.DeleteIdAsync(requestContext.ApiKey, responseContent);
-                    break;
-                }
-            }
+            await assistantService.DeleteIdAsync(requestContext.ApiKey, responseContent);
         }
     }
 }

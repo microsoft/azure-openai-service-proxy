@@ -6,8 +6,16 @@ using AzureAIProxy.Services;
 
 namespace AzureAIProxy.Routes;
 
+/// <summary>
+/// Defines routes and handling logic for interacting with Azure OpenAI assistants and threads.
+/// </summary>
 public static class AzureAIOpenAIAssistants
 {
+    /// <summary>
+    /// Maps routes for assistant and thread operations under the "/openai" path.
+    /// </summary>
+    /// <param name="builder">The route group builder to configure the routes.</param>
+    /// <returns>The updated route group builder.</returns>
     public static RouteGroupBuilder MapAzureOpenAIAssistantsRoutes(this RouteGroupBuilder builder)
     {
         var openAiPaths = new[] { "/assistants/{*assistant_id}", "/threads/{*thread_id}" };
@@ -22,6 +30,17 @@ public static class AzureAIOpenAIAssistants
         return builder;
     }
 
+    /// <summary>
+    /// Handles HTTP requests for assistant and thread operations by routing them to the appropriate method based on the request type.
+    /// </summary>
+    /// <param name="catalogService">The catalog service for retrieving deployment information.</param>
+    /// <param name="proxyService">The proxy service for forwarding requests.</param>
+    /// <param name="assistantService">The assistant service for managing assistant and thread IDs.</param>
+    /// <param name="context">The HTTP context of the request.</param>
+    /// <param name="requestJsonDoc">The optional JSON document in the request body.</param>
+    /// <param name="assistant_id">The optional assistant identifier from the route.</param>
+    /// <param name="thread_id">The optional thread identifier from the route.</param>
+    /// <returns>An <see cref="IResult"/> representing the result of the operation.</returns>
     [ApiKeyAuthorize]
     private static async Task<IResult> CreateThreadAsync(
         [FromServices] ICatalogService catalogService,
@@ -30,8 +49,7 @@ public static class AzureAIOpenAIAssistants
         HttpContext context,
         [FromBody] JsonDocument? requestJsonDoc = null,
         string? assistant_id = null,
-        string? thread_id = null,
-        string? file_id = null
+        string? thread_id = null
     )
     {
         var requestPath = context.Request.Path.Value!.Split("/api/v1/").Last();
@@ -54,7 +72,7 @@ public static class AzureAIOpenAIAssistants
             ["POST"] = () => proxyService.HttpPostAsync(url, deployment.EndpointKey, context, requestJsonDoc!, requestContext, deployment)
         };
 
-        var result = await ValidateId(assistantService, context.Request.Method, assistant_id, thread_id, file_id, requestContext);
+        var result = await ValidateId(assistantService, context.Request.Method, assistant_id, thread_id, requestContext);
         if (result is not null) return result;
 
         if (methodHandlers.TryGetValue(context.Request.Method, out var handler))
@@ -83,7 +101,16 @@ public static class AzureAIOpenAIAssistants
         return OpenAIResult.BadRequest("Unsupported HTTP method: " + context.Request.Method);
     }
 
-    private static async Task<IResult?> ValidateId(IAssistantService assistantService, string method, string? assistant_id, string? thread_id, string? file_id, RequestContext requestContext)
+    /// <summary>
+    /// Validates the assistant or thread identifier based on the HTTP method and API key.
+    /// </summary>
+    /// <param name="assistantService">The assistant service for checking assistant and thread existence.</param>
+    /// <param name="method">The HTTP method of the request.</param>
+    /// <param name="assistant_id">The optional assistant identifier from the route.</param>
+    /// <param name="thread_id">The optional thread identifier from the route.</param>
+    /// <param name="requestContext">The context of the request.</param>
+    /// <returns>An <see cref="IResult"/> representing the validation result, or null if validation passes.</returns>
+    private static async Task<IResult?> ValidateId(IAssistantService assistantService, string method, string? assistant_id, string? thread_id, RequestContext requestContext)
     {
         string[] validateMethods = ["POST", "DELETE"];
 
@@ -101,21 +128,25 @@ public static class AzureAIOpenAIAssistants
                 if (thread.Count == 0)
                     return OpenAIResult.NotFound("Thread not found.");
             }
-            else if (file_id is not null)
-            {
-                var file = await assistantService.GetIdAsync(requestContext.ApiKey, file_id.Split("/").First());
-                if (file.Count == 0)
-                    return OpenAIResult.NotFound("File not found.");
-            }
         }
         return null;
     }
 
+    /// <summary>
+    /// Tracks assistant or thread operations by updating or deleting the ID in the assistant service.
+    /// </summary>
+    /// <param name="assistantService">The assistant service for managing assistant and thread IDs.</param>
+    /// <param name="context">The HTTP context of the request.</param>
+    /// <param name="requestPath">The path of the request.</param>
+    /// <param name="requestContext">The context of the request.</param>
+    /// <param name="responseContent">The content of the response.</param>
+    /// <param name="statusCode">The HTTP status code of the response.</param>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     private static async Task AssistantIdTracking(IAssistantService assistantService, HttpContext context, string requestPath, RequestContext requestContext, string responseContent, int statusCode)
     {
         if (statusCode != 200) return;
 
-        var assistantIdPaths = new[] { "openai/threads", "openai/assistants", "openai/files" };
+        var assistantIdPaths = new[] { "openai/threads", "openai/assistants" };
 
         if (context.Request.Method == "POST" && assistantIdPaths.Contains(requestPath))
         {
