@@ -47,6 +47,12 @@ public class CatalogService(
         return result;
     }
 
+    /// <summary>
+    /// Retrieves the deployment details for a specific event.
+    /// </summary>
+    /// <param name="eventId">The unique identifier for the event.</param>
+    /// <returns>A <see cref="Task"/> representing an asynchronous operation resulting in
+    /// a nullable <see cref="Deployment"/> object, if found; otherwise, null.</returns>
     public async Task<Deployment?> GetEventAssistantAsync(string eventId)
     {
         if (memoryCache.TryGetValue($"{CatalogAssistantEventKey}+{eventId}", out Deployment? cachedValue))
