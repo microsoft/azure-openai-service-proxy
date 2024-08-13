@@ -488,8 +488,7 @@ ALTER VIEW aoai.active_attendee_growth_view OWNER TO azure_pg_admin;
 CREATE TABLE aoai.assistant (
     id character varying(64) NOT NULL,
     api_key character varying(36) NOT NULL,
-    creation_timestamp timestamp without time zone DEFAULT now() NOT NULL,
-    accessed_timestamp timestamp without time zone DEFAULT now() NOT NULL
+    creation_timestamp timestamp without time zone DEFAULT now() NOT NULL
 );
 
 ALTER TABLE aoai.assistant OWNER TO azure_pg_admin;
