@@ -120,9 +120,14 @@ export const SystemCard = ({
       <Card header="OpenAI Functions">
         {!editFunctions && (
           <div onClick={() => setEditFunctions(true)}>
-            <SyntaxHighlighter language="json" style={solarizedlight}>
+            <SyntaxHighlighter
+              language="json"
+              style={solarizedlight}
+              wrapLines={true}
+              lineProps={{ style: { whiteSpace: 'pre-wrap' } }}
+            >
               {functions === ""
-                ? "[]"
+                ? ""
                 : JSON.stringify(JSON.parse(functions), null, 2)}
             </SyntaxHighlighter>
           </div>
@@ -133,13 +138,13 @@ export const SystemCard = ({
               style={{ width: "100%", marginBottom: "24px" }}
               resize="vertical"
               textarea={{ rows: 10, style: { maxHeight: "fit-content" } }}
-              value={functions || `[]`}
+              value={functions || ``}
               onChange={(_, data) => {
                 setFunctions(data.value);
               }}
             />
 
-            <div style={{ marginBottom: "0px", textAlign: "left", padding: "" }}>
+            <div style={{ marginBottom: "0px", textAlign: "center", padding: "" }}>
               <Button
                 icon={<Save24Regular />}
                 iconPosition="before"
