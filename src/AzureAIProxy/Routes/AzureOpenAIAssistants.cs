@@ -21,7 +21,7 @@ public static class AzureAIOpenAIAssistants
     /// <returns>The updated route group builder.</returns>
     public static RouteGroupBuilder MapAzureOpenAIAssistantsRoutes(this RouteGroupBuilder builder)
     {
-        var openAiPaths = new[] { "/assistants/{*assistant_id}", "/threads/{*thread_id}" };
+        var openAiPaths = new[] { "/assistants/{*assistantId}", "/threads/{*threadId}" };
         var openAIGroup = builder.MapGroup("/openai");
 
         foreach (var path in openAiPaths)
@@ -41,8 +41,8 @@ public static class AzureAIOpenAIAssistants
     /// <param name="assistantService">The assistant service for managing assistant and thread IDs.</param>
     /// <param name="context">The HTTP context of the request.</param>
     /// <param name="requestJsonDoc">The optional JSON document in the request body.</param>
-    /// <param name="assistant_id">The optional assistant identifier from the route.</param>
-    /// <param name="thread_id">The optional thread identifier from the route.</param>
+    /// <param name="assistantId">The optional assistant identifier from the route.</param>
+    /// <param name="threadId">The optional thread identifier from the route.</param>
     /// <returns>An <see cref="IResult"/> representing the result of the operation.</returns>
     [ApiKeyAuthorize]
     private static async Task<IResult> CreateThreadAsync(
@@ -51,8 +51,8 @@ public static class AzureAIOpenAIAssistants
         [FromServices] IAssistantService assistantService,
         HttpContext context,
         [FromBody] JsonDocument? requestJsonDoc = null,
-        string? assistant_id = null,
-        string? thread_id = null
+        string? assistantId = null,
+        string? threadId = null
     )
     {
         var requestPath = context.Request.Path.Value!.Split("/api/v1/").Last();
@@ -74,7 +74,7 @@ public static class AzureAIOpenAIAssistants
             [HttpMethod.Post.Method] = () => proxyService.HttpPostAsync(url, deployment.EndpointKey, context, requestJsonDoc!, requestContext, deployment)
         };
 
-        var result = await ValidateId(assistantService, context.Request.Method, assistant_id, thread_id, requestContext);
+        var result = await ValidateId(assistantService, context.Request.Method, assistantId, threadId, requestContext);
         if (result is not null) return result;
 
         if (methodHandlers.TryGetValue(context.Request.Method, out var handler))
@@ -108,23 +108,23 @@ public static class AzureAIOpenAIAssistants
     /// </summary>
     /// <param name="assistantService">The assistant service for checking assistant and thread existence.</param>
     /// <param name="method">The HTTP method of the request.</param>
-    /// <param name="assistant_id">The optional assistant identifier from the route.</param>
-    /// <param name="thread_id">The optional thread identifier from the route.</param>
+    /// <param name="assistantId">The optional assistant identifier from the route.</param>
+    /// <param name="threadId">The optional thread identifier from the route.</param>
     /// <param name="requestContext">The context of the request.</param>
     /// <returns>An <see cref="IResult"/> representing the validation result, or null if validation passes.</returns>
-    private static async Task<IResult?> ValidateId(IAssistantService assistantService, string method, string? assistant_id, string? thread_id, RequestContext requestContext)
+    private static async Task<IResult?> ValidateId(IAssistantService assistantService, string method, string? assistantId, string? threadId, RequestContext requestContext)
     {
         if (validMethods.Contains(method))
         {
-            if (assistant_id is not null)
+            if (assistantId is not null)
             {
-                var assistant = await assistantService.GetIdAsync(requestContext.ApiKey, assistant_id.Split("/").First());
+                var assistant = await assistantService.GetIdAsync(requestContext.ApiKey, assistantId.Split("/").First());
                 if (assistant is null)
                     return OpenAIResult.NotFound("Assistant not found.");
             }
-            else if (thread_id is not null)
+            else if (threadId is not null)
             {
-                var thread = await assistantService.GetIdAsync(requestContext.ApiKey, thread_id.Split("/").First());
+                var thread = await assistantService.GetIdAsync(requestContext.ApiKey, threadId.Split("/").First());
                 if (thread is null)
                     return OpenAIResult.NotFound("Thread not found.");
             }

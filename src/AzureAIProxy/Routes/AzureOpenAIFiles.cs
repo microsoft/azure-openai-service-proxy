@@ -19,7 +19,7 @@ public static class AzureAIOpenFiles
     /// <returns>The updated route group builder.</returns>
     public static RouteGroupBuilder MapAzureOpenAIFilesRoutes(this RouteGroupBuilder builder)
     {
-        var openAIGroup = builder.MapGroup("/openai/files/{*file_id}");
+        var openAIGroup = builder.MapGroup("/openai/files/{*fileId}");
 
         openAIGroup.MapPost("", CreateThreadAsync);
         openAIGroup.MapGet("", CreateThreadAsync);
@@ -36,7 +36,7 @@ public static class AzureAIOpenFiles
     /// <param name="assistantService">The assistant service for managing file IDs.</param>
     /// <param name="context">The HTTP context of the request.</param>
     /// <param name="request">The HTTP request.</param>
-    /// <param name="file_id">The optional file identifier from the route.</param>
+    /// <param name="fileId">The optional file identifier from the route.</param>
     /// <returns>An <see cref="IResult"/> representing the result of the operation.</returns>
     [ApiKeyAuthorize]
     private static async Task<IResult> CreateThreadAsync(
@@ -45,7 +45,7 @@ public static class AzureAIOpenFiles
         [FromServices] IAssistantService assistantService,
         HttpContext context,
         HttpRequest request,
-        string? file_id = null
+        string? fileId = null
     )
     {
         var requestPath = context.Request.Path.Value!.Split("/api/v1/").Last();
@@ -67,7 +67,7 @@ public static class AzureAIOpenFiles
             [HttpMethod.Post.Method] = () => proxyService.HttpPostFormAsync(url, deployment.EndpointKey, context, request, requestContext, deployment)
         };
 
-        var result = await ValidateId(assistantService, context.Request.Method, file_id, requestContext.ApiKey);
+        var result = await ValidateId(assistantService, context.Request.Method, fileId, requestContext.ApiKey);
         if (result is not null) return result;
 
         if (methodHandlers.TryGetValue(context.Request.Method, out var handler))
