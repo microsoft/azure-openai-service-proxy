@@ -11,6 +11,9 @@ namespace AzureAIProxy.Routes;
 /// </summary>
 public static class AzureAIOpenAIAssistants
 {
+    static readonly string[] validMethods = [HttpMethod.Post.Method, HttpMethod.Delete.Method];
+    static readonly string[] assistantIdPaths = ["openai/threads", "openai/assistants"];
+
     /// <summary>
     /// Maps routes for assistant and thread operations under the "/openai" path.
     /// </summary>
@@ -55,8 +58,7 @@ public static class AzureAIOpenAIAssistants
         var requestPath = context.Request.Path.Value!.Split("/api/v1/").Last();
         var requestContext = (RequestContext)context.Items["RequestContext"]!;
 
-        var deployments = await catalogService.GetEventAssistantEndpoint(requestContext.EventId);
-        var deployment = deployments.FirstOrDefault();
+        var deployment = await catalogService.GetEventAssistantEndpointAsync(requestContext.EventId);
         if (deployment is null)
             return OpenAIResult.NotFound("No OpenAI Assistant deployment found for the event.");
 
@@ -67,9 +69,9 @@ public static class AzureAIOpenAIAssistants
 
         var methodHandlers = new Dictionary<string, Func<Task<(string, int)>>>
         {
-            ["DELETE"] = () => proxyService.HttpDeleteAsync(url, deployment.EndpointKey, context, requestContext, deployment),
-            ["GET"] = () => proxyService.HttpGetAsync(url, deployment.EndpointKey, context, requestContext, deployment),
-            ["POST"] = () => proxyService.HttpPostAsync(url, deployment.EndpointKey, context, requestJsonDoc!, requestContext, deployment)
+            [HttpMethod.Delete.Method] = () => proxyService.HttpDeleteAsync(url, deployment.EndpointKey, context, requestContext, deployment),
+            [HttpMethod.Get.Method] = () => proxyService.HttpGetAsync(url, deployment.EndpointKey, context, requestContext, deployment),
+            [HttpMethod.Post.Method] = () => proxyService.HttpPostAsync(url, deployment.EndpointKey, context, requestJsonDoc!, requestContext, deployment)
         };
 
         var result = await ValidateId(assistantService, context.Request.Method, assistant_id, thread_id, requestContext);
@@ -98,7 +100,7 @@ public static class AzureAIOpenAIAssistants
                 return OpenAIResult.ServiceUnavailable("The request failed: " + ex.Message);
             }
         }
-        return OpenAIResult.BadRequest("Unsupported HTTP method: " + context.Request.Method);
+        return OpenAIResult.MethodNotAllowed("Unsupported HTTP method: " + context.Request.Method);
     }
 
     /// <summary>
@@ -112,20 +114,18 @@ public static class AzureAIOpenAIAssistants
     /// <returns>An <see cref="IResult"/> representing the validation result, or null if validation passes.</returns>
     private static async Task<IResult?> ValidateId(IAssistantService assistantService, string method, string? assistant_id, string? thread_id, RequestContext requestContext)
     {
-        string[] validateMethods = ["POST", "DELETE"];
-
-        if (validateMethods.Contains(method))
+        if (validMethods.Contains(method))
         {
             if (assistant_id is not null)
             {
                 var assistant = await assistantService.GetIdAsync(requestContext.ApiKey, assistant_id.Split("/").First());
-                if (assistant.Count == 0)
+                if (assistant is null)
                     return OpenAIResult.NotFound("Assistant not found.");
             }
             else if (thread_id is not null)
             {
                 var thread = await assistantService.GetIdAsync(requestContext.ApiKey, thread_id.Split("/").First());
-                if (thread.Count == 0)
+                if (thread is null)
                     return OpenAIResult.NotFound("Thread not found.");
             }
         }
@@ -146,13 +146,11 @@ public static class AzureAIOpenAIAssistants
     {
         if (statusCode != 200) return;
 
-        var assistantIdPaths = new[] { "openai/threads", "openai/assistants" };
-
-        if (context.Request.Method == "POST" && assistantIdPaths.Contains(requestPath))
+        if (context.Request.Method == HttpMethod.Post.Method && assistantIdPaths.Contains(requestPath))
         {
             await assistantService.AddIdAsync(requestContext.ApiKey, responseContent);
         }
-        else if (context.Request.Method == "DELETE")
+        else if (context.Request.Method == HttpMethod.Delete.Method)
         {
             foreach (var path in assistantIdPaths)
             {

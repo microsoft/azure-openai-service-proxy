@@ -10,6 +10,8 @@ namespace AzureAIProxy.Routes;
 /// </summary>
 public static class AzureAIOpenFiles
 {
+    static readonly string[] validateMethods = [HttpMethod.Post.Method, HttpMethod.Delete.Method];
+
     /// <summary>
     /// Maps routes for file operations under the "/openai/files/{file_id}" path.
     /// </summary>
@@ -17,11 +19,11 @@ public static class AzureAIOpenFiles
     /// <returns>The updated route group builder.</returns>
     public static RouteGroupBuilder MapAzureOpenAIFilesRoutes(this RouteGroupBuilder builder)
     {
-        var openAIGroup = builder.MapGroup("/openai");
+        var openAIGroup = builder.MapGroup("/openai/files/{*file_id}");
 
-        openAIGroup.MapPost("/files/{*file_id}", CreateThreadAsync);
-        openAIGroup.MapGet("/files/{*file_id}", CreateThreadAsync);
-        openAIGroup.MapDelete("/files/{*file_id}", CreateThreadAsync);
+        openAIGroup.MapPost("", CreateThreadAsync);
+        openAIGroup.MapGet("", CreateThreadAsync);
+        openAIGroup.MapDelete("", CreateThreadAsync);
 
         return builder;
     }
@@ -49,8 +51,7 @@ public static class AzureAIOpenFiles
         var requestPath = context.Request.Path.Value!.Split("/api/v1/").Last();
         var requestContext = (RequestContext)context.Items["RequestContext"]!;
 
-        var deployments = await catalogService.GetEventAssistantEndpoint(requestContext.EventId);
-        var deployment = deployments.FirstOrDefault();
+        var deployment = await catalogService.GetEventAssistantEndpointAsync(requestContext.EventId);
         if (deployment is null)
             return OpenAIResult.NotFound("No OpenAI Assistant deployment found for the event.");
 
@@ -61,9 +62,9 @@ public static class AzureAIOpenFiles
 
         var methodHandlers = new Dictionary<string, Func<Task<(string, int)>>>
         {
-            ["DELETE"] = () => proxyService.HttpDeleteAsync(url, deployment.EndpointKey, context, requestContext, deployment),
-            ["GET"] = () => proxyService.HttpGetAsync(url, deployment.EndpointKey, context, requestContext, deployment),
-            ["POST"] = () => proxyService.HttpPostFormAsync(url, deployment.EndpointKey, context, request, requestContext, deployment)
+            [HttpMethod.Delete.Method] = () => proxyService.HttpDeleteAsync(url, deployment.EndpointKey, context, requestContext, deployment),
+            [HttpMethod.Get.Method] = () => proxyService.HttpGetAsync(url, deployment.EndpointKey, context, requestContext, deployment),
+            [HttpMethod.Post.Method] = () => proxyService.HttpPostFormAsync(url, deployment.EndpointKey, context, request, requestContext, deployment)
         };
 
         var result = await ValidateId(assistantService, context.Request.Method, file_id, requestContext.ApiKey);
@@ -90,7 +91,7 @@ public static class AzureAIOpenFiles
                 return OpenAIResult.ServiceUnavailable("The request failed: " + ex.Message);
             }
         }
-        return OpenAIResult.BadRequest("Unsupported HTTP method: " + context.Request.Method);
+        return OpenAIResult.MethodNotAllowed("Unsupported HTTP method: " + context.Request.Method);
     }
 
     /// <summary>
@@ -106,10 +107,10 @@ public static class AzureAIOpenFiles
         if (file_id is null)
             return null;
 
-        if (method.Contains("POST"))
+        if (method == HttpMethod.Post.Method)
         {
             var file = await assistantService.GetIdAsync(ApiKey, file_id.Split("/").First());
-            if (file.Count == 0)
+            if (file is null)
             {
                 return OpenAIResult.NotFound("File not found.");
             }
@@ -117,10 +118,10 @@ public static class AzureAIOpenFiles
 
         // A user can delete if they are the owner of the file or there is no owner
         // The no owner case is when the file is created by the code interpreter
-        if (method.Contains("DELETE"))
+        if (method == HttpMethod.Delete.Method)
         {
             var file = await assistantService.GetIdAsync(file_id.Split("/").First());
-            if (file.Count != 0 && file.First().ApiKey != ApiKey)
+            if (file is not null && file.ApiKey != ApiKey)
             {
                 return OpenAIResult.NotFound("File not found.");
             }
@@ -142,11 +143,11 @@ public static class AzureAIOpenFiles
     {
         if (statusCode != 200) return;
 
-        if (method == "POST")
+        if (method == HttpMethod.Post.Method)
         {
             await assistantService.AddIdAsync(requestContext.ApiKey, responseContent);
         }
-        else if (method == "DELETE")
+        else if (method == HttpMethod.Delete.Method)
         {
             await assistantService.DeleteIdAsync(requestContext.ApiKey, responseContent);
         }

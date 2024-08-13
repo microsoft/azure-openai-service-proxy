@@ -4,8 +4,8 @@ namespace AzureAIProxy.Services;
 
 public interface IAssistantService
 {
-    Task AddIdAsync(string api_key, string responseContent);
-    Task DeleteIdAsync(string api_key, string responseContent);
-    Task<List<Assistant>> GetIdAsync(string api_key, string id);
-    Task<List<Assistant>> GetIdAsync(string id);
+    Task AddIdAsync(string apiKey, string responseContent);
+    Task DeleteIdAsync(string apiKey, string responseContent);
+    Task<Assistant?> GetIdAsync(string apiKey, string id);
+    Task<Assistant?> GetIdAsync(string id);
 }

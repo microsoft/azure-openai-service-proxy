@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
+using System.Web;
 using AzureAIProxy.Shared.Database;
 using Microsoft.Extensions.Primitives;
 
@@ -119,7 +120,7 @@ public class ProxyService(IHttpClientFactory httpClientFactory, IMetricService m
         var form = await request.ReadFormAsync();
         var file = form.Files.GetFile("file");
 
-        if (file != null && file.Length > 0)
+        if (file is not null && file.Length > 0)
         {
             var requestUrlWithQuery = AppendQueryParameters(requestUrl, context);
 
@@ -135,7 +136,8 @@ public class ProxyService(IHttpClientFactory httpClientFactory, IMetricService m
 
             foreach (var key in form.Keys.Where(k => k != "file" && !StringValues.IsNullOrEmpty(form[k])))
             {
-                var fieldContent = new StringContent(form[key]!);
+                var encodedValue = HttpUtility.HtmlEncode(form[key]!);
+                var fieldContent = new StringContent(encodedValue);
                 multipartContent.Add(fieldContent, key);
             }
 

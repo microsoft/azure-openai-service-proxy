@@ -21,7 +21,7 @@ public static class Event
     )
     {
         RequestContext requestContext = (RequestContext)context.Items["RequestContext"]!;
-        var capabilities = await catalogService.GetCapabilities(requestContext.EventId);
+        var capabilities = await catalogService.GetCapabilitiesAsync(requestContext.EventId);
 
         var eventInfo = new EventInfoResponse
         {

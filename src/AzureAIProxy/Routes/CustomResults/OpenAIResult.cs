@@ -17,6 +17,9 @@ public class OpenAIResult(string value, HttpStatusCode statusCode) : IResult
 
     public static OpenAIResult NoContent() => new(string.Empty, HttpStatusCode.NoContent);
 
+    public static OpenAIResult MethodNotAllowed(string message) =>
+        new(message, HttpStatusCode.MethodNotAllowed);
+
     public static OpenAIResult ServiceUnavailable(string message) =>
         new(message, HttpStatusCode.ServiceUnavailable);
 

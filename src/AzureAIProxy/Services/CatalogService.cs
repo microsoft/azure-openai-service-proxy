@@ -44,15 +44,21 @@ public class CatalogService(
         return result;
     }
 
-    public async Task<List<Deployment>> GetEventAssistantEndpoint(string eventId)
+    public async Task<Deployment?> GetEventAssistantEndpointAsync(string eventId)
     {
+        if (memoryCache.TryGetValue($"assistant-deployment+{eventId}", out Deployment? cachedContext))
+            return cachedContext!;
+
         var result = await db.Set<Deployment>()
             .FromSqlRaw(
                 "SELECT * FROM aoai.get_event_openai_assistant(@eventId, @encryptionKey)",
                 new NpgsqlParameter("@eventId", eventId),
                 new NpgsqlParameter("@encryptionKey", EncryptionKey)
             )
-            .ToListAsync();
+            .FirstOrDefaultAsync();
+
+        if (result != null)
+            memoryCache.Set($"assistant-deployment+{eventId}", result, TimeSpan.FromMinutes(4));
 
         return result;
     }
@@ -86,7 +92,7 @@ public class CatalogService(
     /// </summary>
     /// <param name="eventId">The ID of the event.</param>
     /// <returns>A dictionary containing the capabilities for each deployment model type.</returns>
-    public async Task<Dictionary<string, List<string>>> GetCapabilities(string eventId)
+    public async Task<Dictionary<string, List<string>>> GetCapabilitiesAsync(string eventId)
     {
         var deployments = await GetEventCatalogAsync(eventId);
         var capabilities = new Dictionary<string, List<string>>();
