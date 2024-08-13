@@ -120,13 +120,13 @@ public static class AzureAIOpenAIAssistants
             {
                 var assistant = await assistantService.GetIdAsync(requestContext.ApiKey, assistantId.Split("/").First());
                 if (assistant is null)
-                    return OpenAIResult.NotFound("Assistant not found.");
+                    return OpenAIResult.Unauthorized("Unauthorized assistant access.");
             }
             else if (threadId is not null)
             {
                 var thread = await assistantService.GetIdAsync(requestContext.ApiKey, threadId.Split("/").First());
                 if (thread is null)
-                    return OpenAIResult.NotFound("Thread not found.");
+                    return OpenAIResult.Unauthorized("Unauthorized thread access.");
             }
         }
         return null;

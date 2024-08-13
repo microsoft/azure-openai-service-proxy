@@ -110,7 +110,7 @@ public static class AzureAIOpenFiles
             var file = await assistantService.GetIdAsync(ApiKey, file_id.Split("/").First());
             if (file is null)
             {
-                return OpenAIResult.NotFound("File not found.");
+                return OpenAIResult.Unauthorized("Unauthorized file access.");
             }
         }
 
@@ -121,7 +121,7 @@ public static class AzureAIOpenFiles
             var file = await assistantService.GetIdAsync(file_id.Split("/").First());
             if (file is not null && file.ApiKey != ApiKey)
             {
-                return OpenAIResult.NotFound("File not found.");
+                return OpenAIResult.Unauthorized("Unauthorized file access.");
             }
         }
 
