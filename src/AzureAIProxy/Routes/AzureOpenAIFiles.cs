@@ -10,8 +10,6 @@ namespace AzureAIProxy.Routes;
 /// </summary>
 public static class AzureAIOpenFiles
 {
-    static readonly string[] validateMethods = [HttpMethod.Post.Method, HttpMethod.Delete.Method];
-
     /// <summary>
     /// Maps routes for file operations under the "/openai/files/{file_id}" path.
     /// </summary>

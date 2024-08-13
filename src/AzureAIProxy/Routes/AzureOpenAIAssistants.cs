@@ -11,8 +11,8 @@ namespace AzureAIProxy.Routes;
 /// </summary>
 public static class AzureAIOpenAIAssistants
 {
-    static readonly string[] validMethods = [HttpMethod.Post.Method, HttpMethod.Delete.Method];
-    static readonly string[] assistantIdPaths = ["openai/threads", "openai/assistants"];
+    static readonly string[] ValidMethods = [HttpMethod.Post.Method, HttpMethod.Delete.Method];
+    static readonly string[] AssistantIdPaths = ["openai/threads", "openai/assistants"];
 
     /// <summary>
     /// Maps routes for assistant and thread operations under the "/openai" path.
@@ -114,7 +114,7 @@ public static class AzureAIOpenAIAssistants
     /// <returns>An <see cref="IResult"/> representing the validation result, or null if validation passes.</returns>
     private static async Task<IResult?> ValidateId(IAssistantService assistantService, string method, string? assistantId, string? threadId, RequestContext requestContext)
     {
-        if (validMethods.Contains(method))
+        if (ValidMethods.Contains(method))
         {
             if (assistantId is not null)
             {
@@ -146,13 +146,13 @@ public static class AzureAIOpenAIAssistants
     {
         if (statusCode != 200) return;
 
-        if (context.Request.Method == HttpMethod.Post.Method && assistantIdPaths.Contains(requestPath))
+        if (context.Request.Method == HttpMethod.Post.Method && AssistantIdPaths.Contains(requestPath))
         {
             await assistantService.AddIdAsync(requestContext.ApiKey, responseContent);
         }
         else if (context.Request.Method == HttpMethod.Delete.Method)
         {
-            foreach (var path in assistantIdPaths)
+            foreach (var path in AssistantIdPaths)
             {
                 if (requestPath.StartsWith(path))
                 {
