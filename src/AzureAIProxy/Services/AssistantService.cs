@@ -38,7 +38,8 @@ public class AssistantService(AzureAIProxyDbContext db, IMemoryCache memoryCache
         db.Assistants.Add(assistant);
         await db.SaveChangesAsync();
 
-        memoryCache.Set($"{AssistantIdApiKey}+{id}+{apiKey}", assistant, TimeSpan.FromMinutes(10));
+        var cacheKey = $"{AssistantIdApiKey}+{id}+{apiKey}";
+        memoryCache.Set(cacheKey, assistant, TimeSpan.FromMinutes(10));
     }
 
     /// <summary>
@@ -63,8 +64,9 @@ public class AssistantService(AzureAIProxyDbContext db, IMemoryCache memoryCache
             db.Assistants.Remove(assistant);
             await db.SaveChangesAsync();
 
-            if (memoryCache.TryGetValue($"{AssistantIdApiKey}+{id}+{apiKey}", out _))
-                memoryCache.Remove($"{AssistantIdApiKey}+{id}+{apiKey}");
+            var cacheKey = $"{AssistantIdApiKey}+{id}+{apiKey}";
+            if (memoryCache.TryGetValue(cacheKey, out _))
+                memoryCache.Remove(cacheKey);
         }
     }
 
@@ -76,14 +78,16 @@ public class AssistantService(AzureAIProxyDbContext db, IMemoryCache memoryCache
     /// <returns>A task that represents the asynchronous operation. The task result contains a list of assistant records.</returns>
     public async Task<Assistant?> GetIdAsync(string apiKey, string id)
     {
-        if (memoryCache.TryGetValue($"{AssistantIdApiKey}+{id}+{apiKey}", out Assistant? cachedValue))
+        var cacheKey = $"{AssistantIdApiKey}+{id}+{apiKey}";
+
+        if (memoryCache.TryGetValue(cacheKey, out Assistant? cachedValue))
             return cachedValue!;
 
         var result = await db.Assistants
             .FirstOrDefaultAsync(a => a.ApiKey == apiKey && a.Id == id);
 
         if (result is not null)
-            memoryCache.Set($"{AssistantIdApiKey}+{id}+{apiKey}", result, TimeSpan.FromMinutes(10));
+            memoryCache.Set(cacheKey, result, TimeSpan.FromMinutes(10));
 
         return result;
     }

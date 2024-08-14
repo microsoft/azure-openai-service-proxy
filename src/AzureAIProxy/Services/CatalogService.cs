@@ -31,7 +31,9 @@ public class CatalogService(
         string deploymentName
     )
     {
-        if (memoryCache.TryGetValue($"{CatalogEventDeploymentKey}+{eventId}+{deploymentName}", out List<Deployment>? cachedValue))
+        var cacheKey = $"{CatalogEventDeploymentKey}+{eventId}+{deploymentName}";
+
+        if (memoryCache.TryGetValue(cacheKey, out List<Deployment>? cachedValue))
             return cachedValue!;
 
         var result = await db.Set<Deployment>()
@@ -43,7 +45,7 @@ public class CatalogService(
             )
             .ToListAsync();
 
-        memoryCache.Set($"{CatalogEventDeploymentKey}+{eventId}+{deploymentName}", result, TimeSpan.FromMinutes(1));
+        memoryCache.Set(cacheKey, result, TimeSpan.FromMinutes(1));
         return result;
     }
 
@@ -55,7 +57,9 @@ public class CatalogService(
     /// a nullable <see cref="Deployment"/> object, if found; otherwise, null.</returns>
     public async Task<Deployment?> GetEventAssistantAsync(string eventId)
     {
-        if (memoryCache.TryGetValue($"{CatalogAssistantEventKey}+{eventId}", out Deployment? cachedValue))
+        var cacheKey = $"{CatalogAssistantEventKey}+{eventId}";
+
+        if (memoryCache.TryGetValue(cacheKey, out Deployment? cachedValue))
             return cachedValue!;
 
         var result = await db.Set<Deployment>()
@@ -67,7 +71,7 @@ public class CatalogService(
             .FirstOrDefaultAsync();
 
         if (result is not null)
-            memoryCache.Set($"{CatalogAssistantEventKey}+{eventId}", result, TimeSpan.FromMinutes(4));
+            memoryCache.Set(cacheKey, result, TimeSpan.FromMinutes(4));
 
         return result;
     }
