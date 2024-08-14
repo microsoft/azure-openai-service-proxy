@@ -66,7 +66,7 @@ public class CatalogService(
             )
             .FirstOrDefaultAsync();
 
-        if (result != null)
+        if (result is not null)
             memoryCache.Set($"{CatalogAssistantEventKey}+{eventId}", result, TimeSpan.FromMinutes(4));
 
         return result;

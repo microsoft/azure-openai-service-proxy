@@ -58,7 +58,7 @@ public class AssistantService(AzureAIProxyDbContext db, IMemoryCache memoryCache
         var assistant = await db.Assistants
             .FirstOrDefaultAsync(a => a.ApiKey == apiKey && a.Id == id);
 
-        if (assistant != null)
+        if (assistant is not null)
         {
             db.Assistants.Remove(assistant);
             await db.SaveChangesAsync();
@@ -82,7 +82,7 @@ public class AssistantService(AzureAIProxyDbContext db, IMemoryCache memoryCache
         var result = await db.Assistants
             .FirstOrDefaultAsync(a => a.ApiKey == apiKey && a.Id == id);
 
-        if (result != null)
+        if (result is not null)
             memoryCache.Set($"{AssistantIdApiKey}+{id}+{apiKey}", result, TimeSpan.FromMinutes(10));
 
         return result;
