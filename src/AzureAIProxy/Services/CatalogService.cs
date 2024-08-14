@@ -12,6 +12,9 @@ public class CatalogService(
     IMemoryCache memoryCache
 ) : ICatalogService
 {
+    const string CatalogAssistantEventKey = "catalog+assistant+event+key";
+    const string CatalogEventDeploymentKey = "catalog+event+deployment+key";
+
     private readonly string EncryptionKey =
         configuration["PostgresEncryptionKey"]
         ?? throw new ArgumentNullException("PostgresEncryptionKey");
@@ -28,8 +31,10 @@ public class CatalogService(
         string deploymentName
     )
     {
-        if (memoryCache.TryGetValue(eventId + deploymentName, out List<Deployment>? cachedContext))
-            return cachedContext!;
+        var cacheKey = $"{CatalogEventDeploymentKey}+{eventId}+{deploymentName}";
+
+        if (memoryCache.TryGetValue(cacheKey, out List<Deployment>? cachedValue))
+            return cachedValue!;
 
         var result = await db.Set<Deployment>()
             .FromSqlRaw(
@@ -40,7 +45,34 @@ public class CatalogService(
             )
             .ToListAsync();
 
-        memoryCache.Set(eventId + deploymentName, result, TimeSpan.FromMinutes(1));
+        memoryCache.Set(cacheKey, result, TimeSpan.FromMinutes(1));
+        return result;
+    }
+
+    /// <summary>
+    /// Retrieves the deployment details for a specific event.
+    /// </summary>
+    /// <param name="eventId">The unique identifier for the event.</param>
+    /// <returns>A <see cref="Task"/> representing an asynchronous operation resulting in
+    /// a nullable <see cref="Deployment"/> object, if found; otherwise, null.</returns>
+    public async Task<Deployment?> GetEventAssistantAsync(string eventId)
+    {
+        var cacheKey = $"{CatalogAssistantEventKey}+{eventId}";
+
+        if (memoryCache.TryGetValue(cacheKey, out Deployment? cachedValue))
+            return cachedValue!;
+
+        var result = await db.Set<Deployment>()
+            .FromSqlRaw(
+                "SELECT * FROM aoai.get_event_openai_assistant(@eventId, @encryptionKey)",
+                new NpgsqlParameter("@eventId", eventId),
+                new NpgsqlParameter("@encryptionKey", EncryptionKey)
+            )
+            .FirstOrDefaultAsync();
+
+        if (result is not null)
+            memoryCache.Set(cacheKey, result, TimeSpan.FromMinutes(4));
+
         return result;
     }
 
@@ -73,7 +105,7 @@ public class CatalogService(
     /// </summary>
     /// <param name="eventId">The ID of the event.</param>
     /// <returns>A dictionary containing the capabilities for each deployment model type.</returns>
-    public async Task<Dictionary<string, List<string>>> GetCapabilities(string eventId)
+    public async Task<Dictionary<string, List<string>>> GetCapabilitiesAsync(string eventId)
     {
         var deployments = await GetEventCatalogAsync(eventId);
         var capabilities = new Dictionary<string, List<string>>();

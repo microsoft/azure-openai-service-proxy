@@ -15,7 +15,9 @@ public enum ModelType
     [PgName("openai-completion")]
     OpenAI_Completion,
     [PgName("azure-ai-search")]
-    Azure_AI_Search
+    Azure_AI_Search,
+    [PgName("openai-assistant")]
+    OpenAI_Assistant
 }
 
 public static class ModelTypeExtensions
@@ -27,9 +29,10 @@ public static class ModelTypeExtensions
             "openai-chat" => ModelType.OpenAI_Chat,
             "openai-embedding" => ModelType.OpenAI_Embedding,
             "openai-dalle3" => ModelType.OpenAI_Dalle3,
-            "openai-whisper" => ModelType.OpenAI_Whisper,
-            "openai-completion" => ModelType.OpenAI_Completion,
+            "openai-assistant" => ModelType.OpenAI_Assistant,
             "azure-ai-search" => ModelType.Azure_AI_Search,
+            "openai-completion" => ModelType.OpenAI_Completion,
+            // "openai-whisper" => ModelType.OpenAI_Whisper,
             _ => throw new ArgumentOutOfRangeException(nameof(value), value, null)
         };
     }

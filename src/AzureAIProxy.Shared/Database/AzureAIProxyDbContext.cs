@@ -21,6 +21,8 @@ public partial class AzureAIProxyDbContext : DbContext
 
     public virtual DbSet<ActiveAttendeeGrowthView> ActiveAttendeeGrowthViews { get; set; }
 
+    public virtual DbSet<Assistant> Assistants { get; set; }
+
     public virtual DbSet<Event> Events { get; set; }
 
     public virtual DbSet<EventAttendee> EventAttendees { get; set; }
@@ -91,6 +93,22 @@ public partial class AzureAIProxyDbContext : DbContext
         });
 
         // END of Manually added Entities
+
+        modelBuilder.Entity<Assistant>(entity =>
+        {
+            entity.HasKey(e => new { e.Id, e.ApiKey }).HasName("assistant_pkey");
+
+            entity.ToTable("assistant", "aoai");
+
+            entity.Property(e => e.ApiKey)
+                .HasMaxLength(36)
+                .HasColumnName("api_key")
+                .IsRequired();
+            entity.Property(e => e.Id)
+                .HasMaxLength(64)
+                .HasColumnName("id")
+                .IsRequired();
+        });
 
         modelBuilder.Entity<ActiveAttendeeGrowthView>(entity =>
         {

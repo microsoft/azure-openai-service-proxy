@@ -12,7 +12,8 @@ public static class ServicesExtensions
             .AddScoped<IAuthorizeService, AuthorizeService>()
             .AddScoped<IMetricService, MetricService>()
             .AddScoped<IAttendeeService, AttendeeService>()
-            .AddScoped<IEventService, EventService>();
+            .AddScoped<IEventService, EventService>()
+            .AddScoped<IAssistantService, AssistantService>();
 
         if (useMockProxy)
             services.AddScoped<IProxyService, MockProxyService>();

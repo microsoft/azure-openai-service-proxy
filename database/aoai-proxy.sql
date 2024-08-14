@@ -56,7 +56,8 @@ CREATE TYPE aoai.model_type AS ENUM(
     'openai-whisper',
     'openai-completion',
     'openai-instruct',
-    'azure-ai-search'
+    'azure-ai-search',
+    'openai-assistant'
 );
 
 ALTER TYPE aoai.model_type OWNER TO azure_pg_admin;
@@ -342,6 +343,35 @@ $_$;
 ALTER FUNCTION aoai.get_attendee_authorized (p_api_key character varying) OWNER TO azure_pg_admin;
 
 --
+-- Name: get_event_openai_assistant(character varying, character varying); Type: FUNCTION; Schema: aoai; Owner: azure_pg_admin
+--
+
+CREATE FUNCTION aoai.get_event_openai_assistant(p_event_id character varying, p_postgres_encryption_key character varying) RETURNS TABLE(deployment_name character varying, endpoint_url character varying, endpoint_key character varying, model_type aoai.model_type, catalog_id uuid, location character varying)
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+    RETURN QUERY
+    SELECT
+        OC.deployment_name,
+        aoai.pgp_sym_decrypt(OC.endpoint_url_encrypted, p_postgres_encryption_key)::character varying  AS endpoint_url,
+		aoai.pgp_sym_decrypt(OC.endpoint_key_encrypted, p_postgres_encryption_key)::character varying  AS endpoint_key,
+        OC.model_type,
+        OC.catalog_id,
+		OC.location
+    FROM
+        aoai.event_catalog_map EC
+    INNER JOIN
+        aoai.owner_catalog OC ON EC.catalog_id = OC.catalog_id
+    WHERE
+        EC.event_id = p_event_id AND
+		OC.model_type = 'openai-assistant' AND
+        OC.active = true;
+END;
+$$;
+
+ALTER FUNCTION aoai.get_event_openai_assistant(p_event_id character varying, p_postgres_encryption_key character varying) OWNER TO azure_pg_admin;
+
+--
 -- Name: get_event_registration_by_event_id(character varying); Type: FUNCTION; Schema: aoai; Owner: azure_pg_admin
 --
 
@@ -452,6 +482,18 @@ CREATE VIEW aoai.active_attendee_growth_view AS
 ALTER VIEW aoai.active_attendee_growth_view OWNER TO azure_pg_admin;
 
 --
+-- Name: assistant; Type: TABLE; Schema: aoai; Owner: azure_pg_admin
+--
+
+CREATE TABLE aoai.assistant (
+    id character varying(64) NOT NULL,
+    api_key character varying(36) NOT NULL,
+    creation_timestamp timestamp without time zone DEFAULT now() NOT NULL
+);
+
+ALTER TABLE aoai.assistant OWNER TO azure_pg_admin;
+
+--
 -- Name: event; Type: TABLE; Schema: aoai; Owner: azure_pg_admin
 --
 
@@ -558,6 +600,13 @@ CREATE TABLE aoai.owner_event_map (
 );
 
 ALTER TABLE aoai.owner_event_map OWNER TO azure_pg_admin;
+
+--
+-- Name: assistant assistant_pkey; Type: CONSTRAINT; Schema: aoai; Owner: azure_pg_admin
+--
+
+ALTER TABLE ONLY aoai.assistant
+    ADD CONSTRAINT assistant_pkey PRIMARY KEY (id, api_key);
 
 --
 -- Name: event event_pkey; Type: CONSTRAINT; Schema: aoai; Owner: azure_pg_admin
