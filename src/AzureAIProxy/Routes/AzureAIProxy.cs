@@ -7,16 +7,22 @@ using AzureAIProxy.Services;
 
 namespace AzureAIProxy.Routes;
 
-public static class AzureAI
+public static class AzureAIProxy
 {
-    public static RouteGroupBuilder MapAzureOpenAIRoutes(this RouteGroupBuilder builder)
+    public static RouteGroupBuilder MapAzureAIProxyRoutes(this RouteGroupBuilder builder)
     {
+        // Azure AI Search Query Routes
+        builder.MapPost("/indexes/{deploymentName}/docs/search", ProcessRequestAsync);
+        builder.MapPost("/indexes('{deploymentName}')/docs/search.post.search", ProcessRequestAsync);
+
+        // Azure OpenAI Routes
         var openAIGroup = builder.MapGroup("/openai/deployments/{deploymentName}");
         openAIGroup.MapPost("/chat/completions", ProcessRequestAsync);
         openAIGroup.MapPost("/extensions/chat/completions", ProcessRequestAsync);
         openAIGroup.MapPost("/completions", ProcessRequestAsync);
         openAIGroup.MapPost("/embeddings", ProcessRequestAsync);
         openAIGroup.MapPost("/images/generations", ProcessRequestAsync);
+
         return builder;
     }
 
@@ -31,12 +37,7 @@ public static class AzureAI
     {
         using (requestJsonDoc)
         {
-            var routePattern = (context.GetEndpoint() as RouteEndpoint)?.RoutePattern.RawText;
-            var extPath = routePattern?.Split("{deploymentName}").Last();
-
-            if (string.IsNullOrEmpty(extPath))
-                return OpenAIResult.BadRequest("Invalid route pattern.");
-
+            var requestPath = context.Request.Path.Value!.Split("/api/v1/").Last();
             var requestContext = (RequestContext)context.Items["RequestContext"]!;
 
             var streaming = IsStreaming(requestJsonDoc);
@@ -65,7 +66,10 @@ public static class AzureAI
                 );
             }
 
-            var url = GenerateEndpointUrl(deployment, extPath);
+            var url = new UriBuilder(deployment.EndpointUrl.TrimEnd('/'))
+            {
+                Path = requestPath
+            };
 
             try
             {
@@ -128,13 +132,5 @@ public static class AzureAI
             && maxTokensElement.TryGetInt32(out int maxTokens)
             ? maxTokens
             : null;
-    }
-
-    private static UriBuilder GenerateEndpointUrl(Deployment deployment, string extPath)
-    {
-        return new UriBuilder(deployment.EndpointUrl.TrimEnd('/'))
-        {
-            Path = $"/openai/deployments/{deployment.DeploymentName.Trim()}{extPath}"
-        };
     }
 }
