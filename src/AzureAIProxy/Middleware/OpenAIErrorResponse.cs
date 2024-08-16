@@ -3,17 +3,18 @@ using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace AzureAIProxy.Middleware;
 
-public class OpenAIErrorResponse(string value, HttpStatusCode statusCode)
+public class OpenAIErrorResponse(string message, HttpStatusCode statusCode)
 {
-    private readonly JsonHttpResult<OpenAIErrorPayload> innerResult = TypedResults.Json(
-        new OpenAIErrorPayload((int)statusCode, value),
+    private readonly JsonHttpResult<ErrorResponse> innerResult = TypedResults.Json(
+        new ErrorResponse(new ErrorDetails(statusCode.ToString(), message, (int)statusCode)),
         statusCode: (int)statusCode
     );
 
     public static OpenAIErrorResponse BadRequest(string message) =>
         new(message, HttpStatusCode.BadRequest);
 
-    public static OpenAIErrorResponse TooManyRequests(string message) => new(message, HttpStatusCode.TooManyRequests);
+    public static OpenAIErrorResponse TooManyRequests(string message) =>
+        new(message, HttpStatusCode.TooManyRequests);
 
     public static OpenAIErrorResponse Unauthorized(string message) =>
         new(message, HttpStatusCode.Unauthorized);
@@ -21,12 +22,10 @@ public class OpenAIErrorResponse(string value, HttpStatusCode statusCode)
     public async Task WriteAsync(HttpContext httpContext)
     {
         httpContext.Response.StatusCode = (int)innerResult.StatusCode!;
-        await httpContext.Response.WriteAsJsonAsync(new
-        {
-            code = innerResult.StatusCode,
-            message = innerResult.Value
-        });
+        await httpContext.Response.WriteAsJsonAsync(innerResult.Value);
     }
 
-    record OpenAIErrorPayload(int Code, string Message);
+    record ErrorDetails(string Code, string Message, int Status);
+
+    record ErrorResponse(ErrorDetails Error);
 }

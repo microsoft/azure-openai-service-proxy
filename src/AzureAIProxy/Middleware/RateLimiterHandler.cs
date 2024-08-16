@@ -4,8 +4,6 @@ namespace AzureAIProxy.Middleware;
 
 public class RateLimiterHandler(RequestDelegate next)
 {
-    private readonly RequestDelegate _next = next;
-
     public async Task InvokeAsync(HttpContext context)
     {
         RequestContext? requestContext = context.Items["RequestContext"] as RequestContext;
@@ -18,7 +16,7 @@ public class RateLimiterHandler(RequestDelegate next)
         }
         else
         {
-            await _next(context);
+            await next(context);
         }
     }
 }

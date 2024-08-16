@@ -5,8 +5,6 @@ namespace AzureAIProxy.Middleware;
 
 public class LoadProperties(RequestDelegate next)
 {
-    private readonly RequestDelegate _next = next;
-
     public async Task InvokeAsync(HttpContext context)
     {
         JsonDocument? jsonDoc = null;
@@ -40,7 +38,7 @@ public class LoadProperties(RequestDelegate next)
             context.Items["requestPath"]= context.Request.Path.Value!.Split("/api/v1/").Last();
             context.Items["jsonDoc"] = jsonDoc;
 
-            await _next(context);
+            await next(context);
         }
         finally
         {
