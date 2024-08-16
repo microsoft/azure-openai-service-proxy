@@ -7,37 +7,28 @@ using AzureAIProxy.Services;
 
 namespace AzureAIProxy.Routes;
 
-public static class AzureAIProxy
+public static class OpenAIAIProxy
 {
-    public static RouteGroupBuilder MapAzureAIProxyRoutes(this RouteGroupBuilder builder)
+    public static RouteGroupBuilder MapOpenAIProxyRoutes(this RouteGroupBuilder builder)
     {
-        // Azure AI Search Query Routes
-        builder.MapPost("/indexes/{deploymentName}/docs/search", ProcessRequestAsync);
-        builder.MapPost("/indexes('{deploymentName}')/docs/search.post.search", ProcessRequestAsync);
-
-        // Azure OpenAI Routes
-        var openAIGroup = builder.MapGroup("/openai/deployments/{deploymentName}");
-        openAIGroup.MapPost("/chat/completions", ProcessRequestAsync);
-        openAIGroup.MapPost("/extensions/chat/completions", ProcessRequestAsync);
-        openAIGroup.MapPost("/completions", ProcessRequestAsync);
-        openAIGroup.MapPost("/embeddings", ProcessRequestAsync);
-        openAIGroup.MapPost("/images/generations", ProcessRequestAsync);
+        // OpenAI Routes for Mistral chat completions compatibity
+        builder.MapPost("/chat/completions", ProcessRequestAsync);
 
         return builder;
     }
 
-    [ApiKeyAuthorize]
+    [BearerTokenAuthorize]
     private static async Task<IResult> ProcessRequestAsync(
         [FromServices] ICatalogService catalogService,
         [FromServices] IProxyService proxyService,
-        HttpContext context,
-        string deploymentName
+        HttpContext context
     )
     {
         string requestPath = (string)context.Items["requestPath"]!;
         RequestContext requestContext = (RequestContext)context.Items["RequestContext"]!;
         JsonDocument requestJsonDoc = (JsonDocument)context.Items["jsonDoc"]!;
         bool streaming = (bool)context.Items["IsStreaming"]!;
+        string deploymentName = (string)context.Items["ModelName"]!;
 
         var (deployment, eventCatalog) = await catalogService.GetCatalogItemAsync(
             requestContext.EventId,

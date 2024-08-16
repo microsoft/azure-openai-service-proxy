@@ -40,7 +40,6 @@ public static class AzureAIOpenAIAssistants
     /// <param name="proxyService">The proxy service for forwarding requests.</param>
     /// <param name="assistantService">The assistant service for managing assistant and thread IDs.</param>
     /// <param name="context">The HTTP context of the request.</param>
-    /// <param name="requestJsonDoc">The optional JSON document in the request body.</param>
     /// <param name="assistantId">The optional assistant identifier from the route.</param>
     /// <param name="threadId">The optional thread identifier from the route.</param>
     /// <returns>An <see cref="IResult"/> representing the result of the operation.</returns>
@@ -50,13 +49,13 @@ public static class AzureAIOpenAIAssistants
         [FromServices] IProxyService proxyService,
         [FromServices] IAssistantService assistantService,
         HttpContext context,
-        [FromBody] JsonDocument? requestJsonDoc = null,
         string? assistantId = null,
         string? threadId = null
     )
     {
-        var requestPath = context.Request.Path.Value!.Split("/api/v1/").Last();
-        var requestContext = (RequestContext)context.Items["RequestContext"]!;
+        string requestPath = (string)context.Items["requestPath"]!;
+        RequestContext requestContext = (RequestContext)context.Items["RequestContext"]!;
+        JsonDocument requestJsonDoc = (JsonDocument)context.Items["jsonDoc"]!;
 
         var deployment = await catalogService.GetEventAssistantAsync(requestContext.EventId);
         if (deployment is null)

@@ -192,6 +192,7 @@ public class ProxyService(IHttpClientFactory httpClientFactory, IMetricService m
             "application/json"
         );
         requestMessage.Headers.Add("api-key", endpointKey);
+        requestMessage.Headers.Add("Authorization", $"Bearer {endpointKey}");
 
         var response = await httpClient.SendAsync(requestMessage);
         var responseContent = await response.Content.ReadAsStringAsync();

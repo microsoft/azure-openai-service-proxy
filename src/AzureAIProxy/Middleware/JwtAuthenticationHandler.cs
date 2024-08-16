@@ -28,7 +28,7 @@ public class JwtAuthenticationHandler(
 
         Context.Items["RequestContext"] = requestContext;
 
-        var identity = new ClaimsIdentity(null, nameof(ApiKeyAuthenticationHandler));
+        var identity = new ClaimsIdentity(null, nameof(JwtAuthenticationHandler));
         var ticket = new AuthenticationTicket(new ClaimsPrincipal(identity), Scheme.Name);
 
         return AuthenticateResult.Success(ticket);
