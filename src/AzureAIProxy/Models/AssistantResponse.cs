@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace AzureAIProxy.Services;
+namespace AzureAIProxy.Models;
 
 public class AssistantResponse
 {

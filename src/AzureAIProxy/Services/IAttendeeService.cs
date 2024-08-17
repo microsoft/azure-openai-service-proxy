@@ -1,3 +1,5 @@
+using AzureAIProxy.Models;
+
 namespace AzureAIProxy.Services;
 
 public interface IAttendeeService

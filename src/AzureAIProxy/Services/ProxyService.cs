@@ -3,6 +3,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Web;
+using AzureAIProxy.Models;
 using AzureAIProxy.Shared.Database;
 using Microsoft.Extensions.Primitives;
 
@@ -27,7 +28,7 @@ public class ProxyService(IHttpClientFactory httpClientFactory, IMetricService m
     /// <returns>A tuple containing the response content as a string and the HTTP status code.</returns>
     public async Task<(string responseContent, int statusCode)> HttpDeleteAsync(
         UriBuilder requestUrl,
-        string endpointKey,
+        AuthHeader authHeader,
         HttpContext context,
         RequestContext requestContext,
         Deployment deployment
@@ -38,7 +39,7 @@ public class ProxyService(IHttpClientFactory httpClientFactory, IMetricService m
 
         var requestUrlWithQuery = AppendQueryParameters(requestUrl, context);
         using var requestMessage = new HttpRequestMessage(HttpMethod.Delete, requestUrlWithQuery);
-        requestMessage.Headers.Add("api-key", endpointKey);
+        requestMessage.Headers.Add(authHeader.Key, authHeader.Value);
 
         var response = await httpClient.SendAsync(requestMessage);
         var responseContent = await response.Content.ReadAsStringAsync();
@@ -58,7 +59,7 @@ public class ProxyService(IHttpClientFactory httpClientFactory, IMetricService m
 
     public async Task<(string responseContent, int statusCode)> HttpGetAsync(
         UriBuilder requestUrl,
-        string endpointKey,
+        AuthHeader authHeader,
         HttpContext context,
         RequestContext requestContext,
         Deployment deployment
@@ -69,7 +70,7 @@ public class ProxyService(IHttpClientFactory httpClientFactory, IMetricService m
 
         var requestUrlWithQuery = AppendQueryParameters(requestUrl, context);
         using var requestMessage = new HttpRequestMessage(HttpMethod.Get, requestUrlWithQuery);
-        requestMessage.Headers.Add("api-key", endpointKey);
+        requestMessage.Headers.Add(authHeader.Key, authHeader.Value);
 
         var response = await httpClient.SendAsync(requestMessage);
 
@@ -107,7 +108,7 @@ public class ProxyService(IHttpClientFactory httpClientFactory, IMetricService m
     /// <returns>A tuple containing the response content as a string and the HTTP status code.</returns>
     public async Task<(string responseContent, int statusCode)> HttpPostFormAsync(
         UriBuilder requestUrl,
-        string endpointKey,
+        AuthHeader authHeader,
         HttpContext context,
         HttpRequest request,
         RequestContext requestContext,
@@ -147,7 +148,7 @@ public class ProxyService(IHttpClientFactory httpClientFactory, IMetricService m
                 Content = multipartContent
             };
 
-            requestMessage.Headers.Add("api-key", endpointKey);
+            requestMessage.Headers.Add(authHeader.Key, authHeader.Value);
 
             var response = await httpClient.SendAsync(requestMessage);
             var responseContent = await response.Content.ReadAsStringAsync();
@@ -174,7 +175,7 @@ public class ProxyService(IHttpClientFactory httpClientFactory, IMetricService m
     /// <returns>A tuple containing the response content as a string and the HTTP status code.</returns>
     public async Task<(string responseContent, int statusCode)> HttpPostAsync(
         UriBuilder requestUrl,
-        string endpointKey,
+        AuthHeader authHeader,
         HttpContext context,
         JsonDocument requestJsonDoc,
         RequestContext requestContext,
@@ -191,8 +192,7 @@ public class ProxyService(IHttpClientFactory httpClientFactory, IMetricService m
             Encoding.UTF8,
             "application/json"
         );
-        requestMessage.Headers.Add("api-key", endpointKey);
-        requestMessage.Headers.Add("Authorization", $"Bearer {endpointKey}");
+        requestMessage.Headers.Add(authHeader.Key, authHeader.Value);
 
         var response = await httpClient.SendAsync(requestMessage);
         var responseContent = await response.Content.ReadAsStringAsync();
@@ -213,7 +213,7 @@ public class ProxyService(IHttpClientFactory httpClientFactory, IMetricService m
     /// <returns>A task representing the asynchronous operation.</returns>
     public async Task HttpPostStreamAsync(
         UriBuilder requestUrl,
-        string endpointKey,
+        AuthHeader authHeader,
         HttpContext context,
         JsonDocument requestJsonDoc,
         RequestContext requestContext,
@@ -230,7 +230,7 @@ public class ProxyService(IHttpClientFactory httpClientFactory, IMetricService m
             Encoding.UTF8,
             "application/json"
         );
-        requestMessage.Headers.Add("api-key", endpointKey);
+        requestMessage.Headers.Add(authHeader.Key, authHeader.Value);
 
         var response = await httpClient.SendAsync(
             requestMessage,

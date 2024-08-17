@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using AzureAIProxy.Shared.Database;
 using AzureAIProxy.Routes.CustomResults;
 using AzureAIProxy.Services;
+using AzureAIProxy.Models;
 
 namespace AzureAIProxy.Routes;
 
@@ -47,13 +48,15 @@ public static class OpenAIAIProxy
             Path = requestPath
         };
 
+        AuthHeader authHeader = new("Authorization", $"Bearer {deployment.EndpointKey}");
+
         try
         {
             if (streaming)
             {
                 await proxyService.HttpPostStreamAsync(
                     url,
-                    deployment.EndpointKey,
+                    authHeader,
                     context,
                     requestJsonDoc,
                     requestContext,
@@ -65,7 +68,7 @@ public static class OpenAIAIProxy
 
             var (responseContent, statusCode) = await proxyService.HttpPostAsync(
                 url,
-                deployment.EndpointKey,
+                authHeader,
                 context,
                 requestJsonDoc,
                 requestContext,

@@ -1,6 +1,7 @@
 using System.Net;
 using System.Text;
 using System.Text.Json;
+using AzureAIProxy.Models;
 using AzureAIProxy.Shared.Database;
 
 namespace AzureAIProxy.Services;
@@ -24,7 +25,7 @@ public class MockProxyService(IHttpClientFactory httpClientFactory, IMetricServi
     /// </summary>
     public async Task<(string responseContent, int statusCode)> HttpPostAsync(
         UriBuilder requestUrl,
-        string endpointKey,
+        AuthHeader authHeader,
         HttpContext context,
         JsonDocument requestJsonDoc,
         RequestContext requestContext,
@@ -41,7 +42,7 @@ public class MockProxyService(IHttpClientFactory httpClientFactory, IMetricServi
             Encoding.UTF8,
             "application/json"
         );
-        requestMessage.Headers.Add("api-key", endpointKey);
+        requestMessage.Headers.Add(authHeader.Key, authHeader.Value);
 
         // Simulate a delay
         await Task.Delay(RandomDelayInMilliseconds);
@@ -64,7 +65,7 @@ public class MockProxyService(IHttpClientFactory httpClientFactory, IMetricServi
     /// </summary>
     public async Task HttpPostStreamAsync(
         UriBuilder requestUrl,
-        string endpointKey,
+        AuthHeader authHeader,
         HttpContext context,
         JsonDocument requestJsonDoc,
         RequestContext requestContext,
@@ -81,7 +82,7 @@ public class MockProxyService(IHttpClientFactory httpClientFactory, IMetricServi
             Encoding.UTF8,
             "application/json"
         );
-        requestMessage.Headers.Add("api-key", endpointKey);
+        requestMessage.Headers.Add(authHeader.Key, authHeader.Value);
 
         // Simulate a delay
         await Task.Delay(RandomDelayInMilliseconds);
@@ -141,17 +142,17 @@ public class MockProxyService(IHttpClientFactory httpClientFactory, IMetricServi
         return requestUrl.Uri;
     }
 
-    public Task<(string responseContent, int statusCode)> HttpGetAsync(UriBuilder requestUrl, string endpointKey, HttpContext context, RequestContext requestContext, Deployment deployment)
+    public Task<(string responseContent, int statusCode)> HttpGetAsync(UriBuilder requestUrl, AuthHeader authHeader, HttpContext context, RequestContext requestContext, Deployment deployment)
     {
         throw new NotImplementedException();
     }
 
-    public Task<(string responseContent, int statusCode)> HttpDeleteAsync(UriBuilder requestUrl, string endpointKey, HttpContext context, RequestContext requestContext, Deployment deployment)
+    public Task<(string responseContent, int statusCode)> HttpDeleteAsync(UriBuilder requestUrl, AuthHeader authHeader, HttpContext context, RequestContext requestContext, Deployment deployment)
     {
         throw new NotImplementedException();
     }
 
-    public Task<(string responseContent, int statusCode)> HttpPostFormAsync(UriBuilder requestUrl, string endpointKey, HttpContext context, HttpRequest request, RequestContext requestContext, Deployment deployment)
+    public Task<(string responseContent, int statusCode)> HttpPostFormAsync(UriBuilder requestUrl, AuthHeader authHeader, HttpContext context, HttpRequest request, RequestContext requestContext, Deployment deployment)
     {
         throw new NotImplementedException();
     }

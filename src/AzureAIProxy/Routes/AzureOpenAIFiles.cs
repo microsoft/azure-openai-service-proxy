@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using AzureAIProxy.Shared.Database;
 using AzureAIProxy.Routes.CustomResults;
 using AzureAIProxy.Services;
+using AzureAIProxy.Models;
 
 namespace AzureAIProxy.Routes;
 
@@ -58,11 +59,13 @@ public static class AzureAIOpenFiles
             Path = requestPath
         };
 
+        AuthHeader authHeader = new("api-key", deployment.EndpointKey);
+
         var methodHandlers = new Dictionary<string, Func<Task<(string, int)>>>
         {
-            [HttpMethod.Delete.Method] = () => proxyService.HttpDeleteAsync(url, deployment.EndpointKey, context, requestContext, deployment),
-            [HttpMethod.Get.Method] = () => proxyService.HttpGetAsync(url, deployment.EndpointKey, context, requestContext, deployment),
-            [HttpMethod.Post.Method] = () => proxyService.HttpPostFormAsync(url, deployment.EndpointKey, context, request, requestContext, deployment)
+            [HttpMethod.Delete.Method] = () => proxyService.HttpDeleteAsync(url, authHeader, context, requestContext, deployment),
+            [HttpMethod.Get.Method] = () => proxyService.HttpGetAsync(url, authHeader, context, requestContext, deployment),
+            [HttpMethod.Post.Method] = () => proxyService.HttpPostFormAsync(url, authHeader, context, request, requestContext, deployment)
         };
 
         var result = await ValidateId(assistantService, context.Request.Method, fileId, requestContext.ApiKey);

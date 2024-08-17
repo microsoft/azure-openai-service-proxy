@@ -1,3 +1,4 @@
+using AzureAIProxy.Models;
 using AzureAIProxy.Shared.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
