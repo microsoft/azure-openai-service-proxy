@@ -7,8 +7,8 @@ public static class RouteExtensions
         .MapGroup("/api/v1")
         .MapAttendeeRoutes()
         .MapEventRoutes()
-        .MapAzureAIProxyRoutes()
-        .MapOpenAIProxyRoutes()
+        .MapAzureOpenAIRoutes()
+        .MapAzureInferenceRoutes()
         .MapAzureOpenAIAssistantsRoutes()
         .MapAzureOpenAIFilesRoutes();
 }

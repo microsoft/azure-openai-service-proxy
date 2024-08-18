@@ -8,9 +8,9 @@ using AzureAIProxy.Models;
 
 namespace AzureAIProxy.Routes;
 
-public static class AzureAIProxy
+public static class AzureOpenAI
 {
-    public static RouteGroupBuilder MapAzureAIProxyRoutes(this RouteGroupBuilder builder)
+    public static RouteGroupBuilder MapAzureOpenAIRoutes(this RouteGroupBuilder builder)
     {
         // Azure AI Search Query Routes
         builder.MapPost("/indexes/{deploymentName}/docs/search", ProcessRequestAsync);

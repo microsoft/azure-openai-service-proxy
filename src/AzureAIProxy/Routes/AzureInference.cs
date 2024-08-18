@@ -8,12 +8,16 @@ using AzureAIProxy.Models;
 
 namespace AzureAIProxy.Routes;
 
-public static class OpenAIAIProxy
+public static class AzureInference
 {
-    public static RouteGroupBuilder MapOpenAIProxyRoutes(this RouteGroupBuilder builder)
+    public static RouteGroupBuilder MapAzureInferenceRoutes(this RouteGroupBuilder builder)
     {
         // OpenAI Routes for Mistral chat completions compatibity
         builder.MapPost("/chat/completions", ProcessRequestAsync);
+        builder.MapPost("/completions", ProcessRequestAsync);
+        builder.MapPost("/embeddings", ProcessRequestAsync);
+        builder.MapPost("/images/embeddings", ProcessRequestAsync);
+        builder.MapGet("/info", ProcessRequestAsync);
 
         return builder;
     }
@@ -50,8 +54,15 @@ public static class OpenAIAIProxy
 
         List<RequestHeader> requestHeaders =
         [
-            new("Authorization", $"Bearer {deployment.EndpointKey}")
+            new("Authorization", $"Bearer {deployment.EndpointKey}"),
+            new("azureml-model-deployment", deploymentName),
         ];
+
+        if (!context.Request.Headers.Any(h => h.Key == "extra-parameters"))
+        {
+            var extraParameterHeader = context.Request.Headers.FirstOrDefault(h => h.Key == "extra-parameters");
+            requestHeaders.Add(new RequestHeader("extra-parameters", extraParameterHeader.Value!));
+        }
 
         try
         {
