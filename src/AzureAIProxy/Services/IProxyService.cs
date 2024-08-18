@@ -8,7 +8,7 @@ public interface IProxyService
 {
     Task<(string responseContent, int statusCode)> HttpPostAsync(
         UriBuilder requestUrl,
-        AuthHeader authHeader,
+        List<RequestHeader> requestHeaders,
         HttpContext context,
         JsonDocument requestJsonDoc,
         RequestContext requestContext,
@@ -16,7 +16,7 @@ public interface IProxyService
     );
     Task HttpPostStreamAsync(
         UriBuilder requestUrl,
-        AuthHeader authHeader,
+        List<RequestHeader> requestHeaders,
         HttpContext context,
         JsonDocument requestJsonDoc,
         RequestContext requestContext,
@@ -24,21 +24,21 @@ public interface IProxyService
     );
     Task<(string responseContent, int statusCode)> HttpGetAsync(
         UriBuilder requestUrl,
-        AuthHeader authHeader,
+        List<RequestHeader> requestHeaders,
         HttpContext context,
         RequestContext requestContext,
         Deployment deployment
     );
     Task<(string responseContent, int statusCode)> HttpDeleteAsync(
         UriBuilder requestUrl,
-        AuthHeader authHeader,
+        List<RequestHeader> requestHeaders,
         HttpContext context,
         RequestContext requestContext,
         Deployment deployment
     );
       Task<(string responseContent, int statusCode)> HttpPostFormAsync(
         UriBuilder requestUrl,
-        AuthHeader authHeader,
+        List<RequestHeader> requestHeaders,
         HttpContext context,
         HttpRequest request,
         RequestContext requestContext,

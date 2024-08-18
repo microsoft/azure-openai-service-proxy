@@ -48,7 +48,10 @@ public static class OpenAIAIProxy
             Path = requestPath
         };
 
-        AuthHeader authHeader = new("Authorization", $"Bearer {deployment.EndpointKey}");
+        List<RequestHeader> requestHeaders =
+        [
+            new("Authorization", $"Bearer {deployment.EndpointKey}")
+        ];
 
         try
         {
@@ -56,7 +59,7 @@ public static class OpenAIAIProxy
             {
                 await proxyService.HttpPostStreamAsync(
                     url,
-                    authHeader,
+                    requestHeaders,
                     context,
                     requestJsonDoc,
                     requestContext,
@@ -68,7 +71,7 @@ public static class OpenAIAIProxy
 
             var (responseContent, statusCode) = await proxyService.HttpPostAsync(
                 url,
-                authHeader,
+                requestHeaders,
                 context,
                 requestJsonDoc,
                 requestContext,

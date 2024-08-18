@@ -57,7 +57,10 @@ public static class AzureAIProxy
             Path = requestPath
         };
 
-        AuthHeader authHeader = new("api-key", deployment.EndpointKey);
+        List<RequestHeader> requestHeaders =
+        [
+            new("api-key", deployment.EndpointKey)
+        ];
 
         try
         {
@@ -65,7 +68,7 @@ public static class AzureAIProxy
             {
                 await proxyService.HttpPostStreamAsync(
                     url,
-                    authHeader,
+                    requestHeaders,
                     context,
                     requestJsonDoc,
                     requestContext,
@@ -77,7 +80,7 @@ public static class AzureAIProxy
 
             var (responseContent, statusCode) = await proxyService.HttpPostAsync(
                 url,
-                authHeader,
+                requestHeaders,
                 context,
                 requestJsonDoc,
                 requestContext,

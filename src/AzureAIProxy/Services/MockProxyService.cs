@@ -25,7 +25,7 @@ public class MockProxyService(IHttpClientFactory httpClientFactory, IMetricServi
     /// </summary>
     public async Task<(string responseContent, int statusCode)> HttpPostAsync(
         UriBuilder requestUrl,
-        AuthHeader authHeader,
+        List<RequestHeader> requestHeaders,
         HttpContext context,
         JsonDocument requestJsonDoc,
         RequestContext requestContext,
@@ -42,7 +42,9 @@ public class MockProxyService(IHttpClientFactory httpClientFactory, IMetricServi
             Encoding.UTF8,
             "application/json"
         );
-        requestMessage.Headers.Add(authHeader.Key, authHeader.Value);
+
+        foreach (var header in requestHeaders)
+            requestMessage.Headers.Add(header.Key, header.Value);
 
         // Simulate a delay
         await Task.Delay(RandomDelayInMilliseconds);
@@ -65,7 +67,7 @@ public class MockProxyService(IHttpClientFactory httpClientFactory, IMetricServi
     /// </summary>
     public async Task HttpPostStreamAsync(
         UriBuilder requestUrl,
-        AuthHeader authHeader,
+        List<RequestHeader> requestHeaders,
         HttpContext context,
         JsonDocument requestJsonDoc,
         RequestContext requestContext,
@@ -82,7 +84,9 @@ public class MockProxyService(IHttpClientFactory httpClientFactory, IMetricServi
             Encoding.UTF8,
             "application/json"
         );
-        requestMessage.Headers.Add(authHeader.Key, authHeader.Value);
+
+        foreach (var header in requestHeaders)
+            requestMessage.Headers.Add(header.Key, header.Value);
 
         // Simulate a delay
         await Task.Delay(RandomDelayInMilliseconds);
@@ -142,17 +146,17 @@ public class MockProxyService(IHttpClientFactory httpClientFactory, IMetricServi
         return requestUrl.Uri;
     }
 
-    public Task<(string responseContent, int statusCode)> HttpGetAsync(UriBuilder requestUrl, AuthHeader authHeader, HttpContext context, RequestContext requestContext, Deployment deployment)
+    public Task<(string responseContent, int statusCode)> HttpGetAsync(UriBuilder requestUrl, List<RequestHeader> requestHeaders, HttpContext context, RequestContext requestContext, Deployment deployment)
     {
         throw new NotImplementedException();
     }
 
-    public Task<(string responseContent, int statusCode)> HttpDeleteAsync(UriBuilder requestUrl, AuthHeader authHeader, HttpContext context, RequestContext requestContext, Deployment deployment)
+    public Task<(string responseContent, int statusCode)> HttpDeleteAsync(UriBuilder requestUrl, List<RequestHeader> requestHeaders, HttpContext context, RequestContext requestContext, Deployment deployment)
     {
         throw new NotImplementedException();
     }
 
-    public Task<(string responseContent, int statusCode)> HttpPostFormAsync(UriBuilder requestUrl, AuthHeader authHeader, HttpContext context, HttpRequest request, RequestContext requestContext, Deployment deployment)
+    public Task<(string responseContent, int statusCode)> HttpPostFormAsync(UriBuilder requestUrl, List<RequestHeader> requestHeaders, HttpContext context, HttpRequest request, RequestContext requestContext, Deployment deployment)
     {
         throw new NotImplementedException();
     }
