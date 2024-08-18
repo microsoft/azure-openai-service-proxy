@@ -58,7 +58,7 @@ public static class AzureInference
             new("azureml-model-deployment", deploymentName),
         ];
 
-        if (!context.Request.Headers.Any(h => h.Key == "extra-parameters"))
+        if (context.Request.Headers.Any(h => h.Key == "extra-parameters"))
         {
             var extraParameterHeader = context.Request.Headers.FirstOrDefault(h => h.Key == "extra-parameters");
             requestHeaders.Add(new RequestHeader("extra-parameters", extraParameterHeader.Value!));

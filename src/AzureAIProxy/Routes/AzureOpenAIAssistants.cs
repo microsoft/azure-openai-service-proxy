@@ -4,6 +4,7 @@ using AzureAIProxy.Shared.Database;
 using AzureAIProxy.Routes.CustomResults;
 using AzureAIProxy.Services;
 using AzureAIProxy.Models;
+using System.Net;
 
 namespace AzureAIProxy.Routes;
 
@@ -57,6 +58,7 @@ public static class AzureAIOpenAIAssistants
         string requestPath = (string)context.Items["requestPath"]!;
         RequestContext requestContext = (RequestContext)context.Items["RequestContext"]!;
         JsonDocument requestJsonDoc = (JsonDocument)context.Items["jsonDoc"]!;
+        bool IsStreaming = (bool?)context.Items["IsStreaming"] ?? false;
 
         var deployment = await catalogService.GetEventAssistantAsync(requestContext.EventId);
         if (deployment is null)
@@ -82,7 +84,13 @@ public static class AzureAIOpenAIAssistants
         var result = await ValidateId(assistantService, context.Request.Method, assistantId, threadId, requestContext);
         if (result is not null) return result;
 
-        if (methodHandlers.TryGetValue(context.Request.Method, out var handler))
+        if (IsStreaming && context.Request.Method == HttpMethod.Post.Method)
+        {
+            await proxyService.HttpPostStreamAsync(url, requestHeaders, context, requestJsonDoc!, requestContext, deployment);
+            return new ProxyResult(null!, (int)HttpStatusCode.OK);
+
+        }
+        else if (methodHandlers.TryGetValue(context.Request.Method, out var handler))
         {
             try
             {

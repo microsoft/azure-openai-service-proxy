@@ -169,6 +169,73 @@ public class ProxyService(IHttpClientFactory httpClientFactory, IMetricService m
     }
 
     /// <summary>
+    /// Sends an HTTP POST request with a form body asynchronously.
+    /// </summary>
+    /// <param name="requestUrl">The URL of the request.</param>
+    /// <param name="endpointKey">The API key for the endpoint.</param>
+    /// <param name="context">The HTTP context.</param>
+    /// <param name="request">The HTTP request containing form data.</param>
+    /// <param name="requestContext">The request context object containing relevant details for the request.</param>
+    /// <param name="deployment">The deployment details related to the request.</param>
+    /// <returns>A tuple containing the response content as a string and the HTTP status code.</returns>
+    public async Task HttpPostFormStreamAsync(
+        UriBuilder requestUrl,
+        List<RequestHeader> requestHeaders,
+        HttpContext context,
+        HttpRequest request,
+        RequestContext requestContext,
+        Deployment deployment
+    )
+    {
+        using var httpClient = httpClientFactory.CreateClient();
+        httpClient.Timeout = TimeSpan.FromSeconds(HttpTimeoutSeconds);
+
+        var form = await request.ReadFormAsync();
+        var file = form.Files.GetFile("file");
+
+        if (file is not null && file.Length > 0)
+        {
+            var requestUrlWithQuery = AppendQueryParameters(requestUrl, context);
+
+            var fileStream = file.OpenReadStream();
+            var fileContent = new StreamContent(fileStream);
+            fileContent.Headers.ContentType = new MediaTypeHeaderValue(file.ContentType);
+
+            // Prepare the multipart form content
+            var multipartContent = new MultipartFormDataContent
+            {
+                { fileContent, "file", file.FileName }
+            };
+
+            foreach (var key in form.Keys.Where(k => k != "file" && !StringValues.IsNullOrEmpty(form[k])))
+            {
+                var encodedValue = HttpUtility.HtmlEncode(form[key]!);
+                var fieldContent = new StringContent(encodedValue);
+                multipartContent.Add(fieldContent, key);
+            }
+
+            // Create the request message
+            var requestMessage = new HttpRequestMessage(HttpMethod.Post, requestUrlWithQuery)
+            {
+                Content = multipartContent
+            };
+
+            foreach (var header in requestHeaders)
+                requestMessage.Headers.Add(header.Key, header.Value);
+
+            var response = await httpClient.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead);
+
+            await metricService.LogApiUsageAsync(requestContext, deployment, null);
+
+            context.Response.StatusCode = (int)response.StatusCode;
+            context.Response.ContentType = "application/json";
+
+            await using var responseStream = await response.Content.ReadAsStreamAsync();
+            await responseStream.CopyToAsync(context.Response.Body);
+        }
+    }
+
+    /// <summary>
     /// Sends an HTTP POST request with a JSON body asynchronously.
     /// </summary>
     /// <param name="requestUrl">The URL of the request.</param>

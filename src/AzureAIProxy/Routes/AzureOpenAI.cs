@@ -38,7 +38,7 @@ public static class AzureOpenAI
         string requestPath = (string)context.Items["requestPath"]!;
         RequestContext requestContext = (RequestContext)context.Items["RequestContext"]!;
         JsonDocument requestJsonDoc = (JsonDocument)context.Items["jsonDoc"]!;
-        bool streaming = (bool)context.Items["IsStreaming"]!;
+        bool streaming = (bool?)context.Items["IsStreaming"] ?? false;
 
         var (deployment, eventCatalog) = await catalogService.GetCatalogItemAsync(
             requestContext.EventId,

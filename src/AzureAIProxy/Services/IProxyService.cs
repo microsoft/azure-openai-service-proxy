@@ -36,7 +36,15 @@ public interface IProxyService
         RequestContext requestContext,
         Deployment deployment
     );
-      Task<(string responseContent, int statusCode)> HttpPostFormAsync(
+    Task<(string responseContent, int statusCode)> HttpPostFormAsync(
+      UriBuilder requestUrl,
+      List<RequestHeader> requestHeaders,
+      HttpContext context,
+      HttpRequest request,
+      RequestContext requestContext,
+      Deployment deployment
+  );
+    Task HttpPostFormStreamAsync(
         UriBuilder requestUrl,
         List<RequestHeader> requestHeaders,
         HttpContext context,
