@@ -192,11 +192,13 @@ public class ProxyService(IHttpClientFactory httpClientFactory, IMetricService m
 
         var requestUrlWithQuery = AppendQueryParameters(requestUrl, context);
         using var requestMessage = new HttpRequestMessage(HttpMethod.Post, requestUrlWithQuery);
-        requestMessage.Content = new StringContent(
-            requestJsonDoc.RootElement.ToString(),
-            Encoding.UTF8,
-            "application/json"
-        );
+
+        if (requestJsonDoc is not null)
+            requestMessage.Content = new StringContent(
+                requestJsonDoc.RootElement.ToString(),
+                Encoding.UTF8,
+                "application/json"
+            );
 
         foreach (var header in requestHeaders)
             requestMessage.Headers.Add(header.Key, header.Value);
@@ -232,11 +234,13 @@ public class ProxyService(IHttpClientFactory httpClientFactory, IMetricService m
 
         var requestUrlWithQuery = AppendQueryParameters(requestUrl, context);
         using var requestMessage = new HttpRequestMessage(HttpMethod.Post, requestUrlWithQuery);
-        requestMessage.Content = new StringContent(
-            requestJsonDoc.RootElement.ToString(),
-            Encoding.UTF8,
-            "application/json"
-        );
+
+        if (requestJsonDoc is not null)
+            requestMessage.Content = new StringContent(
+                requestJsonDoc.RootElement.ToString(),
+                Encoding.UTF8,
+                "application/json"
+            );
 
         foreach (var header in requestHeaders)
             requestMessage.Headers.Add(header.Key, header.Value);
