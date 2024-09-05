@@ -2,27 +2,18 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 16.1
--- Dumped by pg_dump version 16.2 (Debian 16.2-1.pgdg120+2)
+-- Dumped from database version 16.3 (Debian 16.3-1.pgdg120+1)
+-- Dumped by pg_dump version 16.4 (Debian 16.4-1.pgdg120+1)
 
 SET statement_timeout = 0;
-
 SET lock_timeout = 0;
-
 SET idle_in_transaction_session_timeout = 0;
-
 SET client_encoding = 'UTF8';
-
 SET standard_conforming_strings = on;
-
-SELECT pg_catalog.set_config ('search_path', '', false);
-
+SELECT pg_catalog.set_config('search_path', '', false);
 SET check_function_bodies = false;
-
 SET xmloption = content;
-
 SET client_min_messages = warning;
-
 SET row_security = off;
 
 --
@@ -30,6 +21,7 @@ SET row_security = off;
 --
 
 CREATE SCHEMA aoai;
+
 
 ALTER SCHEMA aoai OWNER TO azure_pg_admin;
 
@@ -39,17 +31,32 @@ ALTER SCHEMA aoai OWNER TO azure_pg_admin;
 
 CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA aoai;
 
+
 --
 -- Name: EXTENSION pgcrypto; Type: COMMENT; Schema: -; Owner:
 --
 
 COMMENT ON EXTENSION pgcrypto IS 'cryptographic functions';
 
+
+--
+-- Name: assistant_type; Type: TYPE; Schema: aoai; Owner: azure_pg_admin
+--
+
+CREATE TYPE aoai.assistant_type AS ENUM (
+    'assistant',
+    'file',
+    'thread'
+);
+
+
+ALTER TYPE aoai.assistant_type OWNER TO azure_pg_admin;
+
 --
 -- Name: model_type; Type: TYPE; Schema: aoai; Owner: azure_pg_admin
 --
 
-CREATE TYPE aoai.model_type AS ENUM(
+CREATE TYPE aoai.model_type AS ENUM (
     'openai-chat',
     'openai-embedding',
     'openai-dalle3',
@@ -59,6 +66,7 @@ CREATE TYPE aoai.model_type AS ENUM(
     'azure-ai-search',
     'openai-assistant'
 );
+
 
 ALTER TYPE aoai.model_type OWNER TO azure_pg_admin;
 
@@ -98,12 +106,8 @@ BEGIN
 END;
 $$;
 
-ALTER PROCEDURE aoai.add_attendee_metric (
-    IN p_api_key character varying,
-    IN p_event_id character varying,
-    IN p_catalog_id uuid,
-    IN p_usage jsonb
-) OWNER TO azure_pg_admin;
+
+ALTER PROCEDURE aoai.add_attendee_metric(IN p_api_key character varying, IN p_event_id character varying, IN p_catalog_id uuid, IN p_usage jsonb) OWNER TO azure_pg_admin;
 
 --
 -- Name: add_event(character varying, character varying, character varying, character varying, timestamp without time zone, timestamp without time zone, integer, character varying, character varying, character varying, integer, integer, boolean, character varying); Type: FUNCTION; Schema: aoai; Owner: azure_pg_admin
@@ -184,22 +188,8 @@ BEGIN
 END;
 $$;
 
-ALTER FUNCTION aoai.add_event (
-    p_owner_id character varying,
-    p_event_code character varying,
-    p_event_shared_code character varying,
-    p_event_markdown character varying,
-    p_start_timestamp timestamp without time zone,
-    p_end_timestamp timestamp without time zone,
-    p_time_zone_offset integer,
-    p_time_zone_label character varying,
-    p_organizer_name character varying,
-    p_organizer_email character varying,
-    p_max_token_cap integer,
-    p_daily_request_cap integer,
-    p_active boolean,
-    p_event_image_url character varying
-) OWNER TO azure_pg_admin;
+
+ALTER FUNCTION aoai.add_event(p_owner_id character varying, p_event_code character varying, p_event_shared_code character varying, p_event_markdown character varying, p_start_timestamp timestamp without time zone, p_end_timestamp timestamp without time zone, p_time_zone_offset integer, p_time_zone_label character varying, p_organizer_name character varying, p_organizer_email character varying, p_max_token_cap integer, p_daily_request_cap integer, p_active boolean, p_event_image_url character varying) OWNER TO azure_pg_admin;
 
 --
 -- Name: add_event_attendee(character varying, character varying); Type: FUNCTION; Schema: aoai; Owner: azure_pg_admin
@@ -224,10 +214,8 @@ BEGIN
 END;
 $$;
 
-ALTER FUNCTION aoai.add_event_attendee (
-    p_user_id character varying,
-    p_event_id character varying
-) OWNER TO azure_pg_admin;
+
+ALTER FUNCTION aoai.add_event_attendee(p_user_id character varying, p_event_id character varying) OWNER TO azure_pg_admin;
 
 --
 -- Name: get_attendee_authorized(character varying); Type: FUNCTION; Schema: aoai; Owner: azure_pg_admin
@@ -340,7 +328,8 @@ BEGIN
 END;
 $_$;
 
-ALTER FUNCTION aoai.get_attendee_authorized (p_api_key character varying) OWNER TO azure_pg_admin;
+
+ALTER FUNCTION aoai.get_attendee_authorized(p_api_key character varying) OWNER TO azure_pg_admin;
 
 --
 -- Name: get_event_openai_assistant(character varying, character varying); Type: FUNCTION; Schema: aoai; Owner: azure_pg_admin
@@ -369,6 +358,7 @@ BEGIN
 END;
 $$;
 
+
 ALTER FUNCTION aoai.get_event_openai_assistant(p_event_id character varying, p_postgres_encryption_key character varying) OWNER TO azure_pg_admin;
 
 --
@@ -396,7 +386,8 @@ BEGIN
 END;
 $$;
 
-ALTER FUNCTION aoai.get_event_registration_by_event_id (p_event_id character varying) OWNER TO azure_pg_admin;
+
+ALTER FUNCTION aoai.get_event_registration_by_event_id(p_event_id character varying) OWNER TO azure_pg_admin;
 
 --
 -- Name: get_models_by_deployment_name(character varying, character varying, character varying); Type: FUNCTION; Schema: aoai; Owner: azure_pg_admin
@@ -425,11 +416,8 @@ BEGIN
 END;
 $$;
 
-ALTER FUNCTION aoai.get_models_by_deployment_name (
-    p_event_id character varying,
-    p_deployment_id character varying,
-    p_postgres_encryption_key character varying
-) OWNER TO azure_pg_admin;
+
+ALTER FUNCTION aoai.get_models_by_deployment_name(p_event_id character varying, p_deployment_id character varying, p_postgres_encryption_key character varying) OWNER TO azure_pg_admin;
 
 SET default_tablespace = '';
 
@@ -446,6 +434,7 @@ CREATE TABLE aoai.event_attendee (
     api_key character varying(36) NOT NULL
 );
 
+
 ALTER TABLE aoai.event_attendee OWNER TO azure_pg_admin;
 
 --
@@ -458,6 +447,7 @@ CREATE TABLE aoai.event_attendee_request (
     request_count integer NOT NULL,
     token_count integer NOT NULL
 );
+
 
 ALTER TABLE aoai.event_attendee_request OWNER TO azure_pg_admin;
 
@@ -479,6 +469,7 @@ CREATE VIEW aoai.active_attendee_growth_view AS
   GROUP BY event_id, date_stamp
   ORDER BY date_stamp;
 
+
 ALTER VIEW aoai.active_attendee_growth_view OWNER TO azure_pg_admin;
 
 --
@@ -491,6 +482,7 @@ CREATE TABLE aoai.assistant (
     creation_timestamp timestamp without time zone DEFAULT now() NOT NULL
 );
 
+
 ALTER TABLE aoai.assistant OWNER TO azure_pg_admin;
 
 --
@@ -498,7 +490,7 @@ ALTER TABLE aoai.assistant OWNER TO azure_pg_admin;
 --
 
 CREATE TABLE aoai.event (
-    event_id character varying(50) DEFAULT gen_random_uuid () NOT NULL,
+    event_id character varying(50) DEFAULT gen_random_uuid() NOT NULL,
     owner_id character varying(128) NOT NULL,
     event_code character varying(64) NOT NULL,
     event_markdown character varying(8192) NOT NULL,
@@ -515,6 +507,7 @@ CREATE TABLE aoai.event (
     event_shared_code character varying(64)
 );
 
+
 ALTER TABLE aoai.event OWNER TO azure_pg_admin;
 
 --
@@ -525,6 +518,7 @@ CREATE TABLE aoai.event_catalog_map (
     event_id character varying(50) NOT NULL,
     catalog_id uuid NOT NULL
 );
+
 
 ALTER TABLE aoai.event_catalog_map OWNER TO azure_pg_admin;
 
@@ -540,6 +534,7 @@ CREATE TABLE aoai.metric (
     resource character varying(64) NOT NULL,
     usage jsonb NOT NULL
 );
+
 
 ALTER TABLE aoai.metric OWNER TO azure_pg_admin;
 
@@ -557,6 +552,7 @@ CREATE VIEW aoai.metric_view AS
     ((usage ->> 'total_tokens'::text))::integer AS total_tokens
    FROM aoai.metric;
 
+
 ALTER VIEW aoai.metric_view OWNER TO azure_pg_admin;
 
 --
@@ -568,6 +564,7 @@ CREATE TABLE aoai.owner (
     name character varying(128) NOT NULL,
     email character varying(128) NOT NULL
 );
+
 
 ALTER TABLE aoai.owner OWNER TO azure_pg_admin;
 
@@ -587,6 +584,7 @@ CREATE TABLE aoai.owner_catalog (
     endpoint_key_encrypted bytea
 );
 
+
 ALTER TABLE aoai.owner_catalog OWNER TO azure_pg_admin;
 
 --
@@ -599,6 +597,7 @@ CREATE TABLE aoai.owner_event_map (
     creator boolean NOT NULL
 );
 
+
 ALTER TABLE aoai.owner_event_map OWNER TO azure_pg_admin;
 
 --
@@ -608,54 +607,62 @@ ALTER TABLE aoai.owner_event_map OWNER TO azure_pg_admin;
 ALTER TABLE ONLY aoai.assistant
     ADD CONSTRAINT assistant_pkey PRIMARY KEY (id, api_key);
 
+
 --
 -- Name: event event_pkey; Type: CONSTRAINT; Schema: aoai; Owner: azure_pg_admin
 --
 
 ALTER TABLE ONLY aoai.event
-ADD CONSTRAINT event_pkey PRIMARY KEY (event_id);
+    ADD CONSTRAINT event_pkey PRIMARY KEY (event_id);
+
 
 --
 -- Name: event_attendee eventattendee_pkey; Type: CONSTRAINT; Schema: aoai; Owner: azure_pg_admin
 --
 
 ALTER TABLE ONLY aoai.event_attendee
-ADD CONSTRAINT eventattendee_pkey PRIMARY KEY (user_id, event_id);
+    ADD CONSTRAINT eventattendee_pkey PRIMARY KEY (user_id, event_id);
+
 
 --
 -- Name: event_attendee_request eventattendeerequest_pkey; Type: CONSTRAINT; Schema: aoai; Owner: azure_pg_admin
 --
 
 ALTER TABLE ONLY aoai.event_attendee_request
-ADD CONSTRAINT eventattendeerequest_pkey PRIMARY KEY (api_key, date_stamp);
+    ADD CONSTRAINT eventattendeerequest_pkey PRIMARY KEY (api_key, date_stamp);
+
 
 --
 -- Name: event_catalog_map eventcatalogmap_pkey; Type: CONSTRAINT; Schema: aoai; Owner: azure_pg_admin
 --
 
 ALTER TABLE ONLY aoai.event_catalog_map
-ADD CONSTRAINT eventcatalogmap_pkey PRIMARY KEY (event_id, catalog_id);
+    ADD CONSTRAINT eventcatalogmap_pkey PRIMARY KEY (event_id, catalog_id);
+
 
 --
 -- Name: owner owner_pkey; Type: CONSTRAINT; Schema: aoai; Owner: azure_pg_admin
 --
 
 ALTER TABLE ONLY aoai.owner
-ADD CONSTRAINT owner_pkey PRIMARY KEY (owner_id);
+    ADD CONSTRAINT owner_pkey PRIMARY KEY (owner_id);
+
 
 --
 -- Name: owner_catalog ownercatalog_pkey; Type: CONSTRAINT; Schema: aoai; Owner: azure_pg_admin
 --
 
 ALTER TABLE ONLY aoai.owner_catalog
-ADD CONSTRAINT ownercatalog_pkey PRIMARY KEY (catalog_id);
+    ADD CONSTRAINT ownercatalog_pkey PRIMARY KEY (catalog_id);
+
 
 --
 -- Name: owner_event_map ownereventmap_pkey; Type: CONSTRAINT; Schema: aoai; Owner: azure_pg_admin
 --
 
 ALTER TABLE ONLY aoai.owner_event_map
-ADD CONSTRAINT ownereventmap_pkey PRIMARY KEY (owner_id, event_id);
+    ADD CONSTRAINT ownereventmap_pkey PRIMARY KEY (owner_id, event_id);
+
 
 --
 -- Name: api_key_unique_index; Type: INDEX; Schema: aoai; Owner: azure_pg_admin
@@ -663,175 +670,161 @@ ADD CONSTRAINT ownereventmap_pkey PRIMARY KEY (owner_id, event_id);
 
 CREATE UNIQUE INDEX api_key_unique_index ON aoai.event_attendee USING btree (api_key);
 
+
 --
 -- Name: event_id_index; Type: INDEX; Schema: aoai; Owner: azure_pg_admin
 --
 
 CREATE INDEX event_id_index ON aoai.metric USING btree (event_id);
 
+
 --
 -- Name: event_attendee fk_eventattendee_event; Type: FK CONSTRAINT; Schema: aoai; Owner: azure_pg_admin
 --
 
 ALTER TABLE ONLY aoai.event_attendee
-ADD CONSTRAINT fk_eventattendee_event FOREIGN KEY (event_id) REFERENCES aoai.event (event_id) ON DELETE CASCADE;
+    ADD CONSTRAINT fk_eventattendee_event FOREIGN KEY (event_id) REFERENCES aoai.event(event_id) ON DELETE CASCADE;
+
 
 --
 -- Name: event_attendee_request fk_eventattendeerequest_eventattendee; Type: FK CONSTRAINT; Schema: aoai; Owner: azure_pg_admin
 --
 
 ALTER TABLE ONLY aoai.event_attendee_request
-ADD CONSTRAINT fk_eventattendeerequest_eventattendee FOREIGN KEY (api_key) REFERENCES aoai.event_attendee (api_key) ON DELETE CASCADE;
+    ADD CONSTRAINT fk_eventattendeerequest_eventattendee FOREIGN KEY (api_key) REFERENCES aoai.event_attendee(api_key) ON DELETE CASCADE;
+
 
 --
 -- Name: event_catalog_map fk_eventcatalogmap_event; Type: FK CONSTRAINT; Schema: aoai; Owner: azure_pg_admin
 --
 
 ALTER TABLE ONLY aoai.event_catalog_map
-ADD CONSTRAINT fk_eventcatalogmap_event FOREIGN KEY (event_id) REFERENCES aoai.event (event_id) ON DELETE CASCADE;
+    ADD CONSTRAINT fk_eventcatalogmap_event FOREIGN KEY (event_id) REFERENCES aoai.event(event_id) ON DELETE CASCADE;
+
 
 --
 -- Name: event_catalog_map fk_eventcatalogmap_ownercatalog; Type: FK CONSTRAINT; Schema: aoai; Owner: azure_pg_admin
 --
 
 ALTER TABLE ONLY aoai.event_catalog_map
-ADD CONSTRAINT fk_eventcatalogmap_ownercatalog FOREIGN KEY (catalog_id) REFERENCES aoai.owner_catalog (catalog_id) ON DELETE CASCADE;
+    ADD CONSTRAINT fk_eventcatalogmap_ownercatalog FOREIGN KEY (catalog_id) REFERENCES aoai.owner_catalog(catalog_id) ON DELETE CASCADE;
+
 
 --
 -- Name: owner_catalog fk_groupmodels_group; Type: FK CONSTRAINT; Schema: aoai; Owner: azure_pg_admin
 --
 
 ALTER TABLE ONLY aoai.owner_catalog
-ADD CONSTRAINT fk_groupmodels_group FOREIGN KEY (owner_id) REFERENCES aoai.owner (owner_id) ON DELETE CASCADE;
+    ADD CONSTRAINT fk_groupmodels_group FOREIGN KEY (owner_id) REFERENCES aoai.owner(owner_id) ON DELETE CASCADE;
+
 
 --
 -- Name: metric fk_metric; Type: FK CONSTRAINT; Schema: aoai; Owner: azure_pg_admin
 --
 
 ALTER TABLE ONLY aoai.metric
-ADD CONSTRAINT fk_metric FOREIGN KEY (event_id) REFERENCES aoai.event (event_id) ON DELETE CASCADE;
+    ADD CONSTRAINT fk_metric FOREIGN KEY (event_id) REFERENCES aoai.event(event_id) ON DELETE CASCADE;
+
 
 --
 -- Name: owner_event_map fk_ownereventmap_event; Type: FK CONSTRAINT; Schema: aoai; Owner: azure_pg_admin
 --
 
 ALTER TABLE ONLY aoai.owner_event_map
-ADD CONSTRAINT fk_ownereventmap_event FOREIGN KEY (event_id) REFERENCES aoai.event (event_id) ON DELETE CASCADE;
+    ADD CONSTRAINT fk_ownereventmap_event FOREIGN KEY (event_id) REFERENCES aoai.event(event_id) ON DELETE CASCADE;
+
 
 --
 -- Name: owner_event_map fk_ownereventmap_owner; Type: FK CONSTRAINT; Schema: aoai; Owner: azure_pg_admin
 --
 
 ALTER TABLE ONLY aoai.owner_event_map
-ADD CONSTRAINT fk_ownereventmap_owner FOREIGN KEY (owner_id) REFERENCES aoai.owner (owner_id) ON DELETE CASCADE;
+    ADD CONSTRAINT fk_ownereventmap_owner FOREIGN KEY (owner_id) REFERENCES aoai.owner(owner_id) ON DELETE CASCADE;
+
 
 --
 -- Name: SCHEMA aoai; Type: ACL; Schema: -; Owner: azure_pg_admin
 --
 
-GRANT USAGE ON SCHEMA aoai TO "aoai_proxy_app";
+GRANT USAGE ON SCHEMA aoai TO aoai_proxy_app;
 
 --
 -- Name: TYPE model_type; Type: ACL; Schema: aoai; Owner: azure_pg_admin
 --
 
-GRANT ALL ON TYPE aoai.model_type TO "aoai_proxy_app";
+GRANT ALL ON TYPE aoai.model_type TO aoai_proxy_app;
 
 --
 -- Name: TABLE event_attendee; Type: ACL; Schema: aoai; Owner: azure_pg_admin
 --
 
-GRANT
-SELECT,
-INSERT
-,
-    DELETE,
-UPDATE ON
-TABLE aoai.event_attendee TO "aoai_proxy_app";
+GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE aoai.event_attendee TO aoai_proxy_app;
+
 
 --
 -- Name: TABLE event_attendee_request; Type: ACL; Schema: aoai; Owner: azure_pg_admin
 --
 
-GRANT
-SELECT,
-INSERT
-,
-    DELETE,
-UPDATE ON
-TABLE aoai.event_attendee_request TO "aoai_proxy_app";
+GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE aoai.event_attendee_request TO aoai_proxy_app;
+
+
+--
+-- Name: TABLE active_attendee_growth_view; Type: ACL; Schema: aoai; Owner: azure_pg_admin
+--
+
+GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE aoai.active_attendee_growth_view TO aoai_proxy_app;
+
 
 --
 -- Name: TABLE event; Type: ACL; Schema: aoai; Owner: azure_pg_admin
 --
 
-GRANT
-SELECT,
-INSERT
-,
-    DELETE,
-UPDATE ON
-TABLE aoai.event TO "aoai_proxy_app";
+GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE aoai.event TO aoai_proxy_app;
+
 
 --
 -- Name: TABLE event_catalog_map; Type: ACL; Schema: aoai; Owner: azure_pg_admin
 --
 
-GRANT
-SELECT,
-INSERT
-,
-    DELETE,
-UPDATE ON
-TABLE aoai.event_catalog_map TO "aoai_proxy_app";
+GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE aoai.event_catalog_map TO aoai_proxy_app;
+
 
 --
 -- Name: TABLE metric; Type: ACL; Schema: aoai; Owner: azure_pg_admin
 --
 
-GRANT
-SELECT,
-INSERT
-,
-    DELETE,
-UPDATE ON
-TABLE aoai.metric TO "aoai_proxy_app";
+GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE aoai.metric TO aoai_proxy_app;
+
+
+--
+-- Name: TABLE metric_view; Type: ACL; Schema: aoai; Owner: azure_pg_admin
+--
+
+GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE aoai.metric_view TO aoai_proxy_app;
+
 
 --
 -- Name: TABLE owner; Type: ACL; Schema: aoai; Owner: azure_pg_admin
 --
 
-GRANT
-SELECT,
-INSERT
-,
-    DELETE,
-UPDATE ON
-TABLE aoai.owner TO "aoai_proxy_app";
+GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE aoai.owner TO aoai_proxy_app;
+
 
 --
 -- Name: TABLE owner_catalog; Type: ACL; Schema: aoai; Owner: azure_pg_admin
 --
 
-GRANT
-SELECT,
-INSERT
-,
-    DELETE,
-UPDATE ON
-TABLE aoai.owner_catalog TO "aoai_proxy_app";
+GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE aoai.owner_catalog TO aoai_proxy_app;
+
 
 --
 -- Name: TABLE owner_event_map; Type: ACL; Schema: aoai; Owner: azure_pg_admin
 --
 
-GRANT
-SELECT,
-INSERT
-,
-    DELETE,
-UPDATE ON
-TABLE aoai.owner_event_map TO "aoai_proxy_app";
+GRANT SELECT,INSERT,DELETE,UPDATE ON TABLE aoai.owner_event_map TO aoai_proxy_app;
+
+
+
 
 --
 -- PostgreSQL database dump complete
