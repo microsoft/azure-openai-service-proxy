@@ -35,7 +35,7 @@ public class LoadProperties(RequestDelegate next)
                 }
             }
 
-            context.Items["requestPath"]= context.Request.Path.Value!.Split("/api/v1/").Last();
+            context.Items["requestPath"] = context.Request.Path.Value!.Split("/api/v1/").Last();
             context.Items["jsonDoc"] = jsonDoc;
 
             await next(context);
@@ -59,7 +59,9 @@ public class LoadProperties(RequestDelegate next)
 
     private static string? GetModelName(JsonDocument requestJsonDoc)
     {
-        return requestJsonDoc.RootElement.TryGetProperty("model", out JsonElement modelElement) && modelElement.ValueKind == JsonValueKind.String
+        return requestJsonDoc.RootElement.ValueKind == JsonValueKind.Object &&
+               requestJsonDoc.RootElement.TryGetProperty("model", out JsonElement modelElement) &&
+               modelElement.ValueKind == JsonValueKind.String
             ? modelElement.GetString()
             : null;
     }
