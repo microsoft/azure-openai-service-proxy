@@ -61,7 +61,7 @@ export const Chat = () => {
 
   const { client } = useOpenAIClientContext();
 
-  const onPromptEntered = async (prompt: string) => {
+  const onPromptEntered = async (prompt: string | object[]) => {
     if (!client || !state.model) {
       return;
     }
