@@ -43,9 +43,6 @@ const useStyles = makeStyles({
 export const Message = ({ message }: Props) => {
   const styles = useStyles();
 
-  // write to the console the object type of message.content
-  console.log('message.content is of type: ', typeof message.content);
-
   const parsedPrompt = message.content ? JSON.parse(message.content) : null;
 
   if (Array.isArray(parsedPrompt)) {
