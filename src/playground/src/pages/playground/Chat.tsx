@@ -70,10 +70,13 @@ export const Chat = () => {
     try {
       const start = Date.now();
 
+      // Parse the JSON string back into an array of message objects
+      const parsedPrompt = JSON.parse(prompt);
+
       const messages: ChatRequestMessage[] = [
         state.systemPrompt,
         ...state.messages.filter((m) => !m.isError).map(mapMessage),
-        { role: "user", content: prompt },
+        { role: "user", content: parsedPrompt },
       ];
 
       const chatCompletions = await client.getChatCompletions(

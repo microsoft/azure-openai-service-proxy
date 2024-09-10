@@ -13,6 +13,12 @@ const useStyles = makeStyles({
     marginBottom: "20px",
     maxWidth: "80%",
     marginLeft: "auto",
+    flexWrap: "wrap", // Enable wrapping for the images
+  },
+  image: {
+    maxWidth: "20%",
+    height: "auto",
+    ...shorthands.margin("2px") // Add spacing between the images manually
   },
   message: {
     fontSize: "medium",
@@ -26,10 +32,10 @@ const useStyles = makeStyles({
     ...shorthands.borderRadius("2px"),
   },
   icon: {
-    minWidth:"24px",
-    maxWidth:"24px",
-    width:"24px",
-    marginTop:"6px"
+    minWidth: "24px",
+    maxWidth: "24px",
+    width: "24px",
+    marginTop: "6px"
   }
 });
 
@@ -37,10 +43,40 @@ const useStyles = makeStyles({
 export const Message = ({ message }: Props) => {
   const styles = useStyles();
 
+  // write to the console the object type of message.content
+  console.log('message.content is of type: ', typeof message.content);
+
+  const parsedPrompt = message.content ? JSON.parse(message.content) : null;
+
+  if (Array.isArray(parsedPrompt)) {
+    // Find the text content if it exists
+    const textContent = parsedPrompt.find(item => item.type === 'text')?.text;
+
+    // Find all image URLs
+    const imageUrls = parsedPrompt
+      .filter(item => item.type === 'image_url')
+      .map(item => item.imageUrl?.url);
+
+    return (
+      <div className={styles.container}>
+        {textContent && <div className={styles.message}>{textContent}</div>}
+        {imageUrls.map((url, index) => (
+          <img
+            key={index}
+            src={url}
+            alt={`Message image ${index + 1}`}
+            className={styles.image}// Restrict image width
+          />
+        ))}
+        <Person32Regular className={styles.icon} />
+      </div>
+    );
+  }
+
   return (
     <div className={styles.container}>
       <div className={styles.message}>{message.content}</div>
-      <Person32Regular className={styles.icon}/>
+      <Person32Regular className={styles.icon} />
     </div>
   );
 };
