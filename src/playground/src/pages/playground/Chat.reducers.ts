@@ -53,7 +53,7 @@ const createErrorMessage = (error: any): string => {
 type ChatAction =
   | {
       type: "chatStart";
-      payload: string | object[];
+      payload: string;
     }
   | {
       type: "chatComplete";

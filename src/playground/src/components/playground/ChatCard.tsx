@@ -16,7 +16,7 @@ import { Card } from "./Card";
 import { ChatResponseMessageExtended } from "../../pages/playground/Chat.state";
 
 interface CardProps {
-    onPromptEntered: Dispatch<string | object[]>;
+    onPromptEntered: Dispatch<string>;
     messageList: ChatResponseMessageExtended[];
     onClear: () => void;
     isLoading: boolean;
@@ -144,7 +144,7 @@ function ChatInput({
     onClear,
     canChat,
 }: {
-    promptSubmitted: Dispatch<string | object[]>;
+    promptSubmitted: Dispatch<string>;
     onClear: () => void;
     canChat: boolean;
 }) {
