@@ -4,6 +4,7 @@ import { SystemCard } from "../../components/playground/SystemCard";
 import { ChatParamsCard } from "../../components/playground/ChatParamsCard";
 import { useOpenAIClientContext } from "../../providers/OpenAIProvider";
 import type {
+  ChatMessageContentItem,
   ChatRequestMessage,
   ChatResponseMessage,
   FunctionDefinition,
@@ -61,7 +62,7 @@ export const Chat = () => {
 
   const { client } = useOpenAIClientContext();
 
-  const onPromptEntered = async (prompt: string) => {
+  const onPromptEntered = async (prompt: ChatMessageContentItem[]) => {
     if (!client || !state.model) {
       return;
     }
@@ -70,13 +71,10 @@ export const Chat = () => {
     try {
       const start = Date.now();
 
-      // Parse the JSON string back into an array of message objects
-      const parsedPrompt = JSON.parse(prompt);
-
       const messages: ChatRequestMessage[] = [
         state.systemPrompt,
         ...state.messages.filter((m) => !m.isError).map(mapMessage),
-        { role: "user", content: parsedPrompt },
+        { role: "user", content: prompt },
       ];
 
       const chatCompletions = await client.getChatCompletions(
