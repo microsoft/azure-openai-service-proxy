@@ -3,8 +3,9 @@ import {
   FunctionDefinition,
   GetChatCompletionsOptions,
   ChatResponseMessage,
+  ChatMessageContentItem,
 } from "@azure/openai";
-import { ChatState, INITIAL_STATE } from "./Chat.state";
+import { ChatResponseMessageExtended, ChatState, INITIAL_STATE } from "./Chat.state";
 
 const findRAIError = (
   error: Record<string, { filtered: boolean; severity: number }>
@@ -53,7 +54,7 @@ const createErrorMessage = (error: any): string => {
 type ChatAction =
   | {
       type: "chatStart";
-      payload: string;
+      payload: ChatMessageContentItem[];
     }
   | {
       type: "chatComplete";
@@ -104,12 +105,12 @@ export function reducer(state: ChatState, action: ChatAction): ChatState {
         isLoading: true,
         messages: [
           ...state.messages,
-          {
+          ...action.payload.map((p): ChatResponseMessageExtended => ({
             role: "user",
-            content: action.payload,
+            content: p.type === "text" ? p.text : p.imageUrl?.url,
             toolCalls: [],
             isError: false,
-          },
+          })),
         ],
       };
 

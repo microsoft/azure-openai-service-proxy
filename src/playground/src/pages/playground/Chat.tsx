@@ -4,6 +4,7 @@ import { SystemCard } from "../../components/playground/SystemCard";
 import { ChatParamsCard } from "../../components/playground/ChatParamsCard";
 import { useOpenAIClientContext } from "../../providers/OpenAIProvider";
 import type {
+  ChatMessageContentItem,
   ChatRequestMessage,
   ChatResponseMessage,
   FunctionDefinition,
@@ -61,7 +62,7 @@ export const Chat = () => {
 
   const { client } = useOpenAIClientContext();
 
-  const onPromptEntered = async (prompt: string) => {
+  const onPromptEntered = async (prompt: ChatMessageContentItem[]) => {
     if (!client || !state.model) {
       return;
     }
