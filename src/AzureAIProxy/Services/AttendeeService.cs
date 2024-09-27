@@ -1,4 +1,5 @@
 using System.Data;
+using AzureAIProxy.Models;
 using AzureAIProxy.Shared.Database;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;

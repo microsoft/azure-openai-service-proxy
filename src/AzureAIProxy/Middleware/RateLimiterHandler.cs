@@ -1,27 +1,22 @@
+using AzureAIProxy.Shared.Database;
+
 namespace AzureAIProxy.Middleware;
 
 public class RateLimiterHandler(RequestDelegate next)
 {
-    private const int RateLimitStatusCode = 429;
-    private readonly RequestDelegate _next = next;
-
     public async Task InvokeAsync(HttpContext context)
     {
-        if (context.Items.TryGetValue("RateLimited", out var rateLimit) && rateLimit is true)
+        RequestContext? requestContext = context.Items["RequestContext"] as RequestContext;
+
+        if (requestContext is not null && requestContext.RateLimitExceed)
         {
-            var dailyRequestCap = context.Items["DailyRequestCap"] ?? 0;
-            context.Response.StatusCode = RateLimitStatusCode; // Too Many Requests
-            await context.Response.WriteAsJsonAsync(
-                new
-                {
-                    code = RateLimitStatusCode,
-                    message = $"The event daily request rate of {dailyRequestCap} calls has been exceeded. Requests are disabled until UTC midnight."
-                }
-            );
+            await OpenAIErrorResponse.TooManyRequests(
+                $"The event daily request rate of {requestContext.DailyRequestCap} calls has been exceeded. Requests are disabled until UTC midnight."
+            ).WriteAsync(context);
         }
         else
         {
-            await _next(context);
+            await next(context);
         }
     }
 }

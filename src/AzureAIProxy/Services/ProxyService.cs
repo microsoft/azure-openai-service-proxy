@@ -3,6 +3,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Web;
+using AzureAIProxy.Models;
 using AzureAIProxy.Shared.Database;
 using Microsoft.Extensions.Primitives;
 
@@ -27,7 +28,7 @@ public class ProxyService(IHttpClientFactory httpClientFactory, IMetricService m
     /// <returns>A tuple containing the response content as a string and the HTTP status code.</returns>
     public async Task<(string responseContent, int statusCode)> HttpDeleteAsync(
         UriBuilder requestUrl,
-        string endpointKey,
+        List<RequestHeader> requestHeaders,
         HttpContext context,
         RequestContext requestContext,
         Deployment deployment
@@ -38,7 +39,9 @@ public class ProxyService(IHttpClientFactory httpClientFactory, IMetricService m
 
         var requestUrlWithQuery = AppendQueryParameters(requestUrl, context);
         using var requestMessage = new HttpRequestMessage(HttpMethod.Delete, requestUrlWithQuery);
-        requestMessage.Headers.Add("api-key", endpointKey);
+
+        foreach (var header in requestHeaders)
+            requestMessage.Headers.Add(header.Key, header.Value);
 
         var response = await httpClient.SendAsync(requestMessage);
         var responseContent = await response.Content.ReadAsStringAsync();
@@ -58,7 +61,7 @@ public class ProxyService(IHttpClientFactory httpClientFactory, IMetricService m
 
     public async Task<(string responseContent, int statusCode)> HttpGetAsync(
         UriBuilder requestUrl,
-        string endpointKey,
+        List<RequestHeader> requestHeaders,
         HttpContext context,
         RequestContext requestContext,
         Deployment deployment
@@ -69,7 +72,9 @@ public class ProxyService(IHttpClientFactory httpClientFactory, IMetricService m
 
         var requestUrlWithQuery = AppendQueryParameters(requestUrl, context);
         using var requestMessage = new HttpRequestMessage(HttpMethod.Get, requestUrlWithQuery);
-        requestMessage.Headers.Add("api-key", endpointKey);
+
+        foreach (var header in requestHeaders)
+            requestMessage.Headers.Add(header.Key, header.Value);
 
         var response = await httpClient.SendAsync(requestMessage);
 
@@ -107,7 +112,7 @@ public class ProxyService(IHttpClientFactory httpClientFactory, IMetricService m
     /// <returns>A tuple containing the response content as a string and the HTTP status code.</returns>
     public async Task<(string responseContent, int statusCode)> HttpPostFormAsync(
         UriBuilder requestUrl,
-        string endpointKey,
+        List<RequestHeader> requestHeaders,
         HttpContext context,
         HttpRequest request,
         RequestContext requestContext,
@@ -147,7 +152,8 @@ public class ProxyService(IHttpClientFactory httpClientFactory, IMetricService m
                 Content = multipartContent
             };
 
-            requestMessage.Headers.Add("api-key", endpointKey);
+            foreach (var header in requestHeaders)
+                requestMessage.Headers.Add(header.Key, header.Value);
 
             var response = await httpClient.SendAsync(requestMessage);
             var responseContent = await response.Content.ReadAsStringAsync();
@@ -174,7 +180,7 @@ public class ProxyService(IHttpClientFactory httpClientFactory, IMetricService m
     /// <returns>A tuple containing the response content as a string and the HTTP status code.</returns>
     public async Task<(string responseContent, int statusCode)> HttpPostAsync(
         UriBuilder requestUrl,
-        string endpointKey,
+        List<RequestHeader> requestHeaders,
         HttpContext context,
         JsonDocument requestJsonDoc,
         RequestContext requestContext,
@@ -186,12 +192,16 @@ public class ProxyService(IHttpClientFactory httpClientFactory, IMetricService m
 
         var requestUrlWithQuery = AppendQueryParameters(requestUrl, context);
         using var requestMessage = new HttpRequestMessage(HttpMethod.Post, requestUrlWithQuery);
-        requestMessage.Content = new StringContent(
-            requestJsonDoc.RootElement.ToString(),
-            Encoding.UTF8,
-            "application/json"
-        );
-        requestMessage.Headers.Add("api-key", endpointKey);
+
+        if (requestJsonDoc is not null)
+            requestMessage.Content = new StringContent(
+                requestJsonDoc.RootElement.ToString(),
+                Encoding.UTF8,
+                "application/json"
+            );
+
+        foreach (var header in requestHeaders)
+            requestMessage.Headers.Add(header.Key, header.Value);
 
         var response = await httpClient.SendAsync(requestMessage);
         var responseContent = await response.Content.ReadAsStringAsync();
@@ -212,7 +222,7 @@ public class ProxyService(IHttpClientFactory httpClientFactory, IMetricService m
     /// <returns>A task representing the asynchronous operation.</returns>
     public async Task HttpPostStreamAsync(
         UriBuilder requestUrl,
-        string endpointKey,
+        List<RequestHeader> requestHeaders,
         HttpContext context,
         JsonDocument requestJsonDoc,
         RequestContext requestContext,
@@ -224,12 +234,16 @@ public class ProxyService(IHttpClientFactory httpClientFactory, IMetricService m
 
         var requestUrlWithQuery = AppendQueryParameters(requestUrl, context);
         using var requestMessage = new HttpRequestMessage(HttpMethod.Post, requestUrlWithQuery);
-        requestMessage.Content = new StringContent(
-            requestJsonDoc.RootElement.ToString(),
-            Encoding.UTF8,
-            "application/json"
-        );
-        requestMessage.Headers.Add("api-key", endpointKey);
+
+        if (requestJsonDoc is not null)
+            requestMessage.Content = new StringContent(
+                requestJsonDoc.RootElement.ToString(),
+                Encoding.UTF8,
+                "application/json"
+            );
+
+        foreach (var header in requestHeaders)
+            requestMessage.Headers.Add(header.Key, header.Value);
 
         var response = await httpClient.SendAsync(
             requestMessage,

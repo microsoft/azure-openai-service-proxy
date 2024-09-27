@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using AzureAIProxy.Shared.Database;
 using AzureAIProxy.Routes.CustomResults;
 using AzureAIProxy.Services;
+using AzureAIProxy.Models;
 
 namespace AzureAIProxy.Routes;
 
@@ -46,8 +47,8 @@ public static class AzureAIOpenFiles
         string? fileId = null
     )
     {
-        var requestPath = context.Request.Path.Value!.Split("/api/v1/").Last();
-        var requestContext = (RequestContext)context.Items["RequestContext"]!;
+        string requestPath = (string)context.Items["requestPath"]!;
+        RequestContext requestContext = (RequestContext)context.Items["RequestContext"]!;
 
         var deployment = await catalogService.GetEventAssistantAsync(requestContext.EventId);
         if (deployment is null)
@@ -58,11 +59,16 @@ public static class AzureAIOpenFiles
             Path = requestPath
         };
 
+        List<RequestHeader> requestHeaders =
+        [
+            new("api-key", deployment.EndpointKey)
+        ];
+
         var methodHandlers = new Dictionary<string, Func<Task<(string, int)>>>
         {
-            [HttpMethod.Delete.Method] = () => proxyService.HttpDeleteAsync(url, deployment.EndpointKey, context, requestContext, deployment),
-            [HttpMethod.Get.Method] = () => proxyService.HttpGetAsync(url, deployment.EndpointKey, context, requestContext, deployment),
-            [HttpMethod.Post.Method] = () => proxyService.HttpPostFormAsync(url, deployment.EndpointKey, context, request, requestContext, deployment)
+            [HttpMethod.Delete.Method] = () => proxyService.HttpDeleteAsync(url, requestHeaders, context, requestContext, deployment),
+            [HttpMethod.Get.Method] = () => proxyService.HttpGetAsync(url, requestHeaders, context, requestContext, deployment),
+            [HttpMethod.Post.Method] = () => proxyService.HttpPostFormAsync(url, requestHeaders, context, request, requestContext, deployment)
         };
 
         var result = await ValidateId(assistantService, context.Request.Method, fileId, requestContext.ApiKey);

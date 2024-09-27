@@ -18,6 +18,10 @@ builder
     .AddScheme<ProxyAuthenticationOptions, JwtAuthenticationHandler>(
         ProxyAuthenticationOptions.JwtScheme,
         _ => { }
+    )
+    .AddScheme<ProxyAuthenticationOptions, BearerTokenAuthenticationHandler>(
+        ProxyAuthenticationOptions.BearerTokenScheme,
+        _ => { }
     );
 
 builder.Services.AddMemoryCache();
@@ -31,6 +35,8 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseMiddleware<RateLimiterHandler>();
+app.UseMiddleware<LoadProperties>();
+app.UseMiddleware<MaxTokensHandler>();
 app.MapProxyRoutes();
 
 app.Run();
