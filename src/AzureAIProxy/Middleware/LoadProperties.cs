@@ -11,7 +11,7 @@ public class LoadProperties(RequestDelegate next)
         try
         {
             if (!context.Request.HasFormContentType &&
-                context.Request.ContentType != null &&
+                context.Request.ContentType is not null &&
                 context.Request.ContentType.Contains("application/json", StringComparison.InvariantCultureIgnoreCase))
             {
                 using var reader = new StreamReader(context.Request.Body);
