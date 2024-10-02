@@ -134,6 +134,8 @@ public static class AzureAIOpenAIAssistants
                 var assistant = await assistantService.GetIdAsync(requestContext.ApiKey, assistantId.Split("/").First());
                 if (assistant is null)
                     return OpenAIResult.Unauthorized("Unauthorized assistant access.");
+                else if (method == HttpMethod.Delete.Method && assistant.Scope == Scope.Global)
+                    return OpenAIResult.Unauthorized("Unauthorized assistant deletion.");
             }
             else if (threadId is not null)
             {
