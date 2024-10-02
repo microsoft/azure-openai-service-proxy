@@ -110,7 +110,8 @@ public class AssistantService(AzureAIProxyDbContext db, IMemoryCache memoryCache
                     result = new Assistant
                     {
                         ApiKey = apiKey,
-                        Id = id
+                        Id = id,
+                        Scope = Scope.Global
                     };
                     memoryCache.Set(cacheKey, result, TimeSpan.FromMinutes(10));
                 }
