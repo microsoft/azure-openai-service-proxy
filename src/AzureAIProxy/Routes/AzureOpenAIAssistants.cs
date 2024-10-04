@@ -81,7 +81,7 @@ public static class AzureAIOpenAIAssistants
             [HttpMethod.Post.Method] = () => proxyService.HttpPostAsync(url, requestHeaders, context, requestJsonDoc!, requestContext, deployment)
         };
 
-        var result = await ValidateId(assistantService, context.Request.Method, assistantId, threadId, requestContext);
+        var result = await ValidateId(assistantService, context.Request.Method, assistantId, threadId, requestContext, deployment);
         if (result is not null) return result;
 
         if (IsStreaming && context.Request.Method == HttpMethod.Post.Method)
@@ -125,23 +125,20 @@ public static class AzureAIOpenAIAssistants
     /// <param name="threadId">The optional thread identifier from the route.</param>
     /// <param name="requestContext">The context of the request.</param>
     /// <returns>An <see cref="IResult"/> representing the validation result, or null if validation passes.</returns>
-    private static async Task<IResult?> ValidateId(IAssistantService assistantService, string method, string? assistantId, string? threadId, RequestContext requestContext)
+    private static async Task<IResult?> ValidateId(IAssistantService assistantService, string method, string? assistantId, string? threadId, RequestContext requestContext, Deployment deployment)
     {
         if (ValidMethods.Contains(method))
         {
             if (assistantId is not null)
             {
-                var assistant = await assistantService.GetIdAsync(requestContext.ApiKey, assistantId.Split("/").First());
-                if (assistant is null)
+                if (method == HttpMethod.Delete.Method && assistantId == deployment.DeploymentName)
+                    return OpenAIResult.MethodNotAllowed("Unauthorized assistant deletion.");
+                if (assistantId != deployment.DeploymentName && await assistantService.GetIdAsync(requestContext.ApiKey, assistantId.Split("/").First()) is null)
                     return OpenAIResult.Unauthorized("Unauthorized assistant access.");
-                else if (method == HttpMethod.Delete.Method && assistant.Scope == Scope.Global)
-                    return OpenAIResult.Unauthorized("Unauthorized assistant deletion.");
             }
-            else if (threadId is not null)
+            else if (threadId is not null && await assistantService.GetIdAsync(requestContext.ApiKey, threadId.Split("/").First()) is null)
             {
-                var thread = await assistantService.GetIdAsync(requestContext.ApiKey, threadId.Split("/").First());
-                if (thread is null)
-                    return OpenAIResult.Unauthorized("Unauthorized thread access.");
+                return OpenAIResult.Unauthorized("Unauthorized thread access.");
             }
         }
         return null;

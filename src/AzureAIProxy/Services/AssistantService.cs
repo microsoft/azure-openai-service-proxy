@@ -94,29 +94,6 @@ public class AssistantService(AzureAIProxyDbContext db, IMemoryCache memoryCache
 
         if (result is not null)
             memoryCache.Set(cacheKey, result, TimeSpan.FromMinutes(10));
-        else
-        {
-            if (id.StartsWith("asst_"))
-            {
-                // If the assistant is not found for the API key, it may be a global assistant
-                // A Global Assistant is one that was created outside of the AI Proxy service.
-                // Check if anyone create the assistant via the proxy service
-                // If not, then the assistant is a global assistant
-                result = await GetIdAsync(id);
-                if (result is null)
-                {
-                    // If the assistant is not found in the database, it is a global assistant
-                    // Add the global assistant to the cache to prevent repeated database queries
-                    result = new Assistant
-                    {
-                        ApiKey = apiKey,
-                        Id = id,
-                        Scope = Scope.Global
-                    };
-                    memoryCache.Set(cacheKey, result, TimeSpan.FromMinutes(10));
-                }
-            }
-        }
 
         return result;
     }
