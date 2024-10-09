@@ -14,15 +14,16 @@ public static class NpgsqlDataSourceBuilderExtensions
     public static IHostApplicationBuilder AddAzureAIProxyDbContext(this IHostApplicationBuilder builder)
     {
         NpgsqlDataSourceBuilder dataSourceBuilder =
-            new(builder.Configuration.GetConnectionString("AoaiProxyContext"));
+            new(builder.Configuration.GetConnectionString("postgres"));
         dataSourceBuilder.MapEnum<ModelType>();
 
         dataSourceBuilder.UseEntraAuth(builder.Configuration);
 
         NpgsqlDataSource dataSource = dataSourceBuilder.Build();
 
-        builder.Services.AddDbContext<AzureAIProxyDbContext>(
-            (option) =>
+        builder.AddNpgsqlDbContext<AzureAIProxyDbContext>(
+            "postgres",
+            configureDbContextOptions: (option) =>
                 option.UseNpgsql(
                     dataSource,
                     // https://stackoverflow.com/questions/70423137/how-to-gracefully-handle-a-postgres-restart-in-npgsql

@@ -4,7 +4,8 @@ using AzureAIProxy.Services;
 using AzureAIProxy.Shared;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
-var useMockProxy = builder.Configuration.GetValue<bool>("UseMockProxy", false);
+
+builder.AddServiceDefaults();
 
 builder.AddAzureAIProxyDbContext();
 
@@ -26,12 +27,24 @@ builder
 
 builder.Services.AddMemoryCache();
 builder.Services.AddHttpClient<IProxyService, ProxyService>();
+
+var useMockProxy = builder.Configuration.GetValue("UseMockProxy", false);
 builder.Services.AddProxyServices(useMockProxy);
+
 builder.Services.AddApplicationInsightsTelemetry();
 
 var app = builder.Build();
 
-app.UseHttpsRedirection();
+app.MapDefaultEndpoints();
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
+}
+else
+{
+    app.UseHttpsRedirection();
+}
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseMiddleware<RateLimiterHandler>();

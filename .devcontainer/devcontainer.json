@@ -1,13 +1,12 @@
 // For format details, see https://aka.ms/devcontainer.json.
 {
   "name": "Azure AI Proxy",
-  "dockerComposeFile": "docker-compose.yml",
-  "service": "devcontainer",
+  "image": "mcr.microsoft.com/devcontainers/base:bookworm",
   "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
 
   // See https://containers.dev/implementors/features/
   "features": {
-    "ghcr.io/devcontainers/features/docker-in-docker:2": {},
+    "ghcr.io/devcontainers/features/docker-in-docker:latest": {},
     "ghcr.io/azure/azure-dev/azd:latest": {},
     "ghcr.io/devcontainers/features/node": {},
     "ghcr.io/devcontainers/features/dotnet:2": {
@@ -47,16 +46,21 @@
 
   "portsAttributes": {
     "8000": {
-      "label": "AzureAIProxy"
+      "label": "Proxy (http)"
+    },
+    "7177": {
+      "label": "Proxy (https)"
     },
     "5175": {
-      "label": "Admin"
+      "label": "Admin (http)"
     },
-    "5173": {
-      "label": "Playground (internal)"
+    "7191": {
+      "label": "Admin (https)"
     },
     "4280": {
       "label": "Playgroud (SWA proxy)"
     }
-  }
+  },
+
+  "forwardPorts": [8000, 7177, 5175, 7191, 4280]
 }

@@ -1,24 +1,15 @@
+#!/bin/bash
 
-echo setting up postgresql...
+echo Setting up .NET environment...
 
-# install postgresql client
-sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
-wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/postgresql.gpg >/dev/null
+sudo dotnet workload install aspire
+dotnet tool update -g linux-dev-certs
+dotnet linux-dev-certs install
 
-sudo apt-get update
-sudo apt install postgresql-client -y
+dotnet restore src/AzureAIProxy.sln
 
-psql -U admin -d aoai-proxy -h localhost -w -c 'CREATE ROLE azure_pg_admin WITH NOLOGIN NOSUPERUSER INHERIT NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS;'
-
-psql -U admin -d aoai-proxy -h localhost -w -c 'CREATE ROLE aoai_proxy_app WITH NOLOGIN NOSUPERUSER INHERIT NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS;'
-
-psql -U admin -d aoai-proxy -h localhost -w -c 'CREATE ROLE aoai_proxy_reporting WITH NOLOGIN NOSUPERUSER INHERIT NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS;'
-
-psql -U admin -d aoai-proxy -h localhost -w -c 'GRANT aoai_proxy_app TO azure_pg_admin;'
-psql -U admin -d aoai-proxy -h localhost -w -c 'GRANT aoai_proxy_reporting TO azure_pg_admin;'
-
-
-psql -U admin -d aoai-proxy -h localhost -w -f ./database/aoai-proxy.sql
+dotnet user-secrets set "POSTGRES_ENCRYPTION_KEY" myencryptionkey123 --project src/AzureAIProxy.AppHost
+dotnet user-secrets set "Parameters:pg-password" "mypassword123" --project src/AzureAIProxy.AppHost
 
 echo Setting up Python environment...
 

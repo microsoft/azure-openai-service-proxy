@@ -13,6 +13,7 @@ appsettings.*.json
 *.csproj.user
 .mono
 *.user
+.vs
 
 # AZD
 .azure/
